@@ -1,12 +1,10 @@
 'use client'
 
-import Header from "@/components/home/Header"
-// import Hero from "@/components/home/Hero"
-
+import Header from "@/components/Header/Header"
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       {/* <Hero /> */}
     </div>

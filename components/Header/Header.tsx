@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useState } from "react";
+import { ModeToggle } from "./Darkmode";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,13 +10,13 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-foreground">
                 Gather Beyond
               </span>
             </Link>
@@ -25,25 +26,25 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               href="/features"
-              className="text-gray-600 hover:text-purple-600 transition-colors font-medium"
+              className="text-muted-foreground hover:text-primary transition-colors font-medium"
             >
               {/* Features */}
             </Link>
             <Link
               href="/community"
-              className="text-gray-600 hover:text-purple-600 transition-colors font-medium"
+              className="text-muted-foreground hover:text-primary transition-colors font-medium"
             >
               {/* Community */}
             </Link>
             <Link
               href="/pricing"
-              className="text-gray-600 hover:text-purple-600 transition-colors font-medium"
+              className="text-muted-foreground hover:text-primary transition-colors font-medium"
             >
               {/* Pricing */}
             </Link>
             <Link
               href="/about"
-              className="text-gray-600 hover:text-purple-600 transition-colors font-medium"
+              className="text-muted-foreground hover:text-primary transition-colors font-medium"
             >
               {/* About */}
             </Link>
@@ -53,10 +54,11 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/login"
-              className="text-gray-600 hover:text-purple-600 transition-colors font-medium"
+              className="text-muted-foreground hover:text-primary transition-colors font-medium"
             >
               {/* Sign In */}
             </Link>
+            <ModeToggle /> {/* เพิ่ม Dark Mode Toggle */}
             <Link
               href="/admin"
               className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -68,21 +70,21 @@ const Header = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors"
           >
             <div className="w-6 h-6 flex flex-col justify-center space-y-1">
               <span
-                className={`block w-full h-0.5 bg-gray-600 transition-all duration-300 ${
+                className={`block w-full h-0.5 bg-foreground transition-all duration-300 ${
                   isMenuOpen ? "rotate-45 translate-y-1" : ""
                 }`}
               ></span>
               <span
-                className={`block w-full h-0.5 bg-gray-600 transition-all duration-300 ${
+                className={`block w-full h-0.5 bg-foreground transition-all duration-300 ${
                   isMenuOpen ? "opacity-0" : ""
                 }`}
               ></span>
               <span
-                className={`block w-full h-0.5 bg-gray-600 transition-all duration-300 ${
+                className={`block w-full h-0.5 bg-foreground transition-all duration-300 ${
                   isMenuOpen ? "-rotate-45 -translate-y-1" : ""
                 }`}
               ></span>
@@ -92,39 +94,43 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg">
             <nav className="px-4 py-4 space-y-4">
               <Link
                 href="/features"
-                className="block text-gray-600 hover:text-purple-600 transition-colors font-medium"
+                className="block text-muted-foreground hover:text-primary transition-colors font-medium"
               >
                 {/* Features */}
               </Link>
               <Link
                 href="/community"
-                className="block text-gray-600 hover:text-purple-600 transition-colors font-medium"
+                className="block text-muted-foreground hover:text-primary transition-colors font-medium"
               >
                 {/* Community */}
               </Link>
               <Link
                 href="/pricing"
-                className="block text-gray-600 hover:text-purple-600 transition-colors font-medium"
+                className="block text-muted-foreground hover:text-primary transition-colors font-medium"
               >
                 {/* Pricing */}
               </Link>
               <Link
                 href="/about"
-                className="block text-gray-600 hover:text-purple-600 transition-colors font-medium"
+                className="block text-muted-foreground hover:text-primary transition-colors font-medium"
               >
                 {/* About */}
               </Link>
-              <div className="pt-4 border-t border-gray-200 space-y-2">
+              <div className="pt-4 border-t border-border space-y-2">
                 <Link
                   href="/login"
-                  className="block text-gray-600 hover:text-purple-600 transition-colors font-medium"
+                  className="block text-muted-foreground hover:text-primary transition-colors font-medium"
                 >
                   {/* Sign In */}
                 </Link>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Theme:</span>
+                  <ModeToggle /> {/* เพิ่ม Dark Mode Toggle สำหรับ Mobile */}
+                </div>
                 <Link
                   href="/admin"
                   className="block bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-300 text-center"

@@ -36,6 +36,22 @@ export interface UserRowProps {
 }
 
 export interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+// เพิ่ม interface สำหรับ menu items
+export interface MenuItem {
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+  isActive?: boolean;
+  badge?: string | number;
+}
+
+// เพิ่ม interface สำหรับ admin layout
+export interface AdminLayoutProps {
+  children: React.ReactNode;
+  title?: string;
+  currentTime?: Date;
 }

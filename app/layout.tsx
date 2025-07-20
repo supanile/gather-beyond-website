@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
 import "./globals.css";
+import Providers from "./Providers";
 
 const prompt = Prompt({
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"], // เลือกน้ำหนักฟอนต์ที่ต้องการ
-  style: ["normal", "italic"], // รองรับสไตล์ปกติและตัวเอียง
-  subsets: ["latin", "thai"], // รองรับภาษาไทยและละติน
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  subsets: ["latin", "thai"],
   variable: "--font-prompt",
 });
 
@@ -20,9 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${prompt.variable} antialiased`}>
-        {children}
+        <Providers>
+          <main>{children}</main>
+        </Providers>
       </body>
     </html>
   );
