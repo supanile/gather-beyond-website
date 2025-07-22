@@ -6,7 +6,11 @@ const isProtectedRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
-    await auth.protect();
+    const { userId } = await auth();
+    if (!userId) {
+      // This will redirect to sign-in page
+      return Response.redirect(new URL('/sign-in', req.url));
+    }
   }
 });
 
@@ -17,4 +21,5 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
+  runtime: 'edge',
 };
