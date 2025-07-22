@@ -1,18 +1,22 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-const isProtectedRoute = createRouteMatcher([
-    "/admin(.*)"
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    const { userId } = await auth();
-    if (!userId) {
-      // This will redirect to sign-in page
-      return Response.redirect(new URL('/sign-in', req.url));
+export function middleware(request: NextRequest) {
+  // Check if the request is for an admin route
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    // Check for Clerk session token in cookies
+    const sessionToken = request.cookies.get('__session')?.value || 
+                         request.cookies.get('__clerk_db_jwt')?.value;
+    
+    // If no session token, redirect to sign-in
+    if (!sessionToken) {
+      const signInUrl = new URL('/sign-in', request.url);
+      signInUrl.searchParams.set('redirect_url', request.url);
+      return NextResponse.redirect(signInUrl);
     }
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
