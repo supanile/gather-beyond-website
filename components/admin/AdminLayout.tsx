@@ -129,7 +129,7 @@ export function AppSidebar() {
         <div className="flex items-center justify-between">
           <div className="text-xs text-sidebar-foreground/50">
             <div className="font-semibold text-sidebar-foreground/70">
-              © 2024 Gather Beyond
+              © 2025 Gather Beyond
             </div>
           </div>
         </div>
