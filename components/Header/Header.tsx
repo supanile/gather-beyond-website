@@ -175,7 +175,7 @@ const Header: React.FC = () => {
                   </SignUpButton>
                 </SignedOut>
 
-                {/* Show when user IS signed in */}
+                {/* Show when user is signed in */}
                 <SignedIn>
                   <SignOutLinks />
                   <Link
