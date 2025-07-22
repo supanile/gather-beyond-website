@@ -89,7 +89,7 @@ const Header: React.FC = () => {
         <div className="bg-background/70 backdrop-blur-xl border-b border-border/50 relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="flex justify-between items-center h-16">
-              {/* Enhanced Logo */}
+              {/* Logo */}
               <div className="flex items-center group">
                 <Link href="/" className="flex items-center space-x-3">
                   {/* Animated logo icon */}
@@ -105,7 +105,7 @@ const Header: React.FC = () => {
                 </Link>
               </div>
 
-              {/* Enhanced Desktop Navigation */}
+              {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center">
                 <NavigationMenu>
                   <NavigationMenuList>
@@ -159,7 +159,7 @@ const Header: React.FC = () => {
                 </NavigationMenu>
               </nav>
 
-              {/* Enhanced Desktop CTA */}
+              {/* Desktop CTA */}
               <div className="hidden md:flex items-center space-x-4">
                 {/* Show when user is NOT signed in */}
                 <SignedOut>
@@ -191,7 +191,7 @@ const Header: React.FC = () => {
                 </div>
               </div>
 
-              {/* Enhanced Mobile Menu Button */}
+              {/* Mobile Menu Button */}
               <button
                 onClick={toggleMenu}
                 className="cursor-pointer md:hidden p-3 rounded-xl hover:bg-accent/50 transition-all duration-300 relative group after:absolute after:inset-0 after:rounded-xl after:bg-gradient-to-r after:from-purple-600/20 after:to-blue-600/20 after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300"
@@ -217,7 +217,7 @@ const Header: React.FC = () => {
               </button>
             </div>
 
-            {/* Enhanced Mobile Menu */}
+            {/* Mobile Menu */}
             <div
               className={`md:hidden overflow-hidden transition-all duration-500 ${
                 isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
