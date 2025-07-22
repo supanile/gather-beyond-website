@@ -1,8 +1,12 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+const isProtectedRoute = createRouteMatcher([
+    "/admin(.*)"
+]);
 
 export default clerkMiddleware((auth, req) => {
-  // Protect admin routes
-  if (req.nextUrl.pathname.startsWith('/admin')) {
+  if (isProtectedRoute(req)) {
     auth.protect();
   }
 });
@@ -14,4 +18,5 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
+  runtime: 'nodejs',
 };
