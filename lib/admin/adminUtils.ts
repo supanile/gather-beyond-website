@@ -13,7 +13,7 @@ const mockGuildsResponse = (discordId: string) => {
   });
 };
 
-export const fetchUserGuilds = async (discordId: string, accessToken: string) => {
+export const fetchUserGuilds = async (discordId: string) => {
   try {
     const response = await mockGuildsResponse(discordId);
     return response.guilds.length;
@@ -34,8 +34,7 @@ export const calculateStats = async (users: User[]) => {
   let totalCommunities = 0;
   for (const user of users) {
     const guildCount = await fetchUserGuilds(
-      user.discord_id,
-      "mock-access-token"
+      user.discord_id
     );
     totalCommunities += guildCount;
   }
