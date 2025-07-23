@@ -2,16 +2,16 @@ import { grist } from "@/lib/grist";
 import { NextResponse } from "next/server";
 
 interface Params {
-  params: {
+  params: Promise<{
     userId: string;
-  };
+  }>;
 }
 
 export async function GET(request: Request, { params }: Params) {
-  const { userId } = params;
+  const { userId } = await params;
   
   try {
-    const userMissions = await grist.fetchTable("User_Missions", { user_id: [userId] });
+    const userMissions = await grist.fetchTable("User_missions", { user_id: [userId] });
     
     if (!userMissions || userMissions.length === 0) {
       return NextResponse.json({ error: "No missions found for this user" }, { status: 404 });
