@@ -49,7 +49,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Custom X (Twitter) Icon Component
+// Custom X Icon Component
 const XIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
@@ -77,8 +77,16 @@ interface UserAgent {
   xp_required: number;
 }
 
-const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) => {
-  const [selectedSubmission, setSelectedSubmission] = useState<Mission | null>(null);
+const AdminUserRow = ({
+  user,
+  missions,
+}: {
+  user: User;
+  missions: Mission[];
+}) => {
+  const [selectedSubmission, setSelectedSubmission] = useState<Mission | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortField, setSortField] = useState<keyof Mission | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -168,10 +176,11 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
   };
 
   const getLinkType = (url: string) => {
-    if (url.includes("twitter.com") || url.includes("x.com")) return "X (Twitter)";
+    if (url.includes("x.com")) return "X";
     if (url.includes("discord.com")) return "Discord";
     if (url.includes("github.com")) return "GitHub";
-    if (url.includes("youtube.com") || url.includes("youtu.be")) return "YouTube";
+    if (url.includes("youtube.com") || url.includes("youtu.be"))
+      return "YouTube";
     if (url.includes("medium.com")) return "Medium";
     return "External Link";
   };
@@ -184,7 +193,9 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
     }));
   };
 
-  const userMissions = missions.filter((mission) => mission.user_id === user.discord_id);
+  const userMissions = missions.filter(
+    (mission) => mission.user_id === user.discord_id
+  );
 
   // Sorting functionality
   const handleSort = (field: keyof Mission) => {
@@ -226,6 +237,7 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
   const totalMissions = userMissions.length;
 
   // Status card component with original design
+  // Status card component with original design
   const StatusCard = ({
     status,
     count,
@@ -241,31 +253,41 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
   }) => (
     <Card
       className={`${bgColor} border-opacity-20 dark:border-opacity-40 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200 ${
-        selectedStatus === status ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+        selectedStatus === status ? "ring-2 ring-offset-2 ring-blue-500" : ""
       }`}
       onClick={() => setSelectedStatus(status)}
     >
       <CardContent className="px-3 py-0 -my-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-1">
             <div className={`p-0 sm:p-1.5 rounded-lg ${color}`}>
               <Icon className={`w-4 h-4 sm:w-6 sm:h-6 ${color}`} />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-xs sm:text-sm font-medium text-muted-foreground capitalize">
                 {status}
               </p>
-              <p className="text-lg sm:text-lg font-bold text-foreground">
-                {count}
-              </p>
+              <div className="flex items-baseline space-x-2">
+                <p className="text-lg sm:text-lg font-bold text-foreground">
+                  {count}
+                </p>
+                <p className="text-xs sm:hidden text-muted-foreground">
+                  (
+                  {totalMissions > 0
+                    ? Math.round((count / totalMissions) * 100)
+                    : 0}
+                  %)
+                </p>
+              </div>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right hidden sm:block">
             <p className="text-xs sm:text-sm text-muted-foreground">
+              (
               {totalMissions > 0
                 ? Math.round((count / totalMissions) * 100)
                 : 0}
-              %
+              %)
             </p>
           </div>
         </div>
@@ -276,118 +298,142 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
   return (
     <>
       <Card className="hover:shadow-lg transition-all duration-300 border-border">
-        <CardHeader className="p-6 -my-6">
+        <CardHeader className="p-3 sm:p-6 -my-6">
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-14 h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-2xl shadow-lg shadow-purple-500/25">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
                 {user.email.charAt(0).toUpperCase()}
               </div>
-              <div className="min-w-0">
-                <p className="text-lg font-semibold text-foreground truncate">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm sm:text-base md:text-lg font-semibold text-foreground truncate">
                   {user.email}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground truncate">
                   ID: {user.discord_id}
                 </p>
               </div>
             </div>
             <Badge
               variant="outline"
-              className="bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 dark:from-purple-900/20 dark:to-blue-900/20 dark:text-purple-300"
+              className="bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 dark:from-purple-900/20 dark:to-blue-900/20 dark:text-purple-300 self-start md:self-center"
             >
-              <TrendingUp className="w-4 h-4 mr-1 my-2" />
-              {totalMissions} Total Missions
+              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1 my-1 sm:my-2" />
+              <span className="text-xs sm:text-sm">
+                {totalMissions} Total Missions
+              </span>
             </Badge>
           </div>
 
           {/* User Details in Two Columns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mt-3 sm:mt-4 md:mt-6">
             {/* Column 1 */}
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <Award className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                <span className="text-lg text-foreground">
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex items-center space-x-2">
+                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
                   3
                 </span>
-                <span className="text-base text-muted-foreground">
+                <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
                   missions completed
                 </span>
               </div>
-              <div className="flex items-center space-x-3 mb-4">
-                <DollarSign className="w-5 h-5 text-green-500 dark:text-green-400" />
-                <span className="text-lg text-foreground">
+              <div className="flex items-center space-x-2">
+                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 dark:text-green-400 flex-shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
                   180
                 </span>
-                <span className="text-base text-muted-foreground">
+                <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
                   points
                 </span>
               </div>
-              <div className="flex items-start space-x-3 mb-4">
-                <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-400" />
-                <span className="text-base text-muted-foreground">Interests:</span>
-                <span className="text-lg text-foreground break-words">
+              <div className="flex items-center space-x-2">
+                <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-400 flex-shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                  Interests:
+                </span>
+                <span className="text-sm sm:text-base md:text-lg text-foreground font-medium break-words">
                   Web3, Blockchain
                 </span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 dark:text-orange-400" />
-                <span className="text-base text-muted-foreground">
-                  Joined:
-                </span>
-                <span className="text-lg text-foreground break-words">
-                Jan 8, 2024, 04:15 PM
-                </span>
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                    Joined:
+                  </span>
+                  <span className="text-sm sm:text-base md:text-lg text-foreground font-medium ml-1 break-words">
+                    Jan 8, 2024, 04:15 PM
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Column 2 */}
-            <div>
-              <div className="flex items-start space-x-3 mb-4">
-                <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500 dark:text-indigo-400" />
-                <span className="text-sm sm:text-base text-muted-foreground">Agent Level:</span>
-                <span className="text-sm sm:text-base text-foreground">{userAgent.level}</span>
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex items-center space-x-2">
+                <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                  Agent Level:
+                </span>
+                <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
+                  {userAgent.level}
+                </span>
               </div>
-              <div className="flex items-start space-x-3 mb-4">
-                <SmileIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 dark:text-yellow-400" />
-                <span className="text-sm sm:text-base text-muted-foreground">Agent Mood:</span>
-                <span className="text-sm sm:text-base text-foreground">{userAgent.mood}</span>
+              <div className="flex items-center space-x-2">
+                <SmileIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                  Agent Mood:
+                </span>
+                <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
+                  {userAgent.mood}
+                </span>
               </div>
-              <div className="flex items-start space-x-3 mb-4">
-                <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 dark:text-red-400" />
-                <span className="text-sm sm:text-base text-muted-foreground">Agent Health:</span>
-                <span className="text-sm sm:text-base text-foreground">{userAgent.health}%</span>
+              <div className="flex items-center space-x-2">
+                <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                  Agent Health:
+                </span>
+                <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
+                  {userAgent.health}%
+                </span>
               </div>
-              <div className="flex items-start space-x-3">
-                <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5 text-teal-500 dark:text-teal-400" />
-                <span className="text-sm sm:text-base text-muted-foreground">Last Active:</span>
-                <span className="text-sm sm:text-base text-foreground">{formatDate(userAgent.last_active.$date)}</span>
+              <div className="flex items-center space-x-2">
+                <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5 text-teal-500 dark:text-teal-400 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
+                    Last Active:
+                  </span>
+                  <span className="text-sm sm:text-base md:text-lg text-foreground font-medium ml-1 break-words">
+                    {formatDate(userAgent.last_active.$date)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Social Links */}
-          <div className="flex flex-wrap items-center gap-4 mt-6 pt-4 border-t border-border">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 mt-3 sm:mt-4 md:mt-6 pt-3 sm:pt-4 border-t border-border">
             {user.telegram_id && (
               <div className="flex items-center space-x-2">
-                <Send className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                <span className="text-sm text-muted-foreground truncate max-w-[150px]">
+                <Send className="w-4 h-4 text-blue-500 dark:text-blue-400 flex-shrink-0" />
+                <span className="text-sm text-muted-foreground break-all">
                   {user.telegram_id}
                 </span>
               </div>
             )}
-            {user.twitter_handle && (
+            {user.x_handle && (
               <div className="flex items-center space-x-2">
-                <XIcon className="w-4 h-4 text-foreground" />
-                <span className="text-sm text-muted-foreground truncate max-w-[150px]">
-                  {user.twitter_handle}
+                <XIcon className="w-4 h-4 text-foreground flex-shrink-0" />
+                <span className="text-sm text-muted-foreground break-all">
+                  {user.x_handle}
                 </span>
               </div>
             )}
             {user.wallet_address && (
               <div className="flex items-center space-x-2">
-                <Wallet className="w-4 h-4 text-green-500 dark:text-green-400" />
-                <span className="text-sm text-muted-foreground truncate max-w-[150px]">
+                <Wallet className="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
+                <span className="text-sm text-muted-foreground break-all">
                   {user.wallet_address}
                 </span>
               </div>
@@ -417,7 +463,7 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
               <StatusCard
                 status="completed"
                 count={statusStats.completed}
@@ -487,19 +533,25 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={columnVisibility.submittedAt}
-                    onCheckedChange={() => toggleColumnVisibility("submittedAt")}
+                    onCheckedChange={() =>
+                      toggleColumnVisibility("submittedAt")
+                    }
                   >
                     Submitted At
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={columnVisibility.completedAt}
-                    onCheckedChange={() => toggleColumnVisibility("completedAt")}
+                    onCheckedChange={() =>
+                      toggleColumnVisibility("completedAt")
+                    }
                   >
                     Completed At
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={columnVisibility.submissionLink}
-                    onCheckedChange={() => toggleColumnVisibility("submissionLink")}
+                    onCheckedChange={() =>
+                      toggleColumnVisibility("submissionLink")
+                    }
                   >
                     Submission Link
                   </DropdownMenuCheckboxItem>
@@ -570,7 +622,9 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
                                 </div>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => toggleColumnVisibility("missionId")}
+                                onClick={() =>
+                                  toggleColumnVisibility("missionId")
+                                }
                               >
                                 <div className="flex items-center">
                                   <svg
@@ -730,7 +784,9 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
                                 </div>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => toggleColumnVisibility("acceptedAt")}
+                                onClick={() =>
+                                  toggleColumnVisibility("acceptedAt")
+                                }
                               >
                                 <div className="flex items-center">
                                   <svg
@@ -810,7 +866,9 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
                                 </div>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => toggleColumnVisibility("submittedAt")}
+                                onClick={() =>
+                                  toggleColumnVisibility("submittedAt")
+                                }
                               >
                                 <div className="flex items-center">
                                   <svg
@@ -890,7 +948,9 @@ const AdminUserRow = ({ user, missions }: { user: User; missions: Mission[] }) =
                                 </div>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => toggleColumnVisibility("completedAt")}
+                                onClick={() =>
+                                  toggleColumnVisibility("completedAt")
+                                }
                               >
                                 <div className="flex items-center">
                                   <svg

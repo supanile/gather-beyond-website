@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 // Menu items
@@ -38,7 +39,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar className="border-r border-sidebar-border bg-sidebar/95 backdrop-blur supports-[backdrop-filter]:bg-sidebar/60">
+    <Sidebar className="border-r border-sidebar-border bg-sidebar/95 backdrop-blur supports-[backdrop-filter]:bg-sidebar/60 z-50">
       <SidebarHeader className="p-6 border-b border-sidebar-border/50">
         <div className="flex items-center space-x-3">
           <div className="relative"></div>
@@ -138,6 +139,20 @@ export function AppSidebar() {
   );
 }
 
+// Overlay component to handle clicks outside sidebar
+function SidebarOverlay() {
+  const { open, setOpen } = useSidebar();
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+      onClick={() => setOpen(false)}
+    />
+  );
+}
+
 interface AdminLayoutProps {
   children: React.ReactNode;
   currentTime: Date;
@@ -145,12 +160,15 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children, currentTime }: AdminLayoutProps) {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+    <SidebarProvider defaultOpen={false}>
+      <div className="min-h-screen flex w-full bg-background relative">
         <AppSidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <SidebarOverlay />
+        
+        {/* Main content area - always full width */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0 w-full">
           {/* Enhanced Header */}
-          <header className="bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm border-b border-border flex-shrink-0">
+          <header className="bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm border-b border-border flex-shrink-0 relative z-30">
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center space-x-4">
                 <SidebarTrigger className="p-2.5 rounded-xl hover:bg-accent/50 transition-colors duration-200 group">

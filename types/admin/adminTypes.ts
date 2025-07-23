@@ -6,7 +6,7 @@ export interface User {
   email: string;
   interests: string;
   telegram_id: string;
-  twitter_handle: string;
+  x_handle: string;
   wallet_address: string;
   created_at: string;
 }

@@ -34,7 +34,7 @@ const AdminPage = () => {
     (user) =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.interests.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.twitter_handle.toLowerCase().includes(searchTerm.toLowerCase())
+      user.x_handle.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -82,19 +82,19 @@ const AdminPage = () => {
               </span>
             </div>
           </div>
-          
+
           {/* Search Input */}
           <div className="relative mb-6">
             <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search users by email, interests, or Twitter..."
-              className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground"
+              placeholder="Search users by email, interests, or X..."
+              className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-xs sm:placeholder:text-sm md:placeholder:text-base placeholder:text-muted-foreground"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           {/* User List */}
           <div className="space-y-4">
             {filteredUsers.map((user) => (
