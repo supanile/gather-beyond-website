@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Mission, User } from "@/types/admin/adminTypes";
 import {
   Award,
-  DollarSign,
   Calendar,
   Send,
   Wallet,
@@ -16,11 +15,12 @@ import {
   ArrowUpDown,
   MoreHorizontal,
   Settings2,
-  User as UserIcon, // Added for Agent Level
-  Smile as SmileIcon, // Added for Agent Mood
-  Heart as HeartIcon, // Added for Agent Health
-  Clock as ClockIcon, // Added for Last Active
-  Info as InfoIcon, // Added for Interests
+  User as UserIcon, 
+  Smile as SmileIcon,
+  Heart as HeartIcon, 
+  Clock as ClockIcon,
+  Info as InfoIcon,
+  Coins, 
 } from "lucide-react";
 import {
   Table,
@@ -63,15 +63,15 @@ const XIcon = ({ className }: { className?: string }) => (
 
 // Define UserAgent interface
 interface UserAgent {
-  _id: { $oid: string };
+  id: number;
   user_id: string;
   xp: number;
   level: number;
   health: number;
   mood: string;
-  last_active: { $date: string };
-  created_at: { $date: string };
-  last_health_decay: { $date: string };
+  last_active: number;
+  created_at: number;
+  last_health_decay: number;
   total_xp: number;
   current_level_progress: number;
   xp_required: number;
@@ -79,10 +79,11 @@ interface UserAgent {
 
 const AdminUserRow = ({
   user,
-  missions,
+  userAgent,
 }: {
   user: User;
   missions: Mission[];
+  userAgent?: UserAgent;
 }) => {
   const [selectedSubmission, setSelectedSubmission] = useState<Mission | null>(
     null
@@ -91,6 +92,8 @@ const AdminUserRow = ({
   const [sortField, setSortField] = useState<keyof Mission | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [realMissions, setRealMissions] = useState<Mission[]>([]);
+  const [isLoadingMissions, setIsLoadingMissions] = useState(true);
 
   // Column visibility state
   const [columnVisibility, setColumnVisibility] = useState<{
@@ -109,24 +112,48 @@ const AdminUserRow = ({
     submissionLink: true,
   });
 
-  // User agent state
-  const userAgent: UserAgent = {
-    _id: { $oid: "6864667528eed21c25efed6d" },
-    user_id: "421249349469732874",
+  // Use real userAgent data or fallback to default values
+  const agentData: UserAgent = userAgent || {
+    id: 0,
+    user_id: user.discord_id,
     xp: 0,
     level: 1,
     health: 100,
-    mood: "Happy",
-    last_active: { $date: "2025-07-01T22:51:33.662Z" },
-    created_at: { $date: "2025-07-01T22:51:33.662Z" },
-    last_health_decay: { $date: "2025-07-01T22:51:33.662Z" },
+    mood: "neutral",
+    last_active: Date.now() / 1000,
+    created_at: Date.now() / 1000,
+    last_health_decay: Date.now() / 1000,
     total_xp: 0,
     current_level_progress: 0,
     xp_required: 100,
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  useEffect(() => {
+    const fetchUserMissions = async () => {
+      try {
+        setIsLoadingMissions(true);
+        const response = await fetch(`/api/users/${user.discord_id}/missions`);
+        if (response.ok) {
+          const data = await response.json();
+          setRealMissions(data);
+        } else {
+          console.error("Failed to fetch missions");
+          setRealMissions([]);
+        }
+      } catch (error) {
+        console.error("Error fetching missions:", error);
+        setRealMissions([]);
+      } finally {
+        setIsLoadingMissions(false);
+      }
+    };
+
+    fetchUserMissions();
+  }, [user.discord_id]);
+
+  const formatDate = (timestamp: number | string) => {
+    const date = typeof timestamp === "number" ? new Date(timestamp * 1000) : new Date(timestamp);
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -193,9 +220,8 @@ const AdminUserRow = ({
     }));
   };
 
-  const userMissions = missions.filter(
-    (mission) => mission.user_id === user.discord_id
-  );
+  // Use real missions data instead of props
+  const userMissions = realMissions;
 
   // Sorting functionality
   const handleSort = (field: keyof Mission) => {
@@ -226,7 +252,7 @@ const AdminUserRow = ({
     return 0;
   });
 
-  // Calculate status statistics
+  // Update status statistics to use real data
   const statusStats = {
     accepted: userMissions.filter((m) => m.status === "accepted").length,
     submitted: userMissions.filter((m) => m.status === "submitted").length,
@@ -332,16 +358,16 @@ const AdminUserRow = ({
               <div className="flex items-center space-x-2">
                 <Award className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
                 <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
-                  3
+                  {user.missions_completed || 0}
                 </span>
                 <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
                   missions completed
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 dark:text-green-400 flex-shrink-0" />
+                <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 dark:text-green-400 flex-shrink-0" />
                 <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
-                  180
+                  {user.total_points || 0}
                 </span>
                 <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
                   points
@@ -353,7 +379,7 @@ const AdminUserRow = ({
                   Interests:
                 </span>
                 <span className="text-sm sm:text-base md:text-lg text-foreground font-medium break-words">
-                  Web3, Blockchain
+                  {user.interests || "Not specified"}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
@@ -363,7 +389,7 @@ const AdminUserRow = ({
                     Joined:
                   </span>
                   <span className="text-sm sm:text-base md:text-lg text-foreground font-medium ml-1 break-words">
-                    Jan 8, 2024, 04:15 PM
+                    {agentData.created_at ? formatDate(agentData.created_at) : "Unknown"}
                   </span>
                 </div>
               </div>
@@ -377,7 +403,7 @@ const AdminUserRow = ({
                   Agent Level:
                 </span>
                 <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
-                  {userAgent.level}
+                  {agentData.level}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
@@ -385,19 +411,19 @@ const AdminUserRow = ({
                 <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
                   Agent Mood:
                 </span>
-                <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
-                  {userAgent.mood}
+                <span className="text-sm sm:text-base md:text-lg text-foreground font-medium capitalize">
+                  {agentData.mood}
                 </span>
               </div>
-              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
                 <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 dark:text-red-400 flex-shrink-0" />
                 <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
                   Agent Health:
                 </span>
                 <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
-                  {userAgent.health}%
+                  {agentData.health}/100
                 </span>
-              </div>
+                </div>
               <div className="flex items-center space-x-2">
                 <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5 text-teal-500 dark:text-teal-400 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
@@ -405,7 +431,7 @@ const AdminUserRow = ({
                     Last Active:
                   </span>
                   <span className="text-sm sm:text-base md:text-lg text-foreground font-medium ml-1 break-words">
-                    {formatDate(userAgent.last_active.$date)}
+                    {formatDate(agentData.last_active)}
                   </span>
                 </div>
               </div>
@@ -414,11 +440,11 @@ const AdminUserRow = ({
 
           {/* Social Links */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 mt-3 sm:mt-4 md:mt-6 pt-3 sm:pt-4 border-t border-border">
-            {user.telegram_id && (
+            {user.telegram_handle && (
               <div className="flex items-center space-x-2">
                 <Send className="w-4 h-4 text-blue-500 dark:text-blue-400 flex-shrink-0" />
                 <span className="text-sm text-muted-foreground break-all">
-                  {user.telegram_id}
+                  {user.telegram_handle}
                 </span>
               </div>
             )}
@@ -426,7 +452,7 @@ const AdminUserRow = ({
               <div className="flex items-center space-x-2">
                 <XIcon className="w-4 h-4 text-foreground flex-shrink-0" />
                 <span className="text-sm text-muted-foreground break-all">
-                  {user.x_handle}
+                  {user.twitter_handle}
                 </span>
               </div>
             )}
@@ -463,36 +489,49 @@ const AdminUserRow = ({
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-              <StatusCard
-                status="completed"
-                count={statusStats.completed}
-                icon={CheckCircle}
-                color="text-green-600 dark:text-green-400"
-                bgColor="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10"
-              />
-              <StatusCard
-                status="submitted"
-                count={statusStats.submitted}
-                icon={Upload}
-                color="text-yellow-600 dark:text-yellow-400"
-                bgColor="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/10 dark:to-amber-900/10"
-              />
-              <StatusCard
-                status="accepted"
-                count={statusStats.accepted}
-                icon={Clock}
-                color="text-blue-600 dark:text-blue-400"
-                bgColor="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10"
-              />
-              <StatusCard
-                status="rejected"
-                count={statusStats.rejected}
-                icon={XCircle}
-                color="text-red-600 dark:text-red-400"
-                bgColor="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/10 dark:to-rose-900/10"
-              />
-            </div>
+            
+            {isLoadingMissions ? (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="px-3 py-4">
+                      <div className="h-16 bg-muted rounded"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                <StatusCard
+                  status="completed"
+                  count={statusStats.completed}
+                  icon={CheckCircle}
+                  color="text-green-600 dark:text-green-400"
+                  bgColor="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10"
+                />
+                <StatusCard
+                  status="submitted"
+                  count={statusStats.submitted}
+                  icon={Upload}
+                  color="text-yellow-600 dark:text-yellow-400"
+                  bgColor="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/10 dark:to-amber-900/10"
+                />
+                <StatusCard
+                  status="accepted"
+                  count={statusStats.accepted}
+                  icon={Clock}
+                  color="text-blue-600 dark:text-blue-400"
+                  bgColor="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10"
+                />
+                <StatusCard
+                  status="rejected"
+                  count={statusStats.rejected}
+                  icon={XCircle}
+                  color="text-red-600 dark:text-red-400"
+                  bgColor="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/10 dark:to-rose-900/10"
+                />
+              </div>
+            )}
           </div>
 
           {/* Missions DataTable with Column Toggle */}
@@ -984,7 +1023,49 @@ const AdminUserRow = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedMissions.length > 0 ? (
+                    {isLoadingMissions ? (
+                      [...Array(3)].map((_, i) => (
+                        <TableRow key={i}>
+                          {Object.values(columnVisibility).filter(Boolean).length > 0 && (
+                            <>
+                              {columnVisibility.missionId && (
+                                <TableCell>
+                                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                                </TableCell>
+                              )}
+                              {columnVisibility.status && (
+                                <TableCell>
+                                  <div className="h-6 bg-muted rounded animate-pulse w-16"></div>
+                                </TableCell>
+                              )}
+                              {columnVisibility.acceptedAt && (
+                                <TableCell>
+                                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                                </TableCell>
+                              )}
+                              {columnVisibility.submittedAt && (
+                                <TableCell>
+                                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                                </TableCell>
+                              )}
+                              {columnVisibility.completedAt && (
+                                <TableCell>
+                                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                                </TableCell>
+                              )}
+                              {columnVisibility.submissionLink && (
+                                <TableCell>
+                                  <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
+                                </TableCell>
+                              )}
+                              <TableCell>
+                                <div className="h-6 w-6 bg-muted rounded animate-pulse"></div>
+                              </TableCell>
+                            </>
+                          )}
+                        </TableRow>
+                      ))
+                    ) : sortedMissions.length > 0 ? (
                       sortedMissions.map((mission) => (
                         <TableRow key={mission._id}>
                           {columnVisibility.missionId && (
@@ -996,9 +1077,7 @@ const AdminUserRow = ({
                             <TableCell>
                               <Badge
                                 variant={getStatusVariant(mission.status)}
-                                className={`${getStatusColor(
-                                  mission.status
-                                )} text-xs`}
+                                className={`${getStatusColor(mission.status)} text-xs`}
                               >
                                 {mission.status}
                               </Badge>
@@ -1006,39 +1085,31 @@ const AdminUserRow = ({
                           )}
                           {columnVisibility.acceptedAt && (
                             <TableCell className="text-xs text-muted-foreground">
-                              {mission.accepted_at === "NULL" ||
-                              mission.accepted_at === null ||
-                              !mission.accepted_at
+                              {!mission.accepted_at || mission.accepted_at === "NULL"
                                 ? "N/A"
                                 : formatDate(mission.accepted_at)}
                             </TableCell>
                           )}
                           {columnVisibility.submittedAt && (
                             <TableCell className="text-xs text-muted-foreground">
-                              {mission.submitted_at === "NULL" ||
-                              mission.submitted_at === null ||
-                              !mission.submitted_at
+                              {!mission.submitted_at || mission.submitted_at === "NULL"
                                 ? "N/A"
                                 : formatDate(mission.submitted_at)}
                             </TableCell>
                           )}
                           {columnVisibility.completedAt && (
                             <TableCell className="text-xs text-muted-foreground">
-                              {mission.completed_at === "NULL" ||
-                              mission.completed_at === null ||
-                              !mission.completed_at
+                              {!mission.completed_at || mission.completed_at === "NULL"
                                 ? "N/A"
                                 : formatDate(mission.completed_at)}
                             </TableCell>
                           )}
                           {columnVisibility.submissionLink && (
                             <TableCell>
-                              {mission.submission_link === "NULL" ||
-                              mission.submission_link === null ||
-                              !mission.submission_link ? (
-                                <span className="text-muted-foreground text-xs">
-                                  N/A
-                                </span>
+                              {!mission.submission_link || 
+                               mission.submission_link === "NULL" || 
+                               mission.submission_link === "" ? (
+                                <span className="text-muted-foreground text-xs">N/A</span>
                               ) : (
                                 <Badge variant="outline" className="text-xs">
                                   {getLinkType(mission.submission_link)}
@@ -1048,21 +1119,17 @@ const AdminUserRow = ({
                           )}
                           <TableCell>
                             {mission.submission_link &&
-                              mission.submission_link !== "NULL" && (
+                              mission.submission_link !== "NULL" &&
+                              mission.submission_link !== "" && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      className="h-6 w-6 p-0"
-                                    >
+                                    <Button variant="ghost" className="h-6 w-6 p-0">
                                       <span className="sr-only">Open menu</span>
                                       <MoreHorizontal className="h-3 w-3" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                      onClick={() => openModal(mission)}
-                                    >
+                                    <DropdownMenuItem onClick={() => openModal(mission)}>
                                       <Eye className="mr-2 h-4 w-4" />
                                       View Details
                                     </DropdownMenuItem>
@@ -1086,7 +1153,7 @@ const AdminUserRow = ({
                     ) : (
                       <TableRow>
                         <TableCell
-                          colSpan={7}
+                          colSpan={Object.values(columnVisibility).filter(Boolean).length + 1}
                           className="h-24 text-center text-muted-foreground"
                         >
                           No missions found for this user
