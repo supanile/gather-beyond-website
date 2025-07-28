@@ -179,7 +179,7 @@ const Header: React.FC = () => {
                 <SignedIn>
                   <SignOutLinks />
                   <Link
-                    href="/admin"
+                    href="/admin/userdashboard"
                     className="cursor-pointer relative overflow-hidden bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 group after:absolute after:inset-0 after:bg-gradient-to-r after:from-white/20 after:to-transparent after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-300"
                   >
                     <span className="relative z-10">Admin Panel</span>
@@ -282,7 +282,7 @@ const Header: React.FC = () => {
                     <SignedIn>
                       <SignOutLinks />
                       <Link
-                        href="/admin"
+                        href="/admin/userdashboard"
                         className="cursor-pointer block relative overflow-hidden bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-300 text-center shadow-lg transform hover:scale-105 group after:absolute after:inset-0 after:bg-gradient-to-r after:from-white/20 after:to-transparent after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-300"
                       >
                         <span className="relative z-10">Admin Panel</span>

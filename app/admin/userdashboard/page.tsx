@@ -1,10 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Users, Globe, Target, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  Search,
+  Users,
+  Globe,
+  Crosshair,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
-import AdminUserRow from "@/components/admin/AdminUserRow";
+import AdminUserTable from "@/components/admin/AdminUserTable";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAdminData } from "@/hooks/useAdminData";
 import { Button } from "@/components/ui/button";
@@ -17,20 +26,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const AdminPage = () => {
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+const DashboardPage = () => {
+  const [, setCurrentTime] = useState<Date>(new Date());
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  
-  const { stats, isLoading: isLoadingStats, error: statsError } = useStatistics();
-  const { users, missions, isLoading: isLoadingData, error: dataError } = useAdminData();
+
+  const {
+    stats,
+    isLoading: isLoadingStats,
+    error: statsError,
+  } = useStatistics();
+  const {
+    users,
+    missions,
+    isLoading: isLoadingData,
+    error: dataError,
+  } = useAdminData();
 
   const filteredUsers = users.filter(
     (user) =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.interests || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.twitter_handle || '').toLowerCase().includes(searchTerm.toLowerCase())
+      (user.interests || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.twitter_handle || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
 
   // Calculate pagination
@@ -62,30 +82,33 @@ const AdminPage = () => {
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let startPage = Math.max(
+        1,
+        currentPage - Math.floor(maxVisiblePages / 2)
+      );
       const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-      
+
       if (endPage - startPage < maxVisiblePages - 1) {
         startPage = Math.max(1, endPage - maxVisiblePages + 1);
       }
-      
+
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
     }
-    
+
     return pages;
   };
 
   if (isLoadingData) {
     return (
-      <AdminLayout currentTime={currentTime}>
+      <AdminLayout>
         <div className="space-y-6">
           {/* Stats Cards Loading */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -119,15 +142,17 @@ const AdminPage = () => {
           </div>
 
           {/* User Dashboard Loading */}
-          <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-              <Skeleton className="h-6 w-32" />
+              <div></div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+              <div className="flex items-center space-x-2">
                 <Skeleton className="h-4 w-40" />
-                <div className="flex items-center space-x-2">
-                  <Skeleton className="h-4 w-12" />
-                  <Skeleton className="h-8 w-20" />
-                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-8 w-20" />
+              </div>
               </div>
             </div>
 
@@ -139,7 +164,10 @@ const AdminPage = () => {
             {/* User List Loading */}
             <div className="space-y-4 mb-6">
               {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="bg-background rounded-lg border border-border p-4">
+                <div
+                  key={index}
+                  className="bg-background rounded-lg border border-border p-4"
+                >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <Skeleton className="h-5 w-48 mb-2" />
@@ -184,7 +212,7 @@ const AdminPage = () => {
 
   if (dataError) {
     return (
-      <AdminLayout currentTime={currentTime}>
+      <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <p className="text-destructive">Error loading data: {dataError}</p>
         </div>
@@ -193,7 +221,7 @@ const AdminPage = () => {
   }
 
   return (
-    <AdminLayout currentTime={currentTime}>
+    <AdminLayout>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -228,7 +256,9 @@ const AdminPage = () => {
               </div>
             </>
           ) : statsError ? (
-            <p className="text-destructive">Error loading stats: {statsError}</p>
+            <p className="text-destructive">
+              Error loading stats: {statsError}
+            </p>
           ) : (
             <>
               <AdminStatCard
@@ -239,7 +269,7 @@ const AdminPage = () => {
               <AdminStatCard
                 title="Total Missions"
                 value={missions.length.toLocaleString()}
-                icon={Target}
+                icon={Crosshair}
               />
               <AdminStatCard
                 title="Total Communities"
@@ -253,20 +283,22 @@ const AdminPage = () => {
         {/* User Dashboard */}
         <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-            <h3 className="text-lg font-semibold text-foreground">
-              User Dashboard
-            </h3>
+            <div></div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} users
+                  Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of{" "}
+                  {totalItems} users
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground whitespace-nowrap">
                   Show:
                 </span>
-                <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={handleItemsPerPageChange}
+                >
                   <SelectTrigger className="w-20 h-8">
                     <SelectValue />
                   </SelectTrigger>
@@ -297,7 +329,7 @@ const AdminPage = () => {
           <div className="space-y-4 mb-6">
             {currentUsers.length > 0 ? (
               currentUsers.map((user) => (
-                <AdminUserRow
+                <AdminUserTable
                   key={user.email}
                   user={user}
                   missions={user.userMissions || []}
@@ -306,7 +338,9 @@ const AdminPage = () => {
               ))
             ) : (
               <div className="text-center py-8">
-                <p className="text-muted-foreground">No users found matching your search.</p>
+                <p className="text-muted-foreground">
+                  No users found matching your search.
+                </p>
               </div>
             )}
           </div>
@@ -317,7 +351,7 @@ const AdminPage = () => {
               <div className="text-sm text-muted-foreground">
                 Page {currentPage} of {totalPages}
               </div>
-              
+
               <div className="flex items-center space-x-1">
                 {/* First Page */}
                 <Button
@@ -329,7 +363,7 @@ const AdminPage = () => {
                 >
                   <ChevronsLeft className="h-4 w-4" />
                 </Button>
-                
+
                 {/* Previous Page */}
                 <Button
                   variant="outline"
@@ -364,7 +398,7 @@ const AdminPage = () => {
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-                
+
                 {/* Last Page */}
                 <Button
                   variant="outline"
@@ -384,4 +418,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;
+export default DashboardPage;

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Home, Menu } from "lucide-react";
+import { BarChart3, Crosshair, Home, Menu} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/Header/Darkmode";
@@ -29,9 +29,14 @@ const items = [
     icon: Home,
   },
   {
-    title: "Dashboard",
-    url: "/admin",
+    title: "Users Dashboard",
+    url: "/admin/userdashboard",
     icon: BarChart3,
+  },
+  {
+    title: "Missions Management",
+    url: "/admin/missions",
+    icon: Crosshair,
   },
 ];
 
@@ -45,7 +50,7 @@ export function AppSidebar() {
           <div className="relative"></div>
           <div className="flex flex-col">
             <h2 className="text-lg font-bold text-purple-700 dark:text-purple-300">
-              Admin Dashboard
+              Admin Panel
             </h2>
             <p className="text-xs text-sidebar-foreground/60 font-medium">
               Control Center
@@ -155,48 +160,79 @@ function SidebarOverlay() {
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  currentTime: Date;
 }
 
-export function AdminLayout({ children, currentTime }: AdminLayoutProps) {
+export function AdminLayout({ children }: AdminLayoutProps) {
+  const pathname = usePathname();
+  const [currentTime, setCurrentTime] = React.useState(new Date());
+  const [isClient, setIsClient] = React.useState(false);
+  
+  // Set client flag after component mounts
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  // Update time every second
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+  
+  // Dynamic title based on current path
+  const getPageTitle = () => {
+    if (pathname === "/admin/missions") return "Missions Management";
+    if (pathname === "/admin/userdashboard") return "Users Dashboard";
+    if (pathname === "/") return "Home";
+    return "Admin Panel";
+  };
+
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-background relative">
         <AppSidebar />
         <SidebarOverlay />
-        
+
         {/* Main content area - always full width */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 w-full">
           {/* Enhanced Header */}
           <header className="bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm border-b border-border flex-shrink-0 relative z-30">
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center space-x-4">
-                <SidebarTrigger className="p-2.5 rounded-xl hover:bg-accent/50 transition-colors duration-200 group">
-                  <Menu className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
+                <SidebarTrigger className="p-3 rounded-xl hover:bg-accent/50 transition-colors duration-200 group">
+                  <Menu className="w-8 h-8 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
                 </SidebarTrigger>
                 <div className="flex items-center space-x-3">
                   <div className="h-8 w-1 bg-purple-600 dark:bg-purple-500 rounded-full"></div>
                   <div>
                     <h1 className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                      Dashboard
+                      {getPageTitle()}
                     </h1>
                     <p className="text-sm text-muted-foreground flex items-center space-x-2">
-                      <span>
-                        {currentTime.toLocaleDateString("en-US", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
-                      <span className="w-1 h-1 bg-muted-foreground/50 rounded-full"></span>
-                      <span>
-                        {currentTime.toLocaleTimeString("en-US", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
-                      </span>
+                      {isClient ? (
+                        <>
+                          <span>
+                            {currentTime.toLocaleDateString("en-US", {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </span>
+                          <span className="w-1 h-1 bg-muted-foreground/50 rounded-full"></span>
+                          <span>
+                            {currentTime.toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                            })}
+                          </span>
+                        </>
+                      ) : (
+                        <span>Loading...</span>
+                      )}
                     </p>
                   </div>
                 </div>
