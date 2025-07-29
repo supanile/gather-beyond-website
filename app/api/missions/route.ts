@@ -340,7 +340,7 @@ export async function DELETE(request: Request) {
       console.log(`Checking if mission ${id} exists...`);
       const missions = await grist.fetchTable("Missions");
       const missionExists = missions.find(
-        (m: any) => String(m.id) === String(id)
+        (m) => String(m.id) === String(id)
       );
 
       if (!missionExists) {
