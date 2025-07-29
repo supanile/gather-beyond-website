@@ -58,7 +58,6 @@ export const useMissionsTable = () => {
     action_request: "",
     format: "",
     useful_link: "",
-    status: "upcoming",
     partner: "Super Connector",
   });
 
@@ -203,7 +202,6 @@ export const useMissionsTable = () => {
         endDate: newMission.endDate || null,
         regex: newMission.regex || "",
         partner: newMission.partner,
-        status: newMission.status,
         duration:
           newMission.duration ||
           JSON.stringify({
@@ -238,7 +236,6 @@ export const useMissionsTable = () => {
           action_request: "",
           format: "",
           useful_link: "",
-          status: "upcoming",
           partner: "Super Connector",
         });
 
@@ -285,7 +282,6 @@ export const useMissionsTable = () => {
         endDate: updateData.endDate || null,
         regex: updateData.regex || "",
         partner: updateData.partner, // Use partnerName
-        status: updateData.status,
         duration:
           updateData.duration ||
           JSON.stringify({

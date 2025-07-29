@@ -53,7 +53,6 @@ export interface NewMissionForm {
   action_request: string;
   format: string;
   useful_link: string;
-  status: string;
   partner: string;
   requirements?: string;
   repeatable?: number;

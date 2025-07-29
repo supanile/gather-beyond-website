@@ -181,15 +181,15 @@ export async function POST(request: Request) {
           end: endDate ? endDate.toISOString() : null,
         }),
       repeatable: body.repeatable || 0,
-      startDate: startDate,
-      endDate: endDate,
+      startDate: startDate.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD string
+      endDate: endDate ? endDate.toISOString().split('T')[0] : null, // Convert Date to YYYY-MM-DD string or null
       regex: body.regex || "",
       status: body.status,
     };
 
     console.log("Prepared mission data for Grist:", missionData);
 
-    const result = await grist.addRecord("Missions", missionData);
+    const result = await grist.addRecords("Missions", [missionData]);
     console.log("Grist response:", result);
 
     return NextResponse.json(
@@ -219,19 +219,6 @@ export async function PUT(request: Request) {
     if (!id) {
       return NextResponse.json(
         { error: "Mission ID is required for update" },
-        { status: 400 }
-      );
-    }
-
-    // Validate status
-    const validStatuses = ["upcoming", "active", "completed", "ended"];
-    if (updateData.status && !validStatuses.includes(updateData.status)) {
-      return NextResponse.json(
-        {
-          error: `Invalid status: ${
-            updateData.status
-          }. Must be one of: ${validStatuses.join(", ")}`,
-        },
         { status: 400 }
       );
     }
@@ -296,21 +283,18 @@ export async function PUT(request: Request) {
 
     // Convert dates if provided
     if (updateData.startDate) {
-      updateData.startDate = new Date(updateData.startDate);
+      updateData.startDate = new Date(updateData.startDate).toISOString().split('T')[0];
     }
     if (updateData.endDate) {
-      updateData.endDate = new Date(updateData.endDate);
+      updateData.endDate = new Date(updateData.endDate).toISOString().split('T')[0];
     }
 
     const finalUpdateData = {
       ...updateData,
       partner: partnerId,
-      status: updateData.status, // Include status
     };
 
-    console.log("Update data prepared for Grist:", finalUpdateData);
-
-    const result = await grist.updateRecord("Missions", id, finalUpdateData);
+    const result = await grist.updateRecords("Missions", [{id, ...finalUpdateData}]);
 
     return NextResponse.json(
       { message: "Mission updated successfully", data: result },
@@ -354,25 +338,6 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Test Grist connection first
-    try {
-      console.log("Testing Grist connection...");
-      await grist.testConnection();
-      console.log("Grist connection successful");
-    } catch (connectionError) {
-      console.error("❌ Grist connection failed:", connectionError);
-      return NextResponse.json(
-        {
-          error: "Failed to connect to Grist API",
-          details:
-            connectionError instanceof Error
-              ? connectionError.message
-              : "Connection failed",
-        },
-        { status: 503 }
-      );
-    }
-
     // Verify mission exists before deletion
     try {
       console.log(`Checking if mission ${id} exists...`);
@@ -398,9 +363,9 @@ export async function DELETE(request: Request) {
       // Continue with deletion attempt anyway
     }
 
-    // Delete the mission - now using the fixed deleteRecord method
+    // Delete the mission - now using the correct deleteRecords method
     console.log(`Attempting to delete mission ${id} from Grist...`);
-    const result = await grist.deleteRecord("Missions", id);
+    const result = await grist.deleteRecords("Missions", [parseInt(id)]);
 
     console.log("Delete operation successful:", result);
 
