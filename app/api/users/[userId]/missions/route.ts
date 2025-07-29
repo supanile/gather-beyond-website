@@ -12,7 +12,7 @@ export async function GET(request: Request, { params }: Params) {
   
   try {
     const userMissions = await grist.fetchTable("User_missions", { user_id: [userId] });
-    
+
     if (!userMissions || userMissions.length === 0) {
       return NextResponse.json([], { status: 200 });
     }

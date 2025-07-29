@@ -297,8 +297,8 @@ const AdminPage = () => {
           <div className="space-y-4 mb-6">
             {currentUsers.length > 0 ? (
               currentUsers.map((user) => (
-                <AdminUserRow
-                  key={user.email}
+                <AdminUserTable
+                  key={user.discord_id}
                   user={user}
                   missions={user.userMissions || []}
                   userAgent={user.agent}
