@@ -15,9 +15,6 @@ const PARTNER_ID_MAP: { [key: string]: number } = {
 
 export async function GET() {
   try {
-    console.log("Testing Grist API connection...");
-    await grist.testConnection();
-
     const missions = await grist.fetchTable("Missions");
 
     if (!missions || missions.length === 0) {
