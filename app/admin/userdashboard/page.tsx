@@ -330,7 +330,7 @@ const DashboardPage = () => {
             {currentUsers.length > 0 ? (
               currentUsers.map((user) => (
                 <AdminUserTable
-                  key={user.email}
+                  key={user.discord_id}
                   user={user}
                   missions={user.userMissions || []}
                   userAgent={user.agent}
