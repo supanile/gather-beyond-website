@@ -221,7 +221,7 @@ export const useMissionsTable = () => {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json();
         toast.success("Mission added successfully!");
         setIsAddModalOpen(false);
 
@@ -352,7 +352,7 @@ export const useMissionsTable = () => {
         try {
           result = await response.json();
           console.log("Delete result:", result);
-        } catch (parseError) {
+        } catch {
           console.warn("Success response is not JSON, treating as success");
           result = { message: "Mission deleted successfully" };
         }

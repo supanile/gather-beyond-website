@@ -73,7 +73,7 @@ export const PARTNER_OPTIONS = [
   "Dessistant",
   "Maneki AI",
   "TAMA TAMA"
-] as const;
+] as string[];
 
 export type PartnerOption = typeof PARTNER_OPTIONS[number];
 
