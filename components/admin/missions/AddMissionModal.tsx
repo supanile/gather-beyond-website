@@ -50,7 +50,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       console.log("🔧 AddMissionModal opened with data:", newMission);
-      console.log("🔧 Status value:", newMission.status);
       console.log("🔧 Partner value:", newMission.partner);
     }
   }, [isOpen, newMission]);
@@ -218,31 +217,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                   {PARTNER_OPTIONS.map((partner) => (
                     <SelectItem key={partner} value={partner}>
                       {partner}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Status */}
-            <div className="space-y-2">
-              <Label htmlFor="status" className="text-sm font-medium">
-                Status <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={newMission.status || "upcoming"}
-                onValueChange={(value) => {
-                  console.log("🔧 Status selected:", value);
-                  handleInputChange("status", value);
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

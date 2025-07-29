@@ -65,7 +65,6 @@ const AdminMissionsTable = () => {
     setNewMission,
     setIsAddModalOpen,
     setIsViewModalOpen,
-    setSelectedMission,
   } = useMissionsTable();
 
   // Edit and Delete state
@@ -81,11 +80,6 @@ const AdminMissionsTable = () => {
 
   // แก้ไข Edit Mission Handler - ใช้ exact values
   const handleEditMission = (mission: Mission) => {
-    console.log("🔍 Original mission data:", mission);
-
-    // Set selectedMission
-    setSelectedMission(mission);
-
     // Use partnerName directly and check if it is in PARTNER_OPTIONS.
     const partnerName = PARTNER_OPTIONS.includes(mission.partnerName as any)
       ? mission.partnerName
@@ -121,7 +115,6 @@ const AdminMissionsTable = () => {
       action_request: mission.action_request || "",
       format: mission.format || "",
       useful_link: mission.useful_link || "",
-      status: missionStatus, 
       partner: partnerName,
       requirements: mission.requirements || "",
       repeatable: mission.repeatable || 0,
@@ -148,7 +141,6 @@ const AdminMissionsTable = () => {
     };
 
     console.log("📝 Final mapped mission form data:", missionForm);
-    console.log("📝 Final Status:", missionForm.status);
     console.log("📝 Final Partner:", missionForm.partner);
     console.log("📝 Final Type:", missionForm.type);
     console.log("📝 Final Platform:", missionForm.platform);
@@ -208,7 +200,6 @@ const AdminMissionsTable = () => {
   const handleUpdateMissionSubmit = async (missionForm: NewMissionForm) => {
     if (missionToEdit && selectedMission) {
       console.log("Submitting update with form data:", missionForm);
-      console.log("Final update - Status:", missionForm.status);
       console.log("Final update - Partner:", missionForm.partner);
       console.log("Final update - Type:", missionForm.type);
       console.log("Final update - Platform:", missionForm.platform);
@@ -220,7 +211,6 @@ const AdminMissionsTable = () => {
       if (success) {
         setIsEditModalOpen(false);
         setMissionToEdit(null);
-        setSelectedMission(null);
       }
     }
   };
@@ -327,7 +317,6 @@ const AdminMissionsTable = () => {
           setIsEditModalOpen(open);
           if (!open) {
             setMissionToEdit(null);
-            setSelectedMission(null);
           }
         }}
         newMission={
@@ -341,7 +330,6 @@ const AdminMissionsTable = () => {
             action_request: "",
             format: "",
             useful_link: "",
-            status: "upcoming",
             partner: "Super Connector",
           }
         }
@@ -365,7 +353,6 @@ const AdminMissionsTable = () => {
               };
               const updated = mission(currentMission);
               console.log("🔧 Updated via function:", updated);
-              console.log("🔧 Status after update:", updated.status);
               console.log("🔧 Partner after update:", updated.partner);
               console.log("🔧 Type after update:", updated.type);
               console.log("🔧 Platform after update:", updated.platform);
@@ -373,7 +360,6 @@ const AdminMissionsTable = () => {
             });
           } else {
             console.log("🔧 Direct mission update:", mission);
-            console.log("🔧 Direct update - Status:", mission.status);
             console.log("🔧 Direct update - Partner:", mission.partner);
             console.log("🔧 Direct update - Type:", mission.type);
             console.log("🔧 Direct update - Platform:", mission.platform);
@@ -383,7 +369,6 @@ const AdminMissionsTable = () => {
         onSubmit={() => {
           if (missionToEdit) {
             console.log("🔧 Submitting edit with data:", missionToEdit);
-            console.log("🔧 Submit - Status:", missionToEdit.status);
             console.log("🔧 Submit - Partner:", missionToEdit.partner);
             console.log("🔧 Submit - Type:", missionToEdit.type);
             console.log("🔧 Submit - Platform:", missionToEdit.platform);
@@ -411,7 +396,7 @@ const AdminMissionsTable = () => {
             <DialogTitle className="flex items-center justify-center gap-2 text-red-600">
               ⚠️ DANGER ZONE ⚠️
             </DialogTitle>
-            <DialogDescription className="text-red-600 font-medium">
+            <DialogDescription className="text-red-600 font-medium text-center">
               You are about to permanently delete this mission!
             </DialogDescription>
           </DialogHeader>
