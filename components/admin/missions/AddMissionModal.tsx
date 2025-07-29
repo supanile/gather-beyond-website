@@ -76,14 +76,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     await onSubmit();
   };
 
-  // Define status options explicitly
-  const STATUS_OPTIONS = [
-    { value: "upcoming", label: "Upcoming" },
-    { value: "active", label: "Active" },
-    { value: "completed", label: "Completed" },
-    { value: "ended", label: "Ended" }
-  ] as const;
-
   // Define type options
   const TYPE_OPTIONS = [
     { value: "Social", label: "Social" },
