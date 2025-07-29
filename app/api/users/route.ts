@@ -1,7 +1,7 @@
 import { grist } from "@/lib/grist";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const users = await grist.fetchTable("Users");
     
