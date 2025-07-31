@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const [users, missions, discordData] = await Promise.all([
+    const [users, missions, userMissions, discordData] = await Promise.all([
       grist.fetchTable("Users"),
       grist.fetchTable("Missions"),
+      grist.fetchTable("User_missions"),
       fetch("https://discord.com/api/v9/invites/Y3TrR6Y86f?with_counts=true")
         .then(res => res.json())
         .catch(error => {
@@ -17,6 +18,7 @@ export async function GET() {
     const stats = {
       totaluser: users?.length || 0,
       totalmissions: missions?.length || 0,
+      totalusermissions: userMissions?.length || 0,
       totalcommunity: discordData?.approximate_member_count || 0
     };
 
