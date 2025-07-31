@@ -21,6 +21,7 @@ export async function GET(request: Request, { params }: Params) {
     const transformedMissions = userMissions.map((mission) => ({
       _id: mission.id,
       mission_id: mission.mission_id,
+      mission_name: mission.mission_name,
       user_id: mission.user_id,
       status: mission.status,
       accepted_at: mission.accepted_at,
