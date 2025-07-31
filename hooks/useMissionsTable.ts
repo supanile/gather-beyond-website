@@ -69,7 +69,7 @@ export const useMissionsTable = () => {
       if (response.ok) {
         const data = await response.json();
         setMissions(data);
-        toast.success("Missions loaded successfully");
+        console.log("Missions loaded successfully");
       } else {
         const errorData = await response.json();
         console.error("Failed to fetch missions:", errorData);
@@ -221,7 +221,7 @@ export const useMissionsTable = () => {
       });
 
       if (response.ok) {
-        await response.json();
+        const result = await response.json();
         toast.success("Mission added successfully!");
         setIsAddModalOpen(false);
 
@@ -352,7 +352,7 @@ export const useMissionsTable = () => {
         try {
           result = await response.json();
           console.log("Delete result:", result);
-        } catch {
+        } catch (parseError) {
           console.warn("Success response is not JSON, treating as success");
           result = { message: "Mission deleted successfully" };
         }

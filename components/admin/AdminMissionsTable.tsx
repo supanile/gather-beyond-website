@@ -81,7 +81,7 @@ const AdminMissionsTable = () => {
   // แก้ไข Edit Mission Handler - ใช้ exact values
   const handleEditMission = (mission: Mission) => {
     // Use partnerName directly and check if it is in PARTNER_OPTIONS.
-    const partnerName = (PARTNER_OPTIONS as string[]).includes(mission.partnerName)
+    const partnerName = PARTNER_OPTIONS.includes(mission.partnerName as any)
       ? mission.partnerName
       : "Super Connector";
     console.log("📝 Partner mapping:", mission.partnerName, "->", partnerName);

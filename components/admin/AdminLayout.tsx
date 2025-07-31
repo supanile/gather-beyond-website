@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Home, Menu} from "lucide-react";
+import { BarChart3, Crosshair, Home, Menu} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/Header/Darkmode";
@@ -33,11 +33,11 @@ const items = [
     url: "/admin/userdashboard",
     icon: BarChart3,
   },
-  // {
-  //   title: "Missions Management",
-  //   url: "/admin/missions",
-  //   icon: Crosshair,
-  // },
+  {
+    title: "Missions Management",
+    url: "/admin/missions",
+    icon: Crosshair,
+  },
 ];
 
 export function AppSidebar() {
