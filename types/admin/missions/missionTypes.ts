@@ -77,24 +77,24 @@ export const PARTNER_OPTIONS = [
 
 export type PartnerOption = typeof PARTNER_OPTIONS[number];
 
-// Type options
+// Type options with proper mapping
 export const TYPE_OPTIONS = [
-  "Social",
-  "Trading", 
-  "Community",
-  "Referral",
-  "Engagement"
+  { value: "social", label: "Social" },
+  { value: "trading", label: "Trading" },
+  { value: "community", label: "Community" },
+  { value: "referral", label: "Referral" },
+  { value: "engagement", label: "Engagement" }
 ] as const;
 
 export type TypeOption = typeof TYPE_OPTIONS[number];
 
-// Platform options
+// Platform options with proper mapping
 export const PLATFORM_OPTIONS = [
-  "telegram",
-  "twitter",
-  "discord", 
-  "website",
-  "mobile"
+  { value: "telegram", label: "Telegram" },
+  { value: "twitter", label: "Twitter" },
+  { value: "discord", label: "Discord" },
+  { value: "website", label: "Website" },
+  { value: "mobile", label: "Mobile" }
 ] as const;
 
 export type PlatformOption = typeof PLATFORM_OPTIONS[number];
@@ -134,4 +134,5 @@ export interface StatusCardProps {
   bgColor: string;
   onClick?: () => void;
   isSelected?: boolean;
+  isDisabled?: boolean;
 }

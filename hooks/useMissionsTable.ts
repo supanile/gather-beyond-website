@@ -69,7 +69,7 @@ export const useMissionsTable = () => {
       if (response.ok) {
         const data = await response.json();
         setMissions(data);
-        toast.success("Missions loaded successfully");
+        console.log("Missions loaded successfully");
       } else {
         const errorData = await response.json();
         console.error("Failed to fetch missions:", errorData);

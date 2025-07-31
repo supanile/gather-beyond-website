@@ -262,7 +262,7 @@ const DashboardPage = () => {
           ) : (
             <>
               <AdminStatCard
-                title="Total Users"
+                title="Super Users"
                 value={users.length.toLocaleString()}
                 icon={Users}
               />
@@ -272,7 +272,7 @@ const DashboardPage = () => {
                 icon={Crosshair}
               />
               <AdminStatCard
-                title="Total Communities"
+                title="Total Users"
                 value={stats?.totalcommunity.toLocaleString() ?? "0"}
                 icon={Globe}
               />
