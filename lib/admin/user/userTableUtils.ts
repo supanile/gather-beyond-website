@@ -83,35 +83,35 @@ export const sortMissions = (
   if (!sortConfig.field) return missions;
 
   return [...missions].sort((a, b) => {
-    let aValue: any;
-    let bValue: any;
+    let aValue: string | number | null | undefined;
+    let bValue: string | number | null | undefined;
 
     switch (sortConfig.field) {
       case "user.email":
-        aValue = (a as any).user?.email || "";
-        bValue = (b as any).user?.email || "";
+        aValue = (a as Mission & { user?: { email?: string } }).user?.email || "";
+        bValue = (b as Mission & { user?: { email?: string } }).user?.email || "";
         break;
 
       case "agent.highest_level":
       case "agent.lowest_level":
         aValue =
-          (a as any).user?.userAgent?.level ||
-          (a as any).user?.agent?.level ||
+          (a as Mission & { user?: { userAgent?: { level?: number }; agent?: { level?: number } } }).user?.userAgent?.level ||
+          (a as Mission & { user?: { userAgent?: { level?: number }; agent?: { level?: number } } }).user?.agent?.level ||
           0;
         bValue =
-          (b as any).user?.userAgent?.level ||
-          (b as any).user?.agent?.level ||
+          (b as Mission & { user?: { userAgent?: { level?: number }; agent?: { level?: number } } }).user?.userAgent?.level ||
+          (b as Mission & { user?: { userAgent?: { level?: number }; agent?: { level?: number } } }).user?.agent?.level ||
           0;
         break;
 
       case "agent.last_active":
         aValue =
-          (a as any).user?.userAgent?.last_active ||
-          (a as any).user?.agent?.last_active ||
+          (a as Mission & { user?: { userAgent?: { last_active?: number }; agent?: { last_active?: number } } }).user?.userAgent?.last_active ||
+          (a as Mission & { user?: { userAgent?: { last_active?: number }; agent?: { last_active?: number } } }).user?.agent?.last_active ||
           0;
         bValue =
-          (b as any).user?.userAgent?.last_active ||
-          (b as any).user?.agent?.last_active ||
+          (b as Mission & { user?: { userAgent?: { last_active?: number }; agent?: { last_active?: number } } }).user?.userAgent?.last_active ||
+          (b as Mission & { user?: { userAgent?: { last_active?: number }; agent?: { last_active?: number } } }).user?.agent?.last_active ||
           0;
         break;
 

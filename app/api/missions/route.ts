@@ -133,7 +133,7 @@ export async function POST(request: Request) {
 
     console.log(`Partner "${body.partner}" mapped to ID: ${partnerId}`);
 
-    // ✅ FIXED: Create proper duration object with both dates
+    // Create proper duration object with both dates
     const durationData = {
       start: body.startDate
         ? new Date(body.startDate).toISOString()
@@ -156,16 +156,16 @@ export async function POST(request: Request) {
       format: body.format || "",
       useful_link: body.useful_link || "",
       requirements: body.requirements || JSON.stringify({}),
-      duration: JSON.stringify(durationData), // ✅ FIXED: Properly format duration
+      duration: JSON.stringify(durationData), // Properly format duration
       repeatable: body.repeatable || 0,
       regex: body.regex || "",
-      // ✅ NEW: Add targeting data field
-      targeting: body.missionTargeting ? JSON.stringify(body.missionTargeting) : null,
+      // ✅ REMOVED: targeting field since it doesn't exist in Grist table yet
+      // targeting: body.missionTargeting ? JSON.stringify(body.missionTargeting) : null,
     };
 
     console.log("Prepared mission data for Grist:", missionData);
     console.log("Duration field:", missionData.duration);
-    console.log("🎯 Targeting field:", missionData.targeting);
+    // console.log("🎯 Targeting field:", missionData.targeting); // Removed this log too
 
     const result = await grist.addRecords("Missions", [missionData]);
     console.log("Grist response:", result);
@@ -259,7 +259,7 @@ export async function PUT(request: Request) {
       console.log(`Partner "${updateData.partner}" mapped to ID: ${partnerId}`);
     }
 
-    // ✅ FIXED: Handle duration properly for updates
+    // Handle duration properly for updates
     const cleanUpdateData = { ...updateData };
     delete cleanUpdateData.startDate;
     delete cleanUpdateData.endDate;
@@ -267,13 +267,13 @@ export async function PUT(request: Request) {
 
     // Create duration object if dates are provided
     if (updateData.startDate || updateData.endDate) {
-      let currentDuration = {};
+      let currentDuration: { start?: string; end?: string | null } = {};
 
       // Parse existing duration if it exists
       if (cleanUpdateData.duration) {
         try {
           currentDuration = JSON.parse(cleanUpdateData.duration);
-        } catch (e) {
+        } catch {
           console.warn("Failed to parse existing duration, using empty object");
           currentDuration = {};
         }

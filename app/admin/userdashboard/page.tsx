@@ -114,8 +114,8 @@ const DashboardPage = () => {
           .includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      let aValue: string | number | null | undefined;
+      let bValue: string | number | null | undefined;
 
       switch (sortConfig.field) {
         case "user.email":
@@ -146,7 +146,7 @@ const DashboardPage = () => {
 
       // Handle email sorting (case-insensitive)
       if (sortConfig.field === "user.email") {
-        const comparison = aValue.localeCompare(bValue);
+        const comparison = (aValue as string).localeCompare(bValue as string);
         return sortConfig.direction === "asc" ? comparison : -comparison;
       }
 

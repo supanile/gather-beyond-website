@@ -679,7 +679,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   const updateBehaviorFilter = (
     filterKey: keyof BehaviorFilters,
     field: string,
-    value: any
+    value: string | number | boolean | number[]
   ) => {
     setBehaviorFilters((prev) => ({
       ...prev,

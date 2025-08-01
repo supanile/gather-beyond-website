@@ -3,16 +3,97 @@ import { Mission } from "@/types/admin/adminTypes";
 import { 
   UserAgent, 
   ColumnVisibility, 
-  SortConfig, 
   PaginationConfig 
 } from "@/types/admin/userTableTypes";
 import { 
   calculateStatusStats, 
-  sortMissions, 
   filterMissionsByStatus, 
   paginateMissions,
-  getDefaultUserAgent
+  getDefaultUserAgent,
 } from "@/lib/admin/user/userTableUtils";
+
+// Extended Mission type to match what UserMissionsTable expects
+interface ExtendedMission extends Mission {
+  user?: { email: string };
+}
+
+// Mission-specific sort config for UserMissionsTable - updated to match ExtendedMission
+interface MissionSortConfig {
+  field: keyof ExtendedMission | "user.email" | null;
+  direction: "asc" | "desc";
+}
+
+// Mission-specific sort function
+const sortMissionsByField = (
+  missions: Mission[],
+  sortConfig: MissionSortConfig
+): Mission[] => {
+  if (!sortConfig.field) return missions;
+
+  return [...missions].sort((a, b) => {
+    let aValue: string | number | null | undefined;
+    let bValue: string | number | null | undefined;
+
+    switch (sortConfig.field) {
+      case "mission_id":
+        aValue = a.mission_id;
+        bValue = b.mission_id;
+        break;
+      case "status":
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case "accepted_at":
+        aValue = a.accepted_at;
+        bValue = b.accepted_at;
+        break;
+      case "submitted_at":
+        aValue = a.submitted_at;
+        bValue = b.submitted_at;
+        break;
+      case "completed_at":
+        aValue = a.completed_at;
+        bValue = b.completed_at;
+        break;
+      case "user":
+      case "user.email":
+        // For user.email, we'll handle it separately if needed
+        aValue = (a as Mission & { user?: { email: string } }).user?.email || "";
+        bValue = (b as Mission & { user?: { email: string } }).user?.email || "";
+        break;
+      default:
+        // Handle any other ExtendedMission keys
+        const field = sortConfig.field as keyof ExtendedMission;
+        const extendedA = a as ExtendedMission;
+        const extendedB = b as ExtendedMission;
+        aValue = extendedA[field] as string | number | null | undefined;
+        bValue = extendedB[field] as string | number | null | undefined;
+        break;
+    }
+
+    // Handle null/undefined/empty values
+    if (aValue === null || aValue === undefined || aValue === "NULL") {
+      if (bValue === null || bValue === undefined || bValue === "NULL") return 0;
+      return 1; // nulls go to end
+    }
+    if (bValue === null || bValue === undefined || bValue === "NULL") return -1;
+
+    // String comparison for text fields
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      const comparison = aValue.toLowerCase().localeCompare(bValue.toLowerCase());
+      return sortConfig.direction === "asc" ? comparison : -comparison;
+    }
+
+    // Numeric comparison
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+    }
+
+    // Fallback to string comparison
+    const comparison = String(aValue).localeCompare(String(bValue));
+    return sortConfig.direction === "asc" ? comparison : -comparison;
+  });
+};
 
 export const useUserMissions = (userId: string) => {
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -48,7 +129,7 @@ export const useUserTableState = () => {
   const [selectedSubmission, setSelectedSubmission] = useState<Mission | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [sortConfig, setSortConfig] = useState<SortConfig>({
+  const [sortConfig, setSortConfig] = useState<MissionSortConfig>({
     field: null,
     direction: "asc"
   });
@@ -59,6 +140,7 @@ export const useUserTableState = () => {
   });
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     missionId: true,
+    userEmail: true,
     status: true,
     acceptedAt: true,
     submittedAt: true,
@@ -66,7 +148,7 @@ export const useUserTableState = () => {
     submissionLink: true,
   });
 
-  const handleSort = (field: keyof Mission) => {
+  const handleSort = (field: MissionSortConfig['field']) => {
     setSortConfig(prev => ({
       field,
       direction: prev.field === field && prev.direction === "asc" ? "desc" : "asc"
@@ -114,7 +196,7 @@ export const useUserTableState = () => {
 export const useProcessedMissions = (
   missions: Mission[], 
   selectedStatus: string | null, 
-  sortConfig: SortConfig,
+  sortConfig: MissionSortConfig,
   pagination: PaginationConfig
 ) => {
   const processedData = useMemo(() => {
@@ -122,7 +204,7 @@ export const useProcessedMissions = (
     const filteredMissions = filterMissionsByStatus(missions, selectedStatus);
     
     // Sort missions
-    const sortedMissions = sortMissions(filteredMissions, sortConfig);
+    const sortedMissions = sortMissionsByField(filteredMissions, sortConfig);
     
     // Calculate total pages
     const totalPages = Math.ceil(sortedMissions.length / pagination.pageSize);

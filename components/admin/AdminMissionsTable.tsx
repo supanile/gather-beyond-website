@@ -91,7 +91,7 @@ const AdminMissionsTable = () => {
     const missionType = mission.type || "";
     const missionPlatform = mission.platform || "";
 
-    // ✅ FIXED: แปลงวันที่อย่างถูกต้องสำหรับ edit form
+    // แปลงวันที่อย่างถูกต้องสำหรับ edit form
     const convertToDatetimeLocal = (
       dateValue: string | number | null | undefined
     ): string | undefined => {
@@ -125,7 +125,7 @@ const AdminMissionsTable = () => {
       }
     };
 
-    // ✅ FIXED: Since targeting properties don't exist in Mission type, set to null for now
+    // Since targeting properties don't exist in Mission type, set to null for now
     const missionTargeting = null;
 
     // Convert Mission to NewMissionForm for editing

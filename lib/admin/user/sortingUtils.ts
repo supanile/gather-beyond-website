@@ -2,7 +2,7 @@ import { Mission, User } from "@/types/admin/adminTypes";
 import { UserAgent } from "@/types/admin/userTableTypes";
 
 interface ExtendedMission extends Mission {
-  user?: User;
+  user?: User & { userAgent?: UserAgent };
 }
 
 interface ExtendedUser extends User {
@@ -27,7 +27,7 @@ export interface SortConfig {
 const getSortValue = (
   item: ExtendedMission | ExtendedUser,
   field: SortField
-): any => {
+): string | number => {
   switch (field) {
     case "user.email":
       if ("user" in item && item.user) {
