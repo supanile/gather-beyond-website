@@ -18,7 +18,7 @@ export async function GET() {
     const stats = {
       totaluser: users?.length || 0,
       totalmissions: missions?.length || 0,
-      totalusermissions: userMissions?.length || 0,
+      totalmissionsubmitted: userMissions?.length || 0,
       totalcommunity: discordData?.approximate_member_count || 0
     };
 

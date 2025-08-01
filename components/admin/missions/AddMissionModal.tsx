@@ -166,8 +166,24 @@ const DateTimePicker = ({
     if (selectedDate) {
       setDate(selectedDate);
       const [hours, minutes] = time.split(":");
-      selectedDate.setHours(parseInt(hours), parseInt(minutes));
-      onChange(selectedDate.toISOString().slice(0, 16));
+
+      // สร้าง Date object ใหม่และตั้งเวลาตาม local timezone
+      const newDate = new Date(selectedDate);
+      newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      // ส่งเป็น ISO string แต่ไม่แปลง timezone
+      const formattedDateTime =
+        newDate.getFullYear() +
+        "-" +
+        String(newDate.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(newDate.getDate()).padStart(2, "0") +
+        "T" +
+        String(newDate.getHours()).padStart(2, "0") +
+        ":" +
+        String(newDate.getMinutes()).padStart(2, "0");
+
+      onChange(formattedDateTime);
     }
   };
 
@@ -176,8 +192,21 @@ const DateTimePicker = ({
     if (date) {
       const [hours, minutes] = newTime.split(":");
       const newDate = new Date(date);
-      newDate.setHours(parseInt(hours), parseInt(minutes));
-      onChange(newDate.toISOString().slice(0, 16));
+      newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      // ส่งเป็น ISO string แต่ไม่แปลง timezone
+      const formattedDateTime =
+        newDate.getFullYear() +
+        "-" +
+        String(newDate.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(newDate.getDate()).padStart(2, "0") +
+        "T" +
+        String(newDate.getHours()).padStart(2, "0") +
+        ":" +
+        String(newDate.getMinutes()).padStart(2, "0");
+
+      onChange(formattedDateTime);
     }
   };
 
@@ -263,10 +292,35 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     e.preventDefault();
     console.log("🔧 Submitting form with data:", newMission);
     console.log("🔧 Mission targeting data:", missionTargeting);
+    console.log("🔧 Is edit mode:", isEditMode);
 
-    // You can process targeting data here before submission
-    // For now, we'll just submit the mission as usual
-    await onSubmit();
+    // Validate required fields before submission
+    const requiredFields = ["title", "description", "type", "platform", "partner"];
+    const missingFields = requiredFields.filter(field => !newMission[field as keyof NewMissionForm]);
+    
+    if (missingFields.length > 0) {
+      console.error("Missing required fields:", missingFields);
+      // Don't proceed with submission if required fields are missing
+      return;
+    }
+
+    try {
+      // Add targeting data to mission before submission
+      const missionWithTargeting = {
+        ...newMission,
+        missionTargeting: missionTargeting
+      };
+      
+      console.log("🔧 Final mission data with targeting:", missionWithTargeting);
+      
+      // Update the mission form data with targeting before calling onSubmit
+      onMissionChange(missionWithTargeting);
+      
+      // Call the parent's submit handler
+      await onSubmit();
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
   };
 
   return (
@@ -379,7 +433,11 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     Partner <span className="text-red-500">*</span>
                   </Label>
                   <Select
-                    value={newMission.partner && newMission.partner.trim() !== "" ? newMission.partner : undefined}
+                    value={
+                      newMission.partner && newMission.partner.trim() !== ""
+                        ? newMission.partner
+                        : undefined
+                    }
                     onValueChange={(value) => {
                       console.log("🔧 Partner selected:", value);
                       handleInputChange("partner", value);

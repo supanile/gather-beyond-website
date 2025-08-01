@@ -60,7 +60,7 @@ const formatDateWithTime = (
 
     // ตรวจสอบว่าเป็น Unix timestamp (number) or ISO string
     if (typeof dateValue === "number") {
-      // Unix timestamp
+      // Unix timestamp - แปลงเป็น milliseconds
       date = new Date(dateValue * 1000);
     } else if (typeof dateValue === "string") {
       // ISO string or date string
@@ -71,19 +71,20 @@ const formatDateWithTime = (
 
     if (isNaN(date.getTime())) return "N/A";
 
-    // Change it to Bangkok timezone (UTC+7)
-    const bangkokDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+    // ใช้ local timezone (Bangkok) โดยตรง
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: 'Asia/Bangkok',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    };
 
-    // Format DD/MM/YYYY
-    const day = bangkokDate.getUTCDate().toString().padStart(2, "0");
-    const month = (bangkokDate.getUTCMonth() + 1).toString().padStart(2, "0");
-    const year = bangkokDate.getUTCFullYear();
+    const formatter = new Intl.DateTimeFormat('en-GB', options);
+    return formatter.format(date);
 
-    // Format HH:MM
-    const hours = bangkokDate.getUTCHours().toString().padStart(2, "0");
-    const minutes = bangkokDate.getUTCMinutes().toString().padStart(2, "0");
-
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
   } catch (error) {
     console.error("Error formatting date with time:", error);
     return "N/A";

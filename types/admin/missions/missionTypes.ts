@@ -61,6 +61,37 @@ export interface NewMissionForm {
   regex?: string;
   duration?: string;
   level_required?: number;
+  missionTargeting?: MissionTargetingData | null; // Add targeting data
+}
+
+// Add MissionTargetingData interface
+export interface MissionTargetingData {
+  audienceType: "global" | "custom";
+  behaviorFilters: {
+    xpLevel: { enabled: boolean; min: number; max: number };
+    missionStreak: { enabled: boolean; value: number };
+    lastActive: { enabled: boolean; value: string };
+    failedMissions: { enabled: boolean; value: number };
+    trustScore: { enabled: boolean; value: number[] };
+    connectedWallet: { enabled: boolean; value: boolean };
+    joinedViaPartner: { enabled: boolean; value: string };
+    referredUsers: { enabled: boolean; value: number };
+    agentHealth: { enabled: boolean; value: number[] };
+    memoryProofSubmitted: { enabled: boolean; value: boolean };
+    taggedInterests: { enabled: boolean; value: string[] };
+  };
+  demographicFilters: {
+    location: string[];
+    language: string[];
+    ageRange: string;
+    gender: string;
+  };
+  deliveryOptions: {
+    channel: string;
+    scope: string;
+    schedule: string;
+    scheduledDate: string;
+  };
 }
 
 // Partner options constant
@@ -77,18 +108,18 @@ export const PARTNER_OPTIONS = [
 
 export type PartnerOption = typeof PARTNER_OPTIONS[number];
 
-// Type options with proper mapping
+// Type options with proper mapping - FIXED: Use capitalized values to match backend validation
 export const TYPE_OPTIONS = [
-  { value: "social", label: "Social" },
-  { value: "trading", label: "Trading" },
-  { value: "community", label: "Community" },
-  { value: "referral", label: "Referral" },
-  { value: "engagement", label: "Engagement" }
+  { value: "Social", label: "Social" },
+  { value: "Trading", label: "Trading" },
+  { value: "Community", label: "Community" },
+  { value: "Referral", label: "Referral" },
+  { value: "Engagement", label: "Engagement" }
 ] as const;
 
 export type TypeOption = typeof TYPE_OPTIONS[number];
 
-// Platform options with proper mapping
+// Platform options with proper mapping - FIXED: Use lowercase values to match backend validation
 export const PLATFORM_OPTIONS = [
   { value: "telegram", label: "Telegram" },
   { value: "twitter", label: "Twitter" },

@@ -31,6 +31,7 @@ import {
   Mission,
   NewMissionForm,
   PARTNER_OPTIONS,
+  PartnerOption,
 } from "@/types/admin/missions/missionTypes";
 import { toast } from "sonner";
 
@@ -63,6 +64,7 @@ const AdminMissionsTable = () => {
     handleItemsPerPageChange,
     setSelectedStatus,
     setNewMission,
+    setSelectedMission, // ✅ ADD: Include setSelectedMission
     setIsAddModalOpen,
     setIsViewModalOpen,
   } = useMissionsTable();
@@ -81,35 +83,57 @@ const AdminMissionsTable = () => {
   // แก้ไข Edit Mission Handler - ใช้ exact values
   const handleEditMission = (mission: Mission) => {
     // Use partnerName directly and check if it is in PARTNER_OPTIONS.
-    const partnerName = PARTNER_OPTIONS.includes(mission.partnerName as any)
+    const partnerName = PARTNER_OPTIONS.includes(mission.partnerName as PartnerOption)
       ? mission.partnerName
       : "Super Connector";
-    console.log("📝 Partner mapping:", mission.partnerName, "->", partnerName);
-
-    // Use status directly and check that it is a valid value.
-    const validStatuses = ["upcoming", "active", "completed", "ended"];
-    const missionStatus = validStatuses.includes(mission.status)
-      ? mission.status
-      : "upcoming";
-    console.log("📝 Status mapping:", mission.status, "->", missionStatus);
 
     // Use the type and platform that are stored in the database.
     const missionType = mission.type || "";
     const missionPlatform = mission.platform || "";
-    console.log("📝 Type mapping:", mission.type, "->", missionType);
-    console.log(
-      "📝 Platform mapping:",
-      mission.platform,
-      "->",
-      missionPlatform
-    );
+
+    // ✅ FIXED: แปลงวันที่อย่างถูกต้องสำหรับ edit form
+    const convertToDatetimeLocal = (
+      dateValue: string | number | null | undefined
+    ): string | undefined => {
+      if (!dateValue) return undefined;
+
+      try {
+        let date: Date;
+
+        if (typeof dateValue === "number") {
+          // Unix timestamp
+          date = new Date(dateValue * 1000);
+        } else if (typeof dateValue === "string") {
+          date = new Date(dateValue);
+        } else {
+          return undefined;
+        }
+
+        if (isNaN(date.getTime())) return undefined;
+
+        // แปลงเป็น format YYYY-MM-DDTHH:mm สำหรับ datetime-local input
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      } catch (error) {
+        console.error("Error converting date for edit:", error);
+        return undefined;
+      }
+    };
+
+    // ✅ FIXED: Since targeting properties don't exist in Mission type, set to null for now
+    const missionTargeting = null;
 
     // Convert Mission to NewMissionForm for editing
     const missionForm: NewMissionForm = {
       title: mission.title || "",
       description: mission.description || "",
-      type: missionType, 
-      platform: missionPlatform, 
+      type: missionType,
+      platform: missionPlatform,
       reward: mission.reward || "",
       level_required: mission.level_required || 1,
       action_request: mission.action_request || "",
@@ -118,34 +142,20 @@ const AdminMissionsTable = () => {
       partner: partnerName,
       requirements: mission.requirements || "",
       repeatable: mission.repeatable || 0,
-      startDate: mission.startDate
-        ? new Date(
-            typeof mission.startDate === "number"
-              ? mission.startDate * 1000
-              : mission.startDate
-          )
-            .toISOString()
-            .slice(0, 16)
-        : undefined,
-      endDate: mission.endDate
-        ? new Date(
-            typeof mission.endDate === "number"
-              ? mission.endDate * 1000
-              : mission.endDate
-          )
-            .toISOString()
-            .slice(0, 16)
-        : undefined,
+      startDate: convertToDatetimeLocal(mission.startDate),
+      endDate: convertToDatetimeLocal(mission.endDate),
       regex: mission.regex || "",
       duration: mission.duration || "",
+      missionTargeting: missionTargeting, // ✅ FIXED: Set to null since not available in Mission type
     };
 
     console.log("📝 Final mapped mission form data:", missionForm);
-    console.log("📝 Final Partner:", missionForm.partner);
-    console.log("📝 Final Type:", missionForm.type);
-    console.log("📝 Final Platform:", missionForm.platform);
+    console.log("📝 Start Date:", missionForm.startDate);
+    console.log("📝 End Date:", missionForm.endDate);
+    console.log("📝 Mission Targeting:", missionForm.missionTargeting);
 
     setMissionToEdit(missionForm);
+    setSelectedMission(mission); // ✅ IMPORTANT: Set selected mission for edit modal
     setIsEditModalOpen(true);
   };
 
@@ -204,13 +214,17 @@ const AdminMissionsTable = () => {
       console.log("Final update - Type:", missionForm.type);
       console.log("Final update - Platform:", missionForm.platform);
 
+      // Ensure we have the current form data, not the old missionToEdit
+      const currentFormData = missionForm || missionToEdit;
+      
       const success = await handleUpdateMission(
         selectedMission.id,
-        missionForm
+        currentFormData
       );
       if (success) {
         setIsEditModalOpen(false);
         setMissionToEdit(null);
+        setSelectedMission(null); // Clear selected mission
       }
     }
   };
@@ -366,12 +380,14 @@ const AdminMissionsTable = () => {
             setMissionToEdit(mission);
           }
         }}
-        onSubmit={() => {
+        onSubmit={async () => {
           if (missionToEdit) {
-            console.log("🔧 Submitting edit with data:", missionToEdit);
+            console.log("🔧 Submitting edit with current form data:", missionToEdit);
             console.log("🔧 Submit - Partner:", missionToEdit.partner);
             console.log("🔧 Submit - Type:", missionToEdit.type);
             console.log("🔧 Submit - Platform:", missionToEdit.platform);
+            
+            // Use the current missionToEdit state which should have the latest form data
             return handleUpdateMissionSubmit(missionToEdit);
           }
           return Promise.resolve();
@@ -421,7 +437,7 @@ const AdminMissionsTable = () => {
                 <strong>⚠️ WARNING:</strong> This action will:
               </p>
               <ul className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 space-y-1 ml-4">
-                <li>• Permanently delete this mission from Grist</li>
+                <li>• Permanently delete this mission</li>
                 <li>• Remove all associated data</li>
                 <li>• Cannot be undone or recovered</li>
                 <li>• May affect user progress</li>

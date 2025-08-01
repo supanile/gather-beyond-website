@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 // Partner mapping
 const PARTNER_ID_MAP: { [key: string]: number } = {
   "Super Connector": 2,
-  Staika: 4, 
+  Staika: 4,
   "Bread.gg": 7,
   "BTC Rush": 6,
   Deepbrew: 8,
@@ -71,7 +71,6 @@ export async function POST(request: Request) {
       "type",
       "platform",
       "partner",
-      "status",
     ];
     for (const field of requiredFields) {
       if (!body[field]) {
@@ -80,19 +79,6 @@ export async function POST(request: Request) {
           { status: 400 }
         );
       }
-    }
-
-    // Validate status - ให้ตรงกับ Formula Column
-    const validStatuses = ["upcoming", "active", "completed", "ended"];
-    if (!validStatuses.includes(body.status)) {
-      return NextResponse.json(
-        {
-          error: `Invalid status: ${
-            body.status
-          }. Must be one of: ${validStatuses.join(", ")}`,
-        },
-        { status: 400 }
-      );
     }
 
     // Validate type
@@ -133,17 +119,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Convert dates to proper format for Grist
-    const startDate = body.startDate ? new Date(body.startDate) : new Date();
-    const endDate = body.endDate ? new Date(body.endDate) : null;
-
-    if (isNaN(startDate.getTime())) {
-      return NextResponse.json(
-        { error: "Invalid start date format" },
-        { status: 400 }
-      );
-    }
-
     // Get partner ID from partner name
     const partnerId = PARTNER_ID_MAP[body.partner];
     if (!partnerId) {
@@ -158,6 +133,16 @@ export async function POST(request: Request) {
 
     console.log(`Partner "${body.partner}" mapped to ID: ${partnerId}`);
 
+    // ✅ FIXED: Create proper duration object with both dates
+    const durationData = {
+      start: body.startDate
+        ? new Date(body.startDate).toISOString()
+        : new Date().toISOString(),
+      end: body.endDate ? new Date(body.endDate).toISOString() : null,
+    };
+
+    console.log("Duration data created:", durationData);
+
     // Prepare data for Grist
     const missionData = {
       title: body.title,
@@ -171,20 +156,16 @@ export async function POST(request: Request) {
       format: body.format || "",
       useful_link: body.useful_link || "",
       requirements: body.requirements || JSON.stringify({}),
-      duration:
-        body.duration ||
-        JSON.stringify({
-          start: startDate.toISOString(),
-          end: endDate ? endDate.toISOString() : null,
-        }),
+      duration: JSON.stringify(durationData), // ✅ FIXED: Properly format duration
       repeatable: body.repeatable || 0,
-      startDate: startDate.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD string
-      endDate: endDate ? endDate.toISOString().split('T')[0] : null, // Convert Date to YYYY-MM-DD string or null
       regex: body.regex || "",
-      status: body.status,
+      // ✅ NEW: Add targeting data field
+      targeting: body.missionTargeting ? JSON.stringify(body.missionTargeting) : null,
     };
 
     console.log("Prepared mission data for Grist:", missionData);
+    console.log("Duration field:", missionData.duration);
+    console.log("🎯 Targeting field:", missionData.targeting);
 
     const result = await grist.addRecords("Missions", [missionData]);
     console.log("Grist response:", result);
@@ -278,20 +259,75 @@ export async function PUT(request: Request) {
       console.log(`Partner "${updateData.partner}" mapped to ID: ${partnerId}`);
     }
 
-    // Convert dates if provided
-    if (updateData.startDate) {
-      updateData.startDate = new Date(updateData.startDate).toISOString().split('T')[0];
-    }
-    if (updateData.endDate) {
-      updateData.endDate = new Date(updateData.endDate).toISOString().split('T')[0];
+    // ✅ FIXED: Handle duration properly for updates
+    const cleanUpdateData = { ...updateData };
+    delete cleanUpdateData.startDate;
+    delete cleanUpdateData.endDate;
+    delete cleanUpdateData.status;
+
+    // Create duration object if dates are provided
+    if (updateData.startDate || updateData.endDate) {
+      let currentDuration = {};
+
+      // Parse existing duration if it exists
+      if (cleanUpdateData.duration) {
+        try {
+          currentDuration = JSON.parse(cleanUpdateData.duration);
+        } catch (e) {
+          console.warn("Failed to parse existing duration, using empty object");
+          currentDuration = {};
+        }
+      }
+
+      // Update duration with new dates
+      const durationData = {
+        ...currentDuration,
+        start: updateData.startDate
+          ? new Date(updateData.startDate).toISOString()
+          : currentDuration.start || new Date().toISOString(),
+        end: updateData.endDate
+          ? new Date(updateData.endDate).toISOString()
+          : updateData.endDate === null || updateData.endDate === undefined
+          ? null
+          : currentDuration.end,
+      };
+
+      cleanUpdateData.duration = JSON.stringify(durationData);
+      console.log("Updated duration data:", durationData);
     }
 
+    // ✅ NEW: Handle targeting data for updates
+    // COMMENTED OUT: targeting field since it doesn't exist in Grist table yet
+    /*
+    if (updateData.missionTargeting !== undefined) {
+      if (updateData.missionTargeting === null) {
+        cleanUpdateData.targeting = null;
+      } else {
+        cleanUpdateData.targeting = typeof updateData.missionTargeting === 'string' 
+          ? updateData.missionTargeting 
+          : JSON.stringify(updateData.missionTargeting);
+      }
+      
+      // Remove the original field name to avoid confusion
+      delete cleanUpdateData.missionTargeting;
+      
+      console.log("🎯 Updated targeting data:", cleanUpdateData.targeting);
+    }
+    */
+
+    // Remove missionTargeting field to avoid errors
+    delete cleanUpdateData.missionTargeting;
+
     const finalUpdateData = {
-      ...updateData,
+      ...cleanUpdateData,
       partner: partnerId,
     };
 
-    const result = await grist.updateRecords("Missions", [{id, ...finalUpdateData}]);
+    console.log("Final update data:", finalUpdateData);
+
+    const result = await grist.updateRecords("Missions", [
+      { id, ...finalUpdateData },
+    ]);
 
     return NextResponse.json(
       { message: "Mission updated successfully", data: result },
@@ -339,9 +375,7 @@ export async function DELETE(request: Request) {
     try {
       console.log(`Checking if mission ${id} exists...`);
       const missions = await grist.fetchTable("Missions");
-      const missionExists = missions.find(
-        (m) => String(m.id) === String(id)
-      );
+      const missionExists = missions.find((m) => String(m.id) === String(id));
 
       if (!missionExists) {
         console.log(`Mission ${id} not found in database`);

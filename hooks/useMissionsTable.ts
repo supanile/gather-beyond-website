@@ -175,7 +175,6 @@ export const useMissionsTable = () => {
         "description",
         "type",
         "platform",
-        "status",
         "partner",
       ];
       for (const field of requiredFields) {
@@ -184,6 +183,22 @@ export const useMissionsTable = () => {
           return;
         }
       }
+
+      // ✅ FIXED: จัดการวันที่และเวลาแบบถูกต้อง
+      const startDate = newMission.startDate
+        ? newMission.startDate // ใช้ค่าที่ส่งมาตรงๆ (รูปแบบ YYYY-MM-DDTHH:mm)
+        : new Date().toISOString().slice(0, 16); // current datetime in local format
+
+      const endDate = newMission.endDate
+        ? newMission.endDate // ใช้ค่าที่ส่งมาตรงๆ
+        : null;
+
+      console.log("Processed dates:", {
+        originalStart: newMission.startDate,
+        processedStart: startDate,
+        originalEnd: newMission.endDate,
+        processedEnd: endDate,
+      });
 
       // Prepare mission data
       const missionData = {
@@ -198,15 +213,15 @@ export const useMissionsTable = () => {
         useful_link: newMission.useful_link,
         requirements: newMission.requirements || "{}",
         repeatable: newMission.repeatable || 0,
-        startDate: newMission.startDate || new Date().toISOString(),
-        endDate: newMission.endDate || null,
+        startDate: startDate,
+        endDate: endDate,
         regex: newMission.regex || "",
         partner: newMission.partner,
         duration:
           newMission.duration ||
           JSON.stringify({
-            start: new Date().toISOString(),
-            end: null,
+            start: startDate,
+            end: endDate,
           }),
       };
 
@@ -264,7 +279,23 @@ export const useMissionsTable = () => {
     try {
       setIsSubmitting(true);
 
-      // Prepare update data
+      // ✅ FIXED: จัดการวันที่และเวลาแบบถูกต้องสำหรับ update
+      const startDate = updateData.startDate
+        ? updateData.startDate // ใช้ค่าที่ส่งมาตรงๆ (รูปแบบ YYYY-MM-DDTHH:mm)
+        : new Date().toISOString().slice(0, 16); // current datetime in local format
+
+      const endDate = updateData.endDate
+        ? updateData.endDate // ใช้ค่าที่ส่งมาตรงๆ
+        : null;
+
+      console.log("Update processed dates:", {
+        originalStart: updateData.startDate,
+        processedStart: startDate,
+        originalEnd: updateData.endDate,
+        processedEnd: endDate,
+      });
+
+      // Prepare update data (remove targeting for now since column doesn't exist)
       const missionUpdateData = {
         id: missionId,
         title: updateData.title,
@@ -278,15 +309,16 @@ export const useMissionsTable = () => {
         useful_link: updateData.useful_link,
         requirements: updateData.requirements || "{}",
         repeatable: updateData.repeatable || 0,
-        startDate: updateData.startDate || new Date().toISOString(),
-        endDate: updateData.endDate || null,
+        startDate: startDate,
+        endDate: endDate,
         regex: updateData.regex || "",
-        partner: updateData.partner, // Use partnerName
+        partner: updateData.partner,
+        // ✅ REMOVED: targeting field since it doesn't exist in Grist table yet
         duration:
           updateData.duration ||
           JSON.stringify({
-            start: new Date().toISOString(),
-            end: null,
+            start: startDate,
+            end: endDate,
           }),
       };
 
@@ -480,6 +512,7 @@ export const useMissionsTable = () => {
     handleItemsPerPageChange,
     setSelectedStatus,
     setNewMission,
+    setSelectedMission, // ✅ ADD: Export setSelectedMission
     setIsAddModalOpen,
     setIsViewModalOpen,
     fetchMissions,

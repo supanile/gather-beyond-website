@@ -17,6 +17,7 @@ export interface UserAgent {
 
 export interface ColumnVisibility {
   missionId: boolean;
+  userEmail: boolean;
   status: boolean;
   acceptedAt: boolean;
   submittedAt: boolean;
@@ -43,7 +44,7 @@ export interface StatusCardProps {
 }
 
 export interface SortConfig {
-  field: keyof Mission | null;
+  field: keyof Mission | 'user.email' | 'agent.last_active' | null;
   direction: "asc" | "desc";
 }
 

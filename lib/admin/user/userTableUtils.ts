@@ -1,8 +1,23 @@
 import { Mission } from "@/types/admin/adminTypes";
-import { UserAgent, StatusStats, SortConfig } from "@/types/admin/userTableTypes";
+import { UserAgent } from "@/types/admin/userTableTypes";
 
-export const formatDate = (timestamp: number | string) => {
-  const date = typeof timestamp === "number" ? new Date(timestamp * 1000) : new Date(timestamp);
+export interface SortConfig {
+  field:
+    | "user.email"
+    | "agent.highest_level"
+    | "agent.lowest_level"
+    | "agent.last_active"
+    | null;
+  direction: "asc" | "desc";
+}
+
+export const formatDate = (timestamp: number | string | null | undefined) => {
+  if (!timestamp || timestamp === "NULL") return "N/A";
+  const date =
+    typeof timestamp === "number"
+      ? new Date(timestamp * 1000)
+      : new Date(timestamp);
+  if (isNaN(date.getTime())) return "N/A";
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -60,29 +75,115 @@ export const calculateStatusStats = (missions: Mission[]): StatusStats => {
   };
 };
 
-export const sortMissions = (missions: Mission[], sortConfig: SortConfig): Mission[] => {
+// Updated sortMissions function with last_active sorting
+export const sortMissions = (
+  missions: Mission[],
+  sortConfig: SortConfig
+): Mission[] => {
   if (!sortConfig.field) return missions;
 
   return [...missions].sort((a, b) => {
-    const aValue = a[sortConfig.field!];
-    const bValue = b[sortConfig.field!];
+    let aValue: any;
+    let bValue: any;
 
-    if (aValue === null || aValue === undefined || aValue === "NULL") return 1;
-    if (bValue === null || bValue === undefined || bValue === "NULL") return -1;
+    switch (sortConfig.field) {
+      case "user.email":
+        aValue = (a as any).user?.email || "";
+        bValue = (b as any).user?.email || "";
+        break;
 
-    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+      case "agent.highest_level":
+      case "agent.lowest_level":
+        aValue =
+          (a as any).user?.userAgent?.level ||
+          (a as any).user?.agent?.level ||
+          0;
+        bValue =
+          (b as any).user?.userAgent?.level ||
+          (b as any).user?.agent?.level ||
+          0;
+        break;
+
+      case "agent.last_active":
+        aValue =
+          (a as any).user?.userAgent?.last_active ||
+          (a as any).user?.agent?.last_active ||
+          0;
+        bValue =
+          (b as any).user?.userAgent?.last_active ||
+          (b as any).user?.agent?.last_active ||
+          0;
+        break;
+
+      default:
+        return 0;
+    }
+
+    // Handle null/undefined/empty values - put them at the end always
+    if (
+      (aValue === null ||
+        aValue === undefined ||
+        aValue === "NULL" ||
+        aValue === 0) &&
+      (bValue === null ||
+        bValue === undefined ||
+        bValue === "NULL" ||
+        bValue === 0)
+    )
+      return 0;
+
+    if (
+      aValue === null ||
+      aValue === undefined ||
+      aValue === "NULL" ||
+      aValue === 0
+    )
+      return 1;
+    if (
+      bValue === null ||
+      bValue === undefined ||
+      bValue === "NULL" ||
+      bValue === 0
+    )
+      return -1;
+
+    // Handle email sorting (case-insensitive)
+    if (sortConfig.field === "user.email") {
+      const comparison = String(aValue)
+        .toLowerCase()
+        .localeCompare(String(bValue).toLowerCase());
+      return sortConfig.direction === "asc" ? comparison : -comparison;
+    }
+
+    // Handle numeric sorting (agent levels and last_active)
+    if (
+      sortConfig.field === "agent.highest_level" ||
+      sortConfig.field === "agent.lowest_level" ||
+      sortConfig.field === "agent.last_active"
+    ) {
+      const numA = Number(aValue);
+      const numB = Number(bValue);
+      return sortConfig.direction === "asc" ? numA - numB : numB - numA;
+    }
+
     return 0;
   });
 };
 
-export const filterMissionsByStatus = (missions: Mission[], selectedStatus: string | null): Mission[] => {
-  return selectedStatus 
+export const filterMissionsByStatus = (
+  missions: Mission[],
+  selectedStatus: string | null
+): Mission[] => {
+  return selectedStatus
     ? missions.filter((mission) => mission.status === selectedStatus)
     : missions;
 };
 
-export const paginateMissions = (missions: Mission[], currentPage: number, pageSize: number): Mission[] => {
+export const paginateMissions = (
+  missions: Mission[],
+  currentPage: number,
+  pageSize: number
+): Mission[] => {
   return missions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 };
 
@@ -102,3 +203,40 @@ export const getDefaultUserAgent = (userId: string): UserAgent => {
     xp_required: 100,
   };
 };
+
+// Helper function to get sort field display names
+export const getSortFieldDisplayName = (field: SortConfig["field"]): string => {
+  switch (field) {
+    case "user.email":
+      return "Email";
+    case "agent.highest_level":
+      return "Agent Highest Level";
+    case "agent.lowest_level":
+      return "Agent Lowest Level";
+    case "agent.last_active":
+      return "Last Active";
+    default:
+      return "";
+  }
+};
+
+// Helper function to get available sort options
+export const getSortOptions = () => {
+  return {
+    email: [{ field: "user.email" as const, label: "Email" }],
+    performance: [
+      { field: "agent.highest_level" as const, label: "Agent Highest Level" },
+      { field: "agent.lowest_level" as const, label: "Agent Lowest Level" },
+    ],
+    activity: [
+      { field: "agent.last_active" as const, label: "Last Active" },
+    ],
+  };
+};
+
+interface StatusStats {
+  accepted: number;
+  submitted: number;
+  completed: number;
+  rejected: number;
+}

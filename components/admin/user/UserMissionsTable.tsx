@@ -1,5 +1,5 @@
 import React from "react";
-import { Mission } from "@/types/admin/adminTypes";
+import { Mission, User } from "@/types/admin/adminTypes";
 import {
   Eye,
   ExternalLink,
@@ -9,6 +9,7 @@ import {
   ChevronUp,
   ChevronDown,
   EyeOff,
+  Mail,
 } from "lucide-react";
 import {
   Table,
@@ -38,6 +39,7 @@ import {
 
 interface ColumnVisibility {
   missionId: boolean;
+  userEmail: boolean;
   status: boolean;
   acceptedAt: boolean;
   submittedAt: boolean;
@@ -45,17 +47,22 @@ interface ColumnVisibility {
   submissionLink: boolean;
 }
 
+interface ExtendedMission extends Mission {
+  user?: User; // Add user data to mission for email display
+}
+
 interface UserMissionsTableProps {
-  paginatedMissions: Mission[];
+  paginatedMissions: ExtendedMission[];
   isLoading: boolean;
   columnVisibility: ColumnVisibility;
   sortConfig: {
     field: string | null;
     direction: "asc" | "desc";
   };
-  onSort: (field: keyof Mission) => void;
+  onSort: (field: keyof ExtendedMission | 'user.email') => void;
   onToggleColumnVisibility: (column: keyof ColumnVisibility) => void;
-  onOpenModal: (mission: Mission) => void;
+  onOpenModal: (mission: ExtendedMission) => void;
+  showUserEmail?: boolean; // Option to show/hide email column
 }
 
 const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
@@ -66,7 +73,19 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
   onSort,
   onToggleColumnVisibility,
   onOpenModal,
+  showUserEmail = false,
 }) => {
+  const getSortIcon = (field: string) => {
+    if (sortConfig.field === field) {
+      return sortConfig.direction === "asc" ? (
+        <ChevronUp className="h-2 w-2 sm:h-3 sm:w-3" />
+      ) : (
+        <ChevronDown className="h-2 w-2 sm:h-3 sm:w-3" />
+      );
+    }
+    return <ChevronsUpDown className="h-2 w-2 sm:h-3 sm:w-3" />;
+  };
+
   return (
     <div className="mt-4 sm:mt-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 sm:mb-3 gap-2">
@@ -92,6 +111,15 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
             >
               Mission ID
             </DropdownMenuCheckboxItem>
+            {showUserEmail && (
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.userEmail}
+                onCheckedChange={() => onToggleColumnVisibility("userEmail")}
+                className="text-xs sm:text-sm"
+              >
+                User Email
+              </DropdownMenuCheckboxItem>
+            )}
             <DropdownMenuCheckboxItem
               checked={columnVisibility.status}
               onCheckedChange={() => onToggleColumnVisibility("status")}
@@ -147,15 +175,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                         >
                           <span className="hidden sm:inline">Mission ID</span>
                           <span className="sm:hidden">ID</span>
-                          {sortConfig.field === "mission_id" ? (
-                            sortConfig.direction === "asc" ? (
-                              <ChevronUp className="h-2 w-2 sm:h-3 sm:w-3" />
-                            ) : (
-                              <ChevronDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                            )
-                          ) : (
-                            <ChevronsUpDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                          )}
+                          {getSortIcon("mission_id")}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
@@ -191,6 +211,56 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                     </DropdownMenu>
                   </TableHead>
                 )}
+                
+                {/* User Email Column - New Addition */}
+                {showUserEmail && columnVisibility.userEmail && (
+                  <TableHead className="w-[120px] sm:w-[180px] min-w-[120px] sm:min-w-[180px]">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-1 sm:p-2 font-medium text-foreground hover:text-foreground text-xs sm:text-sm"
+                        >
+                          <Mail className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                          <span className="hidden sm:inline">User Email</span>
+                          <span className="sm:hidden">Email</span>
+                          {getSortIcon("user.email")}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem
+                          onClick={() => onSort("user.email")}
+                          className="text-xs sm:text-sm"
+                        >
+                          <div className="flex items-center">
+                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                            A-Z
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onSort("user.email")}
+                          className="text-xs sm:text-sm"
+                        >
+                          <div className="flex items-center">
+                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                            Z-A
+                          </div>
+                        </DropdownMenuItem>
+                        <div className="bg-border -mx-1 my-1 h-px"></div>
+                        <DropdownMenuItem
+                          onClick={() => onToggleColumnVisibility("userEmail")}
+                          className="text-xs sm:text-sm"
+                        >
+                          <div className="flex items-center">
+                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                            Hide
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableHead>
+                )}
+
                 {columnVisibility.status && (
                   <TableHead className="w-[80px] sm:w-[100px] min-w-[80px] sm:min-w-[100px]">
                     <DropdownMenu>
@@ -200,15 +270,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                           className="h-auto p-1 sm:p-2 font-medium text-foreground hover:text-foreground text-xs sm:text-sm"
                         >
                           Status
-                          {sortConfig.field === "status" ? (
-                            sortConfig.direction === "asc" ? (
-                              <ChevronUp className="h-2 w-2 sm:h-3 sm:w-3" />
-                            ) : (
-                              <ChevronDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                            )
-                          ) : (
-                            <ChevronsUpDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                          )}
+                          {getSortIcon("status")}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
@@ -244,6 +306,8 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                     </DropdownMenu>
                   </TableHead>
                 )}
+
+                {/* Rest of the columns remain the same... */}
                 {columnVisibility.acceptedAt && (
                   <TableHead className="w-[100px] sm:w-[140px] min-w-[100px] sm:min-w-[140px]">
                     <DropdownMenu>
@@ -254,15 +318,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                         >
                           <span className="hidden sm:inline">Accepted At</span>
                           <span className="sm:hidden">Accepted</span>
-                          {sortConfig.field === "accepted_at" ? (
-                            sortConfig.direction === "asc" ? (
-                              <ChevronUp className="h-2 w-2 sm:h-3 sm:w-3" />
-                            ) : (
-                              <ChevronDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                            )
-                          ) : (
-                            <ChevronsUpDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                          )}
+                          {getSortIcon("accepted_at")}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
@@ -298,6 +354,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                     </DropdownMenu>
                   </TableHead>
                 )}
+
                 {columnVisibility.submittedAt && (
                   <TableHead className="w-[100px] sm:w-[140px] min-w-[100px] sm:min-w-[140px]">
                     <DropdownMenu>
@@ -308,15 +365,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                         >
                           <span className="hidden sm:inline">Submitted At</span>
                           <span className="sm:hidden">Submitted</span>
-                          {sortConfig.field === "submitted_at" ? (
-                            sortConfig.direction === "asc" ? (
-                              <ChevronUp className="h-2 w-2 sm:h-3 sm:w-3" />
-                            ) : (
-                              <ChevronDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                            )
-                          ) : (
-                            <ChevronsUpDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                          )}
+                          {getSortIcon("submitted_at")}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
@@ -352,6 +401,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                     </DropdownMenu>
                   </TableHead>
                 )}
+
                 {columnVisibility.completedAt && (
                   <TableHead className="w-[100px] sm:w-[140px] min-w-[100px] sm:min-w-[140px]">
                     <DropdownMenu>
@@ -362,15 +412,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                         >
                           <span className="hidden sm:inline">Completed At</span>
                           <span className="sm:hidden">Completed</span>
-                          {sortConfig.field === "completed_at" ? (
-                            sortConfig.direction === "asc" ? (
-                              <ChevronUp className="h-2 w-2 sm:h-3 sm:w-3" />
-                            ) : (
-                              <ChevronDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                            )
-                          ) : (
-                            <ChevronsUpDown className="h-2 w-2 sm:h-3 sm:w-3" />
-                          )}
+                          {getSortIcon("completed_at")}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
@@ -406,6 +448,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                     </DropdownMenu>
                   </TableHead>
                 )}
+
                 {columnVisibility.submissionLink && (
                   <TableHead className="w-[80px] sm:w-[120px] min-w-[80px] sm:min-w-[120px] text-foreground text-xs sm:text-sm">
                     <span className="hidden sm:inline">Submission Link</span>
@@ -424,6 +467,11 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                     {Object.values(columnVisibility).filter(Boolean).length > 0 && (
                       <>
                         {columnVisibility.missionId && (
+                          <TableCell className="py-2 sm:py-3">
+                            <div className="h-3 sm:h-4 bg-muted rounded animate-pulse"></div>
+                          </TableCell>
+                        )}
+                        {showUserEmail && columnVisibility.userEmail && (
                           <TableCell className="py-2 sm:py-3">
                             <div className="h-3 sm:h-4 bg-muted rounded animate-pulse"></div>
                           </TableCell>
@@ -468,6 +516,19 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                         {mission.mission_id}
                       </TableCell>
                     )}
+                    
+                    {/* User Email Cell - New Addition */}
+                    {showUserEmail && columnVisibility.userEmail && (
+                      <TableCell className="text-xs sm:text-sm text-foreground py-2 sm:py-3">
+                        <div className="flex items-center space-x-2">
+                          <Mail className="w-3 h-3 text-muted-foreground" />
+                          <span className="truncate max-w-[100px] sm:max-w-[150px]" title={mission.user?.email}>
+                            {mission.user?.email || "N/A"}
+                          </span>
+                        </div>
+                      </TableCell>
+                    )}
+
                     {columnVisibility.status && (
                       <TableCell className="py-2 sm:py-3">
                         <Badge
