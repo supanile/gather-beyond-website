@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -113,16 +112,6 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
       <ChevronDown className="h-3 w-3" />
     );
   };
-
-  const LoadingRow = () => (
-    <TableRow>
-      {Array.from({ length: totalVisibleColumns }).map((_, index) => (
-        <TableCell key={index}>
-          <Skeleton className="h-4 w-full" />
-        </TableCell>
-      ))}
-    </TableRow>
-  );
 
   const EmptyRow = () => (
     <TableRow>
@@ -486,11 +475,7 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading ? (
-            Array.from({ length: 5 }).map((_, index) => (
-              <LoadingRow key={index} />
-            ))
-          ) : missions.length === 0 ? (
+          {missions.length === 0 ? (
             <EmptyRow />
           ) : (
             missions.map((mission) => {

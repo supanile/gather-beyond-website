@@ -15,10 +15,13 @@ import {
   ArrowDown,
   Filter,
   CheckIcon,
+  Zap,
+  UserCog, 
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
 import AdminUserTable from "@/components/admin/AdminUserTable";
+import { UserDataTable } from "@/components/admin/UserDataTable";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAdminData } from "@/hooks/useAdminData";
 import { Button } from "@/components/ui/button";
@@ -38,6 +41,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import InterestsPieChartCard from "@/components/admin/InterestsPieChartCard";
+import MoodBarChartCard from "@/components/admin/MoodBarChartCard";
+import DailySubmissionLineChartCard from "@/components/admin/DailySubmissionLineChartCard";
 
 type SortOption = {
   field:
@@ -273,6 +280,13 @@ const DashboardPage = () => {
             </div>
           </div>
 
+          {/* Chart Cards Loading - Updated to 3 columns */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <Skeleton className="h-96 rounded-2xl" />
+            <Skeleton className="h-96 rounded-2xl" />
+            <Skeleton className="h-96 rounded-2xl" />
+          </div>
+
           {/* User Dashboard Loading */}
           <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
@@ -352,324 +366,390 @@ const DashboardPage = () => {
     );
   }
 
+  // Add these helper functions before the DashboardPage component
+  const calculateCompletionRate = (users: any[]): number => {
+    if (users.length === 0) return 0;
+
+    const totalMissions = users.reduce((sum, user) => {
+      return sum + (user.userMissions?.length || 0);
+    }, 0);
+
+    const completedMissions = users.reduce((sum, user) => {
+      return (
+        sum +
+        (user.userMissions?.filter(
+          (mission: any) => mission.status === "completed"
+        ).length || 0)
+      );
+    }, 0);
+
+    return totalMissions > 0
+      ? Math.round((completedMissions / totalMissions) * 100)
+      : 0;
+  };
+
+  const calculateTotalXP = (users: any[]): number => {
+    return users.reduce((sum, user) => {
+      return sum + (user.total_points || 0);
+    }, 0);
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {isLoadingStats ? (
-            <>
-              <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Skeleton className="h-4 w-20 mb-2" />
-                    <Skeleton className="h-8 w-16" />
+        <div className="space-y-6">
+          {/* Regular Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {isLoadingStats ? (
+              <>
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-card rounded-2xl shadow-sm border border-border p-6"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Skeleton className="h-4 w-20 mb-2" />
+                        <Skeleton className="h-8 w-16" />
+                      </div>
+                      <Skeleton className="h-8 w-8 rounded" />
+                    </div>
                   </div>
-                  <Skeleton className="h-8 w-8 rounded" />
-                </div>
-              </div>
-              <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Skeleton className="h-4 w-24 mb-2" />
-                    <Skeleton className="h-8 w-16" />
-                  </div>
-                  <Skeleton className="h-8 w-8 rounded" />
-                </div>
-              </div>
-              <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Skeleton className="h-4 w-28 mb-2" />
-                    <Skeleton className="h-8 w-16" />
-                  </div>
-                  <Skeleton className="h-8 w-8 rounded" />
-                </div>
-              </div>
-              <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Skeleton className="h-4 w-20 mb-2" />
-                    <Skeleton className="h-8 w-16" />
-                  </div>
-                  <Skeleton className="h-8 w-8 rounded" />
-                </div>
-              </div>
-            </>
-          ) : statsError ? (
-            <p className="text-destructive">
-              Error loading stats: {statsError}
-            </p>
-          ) : (
-            <>
-              <AdminStatCard
-                title="Total Users"
-                value={stats?.totalcommunity.toLocaleString() ?? "0"}
-                icon={Users}
-              />
-              <AdminStatCard
-                title="SUPER Users"
-                value={users.length.toLocaleString()}
-                icon={ShieldUser}
-              />
-              <AdminStatCard
-                title="Total Missions"
-                value={missions.length.toLocaleString()}
-                icon={Crosshair}
-              />
-              <AdminStatCard
-                title="Mission Submitted"
-                value={stats?.totalmissionsubmitted?.toLocaleString() || "0"}
-                icon={Send}
-              />
-            </>
-          )}
-        </div>
-
-        {/* User Dashboard */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-            <div className="flex items-center gap-2">
-              {/* Sort Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8">
-                    <Filter className="h-4 w-4 mr-2" />
-                    {getSortIcon()}
-                    <span className="hidden sm:inline ml-1">
-                      {sortConfig.label}
-                    </span>
-                    <span className="sm:hidden ml-1">Sort</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {/* Email Sorting */}
-                  <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                    Email
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={() => handleSortChange(sortOptions[0])}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Email A-Z</span>
-                    {sortConfig.field === "user.email" &&
-                      sortConfig.direction === "asc" && (
-                        <CheckIcon
-                          className="h-5 w-5 text-green-500"
-                          aria-label="Active"
-                        />
-                      )}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleSortChange(sortOptions[1])}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Email Z-A</span>
-                    {sortConfig.field === "user.email" &&
-                      sortConfig.direction === "desc" && (
-                        <CheckIcon
-                          className="h-5 w-5 text-green-500"
-                          aria-label="Active"
-                        />
-                      )}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {/* Performance Sorting */}
-                  <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                    Performance
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={() => handleSortChange(sortOptions[2])}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Agent Highest Level</span>
-                    {sortConfig.field === "agent.highest_level" &&
-                      sortConfig.direction === "desc" && (
-                        <CheckIcon
-                          className="h-5 w-5 text-green-500"
-                          aria-label="Active"
-                        />
-                      )}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleSortChange(sortOptions[3])}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Agent Lowest Level</span>
-                    {sortConfig.field === "agent.lowest_level" &&
-                      sortConfig.direction === "asc" && (
-                        <CheckIcon
-                          className="h-5 w-5 text-green-500"
-                          aria-label="Active"
-                        />
-                      )}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {/* Activity Sorting */}
-                  <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                    Activity
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={() => handleSortChange(sortOptions[4])}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Most Recently Active</span>
-                    {sortConfig.field === "agent.last_active" &&
-                      sortConfig.direction === "desc" && (
-                        <CheckIcon
-                          className="h-5 w-5 text-green-500"
-                          aria-label="Active"
-                        />
-                      )}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleSortChange(sortOptions[5])}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Least Recently Active</span>
-                    {sortConfig.field === "agent.last_active" &&
-                      sortConfig.direction === "asc" && (
-                        <CheckIcon
-                          className="h-5 w-5 text-green-500"
-                          aria-label="Active"
-                        />
-                      )}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of{" "}
-                  {totalItems} users
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  Show:
-                </span>
-                <Select
-                  value={itemsPerPage.toString()}
-                  onValueChange={handleItemsPerPageChange}
-                >
-                  <SelectTrigger className="w-20 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="20">20</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Search Input */}
-          <div className="relative mb-6">
-            <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search users by email, interests, or X handle..."
-              className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-xs sm:placeholder:text-sm md:placeholder:text-base placeholder:text-muted-foreground"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {/* User List */}
-          <div className="space-y-4 mb-6">
-            {currentUsers.length > 0 ? (
-              currentUsers.map((user) => (
-                <AdminUserTable
-                  key={user.discord_id}
-                  user={user}
-                  missions={user.userMissions || []}
-                  userAgent={user.agent}
-                />
-              ))
+                ))}
+              </>
+            ) : statsError ? (
+              <p className="text-destructive">
+                Error loading stats: {statsError}
+              </p>
             ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  No users found matching your search.
-                </p>
-              </div>
+              <>
+                <AdminStatCard
+                  title="Total Users"
+                  value={stats?.totalcommunity.toLocaleString() ?? "0"}
+                  icon={Users}
+                />
+                <AdminStatCard
+                  title="SUPER Users"
+                  value={users.length.toLocaleString()}
+                  icon={ShieldUser}
+                />
+                <AdminStatCard
+                  title="Total Missions"
+                  value={missions.length.toLocaleString()}
+                  icon={Crosshair}
+                />
+                <AdminStatCard
+                  title="Mission Submitted"
+                  value={stats?.totalmissionsubmitted?.toLocaleString() || "0"}
+                  icon={Send}
+                />
+                {/* <AdminStatCard
+                  title="Completion Rate"
+                  value={`${calculateCompletionRate(users)}%`}
+                  icon={TrendingUp}
+                /> */}
+                <AdminStatCard
+                  title="Total XP"
+                  value={calculateTotalXP(users).toLocaleString()}
+                  icon={Zap}
+                />
+              </>
             )}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-              <div className="text-sm text-muted-foreground">
-                Page {currentPage} of {totalPages}
+          {/* Chart Cards - 2 columns */}
+          {!isLoadingStats && !statsError && (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="h-full">
+                <InterestsPieChartCard users={users} />
               </div>
+              <div className="h-full">
+                <MoodBarChartCard users={users} />
+              </div>
+            </div>
+          )}
 
-              <div className="flex items-center space-x-1">
-                {/* First Page */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  className="h-8 w-8 p-0"
-                >
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-
-                {/* Previous Page */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="h-8 w-8 p-0"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                {/* Page Numbers */}
-                {getPageNumbers().map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handlePageChange(page)}
-                    className="h-8 w-8 p-0"
-                  >
-                    {page}
-                  </Button>
-                ))}
-
-                {/* Next Page */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="h-8 w-8 p-0"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-
-                {/* Last Page */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="h-8 w-8 p-0"
-                >
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
+          {/* Daily Submission Line Chart - separate full width */}
+          {!isLoadingStats && !statsError && (
+            <div className="grid grid-cols-1 gap-6">
+              <div className="h-full">
+                <DailySubmissionLineChartCard />
               </div>
             </div>
           )}
         </div>
+
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-fit grid-cols-2">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              User Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="user-management"
+              className="flex items-center gap-2"
+            >
+              <UserCog className="h-4 w-4" />
+              User Management
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview">
+            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+                <div className="flex items-center gap-2">
+                  {/* Sort Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-8">
+                        <Filter className="h-4 w-4 mr-2" />
+                        {getSortIcon()}
+                        <span className="hidden sm:inline ml-1">
+                          {sortConfig.label}
+                        </span>
+                        <span className="sm:hidden ml-1">Sort</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-54">
+                      <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {/* Email Sorting */}
+                      <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+                        Email
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange(sortOptions[0])}
+                        className="flex items-center justify-between"
+                      >
+                        <span>Email A-Z</span>
+                        {sortConfig.field === "user.email" &&
+                          sortConfig.direction === "asc" && (
+                            <CheckIcon
+                              className="h-5 w-5 text-green-500"
+                              aria-label="Active"
+                            />
+                          )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange(sortOptions[1])}
+                        className="flex items-center justify-between"
+                      >
+                        <span>Email Z-A</span>
+                        {sortConfig.field === "user.email" &&
+                          sortConfig.direction === "desc" && (
+                            <CheckIcon
+                              className="h-5 w-5 text-green-500"
+                              aria-label="Active"
+                            />
+                          )}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      {/* Performance Sorting */}
+                      <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+                        Performance
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange(sortOptions[2])}
+                        className="flex items-center justify-between"
+                      >
+                        <span>Agent Highest Level</span>
+                        {sortConfig.field === "agent.highest_level" &&
+                          sortConfig.direction === "desc" && (
+                            <CheckIcon
+                              className="h-5 w-5 text-green-500"
+                              aria-label="Active"
+                            />
+                          )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange(sortOptions[3])}
+                        className="flex items-center justify-between"
+                      >
+                        <span>Agent Lowest Level</span>
+                        {sortConfig.field === "agent.lowest_level" &&
+                          sortConfig.direction === "asc" && (
+                            <CheckIcon
+                              className="h-5 w-5 text-green-500"
+                              aria-label="Active"
+                            />
+                          )}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      {/* Activity Sorting */}
+                      <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+                        Activity
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange(sortOptions[4])}
+                        className="flex items-center justify-between"
+                      >
+                        <span>Most Recently Active</span>
+                        {sortConfig.field === "agent.last_active" &&
+                          sortConfig.direction === "desc" && (
+                            <CheckIcon
+                              className="h-5 w-5 text-green-500"
+                              aria-label="Active"
+                            />
+                          )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange(sortOptions[5])}
+                        className="flex items-center justify-between"
+                      >
+                        <span>Least Recently Active</span>
+                        {sortConfig.field === "agent.last_active" &&
+                          sortConfig.direction === "asc" && (
+                            <CheckIcon
+                              className="h-5 w-5 text-green-500"
+                              aria-label="Active"
+                            />
+                          )}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      Showing {startIndex + 1}-{Math.min(endIndex, totalItems)}{" "}
+                      of {totalItems} users
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      Show:
+                    </span>
+                    <Select
+                      value={itemsPerPage.toString()}
+                      onValueChange={handleItemsPerPageChange}
+                    >
+                      <SelectTrigger className="w-20 h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Input */}
+              <div className="relative mb-6">
+                <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search users by email, interests, or X handle..."
+                  className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-xs sm:placeholder:text-sm md:placeholder:text-base placeholder:text-muted-foreground"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* User List */}
+              <div className="space-y-4 mb-6">
+                {currentUsers.length > 0 ? (
+                  currentUsers.map((user) => (
+                    <AdminUserTable
+                      key={user.discord_id}
+                      user={user}
+                      missions={user.userMissions || []}
+                      userAgent={user.agent}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      No users found matching your search.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+                  <div className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                  </div>
+
+                  <div className="flex items-center space-x-1">
+                    {/* First Page */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(1)}
+                      disabled={currentPage === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronsLeft className="h-4 w-4" />
+                    </Button>
+
+                    {/* Previous Page */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+
+                    {/* Page Numbers */}
+                    {getPageNumbers().map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(page)}
+                        className="h-8 w-8 p-0"
+                      >
+                        {page}
+                      </Button>
+                    ))}
+
+                    {/* Next Page */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+
+                    {/* Last Page */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronsRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* User Management Tab */}
+          <TabsContent value="user-management">
+            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+              <UserDataTable users={users} />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </AdminLayout>
   );
