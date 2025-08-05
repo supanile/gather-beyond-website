@@ -505,7 +505,7 @@ const DashboardPage = () => {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" className="h-8">
-                        <Filter className="h-4 w-4 mr-2" />
+                        <Filter className="h-4 w-4 mr-1" />
                         {getSortIcon()}
                         <span className="hidden sm:inline ml-1">
                           {sortConfig.label}

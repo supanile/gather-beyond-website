@@ -78,12 +78,19 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
 
     // Convert to array format for recharts
     let data = Object.entries(interestCounts)
-      .map(([name, value]) => ({
+      .map(([name, value], index) => ({
         name,
         value,
         percentage: ((value / users.length) * 100).toFixed(1),
+        color: COLORS[index % COLORS.length], // Add color property
       }))
       .sort((a, b) => b.value - a.value);
+
+    // Reassign colors after sorting to maintain consistent color mapping
+    data = data.map((item, index) => ({
+      ...item,
+      color: COLORS[index % COLORS.length],
+    }));
 
     // Group small interests into "Others" if they are less than 2% of total users
     const threshold = users.length * 0.02; // 2% threshold
@@ -97,6 +104,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
           name: "Others",
           value: othersSum,
           percentage: ((othersSum / users.length) * 100).toFixed(1),
+          color: COLORS[mainInterests.length % COLORS.length],
         });
       }
     }
@@ -165,7 +173,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
                   {data.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={COLORS[index % COLORS.length]}
+                      fill={entry.color}
                     />
                   ))}
                 </Pie>
@@ -204,7 +212,10 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
               <p className="text-xs text-muted-foreground">Unique Interests</p>
             </div>
             <div>
-              <p className="text-lg font-semibold text-foreground">
+              <p 
+                className="text-lg font-semibold text-foreground"
+                style={{ color: data[0]?.color }}
+              >
                 {data[0]?.name || 'N/A'}
               </p>
               <p className="text-xs text-muted-foreground">Most Popular</p>

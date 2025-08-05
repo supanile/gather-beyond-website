@@ -16,43 +16,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ColumnVisibility, PaginationState } from "@/types/admin/missions/missionTypes";
 
-interface MissionTableControlsProps {
-  selectedStatus: string | null;
-  onResetFilter: () => void;
-  pagination: PaginationState;
-  onItemsPerPageChange: (value: string) => void;
+interface ColumnVisibility {
+  email: boolean;
+  xp: boolean;
+  level: boolean;
+  mood: boolean;
+  health: boolean;
+  interests: boolean;
+  lastActive: boolean;
+  joinedDate: boolean;
+}
+
+interface UserDataPaginationState {
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+interface UserDataTableControlsProps {
+  pagination: UserDataPaginationState;
+  onPageSizeChange: (pageSize: number) => void;
   columnVisibility: ColumnVisibility;
   onToggleColumnVisibility: (column: keyof ColumnVisibility) => void;
 }
 
-export const MissionTableControls: React.FC<MissionTableControlsProps> = ({
-  selectedStatus,
-  onResetFilter,
+export const UserDataTableControls: React.FC<UserDataTableControlsProps> = ({
   pagination,
-  onItemsPerPageChange,
+  onPageSizeChange,
   columnVisibility,
   onToggleColumnVisibility,
 }) => {
-  const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
-  const endIndex = Math.min(startIndex + pagination.itemsPerPage, pagination.totalItems);
+  const startIndex = (pagination.page - 1) * pagination.pageSize;
+  const endIndex = Math.min(startIndex + pagination.pageSize, pagination.total);
 
   // Helper function to format column labels
   const getColumnLabel = (key: string): string => {
     const labelMap: Record<string, string> = {
-      id: "Mission ID",
-      title: "Title",
-      type: "Type",
-      platform: "Platform",
-      partner: "Partner",
-      reward: "Reward",
-      levelRequired: "Level Required",
-      status: "Status",
-      startDate: "Start Date",
-      endDate: "End Date",
-      createdAt: "Created At",
-      updatedAt: "Updated At",
+      email: "User Email",
+      xp: "XP",
+      level: "Level",
+      mood: "Mood",
+      health: "Health",
+      interests: "Interests",
+      lastActive: "Last Active",
+      joinedDate: "Joined Date",
     };
     
     return labelMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
@@ -61,43 +69,34 @@ export const MissionTableControls: React.FC<MissionTableControlsProps> = ({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div className="flex items-center gap-2">
-        {selectedStatus && (
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={onResetFilter}
-            className="text-xs sm:text-sm"
-          >
-            Reset Filter
-          </Button>
-        )}
+        {/* Empty space for consistency - can add filters here later */}
       </div>
 
       <div className="flex items-center gap-2">
         <div className="flex items-center space-x-2">
           <span className="text-xs sm:text-sm text-muted-foreground mr-2 sm:mr-4 whitespace-nowrap">
-            Showing {startIndex + 1}-{endIndex} of {pagination.totalItems} missions
+            Showing {startIndex + 1}-{endIndex} of {pagination.total} users
           </span>
           <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
             Show:
           </span>
           <Select
-            value={pagination.itemsPerPage.toString()}
-            onValueChange={onItemsPerPageChange}
+            value={pagination.pageSize.toString()}
+            onValueChange={(value) => onPageSizeChange(parseInt(value))}
           >
             <SelectTrigger className="w-16 sm:w-20 h-7 sm:h-8 text-xs sm:text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="10" className="text-xs sm:text-sm">10</SelectItem>
-              <SelectItem value="20" className="text-xs sm:text-sm">20</SelectItem>
+              <SelectItem value="25" className="text-xs sm:text-sm">25</SelectItem>
               <SelectItem value="50" className="text-xs sm:text-sm">50</SelectItem>
               <SelectItem value="100" className="text-xs sm:text-sm">100</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        {/* Column Visibility Dropdown - Updated to match UserMissionsTable style */}
+        {/* Column Visibility Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 

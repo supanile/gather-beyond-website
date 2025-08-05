@@ -13,27 +13,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
-  MoreHorizontal,
+  Eye,
   Search,
-  Filter,
-  X,
-  ChevronLeft,
-  ChevronRight,
   ChevronsUpDown,
   ChevronUp,
   ChevronDown,
@@ -41,6 +29,9 @@ import {
 } from "lucide-react";
 import { UserWithAgent, SortConfig } from "@/types/admin/userManagement";
 import { useUserManagement } from "@/hooks/useUserManagement";
+import { ViewUserModal } from "./ViewUserModal";
+import UserDataPagination from "./UserDataPagination";
+import { UserDataTableControls } from "./UserDataTableControl";
 
 interface UserDataTableProps {
   users: UserWithAgent[];
@@ -63,15 +54,12 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     filterConfig,
     pagination,
     paginatedUsers,
-    filterOptions,
     handleSort,
     handleFilter,
     handlePagination,
-    resetFilters,
     totalPages,
   } = useUserManagement({ users });
 
-  const [showFilters, setShowFilters] = useState(false);
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     email: true,
     xp: true,
@@ -82,6 +70,8 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     lastActive: true,
     joinedDate: true,
   });
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserWithAgent | null>(null);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -167,44 +157,34 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     return "bg-red-600 dark:bg-red-500";
   };
 
-  // ฟังก์ชันสำหรับกำหนดสี badge level
   const getLevelBadgeColor = (level: number, allUsers: UserWithAgent[]) => {
     const levels = allUsers.map((user) => user.agent?.level || 1);
     const minLevel = Math.min(...levels);
     const maxLevel = Math.max(...levels);
 
     if (level === minLevel && level === maxLevel) {
-      // กรณีที่มี level เดียวกันทั้งหมด
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     } else if (level === minLevel) {
-      // Level ต่ำสุด - สีม่วงอ่อน
       return "bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800";
     } else if (level === maxLevel) {
-      // Level สูงสุด - สีทอง/เหลืองทอง
       return "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800";
     } else {
-      // Level อื่นๆ - สีปกติ
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     }
   };
 
-  // ฟังก์ชันสำหรับกำหนดสี badge XP
   const getXPBadgeColor = (xp: number, allUsers: UserWithAgent[]) => {
     const xpValues = allUsers.map((user) => user.agent?.xp || 0);
     const minXP = Math.min(...xpValues);
     const maxXP = Math.max(...xpValues);
 
     if (xp === minXP && xp === maxXP) {
-      // กรณีที่มี XP เดียวกันทั้งหมด
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     } else if (xp === minXP) {
-      // XP ต่ำสุด - สีฟ้าอ่อน
       return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
     } else if (xp === maxXP) {
-      // XP สูงสุด - สีเขียวทอง
       return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800";
     } else {
-      // XP อื่นๆ - สีปกติ
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     }
   };
@@ -243,6 +223,19 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     );
   };
 
+  const openViewModal = (user: UserWithAgent) => {
+    setSelectedUser(user);
+    setIsViewModalOpen(true);
+  };
+
+  const handlePageChange = (page: number) => {
+    handlePagination({ page });
+  };
+
+  const handlePageSizeChange = (pageSize: number) => {
+    handlePagination({ pageSize, page: 1 });
+  };
+
   return (
     <div className="space-y-4">
       {/* Header Controls */}
@@ -254,23 +247,6 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
               <Badge variant="secondary" className="text-xs">
                 {pagination.total} filtered
               </Badge>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className={showFilters ? "bg-muted" : ""}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-            {hasActiveFilters() && (
-              <Button variant="ghost" size="sm" onClick={resetFilters}>
-                <X className="h-4 w-4 mr-2" />
-                Clear
-              </Button>
             )}
           </div>
         </div>
@@ -286,103 +262,13 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
           />
         </div>
 
-        {/* Advanced Filters */}
-        {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg border dark:border-gray-700">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Mood</label>
-              <Select
-                value={filterConfig.mood[0] || ""}
-                onValueChange={(value) =>
-                  handleFilter({ mood: value ? [value] : [] })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All moods" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All moods</SelectItem>
-                  {filterOptions.moods.map((mood) => (
-                    <SelectItem key={mood} value={mood}>
-                      {getMoodEmoji(mood)}{" "}
-                      {mood.charAt(0).toUpperCase() + mood.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Min Health
-              </label>
-              <Select
-                value={filterConfig.healthRange[0].toString()}
-                onValueChange={(value) =>
-                  handleFilter({
-                    healthRange: [parseInt(value), filterConfig.healthRange[1]],
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">0</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="75">75</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Min Level
-              </label>
-              <Select
-                value={filterConfig.levelRange[0].toString()}
-                onValueChange={(value) =>
-                  handleFilter({
-                    levelRange: [parseInt(value), filterConfig.levelRange[1]],
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="5">5</SelectItem>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Interest</label>
-              <Select
-                value={filterConfig.interests[0] || ""}
-                onValueChange={(value) =>
-                  handleFilter({ interests: value ? [value] : [] })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All interests" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All interests</SelectItem>
-                  {filterOptions.interests.slice(0, 20).map((interest) => (
-                    <SelectItem key={interest} value={interest}>
-                      {interest}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
+        {/* Table Controls */}
+        <UserDataTableControls
+          pagination={pagination}
+          onPageSizeChange={handlePageSizeChange}
+          columnVisibility={columnVisibility}
+          onToggleColumnVisibility={onToggleColumnVisibility}
+        />
       </div>
 
       {/* Data Table */}
@@ -415,7 +301,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           Desc
                         </div>
                       </DropdownMenuItem>
-                      <div className="bg-border -mx-1 my-1 h-px"></div>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("email")}
                       >
@@ -453,7 +339,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           Desc
                         </div>
                       </DropdownMenuItem>
-                      <div className="bg-border -mx-1 my-1 h-px"></div>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("xp")}
                       >
@@ -495,7 +381,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           Desc
                         </div>
                       </DropdownMenuItem>
-                      <div className="bg-border -mx-1 my-1 h-px"></div>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("level")}
                       >
@@ -537,7 +423,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           Desc
                         </div>
                       </DropdownMenuItem>
-                      <div className="bg-border -mx-1 my-1 h-px"></div>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("mood")}
                       >
@@ -556,7 +442,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+                        className="h-auto px-0 py-2 ml-4 font-medium text-foreground hover:text-foreground justify-start text-xs"
                       >
                         Health
                         {getSortIcon("agent.health")}
@@ -579,7 +465,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           Desc
                         </div>
                       </DropdownMenuItem>
-                      <div className="bg-border -mx-1 my-1 h-px"></div>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("health")}
                       >
@@ -593,7 +479,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                 </TableHead>
               )}
               {columnVisibility.interests && (
-                <TableHead className="w-[200px]">
+                <TableHead className="w-[350px]">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -645,7 +531,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           Desc
                         </div>
                       </DropdownMenuItem>
-                      <div className="bg-border -mx-1 my-1 h-px"></div>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("lastActive")}
                       >
@@ -687,7 +573,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           Desc
                         </div>
                       </DropdownMenuItem>
-                      <div className="bg-border -mx-1 my-1 h-px"></div>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("joinedDate")}
                       >
@@ -727,40 +613,49 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   )}
                   {columnVisibility.xp && (
                     <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getXPBadgeColor(user.agent?.xp || 0, users)}
-                      >
-                        {user.agent?.xp?.toLocaleString() || "0"} XP
-                      </Badge>
+                      <div className="flex justify-center">
+                        <Badge
+                          variant="outline"
+                          className={getXPBadgeColor(
+                            user.agent?.xp || 0,
+                            users
+                          )}
+                        >
+                          {user.agent?.xp?.toLocaleString() || "0"} XP
+                        </Badge>
+                      </div>
                     </TableCell>
                   )}
                   {columnVisibility.level && (
                     <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getLevelBadgeColor(
-                          user.agent?.level || 1,
-                          users
-                        )}
-                      >
-                        Level {user.agent?.level || 1}
-                      </Badge>
+                      <div className="flex justify-center">
+                        <Badge
+                          variant="outline"
+                          className={getLevelBadgeColor(
+                            user.agent?.level || 1,
+                            users
+                          )}
+                        >
+                          Level {user.agent?.level || 1}
+                        </Badge>
+                      </div>
                     </TableCell>
                   )}
                   {columnVisibility.mood && (
                     <TableCell>
                       {user.agent?.mood ? (
-                        <Badge
-                          variant="outline"
-                          className={getMoodColor(user.agent.mood)}
-                        >
-                          <span className="mr-1">
-                            {getMoodEmoji(user.agent.mood)}
-                          </span>
-                          {user.agent.mood.charAt(0).toUpperCase() +
-                            user.agent.mood.slice(1)}
-                        </Badge>
+                        <div className="flex justify-center">
+                          <Badge
+                            variant="outline"
+                            className={getMoodColor(user.agent.mood)}
+                          >
+                            <span className="mr-1">
+                              {getMoodEmoji(user.agent.mood)}
+                            </span>
+                            {user.agent.mood.charAt(0).toUpperCase() +
+                              user.agent.mood.slice(1)}
+                          </Badge>
+                        </div>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
@@ -793,23 +688,35 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   )}
                   {columnVisibility.interests && (
                     <TableCell>
-                      <div className="max-w-[200px]">
+                      <div className="max-w-[320px] min-w-0">
                         {user.interests ? (
                           <div className="flex flex-wrap gap-1">
                             {user.interests
                               .split(",")
-                              .slice(0, 2)
+                              .slice(0, 3)
                               .map((interest, idx) => (
                                 <Badge
                                   key={idx}
                                   variant="secondary"
-                                  className="text-xs"
+                                  className="text-xs truncate max-w-[120px]"
+                                  title={interest.trim()}
                                 >
-                                  {interest.trim()}
+                                  {interest.trim().length > 12
+                                    ? `${interest.trim().substring(0, 14)}...`
+                                    : interest.trim()}
                                 </Badge>
                               ))}
-                            {user.interests.split(",").length > 2 && (
-                              <Badge variant="secondary" className="text-xs">
+                            {user.interests.split(",").length > 4 && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs"
+                                title={`${
+                                  user.interests.split(",").length - 4
+                                } more interests: ${user.interests
+                                  .split(",")
+                                  .slice(4)
+                                  .join(", ")}`}
+                              >
                                 +{user.interests.split(",").length - 2} more
                               </Badge>
                             )}
@@ -821,7 +728,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     </TableCell>
                   )}
                   {columnVisibility.lastActive && (
-                    <TableCell>
+                    <TableCell className="pl-4">
                       {user.agent?.last_active ? (
                         <div className="text-sm">
                           {formatLastActive(user.agent.last_active)}
@@ -832,7 +739,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     </TableCell>
                   )}
                   {columnVisibility.joinedDate && (
-                    <TableCell>
+                    <TableCell className="pl-4">
                       {user.agent?.created_at ? (
                         formatDate(user.agent.created_at)
                       ) : (
@@ -841,18 +748,14 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     </TableCell>
                   )}
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => openViewModal(user)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -872,66 +775,23 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <UserDataPagination
+            pagination={pagination}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Showing {(pagination.page - 1) * pagination.pageSize + 1} to{" "}
-            {Math.min(pagination.page * pagination.pageSize, pagination.total)}{" "}
-            of {pagination.total} results
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <span className="text-sm">Rows per page:</span>
-              <Select
-                value={pagination.pageSize.toString()}
-                onValueChange={(value) =>
-                  handlePagination({ pageSize: parseInt(value), page: 1 })
-                }
-              >
-                <SelectTrigger className="w-16 h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePagination({ page: pagination.page - 1 })}
-                disabled={pagination.page === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-
-              <div className="flex items-center gap-1">
-                <span className="text-sm">
-                  Page {pagination.page} of {totalPages}
-                </span>
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePagination({ page: pagination.page + 1 })}
-                disabled={pagination.page === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* View User Details Modal */}
+      <ViewUserModal
+        isOpen={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        user={selectedUser}
+      />
     </div>
   );
 };
