@@ -30,6 +30,15 @@ const AdminUserTable = ({
   missions: Mission[];
   userAgent?: UserAgent;
 }) => {
+  // Debug logs
+  console.log('AdminUserTable - User:', user.email);
+  console.log('AdminUserTable - Missions:', missions);
+  console.log('AdminUserTable - User has userMissions:', user.userMissions?.length || 0);
+
+  // Use missions from user.userMissions if available, otherwise use props
+  const userMissions = user.userMissions || missions;
+  console.log('AdminUserTable - Final missions to use:', userMissions);
+
   // Custom hooks
   const {
     selectedSubmission,
@@ -53,7 +62,10 @@ const AdminUserTable = ({
     statusStats,
     totalPages,
     totalMissions
-  } = useProcessedMissions(missions, selectedStatus, sortConfig, pagination);
+  } = useProcessedMissions(userMissions, selectedStatus, sortConfig, pagination);
+
+  console.log('AdminUserTable - Status Stats:', statusStats);
+  console.log('AdminUserTable - Total Missions:', totalMissions);
 
   return (
     <>
@@ -89,18 +101,7 @@ const AdminUserTable = ({
               </div>
             </div>
             
-            {/* Placeholder for loading state */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardContent className="px-3 py-4">
-                    <div className="h-16 bg-muted rounded"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Status cards - show actual data here */}
+            {/* Status cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
               <StatusCard
                 status="completed"
@@ -148,7 +149,7 @@ const AdminUserTable = ({
           {/* Missions DataTable */}
           <UserMissionsTable
             paginatedMissions={paginatedMissions}
-            isLoading={false} // Set to false as we're using missions prop directly
+            isLoading={false}
             columnVisibility={columnVisibility}
             sortConfig={sortConfig}
             onSort={handleSort}

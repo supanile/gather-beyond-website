@@ -12,19 +12,72 @@ export interface SortConfig {
 }
 
 export const formatDate = (timestamp: number | string | null | undefined) => {
-  if (!timestamp || timestamp === "NULL") return "N/A";
-  const date =
-    typeof timestamp === "number"
-      ? new Date(timestamp * 1000)
-      : new Date(timestamp);
-  if (isNaN(date.getTime())) return "N/A";
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  // Handle null, undefined, empty string, or "NULL" string
+  if (!timestamp || timestamp === "NULL" || timestamp === null || timestamp === "" || timestamp === "null") {
+    return "N/A";
+  }
+  
+  let date: Date;
+  
+  try {
+    // Handle different timestamp formats
+    if (typeof timestamp === "string") {
+      // If it's a string, try to parse it as number first
+      const parsed = parseInt(timestamp);
+      if (isNaN(parsed) || parsed === 0) {
+        // If it's not a valid number string or is 0, return N/A
+        return "N/A";
+      } else {
+        // If it's a valid number string, treat as unix timestamp
+        date = new Date(parsed * 1000);
+      }
+    } else if (typeof timestamp === "number") {
+      // If it's 0 or negative, return N/A
+      if (timestamp <= 0) {
+        return "N/A";
+      }
+      // If it's a number, check if it needs to be multiplied by 1000 (unix timestamp)
+      // Unix timestamps are usually 10 digits, JS timestamps are 13 digits
+      date = timestamp.toString().length === 10 
+        ? new Date(timestamp * 1000) 
+        : new Date(timestamp);
+    } else {
+      return "N/A";
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "N/A";
+    }
+    
+    // Check if date is reasonable (not too far in past or future)
+    const now = new Date();
+    const oneYearAgo = new Date(now.getFullYear() - 1, 0, 1);
+    const oneYearFromNow = new Date(now.getFullYear() + 1, 11, 31);
+    
+    if (date < oneYearAgo || date > oneYearFromNow) {
+      // Might be the wrong timestamp format, try without multiplying by 1000
+      if (typeof timestamp === "number" && timestamp.toString().length === 10) {
+        date = new Date(timestamp); // Try without *1000
+        if (date < oneYearAgo || date > oneYearFromNow) {
+          return "N/A";
+        }
+      } else {
+        return "N/A";
+      }
+    }
+    
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short", 
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch (error) {
+    console.error("Error formatting date:", error, "for timestamp:", timestamp);
+    return "N/A";
+  }
 };
 
 export const getStatusVariant = (status: string) => {
@@ -58,15 +111,26 @@ export const getStatusColor = (status: string) => {
 };
 
 export const getLinkType = (url: string) => {
-  if (url.includes("x.com")) return "X";
+  if (!url || url === "NULL" || url === "") return "N/A";
+  
+  if (url.includes("x.com") || url.includes("twitter.com")) return "X";
   if (url.includes("discord.com")) return "Discord";
   if (url.includes("github.com")) return "GitHub";
   if (url.includes("youtube.com") || url.includes("youtu.be")) return "YouTube";
   if (url.includes("medium.com")) return "Medium";
-  return "External Link";
+  return "Link";
 };
 
 export const calculateStatusStats = (missions: Mission[]): StatusStats => {
+  if (!Array.isArray(missions)) {
+    return {
+      accepted: 0,
+      submitted: 0,
+      completed: 0,
+      rejected: 0,
+    };
+  }
+
   return {
     accepted: missions.filter((m) => m.status === "accepted").length,
     submitted: missions.filter((m) => m.status === "submitted").length,
@@ -80,7 +144,7 @@ export const sortMissions = (
   missions: Mission[],
   sortConfig: SortConfig
 ): Mission[] => {
-  if (!sortConfig.field) return missions;
+  if (!sortConfig.field || !Array.isArray(missions)) return missions;
 
   return [...missions].sort((a, b) => {
     let aValue: string | number | null | undefined;
@@ -124,10 +188,12 @@ export const sortMissions = (
       (aValue === null ||
         aValue === undefined ||
         aValue === "NULL" ||
+        aValue === "" ||
         aValue === 0) &&
       (bValue === null ||
         bValue === undefined ||
         bValue === "NULL" ||
+        bValue === "" ||
         bValue === 0)
     )
       return 0;
@@ -136,6 +202,7 @@ export const sortMissions = (
       aValue === null ||
       aValue === undefined ||
       aValue === "NULL" ||
+      aValue === "" ||
       aValue === 0
     )
       return 1;
@@ -143,6 +210,7 @@ export const sortMissions = (
       bValue === null ||
       bValue === undefined ||
       bValue === "NULL" ||
+      bValue === "" ||
       bValue === 0
     )
       return -1;
@@ -174,6 +242,8 @@ export const filterMissionsByStatus = (
   missions: Mission[],
   selectedStatus: string | null
 ): Mission[] => {
+  if (!Array.isArray(missions)) return [];
+  
   return selectedStatus
     ? missions.filter((mission) => mission.status === selectedStatus)
     : missions;
@@ -184,7 +254,11 @@ export const paginateMissions = (
   currentPage: number,
   pageSize: number
 ): Mission[] => {
-  return missions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  if (!Array.isArray(missions)) return [];
+  
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  return missions.slice(startIndex, endIndex);
 };
 
 export const getDefaultUserAgent = (userId: string): UserAgent => {

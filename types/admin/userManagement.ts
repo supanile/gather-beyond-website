@@ -1,3 +1,14 @@
+export interface Mission {
+  _id: string;
+  user_id: string;
+  mission_id: number;
+  status: "accepted" | "submitted" | "completed" | "rejected";
+  accepted_at: string;
+  submitted_at: string;
+  completed_at: string | null;
+  submission_link: string | null;
+}
+
 export interface UserAgent {
   id: number;
   user_id: string;
@@ -29,6 +40,7 @@ export interface User {
 
 export interface UserWithAgent extends User {
   agent?: UserAgent;
+  userMissions?: Mission[]; // เพิ่มบรรทัดนี้
 }
 
 export interface UserTableColumn {
