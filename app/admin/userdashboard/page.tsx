@@ -321,7 +321,8 @@ const DashboardPage = () => {
                           <div className="flex items-center gap-4 text-sm">
                             <Skeleton className="h-4 w-24" /> {/* Agent info */}
                             <Skeleton className="h-4 w-20" /> {/* Level */}
-                            <Skeleton className="h-4 w-32" /> {/* Last active */}
+                            <Skeleton className="h-4 w-32" />{" "}
+                            {/* Last active */}
                           </div>
                         </div>
                       </div>
@@ -330,7 +331,8 @@ const DashboardPage = () => {
                       <div className="mb-4">
                         <div className="flex justify-between items-center mb-2">
                           <Skeleton className="h-4 w-36" /> {/* Title */}
-                          <Skeleton className="h-4 w-24" /> {/* Total missions */}
+                          <Skeleton className="h-4 w-24" />{" "}
+                          {/* Total missions */}
                         </div>
                         {/* Status Cards Grid */}
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -810,7 +812,9 @@ const DashboardPage = () => {
                     <AdminUserTable
                       key={user.discord_id}
                       user={user}
-                      missions={missions.filter((m) => m.user_id === user.discord_id)}
+                      missions={missions.filter(
+                        (m) => m.user_id === user.discord_id
+                      )}
                       userAgent={user.agent}
                     />
                   ))

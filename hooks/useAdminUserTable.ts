@@ -9,12 +9,13 @@ import {
   calculateStatusStats, 
   filterMissionsByStatus, 
   paginateMissions,
-  getDefaultUserAgent,
+  getDefaultUserAgent, // import getDefaultUserAgent
 } from "@/lib/admin/user/userTableUtils";
 
 // Extended Mission type to match what UserMissionsTable expects
 interface ExtendedMission extends Mission {
   user?: { email: string };
+  userMissions?: Mission[];
 }
 
 // Mission-specific sort config for UserMissionsTable - updated to match ExtendedMission
@@ -57,12 +58,10 @@ const sortMissionsByField = (
         break;
       case "user":
       case "user.email":
-        // For user.email, we'll handle it separately if needed
         aValue = (a as Mission & { user?: { email: string } }).user?.email || "";
         bValue = (b as Mission & { user?: { email: string } }).user?.email || "";
         break;
       default:
-        // Handle any other ExtendedMission keys
         const field = sortConfig.field as keyof ExtendedMission;
         const extendedA = a as ExtendedMission;
         const extendedB = b as ExtendedMission;
@@ -200,8 +199,14 @@ export const useProcessedMissions = (
   pagination: PaginationConfig
 ) => {
   const processedData = useMemo(() => {
+    console.log('useProcessedMissions - Input missions:', missions);
+    
+    // Ensure missions is an array
+    const validMissions = Array.isArray(missions) ? missions : [];
+    
     // Filter by status
-    const filteredMissions = filterMissionsByStatus(missions, selectedStatus);
+    const filteredMissions = filterMissionsByStatus(validMissions, selectedStatus);
+    console.log('useProcessedMissions - Filtered missions:', filteredMissions);
     
     // Sort missions
     const sortedMissions = sortMissionsByField(filteredMissions, sortConfig);
@@ -217,7 +222,8 @@ export const useProcessedMissions = (
     );
     
     // Calculate status stats
-    const statusStats = calculateStatusStats(missions);
+    const statusStats = calculateStatusStats(validMissions);
+    console.log('useProcessedMissions - Status stats:', statusStats);
     
     return {
       filteredMissions,
@@ -225,13 +231,14 @@ export const useProcessedMissions = (
       paginatedMissions,
       statusStats,
       totalPages,
-      totalMissions: missions.length
+      totalMissions: validMissions.length
     };
   }, [missions, selectedStatus, sortConfig, pagination]);
 
   return processedData;
 };
 
+// แก้ไข useUserAgent function - ให้ export ออกมา
 export const useUserAgent = (userAgent?: UserAgent, userId?: string): UserAgent => {
   return useMemo(() => {
     return userAgent || getDefaultUserAgent(userId || "");

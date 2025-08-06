@@ -86,6 +86,13 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
     return <ChevronsUpDown className="h-2 w-2 sm:h-3 sm:w-3" />;
   };
 
+  // Debug log to check data
+  console.log("UserMissionsTable received:", {
+    paginatedMissions: paginatedMissions?.length || 0,
+    isLoading,
+    sampleMission: paginatedMissions?.[0]
+  });
+
   return (
     <div className="mt-4 sm:mt-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 sm:mb-3 gap-2">
@@ -212,7 +219,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                   </TableHead>
                 )}
                 
-                {/* User Email Column - New Addition */}
+                {/* User Email Column */}
                 {showUserEmail && columnVisibility.userEmail && (
                   <TableHead className="w-[120px] sm:w-[180px] min-w-[120px] sm:min-w-[180px]">
                     <DropdownMenu>
@@ -307,7 +314,6 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                   </TableHead>
                 )}
 
-                {/* Rest of the columns remain the same... */}
                 {columnVisibility.acceptedAt && (
                   <TableHead className="w-[100px] sm:w-[140px] min-w-[100px] sm:min-w-[140px]">
                     <DropdownMenu>
@@ -508,16 +514,16 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                     )}
                   </TableRow>
                 ))
-              ) : paginatedMissions.length > 0 ? (
-                paginatedMissions.map((mission) => (
-                  <TableRow key={mission._id}>
+              ) : paginatedMissions && paginatedMissions.length > 0 ? (
+                paginatedMissions.map((mission, index) => (
+                  <TableRow key={mission._id || `mission-${index}`}>
                     {columnVisibility.missionId && (
                       <TableCell className="font-medium text-xs sm:text-sm text-foreground py-2 sm:py-3">
-                        {mission.mission_id}
+                        {mission.mission_id || 'N/A'}
                       </TableCell>
                     )}
                     
-                    {/* User Email Cell - New Addition */}
+                    {/* User Email Cell */}
                     {showUserEmail && columnVisibility.userEmail && (
                       <TableCell className="text-xs sm:text-sm text-foreground py-2 sm:py-3">
                         <div className="flex items-center space-x-2">
@@ -535,27 +541,27 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                           variant={getStatusVariant(mission.status)}
                           className={`${getStatusColor(mission.status)} text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1`}
                         >
-                          {mission.status}
+                          {mission.status || 'Unknown'}
                         </Badge>
                       </TableCell>
                     )}
                     {columnVisibility.acceptedAt && (
                       <TableCell className="text-[10px] sm:text-xs text-muted-foreground py-2 sm:py-3">
-                        {!mission.accepted_at || mission.accepted_at === "NULL"
+                        {!mission.accepted_at || mission.accepted_at === "NULL" || mission.accepted_at === ""
                           ? "N/A"
                           : formatDate(mission.accepted_at)}
                       </TableCell>
                     )}
                     {columnVisibility.submittedAt && (
                       <TableCell className="text-[10px] sm:text-xs text-muted-foreground py-2 sm:py-3">
-                        {!mission.submitted_at || mission.submitted_at === "NULL"
+                        {!mission.submitted_at || mission.submitted_at === "NULL" || mission.submitted_at === ""
                           ? "N/A"
                           : formatDate(mission.submitted_at)}
                       </TableCell>
                     )}
                     {columnVisibility.completedAt && (
                       <TableCell className="text-[10px] sm:text-xs text-muted-foreground py-2 sm:py-3">
-                        {!mission.completed_at || mission.completed_at === "NULL"
+                        {!mission.completed_at || mission.completed_at === "NULL" || mission.completed_at === ""
                           ? "N/A"
                           : formatDate(mission.completed_at)}
                       </TableCell>
@@ -574,35 +580,35 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                       </TableCell>
                     )}
                     <TableCell className="py-2 sm:py-3">
-                      {mission.submission_link &&
-                        mission.submission_link !== "NULL" &&
-                        mission.submission_link !== "" && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-4 w-4 sm:h-6 sm:w-6 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-2 w-2 sm:h-3 sm:w-3" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => onOpenModal(mission)} className="text-xs sm:text-sm">
-                                <Eye className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <a
-                                  href={mission.submission_link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center text-xs sm:text-sm"
-                                >
-                                  <ExternalLink className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                                  Open Link
-                                </a>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-4 w-4 sm:h-6 sm:w-6 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-2 w-2 sm:h-3 sm:w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onOpenModal(mission)} className="text-xs sm:text-sm">
+                            <Eye className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          {mission.submission_link &&
+                            mission.submission_link !== "NULL" &&
+                            mission.submission_link !== "" && (
+                            <DropdownMenuItem asChild>
+                              <a
+                                href={mission.submission_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center text-xs sm:text-sm"
+                              >
+                                <ExternalLink className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                                Open Link
+                              </a>
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))
