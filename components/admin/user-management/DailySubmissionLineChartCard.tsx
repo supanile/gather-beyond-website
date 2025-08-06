@@ -218,21 +218,22 @@ const DailySubmissionLineChartCard = () => {
       ? Math.round((totalCompleted / totalSubmissions) * 100)
       : 0;
 
-  const overallStats = {
-    accepted: userMissions.filter((m) => m.status === "accepted").length,
-    submitted: userMissions.filter((m) => m.status === "submitted").length,
-    completed: userMissions.filter((m) => m.status === "completed").length,
-    rejected: userMissions.filter((m) => m.status === "rejected").length,
-  };
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: {
+    active?: boolean;
+    payload?: Array<{
+      name: string;
+      value: number;
+      color: string;
+    }>;
+    label?: string;
+  }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-popover border border-border rounded-lg shadow-lg p-3">
           <p className="text-sm font-medium mb-2 text-popover-foreground">
             {label}
           </p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry: { name: string; value: number; color: string }, index: number) => (
             <p
               key={index}
               className="text-sm text-muted-foreground"

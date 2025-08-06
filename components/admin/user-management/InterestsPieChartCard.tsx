@@ -1,24 +1,10 @@
 import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { ChartPie } from "lucide-react";
-
-// Define User interface locally
-interface User {
-  _id: string;
-  discord_id: string;
-  missions_completed: number;
-  total_points: number;
-  email: string;
-  interests: string;
-  telegram_id: string;
-  telegram_handle: string;
-  twitter_handle: string;
-  wallet_address: string;
-  created_at: string;
-}
+import { UserWithAgent } from "@/types/admin/userManagement";
 
 interface InterestsPieChartCardProps {
-  users: User[];
+  users: UserWithAgent[];
   title?: string;
 }
 
@@ -118,7 +104,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
   const usersWithInterests = users.filter(user => user.interests && user.interests.trim()).length;
 
   // Custom tooltip with dark theme support
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; value: number; percentage: string } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -134,7 +120,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
   };
 
   // Custom label function with 10% threshold for displaying percentage
-  const renderLabel = (entry: any) => {
+  const renderLabel = (entry: { name: string; value: number; percentage: string; color: string }) => {
     const percentage = parseFloat(entry.percentage);
     return percentage >= 10 ? `${entry.percentage}%` : '';
   };
@@ -197,7 +183,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
           <div className="text-center">
             <p className="text-muted-foreground">No interests data available</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Users haven't specified their interests yet
+              Users haven&apos;t specified their interests yet
             </p>
           </div>
         </div>

@@ -342,7 +342,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
           <Tabs defaultValue="basic-info" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="basic-info">Basic Information</TabsTrigger>
-              <TabsTrigger value="targeting">Mission Targeting</TabsTrigger>
+              {/* <TabsTrigger value="targeting">Mission Targeting</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="basic-info" className="space-y-6 mt-6">

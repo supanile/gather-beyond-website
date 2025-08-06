@@ -16,7 +16,7 @@ export async function GET() {
       grist.fetchTable("User_agents")
     ]);
 
-    const totalXP = userXp?.reduce((sum: number, user: any) => {
+    const totalXP = userXp?.reduce((sum: number, user: { xp?: number }) => {
       return sum + (user.xp || 0);
     }, 0) || 0;
 

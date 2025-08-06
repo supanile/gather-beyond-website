@@ -12,25 +12,10 @@ import {
   Legend,
 } from "recharts";
 import { Smile } from "lucide-react";
-import { UserAgent } from "@/types/admin/userTableTypes";
-
-interface User {
-  _id: string;
-  discord_id: string;
-  missions_completed: number;
-  total_points: number;
-  email: string;
-  interests: string;
-  telegram_id: string;
-  telegram_handle: string;
-  twitter_handle: string;
-  wallet_address: string;
-  created_at: string;
-  agent?: UserAgent;
-}
+import { UserWithAgent } from "@/types/admin/userManagement";
 
 interface MoodBarChartCardProps {
-  users: User[];
+  users: UserWithAgent[];
   title?: string;
 }
 

@@ -49,15 +49,24 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
 
   const getMoodEmoji = (mood: string) => {
     switch (mood.toLowerCase()) {
-      case "happy": return "😊";
-      case "neutral": return "😐";
-      case "sad": return "😢";
-      case "excited": return "🤩";
-      case "angry": return "😠";
-      case "love": return "😍";
-      case "tired": return "😴";
-      case "surprised": return "😲";
-      default: return "😐";
+      case "happy":
+        return "😊";
+      case "neutral":
+        return "😐";
+      case "sad":
+        return "😢";
+      case "excited":
+        return "🤩";
+      case "angry":
+        return "😠";
+      case "love":
+        return "😍";
+      case "tired":
+        return "😴";
+      case "surprised":
+        return "😲";
+      default:
+        return "😐";
     }
   };
 
@@ -71,10 +80,14 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
           <Card>
             <CardHeader className="p-3 sm:p-6 -mb-4 sm:pb-2">
               <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <span className="text-sm sm:text-lg break-words">{user.email}</span>
+                <span className="text-sm sm:text-lg break-words">
+                  {user.email}
+                </span>
                 {user.agent?.mood && (
                   <Badge className="text-xs self-start sm:self-auto">
-                    {getMoodEmoji(user.agent.mood)} {user.agent.mood.charAt(0).toUpperCase() + user.agent.mood.slice(1)}
+                    {getMoodEmoji(user.agent.mood)}{" "}
+                    {user.agent.mood.charAt(0).toUpperCase() +
+                      user.agent.mood.slice(1)}
                   </Badge>
                 )}
               </CardTitle>
@@ -85,9 +98,18 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                   Social Handles
                 </Label>
                 <p className="text-xs sm:text-sm mt-1 break-words">
-                  {user.twitter_handle && <span>Twitter: {user.twitter_handle}<br /></span>}
-                  {user.telegram_handle && <span>Telegram: {user.telegram_handle}</span>}
-                  {!user.twitter_handle && !user.telegram_handle && <span>-</span>}
+                  {user.twitter_handle && (
+                    <span>
+                      Twitter: {user.twitter_handle}
+                      <br />
+                    </span>
+                  )}
+                  {user.telegram_handle && (
+                    <span>Telegram: {user.telegram_handle}</span>
+                  )}
+                  {!user.twitter_handle && !user.telegram_handle && (
+                    <span>-</span>
+                  )}
                 </p>
               </div>
 
@@ -96,13 +118,17 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                   <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
                     XP
                   </Label>
-                  <p className="text-xs sm:text-sm mt-1">{user.agent?.xp?.toLocaleString() || "0"} XP</p>
+                  <p className="text-xs sm:text-sm mt-1">
+                    {user.agent?.xp?.toLocaleString() || "0"} XP
+                  </p>
                 </div>
                 <div>
                   <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
                     Level
                   </Label>
-                  <p className="text-xs sm:text-sm mt-1">Level {user.agent?.level || 1}</p>
+                  <p className="text-xs sm:text-sm mt-1">
+                    Level {user.agent?.level || 1}
+                  </p>
                 </div>
               </div>
 
@@ -112,7 +138,9 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                     Health
                   </Label>
                   <p className="text-xs sm:text-sm mt-1">
-                    {user.agent?.health !== undefined ? `${user.agent.health}/100` : "-"}
+                    {user.agent?.health !== undefined
+                      ? `${user.agent.health}/100`
+                      : "-"}
                   </p>
                 </div>
                 <div>
@@ -120,7 +148,9 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                     Last Active
                   </Label>
                   <p className="text-xs sm:text-sm mt-1">
-                    {user.agent?.last_active ? formatLastActive(user.agent.last_active) : "-"}
+                    {user.agent?.last_active
+                      ? formatLastActive(user.agent.last_active)
+                      : "-"}
                   </p>
                 </div>
               </div>
@@ -137,7 +167,9 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                       </Badge>
                     ))
                   ) : (
-                    <span className="text-xs sm:text-sm text-muted-foreground">-</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">
+                      -
+                    </span>
                   )}
                 </div>
               </div>
@@ -147,7 +179,9 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                   Joined Date
                 </Label>
                 <p className="text-xs sm:text-sm mt-1">
-                  {user.agent?.created_at ? formatDate(user.agent.created_at) : "-"}
+                  {user.agent?.created_at
+                    ? formatDate(user.agent.created_at)
+                    : "-"}
                 </p>
               </div>
             </CardContent>

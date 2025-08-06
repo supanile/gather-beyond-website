@@ -16,12 +16,12 @@ import {
   Filter,
   CheckIcon,
   Zap,
-  UserCog, 
+  UserCog,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
 import AdminUserTable from "@/components/admin/AdminUserTable";
-import { UserDataTable } from "@/components/admin/UserDataTable";
+import { UserDataTable } from "@/components/admin/user-management/UserDataTable";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAdminData } from "@/hooks/useAdminData";
 import { Button } from "@/components/ui/button";
@@ -42,9 +42,9 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import InterestsPieChartCard from "@/components/admin/InterestsPieChartCard";
-import MoodBarChartCard from "@/components/admin/MoodBarChartCard";
-import DailySubmissionLineChartCard from "@/components/admin/DailySubmissionLineChartCard";
+import InterestsPieChartCard from "@/components/admin/user-management/InterestsPieChartCard";
+import MoodBarChartCard from "@/components/admin/user-management/MoodBarChartCard";
+import DailySubmissionLineChartCard from "@/components/admin/user-management/DailySubmissionLineChartCard";
 
 type SortOption = {
   field:
@@ -240,114 +240,292 @@ const DashboardPage = () => {
     return (
       <AdminLayout>
         <div className="space-y-6">
-          {/* Stats Cards Loading */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Skeleton className="h-4 w-20 mb-2" />
-                  <Skeleton className="h-8 w-16" />
-                </div>
-                <Skeleton className="h-8 w-8 rounded" />
-              </div>
-            </div>
-            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Skeleton className="h-4 w-24 mb-2" />
-                  <Skeleton className="h-8 w-16" />
-                </div>
-                <Skeleton className="h-8 w-8 rounded" />
-              </div>
-            </div>
-            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Skeleton className="h-4 w-28 mb-2" />
-                  <Skeleton className="h-8 w-16" />
-                </div>
-                <Skeleton className="h-8 w-8 rounded" />
-              </div>
-            </div>
-            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Skeleton className="h-4 w-20 mb-2" />
-                  <Skeleton className="h-8 w-16" />
-                </div>
-                <Skeleton className="h-8 w-8 rounded" />
-              </div>
-            </div>
-          </div>
-
-          {/* Chart Cards Loading - Updated to 3 columns */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <Skeleton className="h-96 rounded-2xl" />
-            <Skeleton className="h-96 rounded-2xl" />
-            <Skeleton className="h-96 rounded-2xl" />
-          </div>
-
-          {/* User Dashboard Loading */}
-          <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-              <div></div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                <div className="flex items-center space-x-2">
-                  <Skeleton className="h-4 w-40" />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Skeleton className="h-4 w-12" />
-                  <Skeleton className="h-8 w-20" />
-                </div>
-              </div>
-            </div>
-
-            {/* Search Input Loading */}
-            <div className="relative mb-6">
-              <Skeleton className="w-full h-10 rounded-lg" />
-            </div>
-
-            {/* User List Loading */}
-            <div className="space-y-4 mb-6">
+          {/* Stats Cards Loading - Updated to 3 columns like real content */}
+          <div className="space-y-6">
+            {/* Regular Stats Cards - 3 columns layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 5 }).map((_, index) => (
                 <div
                   key={index}
-                  className="bg-background rounded-lg border border-border p-4"
+                  className="bg-card rounded-2xl shadow-sm border border-border p-6"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <Skeleton className="h-5 w-48 mb-2" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
-                    <Skeleton className="h-6 w-16 rounded-full" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <Skeleton className="h-4 w-16 mb-1" />
-                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-20 mb-2" />
+                      <Skeleton className="h-8 w-16" />
                     </div>
-                    <div>
-                      <Skeleton className="h-4 w-20 mb-1" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                    <div>
-                      <Skeleton className="h-4 w-24 mb-1" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
+                    <Skeleton className="h-8 w-8 rounded" />
                   </div>
                 </div>
               ))}
+
+              {/* Chart Cards Loading - 2 columns like real content */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <Skeleton className="h-96 rounded-2xl" />
+                <Skeleton className="h-96 rounded-2xl" />
+              </div>
+
+              {/* Daily Submission Line Chart - full width like real content */}
+              <div className="grid grid-cols-1 gap-6">
+                <Skeleton className="h-96 rounded-2xl" />
+              </div>
             </div>
 
-            {/* Pagination Loading */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-              <Skeleton className="h-4 w-24" />
-              <div className="flex items-center space-x-1">
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
+            {/* Main Content Tabs Loading */}
+            <div className="space-y-6">
+              {/* Tabs Loading */}
+              <div className="flex space-x-1">
+                <Skeleton className="h-10 w-32 rounded-md" />
+                <Skeleton className="h-10 w-36 rounded-md" />
+              </div>
+
+              {/* User Dashboard Loading */}
+              <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+                {/* Controls Section */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+                  <div className="flex items-center gap-2">
+                    {/* Sort Dropdown Skeleton */}
+                    <Skeleton className="h-8 w-24" />
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Skeleton className="h-4 w-40" />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Skeleton className="h-4 w-12" />
+                      <Skeleton className="h-8 w-20" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Search Input Loading */}
+                <div className="relative mb-6">
+                  <Skeleton className="w-full h-10 rounded-lg" />
+                </div>
+
+                {/* User List Loading - More detailed user cards */}
+                <div className="space-y-4 mb-6">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="bg-background rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-300"
+                    >
+                      {/* User Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Skeleton className="h-5 w-48" /> {/* Email */}
+                            <Skeleton className="h-5 w-16 rounded-full" />{" "}
+                            {/* Badge */}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm">
+                            <Skeleton className="h-4 w-24" /> {/* Agent info */}
+                            <Skeleton className="h-4 w-20" /> {/* Level */}
+                            <Skeleton className="h-4 w-32" /> {/* Last active */}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Mission Status Overview */}
+                      <div className="mb-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <Skeleton className="h-4 w-36" /> {/* Title */}
+                          <Skeleton className="h-4 w-24" /> {/* Total missions */}
+                        </div>
+                        {/* Status Cards Grid */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                          {Array.from({ length: 4 }).map((_, statusIndex) => (
+                            <div
+                              key={statusIndex}
+                              className="p-3 rounded-lg bg-muted/50"
+                            >
+                              <div className="flex items-center justify-between">
+                                <Skeleton className="h-4 w-4 rounded" />
+                                <Skeleton className="h-5 w-6" />
+                              </div>
+                              <Skeleton className="h-3 w-16 mt-1" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Mission Table Header */}
+                      <div className="flex justify-between items-center mb-2">
+                        <Skeleton className="h-4 w-28" />{" "}
+                        {/* Mission Details title */}
+                        <Skeleton className="h-6 w-16" /> {/* View button */}
+                      </div>
+
+                      {/* Mini Mission Table */}
+                      <div className="space-y-2">
+                        {Array.from({ length: 2 }).map((_, missionIndex) => (
+                          <div
+                            key={missionIndex}
+                            className="flex items-center gap-4 p-2 bg-muted/30 rounded"
+                          >
+                            <Skeleton className="h-3 w-12" /> {/* Mission ID */}
+                            <Skeleton className="h-4 w-16 rounded-full" />{" "}
+                            {/* Status badge */}
+                            <Skeleton className="h-3 w-20" /> {/* Date */}
+                            <Skeleton className="h-3 w-16" /> {/* Link */}
+                            <Skeleton className="h-4 w-4 rounded" />{" "}
+                            {/* Actions */}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Pagination */}
+                      <div className="flex justify-between items-center mt-3 pt-2 border-t border-border">
+                        <Skeleton className="h-3 w-20" />
+                        <div className="flex gap-1">
+                          <Skeleton className="h-6 w-12" />
+                          <Skeleton className="h-6 w-12" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Main Pagination Loading */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+                  <Skeleton className="h-4 w-24" />
+                  <div className="flex items-center space-x-1">
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Tabs Loading */}
+          <div className="space-y-6">
+            {/* Tabs Loading */}
+            <div className="flex space-x-1">
+              <Skeleton className="h-10 w-32 rounded-md" />
+              <Skeleton className="h-10 w-36 rounded-md" />
+            </div>
+
+            {/* User Dashboard Loading */}
+            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+              {/* Controls Section */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+                <div className="flex items-center gap-2">
+                  {/* Sort Dropdown Skeleton */}
+                  <Skeleton className="h-8 w-24" />
+                </div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-8 w-20" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Input Loading */}
+              <div className="relative mb-6">
+                <Skeleton className="w-full h-10 rounded-lg" />
+              </div>
+
+              {/* User List Loading - More detailed user cards */}
+              <div className="space-y-4 mb-6">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-background rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-300"
+                  >
+                    {/* User Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Skeleton className="h-5 w-48" /> {/* Email */}
+                          <Skeleton className="h-5 w-16 rounded-full" />{" "}
+                          {/* Badge */}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <Skeleton className="h-4 w-24" /> {/* Agent info */}
+                          <Skeleton className="h-4 w-20" /> {/* Level */}
+                          <Skeleton className="h-4 w-32" /> {/* Last active */}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mission Status Overview */}
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <Skeleton className="h-4 w-36" /> {/* Title */}
+                        <Skeleton className="h-4 w-24" /> {/* Total missions */}
+                      </div>
+                      {/* Status Cards Grid */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                        {Array.from({ length: 4 }).map((_, statusIndex) => (
+                          <div
+                            key={statusIndex}
+                            className="p-3 rounded-lg bg-muted/50"
+                          >
+                            <div className="flex items-center justify-between">
+                              <Skeleton className="h-4 w-4 rounded" />
+                              <Skeleton className="h-5 w-6" />
+                            </div>
+                            <Skeleton className="h-3 w-16 mt-1" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Mission Table Header */}
+                    <div className="flex justify-between items-center mb-2">
+                      <Skeleton className="h-4 w-28" />{" "}
+                      {/* Mission Details title */}
+                      <Skeleton className="h-6 w-16" /> {/* View button */}
+                    </div>
+
+                    {/* Mini Mission Table */}
+                    <div className="space-y-2">
+                      {Array.from({ length: 2 }).map((_, missionIndex) => (
+                        <div
+                          key={missionIndex}
+                          className="flex items-center gap-4 p-2 bg-muted/30 rounded"
+                        >
+                          <Skeleton className="h-3 w-12" /> {/* Mission ID */}
+                          <Skeleton className="h-4 w-16 rounded-full" />{" "}
+                          {/* Status badge */}
+                          <Skeleton className="h-3 w-20" /> {/* Date */}
+                          <Skeleton className="h-3 w-16" /> {/* Link */}
+                          <Skeleton className="h-4 w-4 rounded" />{" "}
+                          {/* Actions */}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center mt-3 pt-2 border-t border-border">
+                      <Skeleton className="h-3 w-20" />
+                      <div className="flex gap-1">
+                        <Skeleton className="h-6 w-12" />
+                        <Skeleton className="h-6 w-12" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Main Pagination Loading */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+                <Skeleton className="h-4 w-24" />
+                <div className="flex items-center space-x-1">
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                </div>
               </div>
             </div>
           </div>
@@ -365,34 +543,6 @@ const DashboardPage = () => {
       </AdminLayout>
     );
   }
-
-  // Add these helper functions before the DashboardPage component
-  const calculateCompletionRate = (users: any[]): number => {
-    if (users.length === 0) return 0;
-
-    const totalMissions = users.reduce((sum, user) => {
-      return sum + (user.userMissions?.length || 0);
-    }, 0);
-
-    const completedMissions = users.reduce((sum, user) => {
-      return (
-        sum +
-        (user.userMissions?.filter(
-          (mission: any) => mission.status === "completed"
-        ).length || 0)
-      );
-    }, 0);
-
-    return totalMissions > 0
-      ? Math.round((completedMissions / totalMissions) * 100)
-      : 0;
-  };
-
-  const calculateTotalXP = (users: any[]): number => {
-    return users.reduce((sum, user) => {
-      return sum + (user.total_points || 0);
-    }, 0);
-  };
 
   return (
     <AdminLayout>
@@ -451,7 +601,7 @@ const DashboardPage = () => {
                 /> */}
                 <AdminStatCard
                   title="Total XP"
-                  value={calculateTotalXP(users).toLocaleString()}
+                  value={stats?.totalXP?.toLocaleString() || "0"}
                   icon={Zap}
                 />
               </>
@@ -660,7 +810,7 @@ const DashboardPage = () => {
                     <AdminUserTable
                       key={user.discord_id}
                       user={user}
-                      missions={user.userMissions || []}
+                      missions={missions.filter((m) => m.user_id === user.discord_id)}
                       userAgent={user.agent}
                     />
                   ))

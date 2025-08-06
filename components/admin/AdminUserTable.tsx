@@ -1,5 +1,6 @@
 import React from "react";
-import { Mission, User } from "@/types/admin/adminTypes";
+import { Mission } from "@/types/admin/adminTypes";
+import { UserWithAgent } from "@/types/admin/userManagement";
 import { UserAgent } from "@/types/admin/userTableTypes";
 import {
   CheckCircle,
@@ -10,27 +11,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
-  useUserMissions,
   useUserTableState,
   useProcessedMissions,
   useUserAgent,
 } from "@/hooks/useAdminUserTable";
-import UserProfileHeader from "./user/UserProfileHeader";
-import StatusCard from "./user/StatusCard";
-import MissionSubmissionModal from "./user/MissionSubmissionModal";
-import UserMissionsTable from "./user/UserMissionsTable";
-import UserMissionsPagination from "./user/UserMissionsPagination";
+import UserProfileHeader from "./user-overview/UserProfileHeader";
+import StatusCard from "./user-overview/StatusCard";
+import MissionSubmissionModal from "./user-overview/MissionSubmissionModal";
+import UserMissionsTable from "./user-overview/UserMissionsTable";
+import UserMissionsPagination from "./user-overview/UserMissionsPagination";
 
 const AdminUserTable = ({
   user,
+  missions,
   userAgent,
 }: {
-  user: User;
+  user: UserWithAgent;
   missions: Mission[];
   userAgent?: UserAgent;
 }) => {
   // Custom hooks
-  const { missions, isLoading: isLoadingMissions } = useUserMissions(user.discord_id);
   const {
     selectedSubmission,
     isModalOpen,
@@ -89,66 +89,66 @@ const AdminUserTable = ({
               </div>
             </div>
             
-            {isLoadingMissions ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                {[...Array(4)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="px-3 py-4">
-                      <div className="h-16 bg-muted rounded"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                <StatusCard
-                  status="completed"
-                  count={statusStats.completed}
-                  icon={CheckCircle}
-                  color="text-green-600 dark:text-green-400"
-                  bgColor="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10"
-                  isSelected={selectedStatus === "completed"}
-                  onClick={setSelectedStatus}
-                  totalMissions={totalMissions}
-                />
-                <StatusCard
-                  status="submitted"
-                  count={statusStats.submitted}
-                  icon={Upload}
-                  color="text-yellow-600 dark:text-yellow-400"
-                  bgColor="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/10 dark:to-amber-900/10"
-                  isSelected={selectedStatus === "submitted"}
-                  onClick={setSelectedStatus}
-                  totalMissions={totalMissions}
-                />
-                <StatusCard
-                  status="accepted"
-                  count={statusStats.accepted}
-                  icon={Clock}
-                  color="text-blue-600 dark:text-blue-400"
-                  bgColor="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10"
-                  isSelected={selectedStatus === "accepted"}
-                  onClick={setSelectedStatus}
-                  totalMissions={totalMissions}
-                />
-                <StatusCard
-                  status="rejected"
-                  count={statusStats.rejected}
-                  icon={XCircle}
-                  color="text-red-600 dark:text-red-400"
-                  bgColor="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/10 dark:to-rose-900/10"
-                  isSelected={selectedStatus === "rejected"}
-                  onClick={setSelectedStatus}
-                  totalMissions={totalMissions}
-                />
-              </div>
-            )}
+            {/* Placeholder for loading state */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="px-3 py-4">
+                    <div className="h-16 bg-muted rounded"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Status cards - show actual data here */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+              <StatusCard
+                status="completed"
+                count={statusStats.completed}
+                icon={CheckCircle}
+                color="text-green-600 dark:text-green-400"
+                bgColor="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10"
+                isSelected={selectedStatus === "completed"}
+                onClick={setSelectedStatus}
+                totalMissions={totalMissions}
+              />
+              <StatusCard
+                status="submitted"
+                count={statusStats.submitted}
+                icon={Upload}
+                color="text-yellow-600 dark:text-yellow-400"
+                bgColor="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/10 dark:to-amber-900/10"
+                isSelected={selectedStatus === "submitted"}
+                onClick={setSelectedStatus}
+                totalMissions={totalMissions}
+              />
+              <StatusCard
+                status="accepted"
+                count={statusStats.accepted}
+                icon={Clock}
+                color="text-blue-600 dark:text-blue-400"
+                bgColor="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10"
+                isSelected={selectedStatus === "accepted"}
+                onClick={setSelectedStatus}
+                totalMissions={totalMissions}
+              />
+              <StatusCard
+                status="rejected"
+                count={statusStats.rejected}
+                icon={XCircle}
+                color="text-red-600 dark:text-red-400"
+                bgColor="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/10 dark:to-rose-900/10"
+                isSelected={selectedStatus === "rejected"}
+                onClick={setSelectedStatus}
+                totalMissions={totalMissions}
+              />
+            </div>
           </div>
 
           {/* Missions DataTable */}
           <UserMissionsTable
             paginatedMissions={paginatedMissions}
-            isLoading={isLoadingMissions}
+            isLoading={false} // Set to false as we're using missions prop directly
             columnVisibility={columnVisibility}
             sortConfig={sortConfig}
             onSort={handleSort}

@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "@/types/admin/adminTypes";
+import { UserWithAgent } from "@/types/admin/userManagement";
 import { UserAgent } from "@/types/admin/userTableTypes";
 import { Badge } from "@/components/ui/badge";
 import XIcon from "@/components/ui/icons/XIcon";
@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 interface UserProfileHeaderProps {
-  user: User;
+  user: UserWithAgent;
   userAgent: UserAgent;
   totalMissions: number;
 }

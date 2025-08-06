@@ -92,7 +92,6 @@ const formatDateWithTime = (
 
 export const MissionsTable: React.FC<MissionsTableProps> = ({
   missions,
-  isLoading,
   sortState,
   columnVisibility,
   onSort,

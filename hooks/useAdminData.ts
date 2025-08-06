@@ -1,25 +1,10 @@
 import { useState, useEffect } from 'react';
 import { User, Mission } from '@/types/admin/adminTypes';
+import { UserWithAgent, UserAgent } from '@/types/admin/userManagement';
 
-interface UserAgent {
-  id: number;
-  user_id: string;
-  xp: number;
-  level: number;
-  health: number;
-  mood: string;
-  last_active: number;
-  created_at: number;
-  last_health_decay: number;
-  total_xp: number;
-  current_level_progress: number;
-  xp_required: number;
-}
-
-interface UserWithAgent extends User {
-  agent?: UserAgent;
-  userMissions?: Mission[];
-}
+// Export interfaces so they can be used by other components
+// If you need userMissions, you can define a local type:
+// type UserWithAgentAndMissions = UserWithAgent & { userMissions?: Mission[] };
 
 export function useAdminData() {
   const [users, setUsers] = useState<UserWithAgent[]>([]);
@@ -52,7 +37,11 @@ export function useAdminData() {
           const userMissions = missionsData.filter(mission => mission.user_id === user.discord_id);
           
           return {
+            // Map _id (string) to id (number if possible, else fallback to 0)
+            id: typeof user._id === 'string' && !isNaN(Number(user._id)) ? Number(user._id) : 0,
             ...user,
+            // Ensure level is present (from agent)
+            level: agent?.level ?? 0,
             agent,
             userMissions
           };
