@@ -5,6 +5,7 @@ interface Statistics {
   totalmissions: number;
   totalcommunity: number;
   totalmissionsubmitted: number;
+  totalXP: number;
 }
 
 export const useStatistics = () => {
