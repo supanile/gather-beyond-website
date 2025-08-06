@@ -119,8 +119,7 @@ const AdminMissionsTable = () => {
         const minutes = String(date.getMinutes()).padStart(2, "0");
 
         return `${year}-${month}-${day}T${hours}:${minutes}`;
-      } catch (error) {
-        console.error("Error converting date for edit:", error);
+      } catch {
         return undefined;
       }
     };
@@ -149,11 +148,6 @@ const AdminMissionsTable = () => {
       missionTargeting: missionTargeting, // ✅ FIXED: Set to null since not available in Mission type
     };
 
-    console.log("📝 Final mapped mission form data:", missionForm);
-    console.log("📝 Start Date:", missionForm.startDate);
-    console.log("📝 End Date:", missionForm.endDate);
-    console.log("📝 Mission Targeting:", missionForm.missionTargeting);
-
     setMissionToEdit(missionForm);
     setSelectedMission(mission); // ✅ IMPORTANT: Set selected mission for edit modal
     setIsEditModalOpen(true);
@@ -161,12 +155,6 @@ const AdminMissionsTable = () => {
 
   // Delete Mission Handler
   const handleDeleteMissionClick = (mission: Mission) => {
-    console.log("🗑️ Delete mission clicked:", {
-      id: mission.id,
-      title: mission.title,
-      type: typeof mission.id,
-    });
-
     setMissionToDelete(mission);
     setIsDeleteDialogOpen(true);
     setConfirmDeleteInput("");
@@ -181,12 +169,6 @@ const AdminMissionsTable = () => {
   // Confirm Delete Handler with API integration
   const confirmDelete = async () => {
     if (missionToDelete && confirmDeleteInput === missionToDelete.title) {
-      console.log(
-        "Confirming delete for mission:",
-        missionToDelete.id,
-        missionToDelete.title
-      );
-
       const success = await handleDeleteMission(missionToDelete.id);
 
       if (success) {
@@ -195,10 +177,7 @@ const AdminMissionsTable = () => {
         setMissionToDelete(null);
         setConfirmDeleteInput("");
         setHasConfirmedWarning(false);
-
-        console.log("Mission deleted successfully, dialog closed");
       } else {
-        console.log("Delete failed, keeping dialog open");
         // Not close the dialog if deletion fails to allow the user to try again
       }
     } else {
@@ -209,11 +188,6 @@ const AdminMissionsTable = () => {
   // แก้ไข Update Mission Handler
   const handleUpdateMissionSubmit = async (missionForm: NewMissionForm) => {
     if (missionToEdit && selectedMission) {
-      console.log("Submitting update with form data:", missionForm);
-      console.log("Final update - Partner:", missionForm.partner);
-      console.log("Final update - Type:", missionForm.type);
-      console.log("Final update - Platform:", missionForm.platform);
-
       // Ensure we have the current form data, not the old missionToEdit
       const currentFormData = missionForm || missionToEdit;
       
@@ -348,8 +322,6 @@ const AdminMissionsTable = () => {
           }
         }
         onMissionChange={(mission) => {
-          console.log("🔧 Mission form changed in parent:", mission);
-
           if (typeof mission === "function") {
             setMissionToEdit((prev) => {
               const currentMission = prev || {
@@ -366,27 +338,14 @@ const AdminMissionsTable = () => {
                 partner: "Super Connector",
               };
               const updated = mission(currentMission);
-              console.log("🔧 Updated via function:", updated);
-              console.log("🔧 Partner after update:", updated.partner);
-              console.log("🔧 Type after update:", updated.type);
-              console.log("🔧 Platform after update:", updated.platform);
               return updated;
             });
           } else {
-            console.log("🔧 Direct mission update:", mission);
-            console.log("🔧 Direct update - Partner:", mission.partner);
-            console.log("🔧 Direct update - Type:", mission.type);
-            console.log("🔧 Direct update - Platform:", mission.platform);
             setMissionToEdit(mission);
           }
         }}
         onSubmit={async () => {
           if (missionToEdit) {
-            console.log("🔧 Submitting edit with current form data:", missionToEdit);
-            console.log("🔧 Submit - Partner:", missionToEdit.partner);
-            console.log("🔧 Submit - Type:", missionToEdit.type);
-            console.log("🔧 Submit - Platform:", missionToEdit.platform);
-            
             // Use the current missionToEdit state which should have the latest form data
             return handleUpdateMissionSubmit(missionToEdit);
           }

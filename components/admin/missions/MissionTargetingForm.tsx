@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -195,7 +195,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   );
 
   // Enhanced segment classification logic following your requirements
-  const classifyUserSegments = (filters: BehaviorFilters): UserSegment[] => {
+  const classifyUserSegments = useCallback((filters: BehaviorFilters): UserSegment[] => {
     // Calculate base filtering multipliers
     let totalFilteredUsers = BASE_USER_DATA.total;
 
@@ -535,7 +535,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
     ];
 
     return segments.filter((s) => s.estimatedCount > 0);
-  };
+  }, [demographicFilters.language.length, demographicFilters.location.length]);
 
   // Calculate audience estimate with enhanced logic
   const audienceEstimate = useMemo((): AudienceEstimate => {
@@ -646,7 +646,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
         groups: Math.ceil(channelReach / 200), // Assume ~200 users per group
       },
     };
-  }, [audienceType, behaviorFilters, demographicFilters, deliveryOptions]);
+  }, [audienceType, behaviorFilters, deliveryOptions, classifyUserSegments]);
 
   // Update parent component when targeting changes
   useEffect(() => {

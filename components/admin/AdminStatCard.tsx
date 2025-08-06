@@ -16,7 +16,9 @@ const AdminStatCard = ({
         {growth && (
           <div
             className={`flex items-center mt-2 text-sm font-medium ${
-              isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+              isPositive
+                ? "text-green-600 dark:text-green-400"
+                : "text-red-600 dark:text-red-400"
             }`}
           >
             {isPositive ? (
@@ -28,14 +30,8 @@ const AdminStatCard = ({
           </div>
         )}
       </div>
-      <div
-        className={`p-3 rounded-full ${
-          isPositive ? "bg-primary/10 dark:bg-primary/20" : "bg-destructive/10 dark:bg-destructive/20"
-        }`}
-      >
-        <Icon
-          className={`w-6 h-6 ${isPositive ? "text-primary dark:text-primary" : "text-destructive dark:text-destructive"}`}
-        />
+      <div className="p-3 rounded-full bg-primary/10">
+        <Icon className="w-6 h-6 text-primary" />
       </div>
     </div>
   </div>
