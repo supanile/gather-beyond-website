@@ -39,7 +39,6 @@ const AdminMissionsTable = () => {
   const {
     // Data
     missions,
-    isLoading,
     isSubmitting,
     statusStats,
 
@@ -274,7 +273,6 @@ const AdminMissionsTable = () => {
         <div className="rounded-md border border-border">
           <MissionsTable
             missions={missions}
-            isLoading={isLoading}
             sortState={sortState}
             columnVisibility={columnVisibility}
             onSort={handleSort}
