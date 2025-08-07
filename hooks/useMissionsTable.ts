@@ -103,9 +103,26 @@ export const useMissionsTable = () => {
 
   // Sorted missions
   const sortedMissions = useMemo(() => {
-    if (!sortState.field) return filteredMissions;
-
     return [...filteredMissions].sort((a, b) => {
+      // Define status priority: active > upcoming > ended > completed
+      const statusPriority = {
+        active: 1,
+        upcoming: 2,
+        complete: 3,
+        ended: 4,
+      };
+
+      const aPriority = statusPriority[a.status as keyof typeof statusPriority] || 999;
+      const bPriority = statusPriority[b.status as keyof typeof statusPriority] || 999;
+
+      // First sort by status priority
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority;
+      }
+
+      // If same status priority, apply regular sorting
+      if (!sortState.field) return 0;
+
       const aValue = a[sortState.field!];
       const bValue = b[sortState.field!];
 

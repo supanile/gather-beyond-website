@@ -39,6 +39,7 @@ import {
 
 interface ColumnVisibility {
   missionId: boolean;
+  missionName: boolean;
   userEmail: boolean;
   status: boolean;
   acceptedAt: boolean;
@@ -59,7 +60,7 @@ interface UserMissionsTableProps {
     field: string | null;
     direction: "asc" | "desc";
   };
-  onSort: (field: keyof ExtendedMission | 'user.email') => void;
+  onSort: (field: keyof ExtendedMission | 'user.email' | 'mission_name') => void;
   onToggleColumnVisibility: (column: keyof ColumnVisibility) => void;
   onOpenModal: (mission: ExtendedMission) => void;
   showUserEmail?: boolean; // Option to show/hide email column
@@ -117,6 +118,13 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
               className="text-xs sm:text-sm"
             >
               Mission ID
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={columnVisibility.missionName}
+              onCheckedChange={() => onToggleColumnVisibility("missionName")}
+              className="text-xs sm:text-sm"
+            >
+              Mission Name
             </DropdownMenuCheckboxItem>
             {showUserEmail && (
               <DropdownMenuCheckboxItem
@@ -207,6 +215,54 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                         <div className="bg-border -mx-1 my-1 h-px"></div>
                         <DropdownMenuItem
                           onClick={() => onToggleColumnVisibility("missionId")}
+                          className="text-xs sm:text-sm"
+                        >
+                          <div className="flex items-center">
+                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                            Hide
+                          </div>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableHead>
+                )}
+                
+                {/* Mission Name Column */}
+                {columnVisibility.missionName && (
+                  <TableHead className="w-[150px] sm:w-[200px] min-w-[150px] sm:min-w-[200px]">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-1 sm:p-2 font-medium text-foreground hover:text-foreground text-xs sm:text-sm"
+                        >
+                          <span className="hidden sm:inline">Mission Name</span>
+                          <span className="sm:hidden">Name</span>
+                          {getSortIcon("mission_name")}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem
+                          onClick={() => onSort("mission_name")}
+                          className="text-xs sm:text-sm"
+                        >
+                          <div className="flex items-center">
+                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                            A-Z
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onSort("mission_name")}
+                          className="text-xs sm:text-sm"
+                        >
+                          <div className="flex items-center">
+                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                            Z-A
+                          </div>
+                        </DropdownMenuItem>
+                        <div className="bg-border -mx-1 my-1 h-px"></div>
+                        <DropdownMenuItem
+                          onClick={() => onToggleColumnVisibility("missionName")}
                           className="text-xs sm:text-sm"
                         >
                           <div className="flex items-center">
@@ -477,6 +533,11 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                             <div className="h-3 sm:h-4 bg-muted rounded animate-pulse"></div>
                           </TableCell>
                         )}
+                        {columnVisibility.missionName && (
+                          <TableCell className="py-2 sm:py-3">
+                            <div className="h-3 sm:h-4 bg-muted rounded animate-pulse"></div>
+                          </TableCell>
+                        )}
                         {showUserEmail && columnVisibility.userEmail && (
                           <TableCell className="py-2 sm:py-3">
                             <div className="h-3 sm:h-4 bg-muted rounded animate-pulse"></div>
@@ -520,6 +581,15 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                     {columnVisibility.missionId && (
                       <TableCell className="font-medium text-xs sm:text-sm text-foreground py-2 sm:py-3">
                         {mission.mission_id || 'N/A'}
+                      </TableCell>
+                    )}
+                    
+                    {/* Mission Name Cell */}
+                    {columnVisibility.missionName && (
+                      <TableCell className="text-xs sm:text-sm text-foreground py-2 sm:py-3">
+                        <div className="truncate max-w-[140px] sm:max-w-[180px]" title={mission.mission_name}>
+                          {mission.mission_name || "N/A"}
+                        </div>
                       </TableCell>
                     )}
                     

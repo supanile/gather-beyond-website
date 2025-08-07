@@ -693,31 +693,33 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           <div className="flex flex-wrap gap-1">
                             {user.interests
                               .split(",")
-                              .slice(0, 3)
+                              .slice(0, 3) // แสดงแค่ 3 ตัวแรก
                               .map((interest, idx) => (
                                 <Badge
                                   key={idx}
                                   variant="secondary"
-                                  className="text-xs truncate max-w-[120px]"
+                                  className="text-xs truncate max-w-[500px]"
                                   title={interest.trim()}
                                 >
-                                  {interest.trim().length > 12
-                                    ? `${interest.trim().substring(0, 14)}...`
+                                  {interest.trim().length > 50
+                                    ? `${interest.trim().substring(0, 50)}...`
                                     : interest.trim()}
                                 </Badge>
                               ))}
-                            {user.interests.split(",").length > 4 && (
+                            {/* แก้ไขเงื่อนไขตรงนี้ - เปลี่ยนจาก length > 4 เป็น length > 3 */}
+                            {user.interests.split(",").length > 3 && (
                               <Badge
                                 variant="secondary"
                                 className="text-xs"
                                 title={`${
-                                  user.interests.split(",").length - 4
+                                  user.interests.split(",").length - 3
                                 } more interests: ${user.interests
                                   .split(",")
-                                  .slice(4)
+                                  .slice(3) // เปลี่ยนจาก slice(4) เป็น slice(3)
+                                  .map((interest) => interest.trim())
                                   .join(", ")}`}
                               >
-                                +{user.interests.split(",").length - 2} more
+                                +{user.interests.split(",").length - 3} more
                               </Badge>
                             )}
                           </div>
@@ -748,8 +750,8 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     </TableCell>
                   )}
                   <TableCell>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
                       onClick={() => openViewModal(user)}
@@ -791,6 +793,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
         isOpen={isViewModalOpen}
         onOpenChange={setIsViewModalOpen}
         user={selectedUser}
+        allUsers={users}
       />
     </div>
   );

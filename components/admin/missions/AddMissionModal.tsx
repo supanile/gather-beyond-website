@@ -251,6 +251,122 @@ const DateTimePicker = ({
   );
 };
 
+// Reward Input Component
+const RewardInput = ({
+  value,
+  onChange,
+}: {
+  value?: string;
+  onChange: (value: string) => void;
+}) => {
+  const [amount, setAmount] = useState("");
+  const [token, setToken] = useState("XP");
+
+  // Token options
+  const TOKEN_OPTIONS = [
+    { value: "XP", label: "XP (Experience Points)" },
+    { value: "COINS", label: "Coins" },
+    { value: "GEMS", label: "Gems" },
+    { value: "TOKENS", label: "Tokens" },
+    { value: "POINTS", label: "Points" },
+    { value: "CREDITS", label: "Credits" },
+  ];
+
+  // Parse existing value on component mount
+  useEffect(() => {
+    if (value && value.trim()) {
+      try {
+        const parsed = JSON.parse(value);
+        if (parsed.amount !== undefined) setAmount(parsed.amount.toString());
+        if (parsed.token) setToken(parsed.token);
+      } catch {
+        // If parsing fails, keep existing value
+        console.log("Could not parse reward value:", value);
+      }
+    }
+  }, [value]);
+
+  // Update parent component when amount or token changes
+  const updateReward = (newAmount: string, newToken: string) => {
+    if (newAmount && newToken) {
+      const rewardObject = {
+        amount: parseInt(newAmount) || 0,
+        token: newToken,
+      };
+      onChange(JSON.stringify(rewardObject));
+    } else {
+      onChange("");
+    }
+  };
+
+  const handleAmountChange = (newAmount: string) => {
+    setAmount(newAmount);
+    updateReward(newAmount, token);
+  };
+
+  const handleTokenChange = (newToken: string) => {
+    setToken(newToken);
+    updateReward(amount, newToken);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        {/* Amount Input */}
+        <div className="space-y-2">
+          <Label
+            htmlFor="reward-amount"
+            className="text-xs text-muted-foreground"
+          >
+            Amount
+          </Label>
+          <Input
+            id="reward-amount"
+            type="number"
+            value={amount}
+            onChange={(e) => handleAmountChange(e.target.value)}
+            placeholder="100"
+            min="0"
+            className="w-full"
+          />
+        </div>
+
+        {/* Token Select */}
+        <div className="space-y-2">
+          <Label
+            htmlFor="reward-token"
+            className="text-xs text-muted-foreground"
+          >
+            Token Type
+          </Label>
+          <Select value={token} onValueChange={handleTokenChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select token" />
+            </SelectTrigger>
+            <SelectContent>
+              {TOKEN_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Preview */}
+      {amount && token && (
+        <div className="mt-2 p-2 bg-muted/50 rounded-md border">
+          <Label className="text-xs text-muted-foreground">JSON Output:</Label>
+          <div className="text-xs font-mono text-foreground mt-1">
+            {`{"amount": ${parseInt(amount) || 0}, "token": "${token}"}`}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   isOpen,
   onOpenChange,
@@ -295,9 +411,17 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     console.log("🔧 Is edit mode:", isEditMode);
 
     // Validate required fields before submission
-    const requiredFields = ["title", "description", "type", "platform", "partner"];
-    const missingFields = requiredFields.filter(field => !newMission[field as keyof NewMissionForm]);
-    
+    const requiredFields = [
+      "title",
+      "description",
+      "type",
+      "platform",
+      "partner",
+    ];
+    const missingFields = requiredFields.filter(
+      (field) => !newMission[field as keyof NewMissionForm]
+    );
+
     if (missingFields.length > 0) {
       console.error("Missing required fields:", missingFields);
       // Don't proceed with submission if required fields are missing
@@ -308,14 +432,17 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       // Add targeting data to mission before submission
       const missionWithTargeting = {
         ...newMission,
-        missionTargeting: missionTargeting
+        missionTargeting: missionTargeting,
       };
-      
-      console.log("🔧 Final mission data with targeting:", missionWithTargeting);
-      
+
+      console.log(
+        "🔧 Final mission data with targeting:",
+        missionWithTargeting
+      );
+
       // Update the mission form data with targeting before calling onSubmit
       onMissionChange(missionWithTargeting);
-      
+
       // Call the parent's submit handler
       await onSubmit();
     } catch (error) {
@@ -483,14 +610,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                   <Label htmlFor="reward" className="text-sm font-medium">
                     Reward
                   </Label>
-                  <Input
-                    id="reward"
+                  <RewardInput
                     value={newMission.reward || ""}
-                    onChange={(e) =>
-                      handleInputChange("reward", e.target.value)
-                    }
-                    placeholder='{"amount": "100", "token": "XP"}'
-                    className="w-full font-mono text-sm"
+                    onChange={(value) => handleInputChange("reward", value)}
                   />
                 </div>
               </div>
