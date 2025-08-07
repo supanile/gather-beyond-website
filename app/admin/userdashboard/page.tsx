@@ -112,7 +112,7 @@ const DashboardPage = () => {
   const filteredAndSortedUsers = users
     .filter(
       (user) =>
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (user.interests || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
@@ -126,8 +126,8 @@ const DashboardPage = () => {
 
       switch (sortConfig.field) {
         case "user.email":
-          aValue = a.email.toLowerCase();
-          bValue = b.email.toLowerCase();
+          aValue = a.email?.toLowerCase() || "";
+          bValue = b.email?.toLowerCase() || "";
           break;
 
         case "agent.highest_level":
@@ -256,32 +256,32 @@ const DashboardPage = () => {
                     </div>
                     <Skeleton className="h-8 w-8 rounded" />
                   </div>
-                ))}
-              </div>
-
-              {/* Main Pagination Loading */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-                <Skeleton className="h-4 w-24" />
-                <div className="flex items-center space-x-1">
-                  <Skeleton className="h-8 w-8" />
-                  <Skeleton className="h-8 w-8" />
-                  <Skeleton className="h-8 w-8" />
-                  <Skeleton className="h-8 w-8" />
-                  <Skeleton className="h-8 w-8" />
                 </div>
               ))}
             </div>
 
-            {/* Chart Cards Loading - 2 columns */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <Skeleton className="h-96 rounded-2xl" />
-              <Skeleton className="h-96 rounded-2xl" />
+            {/* Main Pagination Loading */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+              <Skeleton className="h-4 w-24" />
+              <div className="flex items-center space-x-1">
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-8 w-8" />
+              </div>
             </div>
+          </div>
 
-            {/* Daily Submission Line Chart - full width */}
-            <div className="grid grid-cols-1 gap-6">
-              <Skeleton className="h-96 rounded-2xl" />
-            </div>
+          {/* Chart Cards Loading - 2 columns */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <Skeleton className="h-96 rounded-2xl" />
+            <Skeleton className="h-96 rounded-2xl" />
+          </div>
+
+          {/* Daily Submission Line Chart - full width */}
+          <div className="grid grid-cols-1 gap-6">
+            <Skeleton className="h-96 rounded-2xl" />
           </div>
 
           {/* Main Content Tabs Loading */}
@@ -464,7 +464,7 @@ const DashboardPage = () => {
               <>
                 <AdminStatCard
                   title="Total Users"
-                  value={stats?.totalcommunity.toLocaleString() ?? "0"}
+                  value={stats?.totalcommunity?.toLocaleString() ?? "0"}
                   icon={Users}
                 />
                 <AdminStatCard
@@ -479,17 +479,12 @@ const DashboardPage = () => {
                 />
                 <AdminStatCard
                   title="Mission Submitted"
-                  value={stats?.totalmissionsubmitted?.toLocaleString() || "0"}
+                  value={stats?.totalmissionsubmitted?.toLocaleString() ?? "0"}
                   icon={Send}
                 />
-                {/* <AdminStatCard
-                  title="Completion Rate"
-                  value={`${calculateCompletionRate(users)}%`}
-                  icon={TrendingUp}
-                /> */}
                 <AdminStatCard
                   title="Total XP"
-                  value={stats?.totalXP?.toLocaleString() || "0"}
+                  value={stats?.totalXP?.toLocaleString() ?? "0"}
                   icon={Zap}
                 />
               </>
@@ -566,7 +561,7 @@ const DashboardPage = () => {
                         {sortConfig.field === "user.email" &&
                           sortConfig.direction === "asc" && (
                             <CheckIcon
-                              className="h-5 w-5 text-green-500"
+                              className="h-4 w-4 text-green-500"
                               aria-label="Active"
                             />
                           )}
@@ -579,7 +574,7 @@ const DashboardPage = () => {
                         {sortConfig.field === "user.email" &&
                           sortConfig.direction === "desc" && (
                             <CheckIcon
-                              className="h-5 w-5 text-green-500"
+                              className="h-4 w-4 text-green-500"
                               aria-label="Active"
                             />
                           )}
@@ -597,7 +592,7 @@ const DashboardPage = () => {
                         {sortConfig.field === "agent.highest_level" &&
                           sortConfig.direction === "desc" && (
                             <CheckIcon
-                              className="h-5 w-5 text-green-500"
+                              className="h-4 w-4 text-green-500"
                               aria-label="Active"
                             />
                           )}
@@ -610,7 +605,7 @@ const DashboardPage = () => {
                         {sortConfig.field === "agent.lowest_level" &&
                           sortConfig.direction === "asc" && (
                             <CheckIcon
-                              className="h-5 w-5 text-green-500"
+                              className="h-4 w-4 text-green-500"
                               aria-label="Active"
                             />
                           )}
@@ -628,7 +623,7 @@ const DashboardPage = () => {
                         {sortConfig.field === "agent.last_active" &&
                           sortConfig.direction === "desc" && (
                             <CheckIcon
-                              className="h-5 w-5 text-green-500"
+                              className="h-4 w-4 text-green-500"
                               aria-label="Active"
                             />
                           )}
@@ -641,7 +636,7 @@ const DashboardPage = () => {
                         {sortConfig.field === "agent.last_active" &&
                           sortConfig.direction === "asc" && (
                             <CheckIcon
-                              className="h-5 w-5 text-green-500"
+                              className="h-4 w-4 text-green-500"
                               aria-label="Active"
                             />
                           )}
