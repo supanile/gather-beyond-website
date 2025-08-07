@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Crosshair, Home, Menu} from "lucide-react";
+import { BarChart3, Crosshair, Home, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/Header/Darkmode";
@@ -20,6 +20,31 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+
+// Beautiful Loading Screen Component
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-950 dark:via-gray-950 dark:to-indigo-950">
+      <div className="text-center space-y-8 max-w-md mx-auto px-6">
+        {/* Loading Animation */}
+        <div className="flex justify-center space-x-2">
+          <div
+            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
+            style={{ animationDelay: "0ms" }}
+          ></div>
+          <div
+            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
+            style={{ animationDelay: "150ms" }}
+          ></div>
+          <div
+            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
+            style={{ animationDelay: "300ms" }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Menu items
 const items = [
@@ -44,7 +69,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar className="border-r border-sidebar-border bg-sidebar/95 backdrop-blur supports-[backdrop-filter]:bg-sidebar/60 z-50">
+    <Sidebar className="border-r border-sidebar-border bg-sidebar/95 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-sidebar/60 z-50">
       <SidebarHeader className="p-6 border-b border-sidebar-border/50">
         <div className="flex items-center space-x-3">
           <div className="relative"></div>
@@ -144,7 +169,7 @@ export function AppSidebar() {
   );
 }
 
-// Overlay component to handle clicks outside sidebar
+// Improved overlay component with better mobile handling
 function SidebarOverlay() {
   const { open, setOpen } = useSidebar();
 
@@ -152,8 +177,14 @@ function SidebarOverlay() {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+      className="fixed inset-0 bg-black/50 z-40 lg:hidden touch-manipulation"
       onClick={() => setOpen(false)}
+      style={{
+        WebkitTapHighlightColor: "transparent",
+        WebkitTouchCallout: "none",
+        WebkitUserSelect: "none",
+        userSelect: "none",
+      }}
     />
   );
 }
@@ -166,12 +197,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const [currentTime, setCurrentTime] = React.useState(new Date());
   const [isClient, setIsClient] = React.useState(false);
-  
+  const [isMounted, setIsMounted] = React.useState(false);
+
   // Set client flag after component mounts
   React.useEffect(() => {
     setIsClient(true);
+    setIsMounted(true);
   }, []);
-  
+
   // Update time every second
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -180,7 +213,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
     return () => clearInterval(timer);
   }, []);
-  
+
   // Dynamic title based on current path
   const getPageTitle = () => {
     if (pathname === "/admin/missions") return "Missions Management";
@@ -189,35 +222,46 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     return "Admin Panel";
   };
 
+  // Prevent blur effect issues during initial load
+  if (!isMounted) {
+    return <LoadingScreen />;
+  }
+
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-background relative">
+    <SidebarProvider defaultOpen={false}>
+      <div className="min-h-screen flex w-full bg-background relative overflow-hidden">
         <AppSidebar />
         <SidebarOverlay />
 
         {/* Main content area - always full width */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 w-full">
-          {/* Enhanced Header */}
-          <header className="bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm border-b border-border flex-shrink-0 relative z-30">
-            <div className="flex items-center justify-between px-6 py-4">
-              <div className="flex items-center space-x-4">
-                <SidebarTrigger className="p-3 rounded-xl hover:bg-accent/50 transition-colors duration-200 group">
-                  <Menu className="w-8 h-8 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
+          {/* Enhanced Header - Removed backdrop-blur on mobile */}
+          <header className="bg-card shadow-sm border-b border-border flex-shrink-0 relative z-30 lg:bg-card/95 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-card/60">
+            <div className="flex items-center justify-between px-4 lg:px-6 py-3 lg:py-4">
+              <div className="flex items-center space-x-2 lg:space-x-4">
+                <SidebarTrigger className="p-2 lg:p-3 rounded-xl hover:bg-accent/50 transition-colors duration-200 group touch-manipulation">
+                  <Menu className="w-6 h-6 lg:w-8 lg:h-8 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
                 </SidebarTrigger>
-                <div className="flex items-center space-x-3">
-                  <div className="h-8 w-1 bg-purple-600 dark:bg-purple-500 rounded-full"></div>
+                <div className="flex items-center space-x-2 lg:space-x-3">
+                  <div className="h-6 lg:h-8 w-1 bg-purple-600 dark:bg-purple-500 rounded-full"></div>
                   <div>
-                    <h1 className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                    <h1 className="text-lg lg:text-2xl font-bold text-purple-700 dark:text-purple-300">
                       {getPageTitle()}
                     </h1>
-                    <p className="text-sm text-muted-foreground flex items-center space-x-2">
+                    <p className="text-xs lg:text-sm text-muted-foreground flex items-center space-x-1 lg:space-x-2">
                       {isClient ? (
                         <>
-                          <span>
+                          <span className="hidden sm:inline">
                             {currentTime.toLocaleDateString("en-US", {
                               weekday: "long",
                               year: "numeric",
                               month: "long",
+                              day: "numeric",
+                            })}
+                          </span>
+                          <span className="sm:hidden">
+                            {currentTime.toLocaleDateString("en-US", {
+                              month: "short",
                               day: "numeric",
                             })}
                           </span>
@@ -244,7 +288,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-auto p-6">{children}</main>
+          <main className="flex-1 overflow-auto p-3 lg:p-6">{children}</main>
         </div>
       </div>
     </SidebarProvider>

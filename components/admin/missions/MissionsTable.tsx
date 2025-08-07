@@ -36,7 +36,6 @@ import {
 
 interface MissionsTableProps {
   missions: Mission[];
-  isLoading: boolean;
   sortState: SortState;
   columnVisibility: ColumnVisibility;
   onSort: (field: keyof Mission) => void;
