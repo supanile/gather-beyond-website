@@ -36,6 +36,7 @@ export function useAdminData() {
             _id: mission._id?.toString() || mission.mission_id?.toString() || '',
             user_id: mission.user_id,
             mission_id: mission.mission_id,
+            mission_name: mission.mission_name,
             status: mission.status as "accepted" | "submitted" | "completed" | "rejected",
             // Keep the original values - they should be Unix timestamps or null
             accepted_at: mission.accepted_at?.toString() || '',
@@ -46,8 +47,6 @@ export function useAdminData() {
 
           return transformedMission;
         });
-
-        console.log('Transformed missions:', transformedMissions);
 
         // Combine data
         const usersWithAgents: UserWithAgent[] = usersData.map(user => {
