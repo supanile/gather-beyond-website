@@ -89,13 +89,6 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
     return <ChevronsUpDown className="h-2 w-2 sm:h-3 sm:w-3" />;
   };
 
-  // Debug log to check data
-  console.log("UserMissionsTable received:", {
-    paginatedMissions: paginatedMissions?.length || 0,
-    isLoading,
-    sampleMission: paginatedMissions?.[0]
-  });
-
   return (
     <div className="mt-4 sm:mt-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 sm:mb-3 gap-2">

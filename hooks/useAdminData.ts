@@ -62,8 +62,6 @@ export function useAdminData() {
           };
         });
 
-        console.log('Final users with agents and missions:', usersWithAgents);
-
         setUsers(usersWithAgents);
         setMissions(transformedMissions);
         setUserAgents(agentsData);
