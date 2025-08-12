@@ -140,6 +140,7 @@ export const useUserTableState = () => {
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     missionId: true,
     userEmail: true,
+    missionName: true,
     status: true,
     acceptedAt: true,
     submittedAt: true,

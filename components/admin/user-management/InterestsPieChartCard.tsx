@@ -1,5 +1,12 @@
 import React from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+} from "recharts";
 import { ChartPie } from "lucide-react";
 import { UserWithAgent } from "@/types/admin/userManagement";
 
@@ -32,31 +39,43 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
     const lower = interest.toLowerCase().trim();
     if (lower.includes("nft")) return "NFTs";
     if (lower.includes("game") || lower.includes("gaming")) return "Gaming";
-    if (lower.includes("ai") || lower.includes("artificial intelligence")) return "AI";
-    if (lower.includes("crypto") || lower.includes("cryptocurrencies") || lower.includes("altcoins")) return "Crypto";
-    if (lower.includes("community") || lower.includes("communities") || lower.includes("moderator")) return "Community";
+    if (lower.includes("ai") || lower.includes("artificial intelligence"))
+      return "AI";
+    if (
+      lower.includes("crypto") ||
+      lower.includes("cryptocurrencies") ||
+      lower.includes("altcoins")
+    )
+      return "Crypto";
+    if (
+      lower.includes("community") ||
+      lower.includes("communities") ||
+      lower.includes("moderator")
+    )
+      return "Community";
     if (lower.includes("airdrop")) return "Airdrops";
     if (lower.includes("web3")) return "Web3";
     if (lower.includes("degen")) return "Degen";
     if (lower.includes("trading")) return "Trading";
-    if (lower.includes("socialfi") || lower.includes("socials")) return "SocialFi";
+    if (lower.includes("socialfi") || lower.includes("socials"))
+      return "SocialFi";
     return lower.charAt(0).toUpperCase() + lower.slice(1); // Capitalize others
   };
 
   // Process interests data
   const processInterestsData = () => {
     const interestCounts: Record<string, number> = {};
-    
-    users.forEach(user => {
+
+    users.forEach((user) => {
       if (user.interests && user.interests.trim()) {
         // Split interests by comma, semicolon, or "and", and clean up
         const userInterests = user.interests
           .split(/[,;]| and /) // Split by comma, semicolon, or "and"
-          .map(interest => interest.trim())
-          .filter(interest => interest.length > 0 && !/^\d+$/.test(interest)) // Remove empty and numeric-only strings
+          .map((interest) => interest.trim())
+          .filter((interest) => interest.length > 0 && !/^\d+$/.test(interest)) // Remove empty and numeric-only strings
           .map(normalizeInterest); // Normalize interests
-        
-        userInterests.forEach(interest => {
+
+        userInterests.forEach((interest) => {
           interestCounts[interest] = (interestCounts[interest] || 0) + 1;
         });
       }
@@ -80,11 +99,14 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
 
     // Group small interests into "Others" if they are less than 2% of total users
     const threshold = users.length * 0.02; // 2% threshold
-    const mainInterests = data.filter(item => item.value >= threshold);
-    const otherInterests = data.filter(item => item.value < threshold);
-    
+    const mainInterests = data.filter((item) => item.value >= threshold);
+    const otherInterests = data.filter((item) => item.value < threshold);
+
     if (otherInterests.length > 0) {
-      const othersSum = otherInterests.reduce((sum, item) => sum + item.value, 0);
+      const othersSum = otherInterests.reduce(
+        (sum, item) => sum + item.value,
+        0
+      );
       if (othersSum > 0) {
         mainInterests.push({
           name: "Others",
@@ -101,10 +123,20 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
 
   const data = processInterestsData();
   const totalUsers = users.length;
-  const usersWithInterests = users.filter(user => user.interests && user.interests.trim()).length;
+  const usersWithInterests = users.filter(
+    (user) => user.interests && user.interests.trim()
+  ).length;
 
   // Custom tooltip with dark theme support
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; value: number; percentage: string } }> }) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{
+      payload: { name: string; value: number; percentage: string };
+    }>;
+  }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -120,28 +152,35 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
   };
 
   // Custom label function with 10% threshold for displaying percentage
-  const renderLabel = (entry: { name: string; value: number; percentage: string; color: string }) => {
+  const renderLabel = (entry: {
+    name: string;
+    value: number;
+    percentage: string;
+    color: string;
+  }) => {
     const percentage = parseFloat(entry.percentage);
-    return percentage >= 10 ? `${entry.percentage}%` : '';
+    return percentage >= 10 ? `${entry.percentage}%` : "";
   };
 
   return (
-    <div className="bg-card rounded-2xl p-6 shadow-sm border border-border hover:shadow-md transition-all duration-300 hover:border-primary/20 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-          <p className="text-sm text-muted-foreground">
+    <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm border border-border hover:shadow-md transition-all duration-300 hover:border-primary/20 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4 gap-3">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-foreground truncate">
+            {title}
+          </h3>
+          <p className="text-sm text-muted-foreground truncate">
             {usersWithInterests} of {totalUsers} users have interests listed
           </p>
         </div>
-        <div className="p-3 rounded-full bg-primary/10">
-          <ChartPie className="w-6 h-6 text-primary" />
+        <div className="p-3 rounded-full bg-primary/10 shrink-0">
+          <ChartPie className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
         </div>
       </div>
 
       {data.length > 0 ? (
         <div className="flex-1 min-h-0">
-          <div className="h-80">
+          <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -150,28 +189,25 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
                   cy="50%"
                   labelLine={false}
                   label={renderLabel}
-                  outerRadius={100}
+                  outerRadius="80%"
                   fill="#8884d8"
                   dataKey="value"
                   stroke="hsl(var(--border))"
                   strokeWidth={1}
                 >
                   {data.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={entry.color}
-                    />
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  verticalAlign="bottom" 
+                <Legend
+                  verticalAlign="bottom"
                   height={36}
                   wrapperStyle={{
-                    paddingTop: '20px',
-                    paddingBottom: '40px',
-                    fontSize: '12px',
-                    color: 'hsl(var(--foreground))'
+                    paddingTop: "20px",
+                    paddingBottom: "40px",
+                    fontSize: "12px",
+                    color: "hsl(var(--foreground))",
                   }}
                 />
               </PieChart>
@@ -192,28 +228,33 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
       {/* Summary Stats */}
       {data.length > 0 && (
         <div className="mt-4 pt-4 border-t border-border flex-shrink-0">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-center">
             <div>
-              <p className="text-lg font-semibold text-foreground">{data.length}</p>
+              <p className="text-base sm:text-lg font-semibold text-foreground">
+                {data.length}
+              </p>
               <p className="text-xs text-muted-foreground">Unique Interests</p>
             </div>
             <div>
-              <p 
-                className="text-lg font-semibold text-foreground"
+              <p
+                className="text-base sm:text-lg font-semibold text-foreground truncate"
                 style={{ color: data[0]?.color }}
+                title={data[0]?.name}
               >
-                {data[0]?.name || 'N/A'}
+                {data[0]?.name || "N/A"}
               </p>
               <p className="text-xs text-muted-foreground">Most Popular</p>
             </div>
             <div>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-base sm:text-lg font-semibold text-foreground">
                 {data[0]?.value || 0}
               </p>
-              <p className="text-xs text-muted-foreground">Top Interest Users</p>
+              <p className="text-xs text-muted-foreground">
+                Top Interest Users
+              </p>
             </div>
             <div>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-base sm:text-lg font-semibold text-foreground">
                 {((usersWithInterests / totalUsers) * 100).toFixed(1)}%
               </p>
               <p className="text-xs text-muted-foreground">Coverage Rate</p>

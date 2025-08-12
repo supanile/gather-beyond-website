@@ -27,8 +27,6 @@ export function useAdminData() {
         const missionsResponse = await fetch('/api/user-missions');
         const missionsData: Mission[] = missionsResponse.ok ? await missionsResponse.json() : [];
 
-        console.log('Raw missions data from API:', missionsData);
-
         // Transform missions data to ensure proper format
         const transformedMissions = missionsData.map(mission => {
           // Convert accepted_at, submitted_at, completed_at properly
@@ -36,6 +34,7 @@ export function useAdminData() {
             _id: mission._id?.toString() || mission.mission_id?.toString() || '',
             user_id: mission.user_id,
             mission_id: mission.mission_id,
+            mission_name: mission.mission_name,
             status: mission.status as "accepted" | "submitted" | "completed" | "rejected",
             // Keep the original values - they should be Unix timestamps or null
             accepted_at: mission.accepted_at?.toString() || '',
@@ -47,14 +46,10 @@ export function useAdminData() {
           return transformedMission;
         });
 
-        console.log('Transformed missions:', transformedMissions);
-
         // Combine data
         const usersWithAgents: UserWithAgent[] = usersData.map(user => {
           const agent = agentsData.find(agent => agent.user_id === user.discord_id);
           const userMissions = transformedMissions.filter(mission => mission.user_id === user.discord_id);
-          
-          console.log(`User ${user.email} missions:`, userMissions);
 
           return {
             // Map _id (string) to id (number if possible, else fallback to 0)
@@ -67,15 +62,12 @@ export function useAdminData() {
           };
         });
 
-        console.log('Final users with agents and missions:', usersWithAgents);
-
         setUsers(usersWithAgents);
         setMissions(transformedMissions);
         setUserAgents(agentsData);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('Error fetching admin data:', err);
       } finally {
         setIsLoading(false);
       }

@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusCardProps } from "@/types/admin/userTableTypes";
 
-const StatusCard: React.FC<StatusCardProps> = ({
+const StatusCardOverview: React.FC<StatusCardProps> = ({
   status,
   count,
   icon: Icon,
@@ -56,4 +56,4 @@ const StatusCard: React.FC<StatusCardProps> = ({
   </Card>
 );
 
-export default StatusCard;
+export default StatusCardOverview;

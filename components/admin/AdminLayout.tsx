@@ -24,20 +24,20 @@ import {
 // Beautiful Loading Screen Component
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-950 dark:via-gray-950 dark:to-indigo-950">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-950 dark:to-slate-950">
       <div className="text-center space-y-8 max-w-md mx-auto px-6">
         {/* Loading Animation */}
         <div className="flex justify-center space-x-2">
           <div
-            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
+            className="w-2 h-2 bg-gray-800 dark:bg-gray-200 rounded-full animate-bounce"
             style={{ animationDelay: "0ms" }}
           ></div>
           <div
-            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
+            className="w-2 h-2 bg-gray-800 dark:bg-gray-200 rounded-full animate-bounce"
             style={{ animationDelay: "150ms" }}
           ></div>
           <div
-            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
+            className="w-2 h-2 bg-gray-800 dark:bg-gray-200 rounded-full animate-bounce"
             style={{ animationDelay: "300ms" }}
           ></div>
         </div>
@@ -74,7 +74,7 @@ export function AppSidebar() {
         <div className="flex items-center space-x-3">
           <div className="relative"></div>
           <div className="flex flex-col">
-            <h2 className="text-lg font-bold text-purple-700 dark:text-purple-300">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               Admin Panel
             </h2>
             <p className="text-xs text-sidebar-foreground/60 font-medium">
@@ -99,7 +99,7 @@ export function AppSidebar() {
                           group relative w-full flex items-center space-x-3 px-4 py-2 rounded-xl font-medium transition-all duration-300 ease-out
                           ${
                             isActive
-                              ? "bg-purple-50 dark:bg-purple-900/20 text-sidebar-foreground border border-purple-200/40 dark:border-purple-400/30 shadow-lg shadow-purple-500/10"
+                              ? "bg-gray-50 dark:bg-gray-900/20 text-sidebar-foreground border border-gray-200/40 dark:border-gray-400/30 shadow-lg shadow-gray-500/10"
                               : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-accent/50 hover:shadow-md"
                           }
                         `}
@@ -110,7 +110,7 @@ export function AppSidebar() {
                           relative p-2 rounded-lg transition-all duration-300
                           ${
                             isActive
-                              ? "bg-purple-600 dark:bg-purple-500 shadow-lg shadow-purple-500/25"
+                              ? "bg-gray-800 dark:bg-gray-200 shadow-lg shadow-gray-500/25"
                               : "bg-sidebar-accent/30 group-hover:bg-sidebar-accent/60"
                           }
                         `}
@@ -120,7 +120,7 @@ export function AppSidebar() {
                             w-4 h-4 transition-all duration-300
                             ${
                               isActive
-                                ? "text-white"
+                                ? "text-white dark:text-black"
                                 : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground"
                             }
                           `}
@@ -128,7 +128,7 @@ export function AppSidebar() {
 
                           {/* Subtle glow effect when active */}
                           {isActive && (
-                            <div className="absolute inset-0 bg-purple-600 dark:bg-purple-500 rounded-lg blur opacity-20 -z-10"></div>
+                            <div className="absolute inset-0 bg-gray-800 dark:bg-gray-200 rounded-lg blur opacity-20 -z-10"></div>
                           )}
                         </div>
 
@@ -243,9 +243,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   <Menu className="w-6 h-6 lg:w-8 lg:h-8 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
                 </SidebarTrigger>
                 <div className="flex items-center space-x-2 lg:space-x-3">
-                  <div className="h-6 lg:h-8 w-1 bg-purple-600 dark:bg-purple-500 rounded-full"></div>
+                  <div className="h-6 lg:h-8 w-1 bg-gray-800 dark:bg-gray-200 rounded-full"></div>
                   <div>
-                    <h1 className="text-lg lg:text-2xl font-bold text-purple-700 dark:text-purple-300">
+                    <h1 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
                       {getPageTitle()}
                     </h1>
                     <p className="text-xs lg:text-sm text-muted-foreground flex items-center space-x-1 lg:space-x-2">

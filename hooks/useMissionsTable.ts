@@ -10,6 +10,43 @@ import {
 } from "@/types/admin/missions/missionTypes";
 import { toast } from "sonner";
 
+// Toast styling utility for light/dark mode compatibility with very soft colors
+const toastStyles = {
+  success: {
+    style: {
+      background: 'hsl(142 45% 75%)', // very soft green - much lighter
+      color: 'hsl(142 40% 20%)', // dark green text for contrast
+      border: '1px solid hsl(142 35% 65%)', // subtle green border
+      '--tw-shadow': '0 2px 4px -1px rgba(34, 197, 94, 0.1)',
+      boxShadow: 'var(--tw-shadow)',
+      borderRadius: '8px',
+      backdropFilter: 'blur(4px)',
+    }
+  },
+  error: {
+    style: {
+      background: 'hsl(0 45% 85%)', // very soft pink/red - much lighter
+      color: 'hsl(0 60% 30%)', // dark red text for contrast
+      border: '1px solid hsl(0 35% 75%)', // subtle red border
+      '--tw-shadow': '0 2px 4px -1px rgba(248, 113, 113, 0.1)',
+      boxShadow: 'var(--tw-shadow)',
+      borderRadius: '8px',
+      backdropFilter: 'blur(4px)',
+    }
+  },
+  delete: {
+    style: {
+      background: 'hsl(15 45% 80%)', // very soft orange-red for delete
+      color: 'hsl(15 60% 25%)', // dark orange-red text
+      border: '1px solid hsl(15 35% 70%)', // subtle orange-red border
+      '--tw-shadow': '0 2px 4px -1px rgba(239, 68, 68, 0.1)',
+      boxShadow: 'var(--tw-shadow)',
+      borderRadius: '8px',
+      backdropFilter: 'blur(4px)',
+    }
+  }
+};
+
 export const useMissionsTable = () => {
   // State management
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -22,6 +59,10 @@ export const useMissionsTable = () => {
   const [filters, setFilters] = useState<MissionTableFilters>({
     selectedStatus: null,
   });
+  
+  // Search query state
+  const [searchQuery, setSearchQuery] = useState("");
+  
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -68,17 +109,26 @@ export const useMissionsTable = () => {
       const response = await fetch("/api/missions");
       if (response.ok) {
         const data = await response.json();
-        setMissions(data);
+        
+        // Sanitize mission data to ensure status is always a valid string
+        const sanitizedData = data.map((mission: Mission) => ({
+          ...mission,
+          status: mission.status && typeof mission.status === 'string' && mission.status.trim() !== '' 
+            ? mission.status.trim().toLowerCase() 
+            : 'upcoming' // default status for invalid/empty status
+        }));
+        
+        setMissions(sanitizedData);
         console.log("Missions loaded successfully");
       } else {
         const errorData = await response.json();
         console.error("Failed to fetch missions:", errorData);
-        toast.error("Failed to load missions");
+        toast.error("Failed to load missions", toastStyles.error);
         setMissions([]);
       }
     } catch (error) {
       console.error("Error fetching missions:", error);
-      toast.error("Error loading missions");
+      toast.error("Error loading missions", toastStyles.error);
       setMissions([]);
     } finally {
       setIsLoading(false);
@@ -89,23 +139,66 @@ export const useMissionsTable = () => {
     fetchMissions();
   }, []);
 
-  // Reset to first page when filters change
+  // Reset to first page when filters or search change
   useEffect(() => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
-  }, [filters.selectedStatus, pagination.itemsPerPage]);
+  }, [filters.selectedStatus, searchQuery, pagination.itemsPerPage]);
 
-  // Filtered missions
+  // Filtered missions with search functionality
   const filteredMissions = useMemo(() => {
-    return filters.selectedStatus
-      ? missions.filter((mission) => mission.status === filters.selectedStatus)
-      : missions;
-  }, [missions, filters.selectedStatus]);
+    let filtered = missions;
+
+    // Filter by status
+    if (filters.selectedStatus) {
+      filtered = filtered.filter((mission) => mission.status === filters.selectedStatus);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((mission) => {
+        const searchableFields = [
+          mission.title,
+          mission.description,
+          mission.partnerName,
+          mission.type,
+          mission.platform,
+          mission.action_request,
+          mission.reward, 
+          mission.status, 
+        ];
+
+        return searchableFields.some(
+          (field) => field && field.toString().toLowerCase().includes(query)
+        );
+      });
+    }
+
+    return filtered;
+  }, [missions, filters.selectedStatus, searchQuery]);
 
   // Sorted missions
   const sortedMissions = useMemo(() => {
-    if (!sortState.field) return filteredMissions;
-
     return [...filteredMissions].sort((a, b) => {
+      // Define status priority: active > upcoming > ended > completed
+      const statusPriority = {
+        active: 1,
+        upcoming: 2,
+        completed: 3,
+        ended: 4,
+      };
+
+      const aPriority = statusPriority[a.status as keyof typeof statusPriority] || 999;
+      const bPriority = statusPriority[b.status as keyof typeof statusPriority] || 999;
+
+      // First sort by status priority
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority;
+      }
+
+      // If same status priority, apply regular sorting
+      if (!sortState.field) return 0;
+
       const aValue = a[sortState.field!];
       const bValue = b[sortState.field!];
 
@@ -136,7 +229,7 @@ export const useMissionsTable = () => {
     return currentMissions;
   }, [sortedMissions, pagination.currentPage, pagination.itemsPerPage]);
 
-  // Status statistics
+  // Status statistics (based on all missions, not filtered)
   const statusStats: StatusStats = useMemo(
     () => ({
       active: missions.filter((m) => m.status === "active").length,
@@ -164,6 +257,19 @@ export const useMissionsTable = () => {
     }));
   };
 
+  // Search handlers
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    // Reset to first page when searching
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  };
+
+  // Reset filter function to include search
+  const handleResetFilter = () => {
+    setFilters((prev) => ({ ...prev, selectedStatus: null }));
+    setSearchQuery("");
+  };
+
   // Add Mission Handler
   const handleAddMission = async () => {
     try {
@@ -179,12 +285,12 @@ export const useMissionsTable = () => {
       ];
       for (const field of requiredFields) {
         if (!newMission[field as keyof NewMissionForm]) {
-          toast.error(`Please fill in the ${field} field`);
+          toast.error(`Please fill in the ${field} field`, toastStyles.error);
           return;
         }
       }
 
-      // ✅ FIXED: จัดการวันที่และเวลาแบบถูกต้อง
+      // จัดการวันที่และเวลาแบบถูกต้อง
       const startDate = newMission.startDate
         ? newMission.startDate // ใช้ค่าที่ส่งมาตรงๆ (รูปแบบ YYYY-MM-DDTHH:mm)
         : new Date().toISOString().slice(0, 16); // current datetime in local format
@@ -237,7 +343,7 @@ export const useMissionsTable = () => {
 
       if (response.ok) {
         await response.json();
-        toast.success("Mission added successfully!");
+        toast.success("Mission added successfully!", toastStyles.success);
         setIsAddModalOpen(false);
 
         // Reset form
@@ -258,14 +364,14 @@ export const useMissionsTable = () => {
       } else {
         const errorData = await response.json();
         console.error("API Error Response:", errorData);
-        toast.error(`Failed to add mission: ${errorData.error}`);
+        toast.error(`Failed to add mission: ${errorData.error}`, toastStyles.error);
         if (errorData.details) {
           console.error("Error details:", errorData.details);
         }
       }
     } catch (error) {
       console.error("Error adding mission:", error);
-      toast.error("Failed to add mission. Please try again.");
+      toast.error("Failed to add mission. Please try again.", toastStyles.error);
     } finally {
       setIsSubmitting(false);
     }
@@ -279,7 +385,7 @@ export const useMissionsTable = () => {
     try {
       setIsSubmitting(true);
 
-      // ✅ FIXED: จัดการวันที่และเวลาแบบถูกต้องสำหรับ update
+      // จัดการวันที่และเวลาแบบถูกต้องสำหรับ update
       const startDate = updateData.startDate
         ? updateData.startDate // ใช้ค่าที่ส่งมาตรงๆ (รูปแบบ YYYY-MM-DDTHH:mm)
         : new Date().toISOString().slice(0, 16); // current datetime in local format
@@ -313,7 +419,6 @@ export const useMissionsTable = () => {
         endDate: endDate,
         regex: updateData.regex || "",
         partner: updateData.partner,
-        // ✅ REMOVED: targeting field since it doesn't exist in Grist table yet
         duration:
           updateData.duration ||
           JSON.stringify({
@@ -333,18 +438,18 @@ export const useMissionsTable = () => {
       });
 
       if (response.ok) {
-        toast.success("Mission updated successfully!");
+        toast.success("Mission updated successfully!", toastStyles.success);
         await fetchMissions();
         return true;
       } else {
         const errorData = await response.json();
         console.error("Update API Error Response:", errorData);
-        toast.error(`Failed to update mission: ${errorData.error}`);
+        toast.error(`Failed to update mission: ${errorData.error}`, toastStyles.error);
         return false;
       }
     } catch (error) {
       console.error("Error updating mission:", error);
-      toast.error("Failed to update mission. Please try again.");
+      toast.error("Failed to update mission. Please try again.", toastStyles.error);
       return false;
     } finally {
       setIsSubmitting(false);
@@ -389,7 +494,7 @@ export const useMissionsTable = () => {
           result = { message: "Mission deleted successfully" };
         }
 
-        toast.success("Mission deleted successfully!");
+        toast.success("Mission deleted successfully!", toastStyles.delete);
 
         // Refresh data from server
         await fetchMissions();
@@ -438,7 +543,7 @@ export const useMissionsTable = () => {
           errorMessage = errorData.error;
         }
 
-        toast.error(`Failed to delete mission: ${errorMessage}`);
+        toast.error(`Failed to delete mission: ${errorMessage}`, toastStyles.error);
         return false;
       }
     } catch (error) {
@@ -455,7 +560,7 @@ export const useMissionsTable = () => {
         errorMessage = error.message;
       }
 
-      toast.error(`Network error: ${errorMessage}`);
+      toast.error(`Network error: ${errorMessage}`, toastStyles.error);
       return false;
     } finally {
       setIsSubmitting(false);
@@ -500,6 +605,7 @@ export const useMissionsTable = () => {
     selectedMission,
     isAddModalOpen,
     isViewModalOpen,
+    searchQuery,
 
     // Handlers
     handleSort,
@@ -512,9 +618,11 @@ export const useMissionsTable = () => {
     handleItemsPerPageChange,
     setSelectedStatus,
     setNewMission,
-    setSelectedMission, // ✅ ADD: Export setSelectedMission
+    setSelectedMission,
     setIsAddModalOpen,
     setIsViewModalOpen,
     fetchMissions,
+    handleSearchChange,
+    handleResetFilter, 
   };
 };

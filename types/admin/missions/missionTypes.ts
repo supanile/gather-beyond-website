@@ -119,13 +119,13 @@ export const TYPE_OPTIONS = [
 
 export type TypeOption = typeof TYPE_OPTIONS[number];
 
-// Platform options with proper mapping - FIXED: Use lowercase values to match backend validation
+// Platform options with proper mapping - FIXED: Use capitalized values to match Grist storage
 export const PLATFORM_OPTIONS = [
-  { value: "telegram", label: "Telegram" },
-  { value: "twitter", label: "Twitter" },
-  { value: "discord", label: "Discord" },
-  { value: "website", label: "Website" },
-  { value: "mobile", label: "Mobile" }
+  { value: "Telegram", label: "Telegram" },
+  { value: "Twitter", label: "Twitter" },
+  { value: "Discord", label: "Discord" },
+  { value: "Website", label: "Website" },
+  { value: "Mobile", label: "Mobile" }
 ] as const;
 
 export type PlatformOption = typeof PLATFORM_OPTIONS[number];

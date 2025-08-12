@@ -18,6 +18,7 @@ export interface UserAgent {
 export interface ColumnVisibility {
   missionId: boolean;
   userEmail: boolean;
+  missionName: boolean;
   status: boolean;
   acceptedAt: boolean;
   submittedAt: boolean;

@@ -1,5 +1,10 @@
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPageNumbers } from "@/lib/admin/missions/missionTableUtils";
 
@@ -14,50 +19,71 @@ const UserMissionsPagination: React.FC<UserMissionsPaginationProps> = ({
   totalPages,
   onPageChange,
 }) => {
+  if (totalPages <= 1) return null;
+
   return (
-    <div className="mt-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
-        <div className="text-sm text-muted-foreground">
-          Page{" "}
-          <span className="font-medium text-foreground">
-            {currentPage} of {totalPages}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Prev
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border">
+      <div className="text-sm text-muted-foreground">
+        Page {currentPage} of {totalPages}
       </div>
 
-      {/* Page number buttons */}
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex items-center space-x-1">
+        {/* First Page */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          className="h-8 w-8 p-0"
+        >
+          <ChevronsLeft className="h-4 w-4" />
+        </Button>
+
+        {/* Previous Page */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="h-8 w-8 p-0"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
+        {/* Page Numbers */}
         {getPageNumbers(currentPage, totalPages).map((page) => (
           <Button
             key={page}
             variant={currentPage === page ? "default" : "outline"}
             size="sm"
             onClick={() => onPageChange(page)}
-            className="px-3"
+            className="h-8 w-8 p-0"
           >
             {page}
           </Button>
         ))}
+
+        {/* Next Page */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="h-8 w-8 p-0"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+
+        {/* Last Page */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className="h-8 w-8 p-0"
+        >
+          <ChevronsRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

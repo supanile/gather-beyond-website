@@ -259,18 +259,6 @@ const DashboardPage = () => {
                 </div>
               ))}
             </div>
-
-            {/* Main Pagination Loading */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-              <Skeleton className="h-4 w-24" />
-              <div className="flex items-center space-x-1">
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-              </div>
-            </div>
           </div>
 
           {/* Chart Cards Loading - 2 columns */}
@@ -287,9 +275,9 @@ const DashboardPage = () => {
           {/* Main Content Tabs Loading */}
           <div className="space-y-6">
             {/* Tabs Loading */}
-            <div className="flex space-x-1">
-              <Skeleton className="h-10 w-32 rounded-md" />
-              <Skeleton className="h-10 w-36 rounded-md" />
+            <div className="grid w-full grid-cols-2 h-16 bg-muted rounded-lg p-1 mb-6">
+              <Skeleton className="h-full rounded-md" />
+              <Skeleton className="h-full rounded-md" />
             </div>
 
             {/* User Dashboard Loading */}
@@ -328,7 +316,8 @@ const DashboardPage = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <Skeleton className="h-5 w-48" /> {/* Email */}
-                          <Skeleton className="h-5 w-16 rounded-full" /> {/* Status Badge */}
+                          <Skeleton className="h-5 w-16 rounded-full" />{" "}
+                          {/* Status Badge */}
                         </div>
                         <div className="flex items-center gap-4 text-sm">
                           <Skeleton className="h-4 w-24" /> {/* Agent info */}
@@ -356,7 +345,8 @@ const DashboardPage = () => {
                               <Skeleton className="h-6 w-8" />
                             </div>
                             <Skeleton className="h-3 w-16 mt-1" />
-                            <Skeleton className="h-2 w-20 mt-1" /> {/* Progress bar */}
+                            <Skeleton className="h-2 w-20 mt-1" />{" "}
+                            {/* Progress bar */}
                           </div>
                         ))}
                       </div>
@@ -366,10 +356,12 @@ const DashboardPage = () => {
                     <div className="mb-4">
                       {/* Table Header */}
                       <div className="flex items-center justify-between mb-3">
-                        <Skeleton className="h-4 w-32" /> {/* Mission Details title */}
+                        <Skeleton className="h-4 w-32" />{" "}
+                        {/* Mission Details title */}
                         <div className="flex gap-2">
                           <Skeleton className="h-6 w-16" /> {/* View button */}
-                          <Skeleton className="h-6 w-16" /> {/* Column toggle */}
+                          <Skeleton className="h-6 w-16" />{" "}
+                          {/* Column toggle */}
                         </div>
                       </div>
 
@@ -381,10 +373,12 @@ const DashboardPage = () => {
                             className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg"
                           >
                             <Skeleton className="h-4 w-16" /> {/* Mission ID */}
-                            <Skeleton className="h-5 w-20 rounded-full" /> {/* Status badge */}
+                            <Skeleton className="h-5 w-20 rounded-full" />{" "}
+                            {/* Status badge */}
                             <Skeleton className="h-4 w-24" /> {/* Date */}
                             <Skeleton className="h-4 w-32" /> {/* Link */}
-                            <Skeleton className="h-6 w-6 rounded" /> {/* Actions */}
+                            <Skeleton className="h-6 w-6 rounded" />{" "}
+                            {/* Actions */}
                           </div>
                         ))}
                       </div>
@@ -474,7 +468,7 @@ const DashboardPage = () => {
                 />
                 <AdminStatCard
                   title="Total Missions"
-                  value={missions.length.toLocaleString()}
+                  value={stats?.totalmissions?.toLocaleString() ?? "0"}
                   icon={Crosshair}
                 />
                 <AdminStatCard
@@ -515,19 +509,22 @@ const DashboardPage = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-fit grid-cols-2">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              User Overview
+            <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 md:h-16">
+            <TabsTrigger
+              value="overview"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
+            >
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">User Overview</span>
             </TabsTrigger>
             <TabsTrigger
               value="user-management"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
             >
-              <UserCog className="h-4 w-4" />
-              User Management
+              <UserCog className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">User Management</span>
             </TabsTrigger>
-          </TabsList>
+            </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview">
@@ -537,13 +534,12 @@ const DashboardPage = () => {
                   {/* Sort Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8">
+                      <Button variant="outline" size="sm" className="h-8 cursor-pointer">
                         <Filter className="h-4 w-4 mr-1" />
                         {getSortIcon()}
-                        <span className="hidden sm:inline ml-1">
+                        <span className="sm:inline ml-1">
                           {sortConfig.label}
                         </span>
-                        <span className="sm:hidden ml-1">Sort</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-54">
@@ -653,14 +649,14 @@ const DashboardPage = () => {
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap ">
                       Show:
                     </span>
                     <Select
                       value={itemsPerPage.toString()}
                       onValueChange={handleItemsPerPageChange}
                     >
-                      <SelectTrigger className="w-20 h-8">
+                      <SelectTrigger className="w-20 h-8 cursor-pointer">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
