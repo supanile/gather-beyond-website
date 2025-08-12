@@ -572,7 +572,7 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => onViewMission(mission)}
-                        className="h-6 w-6 p-0"
+                        className="h-6 w-6 p-0 cursor-pointer"
                         title="View Mission"
                       >
                         <Eye className="h-3 w-3" />
@@ -581,7 +581,7 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditMission(mission)}
-                        className="h-6 w-6 p-0 hover:text-blue-600"
+                        className="h-6 w-6 p-0 hover:text-blue-600 cursor-pointer"
                         title="Edit Mission"
                       >
                         <Edit className="h-3 w-3" />
@@ -597,7 +597,7 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
                           );
                           onDeleteMission(mission);
                         }}
-                        className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
                         title="Delete Mission"
                       >
                         <Trash2 className="h-3 w-3" />

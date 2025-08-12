@@ -79,6 +79,7 @@ interface AddMissionModalProps {
   onSubmit: () => Promise<void>;
   isEditMode?: boolean;
   title?: string;
+  isSubmitting?: boolean;
 }
 
 // Time picker component
@@ -158,7 +159,7 @@ const DateTimePicker = ({
     value ? new Date(value) : undefined
   );
   const [time, setTime] = useState<string>(
-    value ? format(new Date(value), "HH:mm") : "12:00"
+    value ? format(new Date(value), "HH:mm") : "00:00"
   );
   const [isOpen, setIsOpen] = useState(false);
 
@@ -167,21 +168,15 @@ const DateTimePicker = ({
       setDate(selectedDate);
       const [hours, minutes] = time.split(":");
 
-      // สร้าง Date object ใหม่และตั้งเวลาตาม local timezone
-      const newDate = new Date(selectedDate);
-      newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      // 🔧 FIX: Create datetime string without timezone conversion
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const day = String(selectedDate.getDate()).padStart(2, "0");
 
-      // ส่งเป็น ISO string แต่ไม่แปลง timezone
-      const formattedDateTime =
-        newDate.getFullYear() +
-        "-" +
-        String(newDate.getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(newDate.getDate()).padStart(2, "0") +
-        "T" +
-        String(newDate.getHours()).padStart(2, "0") +
-        ":" +
-        String(newDate.getMinutes()).padStart(2, "0");
+      const formattedDateTime = `${year}-${month}-${day}T${hours.padStart(
+        2,
+        "0"
+      )}:${minutes.padStart(2, "0")}:00Z`;
 
       onChange(formattedDateTime);
     }
@@ -191,20 +186,16 @@ const DateTimePicker = ({
     setTime(newTime);
     if (date) {
       const [hours, minutes] = newTime.split(":");
-      const newDate = new Date(date);
-      newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      // ส่งเป็น ISO string แต่ไม่แปลง timezone
-      const formattedDateTime =
-        newDate.getFullYear() +
-        "-" +
-        String(newDate.getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(newDate.getDate()).padStart(2, "0") +
-        "T" +
-        String(newDate.getHours()).padStart(2, "0") +
-        ":" +
-        String(newDate.getMinutes()).padStart(2, "0");
+      // 🔧 FIX: Create datetime string without timezone conversion
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      const formattedDateTime = `${year}-${month}-${day}T${hours.padStart(
+        2,
+        "0"
+      )}:${minutes.padStart(2, "0")}:00Z`;
 
       onChange(formattedDateTime);
     }
@@ -375,10 +366,15 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   onSubmit,
   isEditMode = false,
   title = "Add New Mission",
+  isSubmitting = false,
 }) => {
   // State for mission targeting
   const [missionTargeting, setMissionTargeting] =
     useState<MissionTargetingData | null>(null);
+
+  // Internal loading state for better UX
+  const [internalLoading, setInternalLoading] = useState(false);
+  const isLoading = isSubmitting || internalLoading;
 
   // Debug effect to log incoming data
   useEffect(() => {
@@ -406,6 +402,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent double submission
+    if (isLoading) return;
+
     console.log("🔧 Submitting form with data:", newMission);
     console.log("🔧 Mission targeting data:", missionTargeting);
     console.log("🔧 Is edit mode:", isEditMode);
@@ -429,6 +429,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
 
     try {
+      // Set internal loading state
+      setInternalLoading(true);
+
       // Add targeting data to mission before submission
       const missionWithTargeting = {
         ...newMission,
@@ -447,6 +450,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       await onSubmit();
     } catch (error) {
       console.error("Error in form submission:", error);
+    } finally {
+      // Reset internal loading state
+      setInternalLoading(false);
     }
   };
 
@@ -454,7 +460,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       {!isEditMode && (
         <DialogTrigger asChild>
-          <Button className="bg-primary hover:bg-primary/90">
+          <Button className="bg-black text-white hover:bg-black/90 hover:text-white dark:bg-white dark:text-black dark:hover:bg-white/90 dark:hover:text-black cursor-pointer">
             <Plus className="h-4 w-4 mr-2" />
             Add Mission
           </Button>
@@ -468,8 +474,12 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           <Tabs defaultValue="basic-info" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="basic-info">Basic Information</TabsTrigger>
-              {/* <TabsTrigger value="targeting">Mission Targeting</TabsTrigger> */}
+              <TabsTrigger value="basic-info" className="cursor-pointer">
+                Basic Information
+              </TabsTrigger>
+              {/* <TabsTrigger value="targeting" className="cursor-pointer">
+              Mission Targeting
+              </TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="basic-info" className="space-y-6 mt-6">
@@ -738,39 +748,52 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
             </TabsContent>
           </Tabs>
 
-          {/* Action Buttons */}
-          <div className="flex justify-between items-center pt-6 border-t">
-            <div className="flex items-center gap-3">
+          {/* Action Buttons - Mobile Responsive Only */}
+          <div className="flex justify-between items-center pt-6 border-t max-sm:flex-col max-sm:gap-4">
+            <div className="flex items-center gap-3 max-sm:flex-col max-sm:w-full max-sm:gap-2">
               <Button
                 type="button"
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
+                disabled={isLoading}
               >
                 👁️ Preview Mission
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
+                disabled={isLoading}
               >
                 💾 Save Draft
               </Button>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 max-sm:w-full">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="px-6"
+                className="px-6 cursor-pointer max-sm:flex-1"
+                disabled={isLoading}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="bg-primary hover:bg-primary/90 px-6"
+                className="bg-black text-white hover:bg-black/90 hover:text-white dark:bg-white dark:text-black dark:hover:bg-white/90 dark:hover:text-black px-6 cursor-pointer max-sm:flex-1"
+                disabled={isLoading}
               >
-                {isEditMode ? "Update Mission" : "🚀 Publish to Audience"}
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Loading...
+                  </div>
+                ) : isEditMode ? (
+                  "Update Mission"
+                ) : (
+                  "🚀 Publish to Users"
+                )}
               </Button>
             </div>
           </div>

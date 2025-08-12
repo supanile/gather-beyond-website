@@ -240,7 +240,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     <div className="space-y-4">
       {/* Header Controls */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold">User Management</h3>
             {hasActiveFilters() && (
@@ -252,13 +252,15 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
         </div>
 
         {/* Search */}
+        {/* Single input: keep original placeholder, make it responsive */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
+            aria-label="Search users"
             placeholder="Search by email, interests, or social handles..."
             value={filterConfig.search}
             onChange={(e) => handleFilter({ search: e.target.value })}
-            className="pl-10"
+            className="pl-10 w-full min-w-0 truncate placeholder:text-xs sm:placeholder:text-sm"
           />
         </div>
 
@@ -271,8 +273,170 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
         />
       </div>
 
-      {/* Data Table */}
-      <div className="rounded-md border dark:border-gray-700">
+      {/* Data Table - Mobile Card Layout for small screens, Table for large screens */}
+      <div className="block lg:hidden">
+        {/* Mobile Card Layout */}
+        <div className="space-y-3">
+          {paginatedUsers.length > 0 ? (
+            paginatedUsers.map((user) => (
+              <div
+                key={user.discord_id}
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
+              >
+                {/* User Email Section */}
+                {columnVisibility.email && (
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="font-medium text-sm">{user.email}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {user.twitter_handle && (
+                          <span className="mr-2">{user.twitter_handle}</span>
+                        )}
+                        {user.telegram_handle && (
+                          <span>{user.telegram_handle}</span>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 cursor-pointer"
+                      onClick={() => openViewModal(user)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+
+                {/* Stats Row */}
+                <div className="flex flex-wrap gap-2">
+                  {columnVisibility.xp && (
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${getXPBadgeColor(
+                        user.agent?.xp || 0,
+                        users
+                      )}`}
+                    >
+                      {user.agent?.xp?.toLocaleString() || "0"} XP
+                    </Badge>
+                  )}
+                  {columnVisibility.level && (
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${getLevelBadgeColor(
+                        user.agent?.level || 1,
+                        users
+                      )}`}
+                    >
+                      Level {user.agent?.level || 1}
+                    </Badge>
+                  )}
+                  {columnVisibility.mood && user.agent?.mood && (
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${getMoodColor(user.agent.mood)}`}
+                    >
+                      <span className="mr-1">
+                        {getMoodEmoji(user.agent.mood)}
+                      </span>
+                      {user.agent.mood.charAt(0).toUpperCase() +
+                        user.agent.mood.slice(1)}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Health Bar */}
+                {columnVisibility.health && user.agent?.health !== undefined && (
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-muted-foreground">Health</span>
+                      <span
+                        className={`text-xs font-medium ${getHealthColor(
+                          user.agent.health
+                        )}`}
+                      >
+                        {user.agent.health}/100
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full ${getHealthBarColor(
+                          user.agent.health
+                        )}`}
+                        style={{ width: `${user.agent.health}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Interests */}
+                {columnVisibility.interests && user.interests && (
+                  <div className="space-y-1">
+                    <span className="text-xs text-muted-foreground">Interests</span>
+                    <div className="flex flex-wrap gap-1">
+                      {user.interests
+                        .split(",")
+                        .slice(0, 2) // แสดงแค่ 2 ตัวแรกใน mobile
+                        .map((interest, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="secondary"
+                            className="text-xs truncate max-w-[120px]"
+                            title={interest.trim()}
+                          >
+                            {interest.trim().length > 15
+                              ? `${interest.trim().substring(0, 15)}...`
+                              : interest.trim()}
+                          </Badge>
+                        ))}
+                      {user.interests.split(",").length > 2 && (
+                        <Badge
+                          variant="secondary"
+                          className="text-xs"
+                          title={`${
+                            user.interests.split(",").length - 2
+                          } more interests`}
+                        >
+                          +{user.interests.split(",").length - 2} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Date Info */}
+                <div className="flex justify-between text-xs text-muted-foreground pt-2 border-t border-gray-200 dark:border-gray-700">
+                  {columnVisibility.lastActive && user.agent?.last_active && (
+                    <span>Last: {formatLastActive(user.agent.last_active)}</span>
+                  )}
+                  {columnVisibility.joinedDate && user.agent?.created_at && (
+                    <span>Joined: {formatDate(user.agent.created_at)}</span>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              {filterConfig.search || hasActiveFilters()
+                ? "No users found matching your filters."
+                : "No users found."}
+            </div>
+          )}
+        </div>
+
+        {/* Pagination for Mobile */}
+        {totalPages > 1 && (
+          <UserDataPagination
+            pagination={pagination}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
+      </div>
+
+      {/* Desktop Table Layout */}
+      <div className="hidden lg:block rounded-md border dark:border-gray-700">
         <Table>
           <TableHeader>
             <TableRow className="dark:border-gray-700">
@@ -753,7 +917,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0"
+                      className="h-8 w-8 p-0 cursor-pointer"
                       onClick={() => openViewModal(user)}
                     >
                       <Eye className="h-4 w-4" />
