@@ -42,7 +42,6 @@ export interface SidebarProps {
   onClose?: () => void;
 }
 
-// เพิ่ม interface สำหรับ menu items
 export interface MenuItem {
   title: string;
   url: string;
@@ -51,7 +50,6 @@ export interface MenuItem {
   badge?: string | number;
 }
 
-// เพิ่ม interface สำหรับ admin layout
 export interface AdminLayoutProps {
   children: React.ReactNode;
   title?: string;
