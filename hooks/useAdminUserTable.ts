@@ -9,7 +9,7 @@ import {
   calculateStatusStats, 
   filterMissionsByStatus, 
   paginateMissions,
-  getDefaultUserAgent, // import getDefaultUserAgent
+  getDefaultUserAgent,
 } from "@/lib/admin/user/userTableUtils";
 
 // Extended Mission type to match what UserMissionsTable expects
