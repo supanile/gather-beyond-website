@@ -17,8 +17,8 @@ const AdminStatCard = ({
           <div
             className={`flex items-center mt-2 text-sm font-medium ${
               isPositive
-                ? "text-green-600 dark:text-green-400"
-                : "text-red-600 dark:text-red-400"
+                ? "text-green-600 dark:text-green-300"
+                : "text-red-600 dark:text-red-300"
             }`}
           >
             {isPositive ? (

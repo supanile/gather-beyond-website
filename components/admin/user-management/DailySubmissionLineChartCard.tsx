@@ -680,10 +680,10 @@ const DailySubmissionLineChartCard = () => {
                   <div className="text-right">
                     <div className={`text-xs sm:text-sm font-medium ${
                       mission.completionRate >= 80 
-                        ? 'text-green-600 dark:text-green-400'
+                        ? 'text-green-600 dark:text-green-300'
                         : mission.completionRate >= 60
-                        ? 'text-yellow-600 dark:text-yellow-400' 
-                        : 'text-red-600 dark:text-red-400'
+                        ? 'text-yellow-600 dark:text-yellow-300' 
+                        : 'text-red-600 dark:text-red-300'
                     }`}>
                       {mission.completionRate}%
                     </div>
