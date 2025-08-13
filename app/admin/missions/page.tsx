@@ -6,26 +6,52 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AdminMissionsTable from "@/components/admin/AdminMissionsTable";
 import { useMissionsTable } from "@/hooks/useMissionsTable";
 
-// Main skeleton component for the entire missions page - matching DashboardPage pattern
+// Main skeleton component for the entire missions page
 const MissionsPageSkeleton = () => (
   <div className="space-y-6">
-    {/* Status Overview Skeleton - exactly like DashboardPage stats cards */}
+    {/* Status Overview Skeleton */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from({ length: 3 }).map((_, index) => (
         <div
           key={index}
-          className="bg-card rounded-2xl p-6 shadow-sm border border-border hover:shadow-md transition-all duration-300"
+          className="bg-card rounded-2xl p-6 shadow-lg border border-border/50 backdrop-blur-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 relative overflow-hidden"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-muted">
-                <Skeleton className="w-6 h-6" />
+          {/* Background gradient overlay skeleton */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0" />
+
+          {/* Main content skeleton */}
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                {/* Icon skeleton with enhanced styling matching StatusCard */}
+                <div className="p-4 rounded-xl bg-muted shadow-lg backdrop-blur-sm border border-white/20">
+                  <Skeleton className="w-8 h-8" />
+                </div>
+
+                {/* Text content skeleton */}
+                <div className="ml-3 space-y-2">
+                  <Skeleton className="h-4 w-20" /> {/* Status text */}
+                  <Skeleton className="h-10 w-12" /> {/* Count number */}
+                </div>
               </div>
-              <div>
-                <Skeleton className="h-4 w-16 mb-2" />
-                <Skeleton className="h-8 w-8" />
+
+              {/* Filter indicator section skeleton */}
+              <div className="flex flex-col items-center justify-center space-y-2 min-w-0">
+                {/* Filter icon skeleton */}
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
+                  <Skeleton className="w-4 h-4" />
+                </div>
+                
+                {/* Click to filter text skeleton */}
+                <div className="flex items-center space-x-1 opacity-60">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="w-3 h-3" />
+                </div>
               </div>
             </div>
+
+            {/* Bottom subtle line indicator skeleton */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0" />
           </div>
         </div>
       ))}
@@ -195,7 +221,7 @@ const MissionsPageSkeleton = () => (
   </div>
 );
 
-// Main page component - exactly following DashboardPage pattern
+// Main page component
 const MissionsPage = () => {
   // ใช้ isLoading จาก useMissionsTable เป็น source of truth เดียว
   const { isLoading } = useMissionsTable();

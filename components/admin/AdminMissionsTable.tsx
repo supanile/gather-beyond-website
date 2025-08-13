@@ -117,7 +117,7 @@ const AdminMissionsTable = () => {
     endDate: "End Date",
   };
 
-  // แก้ไข Edit Mission Handler - ใช้ exact values
+  // use exact values
   const handleEditMission = (mission: Mission) => {
     // Use partnerName directly and check if it is in PARTNER_OPTIONS.
     const partnerName = PARTNER_OPTIONS.includes(
@@ -224,7 +224,7 @@ const AdminMissionsTable = () => {
     }
   };
 
-  // แก้ไข Update Mission Handler
+  // Update Mission Handler
   const handleUpdateMissionSubmit = async (missionForm: NewMissionForm) => {
     if (missionToEdit && selectedMission) {
       // Ensure we have the current form data, not the old missionToEdit
@@ -249,7 +249,7 @@ const AdminMissionsTable = () => {
     totalItems: displayedMissions.length,
   };
 
-  // Updated status card configurations
+  // Status card configurations
   const statusCardConfigs = [
     {
       status: "active",

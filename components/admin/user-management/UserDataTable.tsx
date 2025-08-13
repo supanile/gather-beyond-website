@@ -870,7 +870,6 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                                     : interest.trim()}
                                 </Badge>
                               ))}
-                            {/* แก้ไขเงื่อนไขตรงนี้ - เปลี่ยนจาก length > 4 เป็น length > 3 */}
                             {user.interests.split(",").length > 3 && (
                               <Badge
                                 variant="secondary"
@@ -879,7 +878,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                                   user.interests.split(",").length - 3
                                 } more interests: ${user.interests
                                   .split(",")
-                                  .slice(3) // เปลี่ยนจาก slice(4) เป็น slice(3)
+                                  .slice(3)
                                   .map((interest) => interest.trim())
                                   .join(", ")}`}
                               >

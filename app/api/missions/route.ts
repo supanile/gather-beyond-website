@@ -132,8 +132,6 @@ export async function POST(request: Request) {
     }
 
     console.log(`Partner "${body.partner}" mapped to ID: ${partnerId}`);
-
-    // 🔧 FIX: Create proper UTC duration object - now simplified
     const durationData = {
       start: body.startDate || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
       end: body.endDate || null,
@@ -260,7 +258,6 @@ export async function PUT(request: Request) {
     delete cleanUpdateData.endDate;
     delete cleanUpdateData.status;
 
-    // 🔧 FIX: Create duration object with proper UTC format for updates
     if (updateData.startDate || updateData.endDate) {
       let currentDuration: { start?: string; end?: string | null } = {};
 
@@ -274,7 +271,6 @@ export async function PUT(request: Request) {
         }
       }
 
-      // 🔧 FIX: Update duration - now simplified since DateTimePicker sends correct format
       const durationData = {
         ...currentDuration,
         start: updateData.startDate || currentDuration.start || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),

@@ -147,7 +147,7 @@ export const calculateStatusStats = (missions: Mission[]): StatusStats => {
   };
 };
 
-// Updated sortMissions function with last_active sorting
+// sortMissions function with last_active sorting
 export const sortMissions = (
   missions: Mission[],
   sortConfig: SortConfig

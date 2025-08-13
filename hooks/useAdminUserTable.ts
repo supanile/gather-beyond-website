@@ -18,7 +18,7 @@ interface ExtendedMission extends Mission {
   userMissions?: Mission[];
 }
 
-// Mission-specific sort config for UserMissionsTable - updated to match ExtendedMission
+// Mission-specific sort config for UserMissionsTable
 interface MissionSortConfig {
   field: keyof ExtendedMission | "user.email" | null;
   direction: "asc" | "desc";
@@ -239,7 +239,7 @@ export const useProcessedMissions = (
   return processedData;
 };
 
-// แก้ไข useUserAgent function - ให้ export ออกมา
+// useUserAgent function - exported for use in other components
 export const useUserAgent = (userAgent?: UserAgent, userId?: string): UserAgent => {
   return useMemo(() => {
     return userAgent || getDefaultUserAgent(userId || "");
