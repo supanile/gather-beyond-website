@@ -168,7 +168,6 @@ const DateTimePicker = ({
       setDate(selectedDate);
       const [hours, minutes] = time.split(":");
 
-      // 🔧 FIX: Create datetime string without timezone conversion
       const year = selectedDate.getFullYear();
       const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
       const day = String(selectedDate.getDate()).padStart(2, "0");
@@ -187,7 +186,6 @@ const DateTimePicker = ({
     if (date) {
       const [hours, minutes] = newTime.split(":");
 
-      // 🔧 FIX: Create datetime string without timezone conversion
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
@@ -272,7 +270,6 @@ const RewardInput = ({
         if (parsed.token) setToken(parsed.token);
       } catch {
         // If parsing fails, keep existing value
-        console.log("Could not parse reward value:", value);
       }
     }
   }, [value]);
@@ -376,26 +373,15 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   const [internalLoading, setInternalLoading] = useState(false);
   const isLoading = isSubmitting || internalLoading;
 
-  // Debug effect to log incoming data
-  useEffect(() => {
-    if (isOpen) {
-      console.log("🔧 AddMissionModal opened with data:", newMission);
-      console.log("🔧 Partner value:", newMission.partner);
-    }
-  }, [isOpen, newMission]);
-
   const handleInputChange = (
     field: keyof NewMissionForm,
     value: string | number
   ) => {
-    console.log(`🔧 Field ${field} changed to:`, value);
     onMissionChange((prev) => {
       const updated = {
         ...prev,
         [field]: value,
       };
-      console.log(`🔧 Updated form state for ${field}:`, updated[field]);
-      console.log(`🔧 Full updated form state:`, updated);
       return updated;
     });
   };
@@ -405,10 +391,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
     // Prevent double submission
     if (isLoading) return;
-
-    console.log("🔧 Submitting form with data:", newMission);
-    console.log("🔧 Mission targeting data:", missionTargeting);
-    console.log("🔧 Is edit mode:", isEditMode);
 
     // Validate required fields before submission
     const requiredFields = [
@@ -437,11 +419,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         ...newMission,
         missionTargeting: missionTargeting,
       };
-
-      console.log(
-        "🔧 Final mission data with targeting:",
-        missionWithTargeting
-      );
 
       // Update the mission form data with targeting before calling onSubmit
       onMissionChange(missionWithTargeting);
@@ -576,7 +553,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                         : undefined
                     }
                     onValueChange={(value) => {
-                      console.log("🔧 Partner selected:", value);
                       handleInputChange("partner", value);
                     }}
                   >
@@ -707,7 +683,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                   />
                 </div>
 
-                {/* Requirements - Full width */}
+                {/* Requirements */}
                 <div className="space-y-2">
                   <Label htmlFor="requirements" className="text-sm font-medium">
                     Requirements
@@ -724,7 +700,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                   />
                 </div>
 
-                {/* Regex Pattern - Full width */}
+                {/* Regex Pattern */}
                 <div className="space-y-2">
                   <Label htmlFor="regex" className="text-sm font-medium">
                     Regex Pattern

@@ -233,9 +233,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <AppSidebar />
         <SidebarOverlay />
 
-        {/* Main content area - always full width */}
+        {/* Main content area */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 w-full">
-          {/* Enhanced Header - Removed backdrop-blur on mobile */}
+          {/* Enhanced Header */}
           <header className="bg-card shadow-sm border-b border-border flex-shrink-0 relative z-30 lg:bg-card/95 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-card/60">
             <div className="flex items-center justify-between px-4 lg:px-6 py-3 lg:py-4">
               <div className="flex items-center space-x-2 lg:space-x-4">

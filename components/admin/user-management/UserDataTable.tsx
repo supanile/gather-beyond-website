@@ -252,7 +252,6 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
         </div>
 
         {/* Search */}
-        {/* Single input: keep original placeholder, make it responsive */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -870,7 +869,6 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                                     : interest.trim()}
                                 </Badge>
                               ))}
-                            {/* แก้ไขเงื่อนไขตรงนี้ - เปลี่ยนจาก length > 4 เป็น length > 3 */}
                             {user.interests.split(",").length > 3 && (
                               <Badge
                                 variant="secondary"
@@ -879,7 +877,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                                   user.interests.split(",").length - 3
                                 } more interests: ${user.interests
                                   .split(",")
-                                  .slice(3) // เปลี่ยนจาก slice(4) เป็น slice(3)
+                                  .slice(3)
                                   .map((interest) => interest.trim())
                                   .join(", ")}`}
                               >

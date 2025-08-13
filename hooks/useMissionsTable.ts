@@ -290,7 +290,6 @@ export const useMissionsTable = () => {
         }
       }
 
-      // จัดการวันที่และเวลาแบบถูกต้อง
       const startDate = newMission.startDate
         ? newMission.startDate // ใช้ค่าที่ส่งมาตรงๆ (รูปแบบ YYYY-MM-DDTHH:mm)
         : new Date().toISOString().slice(0, 16); // current datetime in local format
@@ -401,7 +400,7 @@ export const useMissionsTable = () => {
         processedEnd: endDate,
       });
 
-      // Prepare update data (remove targeting for now since column doesn't exist)
+      // Prepare update data
       const missionUpdateData = {
         id: missionId,
         title: updateData.title,

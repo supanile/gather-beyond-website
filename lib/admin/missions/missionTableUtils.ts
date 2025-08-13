@@ -78,7 +78,7 @@ export const parseReward = (reward: string | null | undefined) => {
   }
 };
 
-// Search and filter utilities - Updated to include completed
+// Search and filter utilities
 export const filterMissionsByStatus = (missions: Mission[], status: string | null) => {
   if (!status) return missions;
   

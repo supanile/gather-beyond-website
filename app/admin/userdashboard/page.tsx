@@ -261,13 +261,13 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Chart Cards Loading - 2 columns */}
+          {/* Chart Cards Loading */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <Skeleton className="h-96 rounded-2xl" />
             <Skeleton className="h-96 rounded-2xl" />
           </div>
 
-          {/* Daily Submission Line Chart - full width */}
+          {/* Daily Submission Line Chart */}
           <div className="grid grid-cols-1 gap-6">
             <Skeleton className="h-96 rounded-2xl" />
           </div>
@@ -327,7 +327,7 @@ const DashboardPage = () => {
                       </div>
                     </div>
 
-                    {/* Mission Status Overview - Matching StatusCard grid */}
+                    {/* Mission Status Overview */}
                     <div className="mb-6 -my-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
                         <Skeleton className="h-5 w-48" /> {/* Title */}
@@ -352,7 +352,7 @@ const DashboardPage = () => {
                       </div>
                     </div>
 
-                    {/* Missions DataTable - Matching UserMissionsTable */}
+                    {/* Missions DataTable */}
                     <div className="mb-4">
                       {/* Table Header */}
                       <div className="flex items-center justify-between mb-3">
@@ -384,7 +384,7 @@ const DashboardPage = () => {
                       </div>
                     </div>
 
-                    {/* Pagination - Matching UserMissionsPagination */}
+                    {/* Pagination */}
                     <div className="flex justify-between items-center pt-3 border-t border-border">
                       <Skeleton className="h-4 w-24" /> {/* Page info */}
                       <div className="flex gap-1">
@@ -497,7 +497,7 @@ const DashboardPage = () => {
             </div>
           )}
 
-          {/* Daily Submission Line Chart - separate full width */}
+          {/* Daily Submission Line Chart */}
           {!isLoadingStats && !statsError && (
             <div className="grid grid-cols-1 gap-6">
               <div className="h-full">

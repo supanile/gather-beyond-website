@@ -108,7 +108,7 @@ export const PARTNER_OPTIONS = [
 
 export type PartnerOption = typeof PARTNER_OPTIONS[number];
 
-// Type options with proper mapping - FIXED: Use capitalized values to match backend validation
+// Type options with proper mapping
 export const TYPE_OPTIONS = [
   { value: "Social", label: "Social" },
   { value: "Trading", label: "Trading" },
@@ -119,7 +119,7 @@ export const TYPE_OPTIONS = [
 
 export type TypeOption = typeof TYPE_OPTIONS[number];
 
-// Platform options with proper mapping - FIXED: Use capitalized values to match Grist storage
+// Platform options with proper mapping
 export const PLATFORM_OPTIONS = [
   { value: "Telegram", label: "Telegram" },
   { value: "Twitter", label: "Twitter" },
