@@ -80,8 +80,12 @@ export const formatDate = (timestamp: number | string | null | undefined) => {
   }
 };
 
-export const getStatusVariant = (status: string) => {
-  switch (status) {
+export const getStatusVariant = (status: string | null | undefined) => {
+  if (!status || typeof status !== 'string' || status.trim() === '') {
+    return "outline";
+  }
+  
+  switch (status.toLowerCase()) {
     case "accepted":
       return "default";
     case "completed":
@@ -95,8 +99,12 @@ export const getStatusVariant = (status: string) => {
   }
 };
 
-export const getStatusColor = (status: string) => {
-  switch (status) {
+export const getStatusColor = (status: string | null | undefined) => {
+  if (!status || typeof status !== 'string' || status.trim() === '') {
+    return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+  }
+  
+  switch (status.toLowerCase()) {
     case "accepted":
       return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300";
     case "completed":

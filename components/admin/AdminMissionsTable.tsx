@@ -6,14 +6,15 @@ import {
   Clock,
   Activity,
   TriangleAlert,
-  CheckCircle,
+  Settings2,
+  Search,
+  X,
 } from "lucide-react";
 import { useMissionsTable } from "@/hooks/useMissionsTable";
 import { getStatusCardConfig } from "@/lib/admin/missions/missionTableUtils";
 import { StatusCard } from "@/components/admin/missions/StatusCard";
 import { AddMissionModal } from "@/components/admin/missions/AddMissionModal";
 import { ViewMissionModal } from "@/components/admin/missions/ViewMissionModal";
-import { MissionTableControls } from "@/components/admin/missions/MissionTableControls";
 import { Pagination } from "@/components/admin/missions/Pagination";
 import { MissionsTable } from "./missions/MissionsTable";
 import {
@@ -24,6 +25,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,6 +67,7 @@ const AdminMissionsTable = () => {
     selectedMission,
     isAddModalOpen,
     isViewModalOpen,
+    searchQuery,
 
     // Handlers
     handleSort,
@@ -63,9 +80,10 @@ const AdminMissionsTable = () => {
     handleItemsPerPageChange,
     setSelectedStatus,
     setNewMission,
-    setSelectedMission, // ✅ ADD: Include setSelectedMission
+    setSelectedMission,
     setIsAddModalOpen,
     setIsViewModalOpen,
+    handleSearchChange,
   } = useMissionsTable();
 
   // Edit and Delete state
@@ -79,10 +97,32 @@ const AdminMissionsTable = () => {
   const [confirmDeleteInput, setConfirmDeleteInput] = React.useState("");
   const [hasConfirmedWarning, setHasConfirmedWarning] = React.useState(false);
 
+  // Reset all filters handler
+  const handleResetAllFilters = () => {
+    setSelectedStatus(null);
+    handleSearchChange("");
+    handlePageChange(1);
+  };
+
+  // Column visibility labels mapping
+  const columnLabels = {
+    id: "ID",
+    title: "Title",
+    type: "Type",
+    platform: "Platform",
+    status: "Status",
+    reward: "Reward",
+    partner: "Partner",
+    startDate: "Start Date",
+    endDate: "End Date",
+  };
+
   // แก้ไข Edit Mission Handler - ใช้ exact values
   const handleEditMission = (mission: Mission) => {
     // Use partnerName directly and check if it is in PARTNER_OPTIONS.
-    const partnerName = PARTNER_OPTIONS.includes(mission.partnerName as PartnerOption)
+    const partnerName = PARTNER_OPTIONS.includes(
+      mission.partnerName as PartnerOption
+    )
       ? mission.partnerName
       : "Super Connector";
 
@@ -144,11 +184,11 @@ const AdminMissionsTable = () => {
       endDate: convertToDatetimeLocal(mission.endDate),
       regex: mission.regex || "",
       duration: mission.duration || "",
-      missionTargeting: missionTargeting, // ✅ FIXED: Set to null since not available in Mission type
+      missionTargeting: missionTargeting,
     };
 
     setMissionToEdit(missionForm);
-    setSelectedMission(mission); // ✅ IMPORTANT: Set selected mission for edit modal
+    setSelectedMission(mission);
     setIsEditModalOpen(true);
   };
 
@@ -189,7 +229,7 @@ const AdminMissionsTable = () => {
     if (missionToEdit && selectedMission) {
       // Ensure we have the current form data, not the old missionToEdit
       const currentFormData = missionForm || missionToEdit;
-      
+
       const success = await handleUpdateMission(
         selectedMission.id,
         currentFormData
@@ -202,7 +242,14 @@ const AdminMissionsTable = () => {
     }
   };
 
-  // Updated status card configurations to include completed
+  // Update pagination info to reflect filtered results
+  const displayedMissions = missions; // missions from hook are already filtered and paginated
+  const paginationInfo = {
+    ...pagination,
+    totalItems: displayedMissions.length,
+  };
+
+  // Updated status card configurations
   const statusCardConfigs = [
     {
       status: "active",
@@ -217,12 +264,6 @@ const AdminMissionsTable = () => {
       ...getStatusCardConfig("upcoming"),
     },
     {
-      status: "completed",
-      count: statusStats.completed,
-      icon: CheckCircle,
-      ...getStatusCardConfig("completed"),
-    },
-    {
       status: "ended",
       count: statusStats.ended,
       icon: Clock,
@@ -233,7 +274,7 @@ const AdminMissionsTable = () => {
   return (
     <div className="space-y-6">
       {/* Status Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {statusCardConfigs.map(({ status, count, icon, color, bgColor }) => (
           <StatusCard
             key={status}
@@ -248,31 +289,176 @@ const AdminMissionsTable = () => {
         ))}
       </div>
 
-      {/* Filters and Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <AddMissionModal
-          isOpen={isAddModalOpen}
-          onOpenChange={setIsAddModalOpen}
-          newMission={newMission}
-          onMissionChange={setNewMission}
-          onSubmit={handleAddMission}
-        />
+      {/* Controls Layout - 2 Rows */}
+      <div className="space-y-4">
+        {/* Row 1: Add Mission Button Only */}
+        <div className="flex justify-start">
+          <AddMissionModal
+            isOpen={isAddModalOpen}
+            onOpenChange={setIsAddModalOpen}
+            newMission={newMission}
+            onMissionChange={setNewMission}
+            onSubmit={handleAddMission}
+          />
+        </div>
 
-        <MissionTableControls
-          selectedStatus={filters.selectedStatus}
-          onResetFilter={() => setSelectedStatus(null)}
-          pagination={pagination}
-          onItemsPerPageChange={handleItemsPerPageChange}
-          columnVisibility={columnVisibility}
-          onToggleColumnVisibility={toggleColumnVisibility}
-        />
+        {/* Row 2: Search + Filters + Controls */}
+        <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+          {/* Left Side: Search + Active Filters + Reset */}
+          <div className="flex flex-col sm:flex-row gap-4 flex-1">
+            {/* Improved Search Input with better width */}
+            <div className="relative flex-1 max-w-xl lg:max-w-3xl xl:max-w-3xl">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-3 w-3 sm:h-4 sm:w-4" />
+              <Input
+                placeholder="Search Missions by Title, Description, Partner, Type, Platform, Status..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-9 pr-9 w-full text-xs sm:text-sm placeholder:text-xs sm:placeholder:text-sm"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleSearchChange("")}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-muted"
+                  aria-label="Clear search"
+                >
+                  <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
+              )}
+            </div>
+
+            {/* Active Filters + Reset Button */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {filters.selectedStatus && (
+                <div
+                  className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs ${
+                    getStatusCardConfig(filters.selectedStatus).bgColor
+                  }`}
+                >
+                  <span
+                    className={
+                      getStatusCardConfig(filters.selectedStatus).color
+                    }
+                  >
+                    Status: {filters.selectedStatus}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedStatus(null)}
+                    className="h-4 w-4 p-0 hover:bg-background"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+              {filters.selectedStatus && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleResetAllFilters}
+                  className="text-xs sm:text-sm whitespace-nowrap cursor-pointer"
+                >
+                  Reset All Filters
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Right Side: Pagination Info + Controls + View */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center space-x-2">
+              <span className="text-xs sm:text-sm text-muted-foreground mr-2 sm:mr-4 whitespace-nowrap">
+                Showing{" "}
+                {(paginationInfo.currentPage - 1) *
+                  paginationInfo.itemsPerPage +
+                  1}
+                -
+                {Math.min(
+                  (paginationInfo.currentPage - 1) *
+                    paginationInfo.itemsPerPage +
+                    paginationInfo.itemsPerPage,
+                  paginationInfo.totalItems
+                )}{" "}
+                of {paginationInfo.totalItems} missions
+                {searchQuery && (
+                  <span className="text-blue-600 ml-1">(filtered)</span>
+                )}
+              </span>
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                Show:
+              </span>
+              <Select
+                value={pagination.itemsPerPage.toString()}
+                onValueChange={handleItemsPerPageChange}
+              >
+                <SelectTrigger className="w-16 sm:w-20 h-7 sm:h-8 text-xs sm:text-sm cursor-pointer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10" className="text-xs sm:text-sm">
+                    10
+                  </SelectItem>
+                  <SelectItem value="20" className="text-xs sm:text-sm">
+                    20
+                  </SelectItem>
+                  <SelectItem value="50" className="text-xs sm:text-sm">
+                    50
+                  </SelectItem>
+                  <SelectItem value="100" className="text-xs sm:text-sm">
+                    100
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Column Visibility Dropdown with proper labels */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs sm:text-sm h-7 sm:h-8 cursor-pointer"
+                >
+                  <Settings2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  View
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-[160px] sm:w-[180px]"
+              >
+                <DropdownMenuLabel className="text-xs sm:text-sm">
+                  Toggle columns
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {Object.entries(columnVisibility).map(([key, value]) => (
+                  <DropdownMenuCheckboxItem
+                    key={key}
+                    checked={value}
+                    onCheckedChange={() =>
+                      toggleColumnVisibility(
+                        key as keyof typeof columnVisibility
+                      )
+                    }
+                    className="text-xs sm:text-sm"
+                  >
+                    {columnLabels[key as keyof typeof columnLabels]}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </div>
 
       {/* Missions Table */}
       <div className="overflow-x-auto">
         <div className="rounded-md border border-border">
+          {/* Pass filtered missions to table */}
           <MissionsTable
-            missions={missions}
+            missions={displayedMissions}
             sortState={sortState}
             columnVisibility={columnVisibility}
             onSort={handleSort}
@@ -285,9 +471,33 @@ const AdminMissionsTable = () => {
             }
           />
 
-          <Pagination pagination={pagination} onPageChange={handlePageChange} />
+          {/* Use updated pagination info */}
+          <Pagination
+            pagination={paginationInfo}
+            onPageChange={handlePageChange}
+          />
         </div>
       </div>
+
+      {/* No Results Message */}
+      {searchQuery && displayedMissions.length === 0 && (
+        <div className="text-center py-8 bg-muted/20 rounded-lg border border-dashed">
+          <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-muted-foreground mb-2">
+            No missions found
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            No missions match your search criteria: &quot;{searchQuery}&quot;
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => handleSearchChange("")}
+            size="sm"
+          >
+            Clear search
+          </Button>
+        </div>
+      )}
 
       {/* View Mission Details Modal */}
       <ViewMissionModal
@@ -461,7 +671,7 @@ const AdminMissionsTable = () => {
             <Button
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 cursor-pointer"
               disabled={isSubmitting}
             >
               Cancel

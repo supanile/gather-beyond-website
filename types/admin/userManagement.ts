@@ -2,6 +2,7 @@ export interface Mission {
   _id: string;
   user_id: string;
   mission_id: number;
+  mission_name: string;
   status: "accepted" | "submitted" | "completed" | "rejected";
   accepted_at: string;
   submitted_at: string;

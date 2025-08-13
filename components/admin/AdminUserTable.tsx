@@ -16,7 +16,7 @@ import {
   useUserAgent,
 } from "@/hooks/useAdminUserTable";
 import UserProfileHeader from "./user-overview/UserProfileHeader";
-import StatusCard from "./user-overview/StatusCard";
+import StatusCard from "./user-overview/StatusCardOverview";
 import MissionSubmissionModal from "./user-overview/MissionSubmissionModal";
 import UserMissionsTable from "./user-overview/UserMissionsTable";
 import UserMissionsPagination from "./user-overview/UserMissionsPagination";
@@ -30,14 +30,8 @@ const AdminUserTable = ({
   missions: Mission[];
   userAgent?: UserAgent;
 }) => {
-  // Debug logs
-  console.log('AdminUserTable - User:', user.email);
-  console.log('AdminUserTable - Missions:', missions);
-  console.log('AdminUserTable - User has userMissions:', user.userMissions?.length || 0);
-
   // Use missions from user.userMissions if available, otherwise use props
   const userMissions = user.userMissions || missions;
-  console.log('AdminUserTable - Final missions to use:', userMissions);
 
   // Custom hooks
   const {
@@ -63,9 +57,6 @@ const AdminUserTable = ({
     totalPages,
     totalMissions
   } = useProcessedMissions(userMissions, selectedStatus, sortConfig, pagination);
-
-  console.log('AdminUserTable - Status Stats:', statusStats);
-  console.log('AdminUserTable - Total Missions:', totalMissions);
 
   return (
     <>

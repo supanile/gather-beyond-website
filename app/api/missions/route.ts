@@ -100,13 +100,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate platform
+    // Validate platform with capitalized values
     const validPlatforms = [
-      "telegram",
-      "twitter",
-      "discord",
-      "website",
-      "mobile",
+      "Telegram",
+      "Twitter",
+      "Discord",
+      "Website",
+      "Mobile",
     ];
     if (!validPlatforms.includes(body.platform)) {
       return NextResponse.json(
@@ -133,12 +133,10 @@ export async function POST(request: Request) {
 
     console.log(`Partner "${body.partner}" mapped to ID: ${partnerId}`);
 
-    // Create proper duration object with both dates
+    // 🔧 FIX: Create proper UTC duration object - now simplified
     const durationData = {
-      start: body.startDate
-        ? new Date(body.startDate).toISOString()
-        : new Date().toISOString(),
-      end: body.endDate ? new Date(body.endDate).toISOString() : null,
+      start: body.startDate || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      end: body.endDate || null,
     };
 
     console.log("Duration data created:", durationData);
@@ -148,7 +146,7 @@ export async function POST(request: Request) {
       title: body.title,
       description: body.description,
       type: body.type,
-      platform: body.platform,
+      platform: body.platform, 
       reward: body.reward || JSON.stringify({ amount: 0, token: "XP" }),
       partner: partnerId,
       level_required: body.level_required || 1,
@@ -156,16 +154,13 @@ export async function POST(request: Request) {
       format: body.format || "",
       useful_link: body.useful_link || "",
       requirements: body.requirements || JSON.stringify({}),
-      duration: JSON.stringify(durationData), // Properly format duration
+      duration: JSON.stringify(durationData, null, 0).replace(/,"/g, ', "').replace(/":"/g, '": "'), 
       repeatable: body.repeatable || 0,
       regex: body.regex || "",
-      // ✅ REMOVED: targeting field since it doesn't exist in Grist table yet
-      // targeting: body.missionTargeting ? JSON.stringify(body.missionTargeting) : null,
     };
 
     console.log("Prepared mission data for Grist:", missionData);
     console.log("Duration field:", missionData.duration);
-    // console.log("🎯 Targeting field:", missionData.targeting); // Removed this log too
 
     const result = await grist.addRecords("Missions", [missionData]);
     console.log("Grist response:", result);
@@ -222,14 +217,14 @@ export async function PUT(request: Request) {
       }
     }
 
-    // Validate platform if provided
+    // Validate platform with capitalized values
     if (updateData.platform) {
       const validPlatforms = [
-        "telegram",
-        "twitter",
-        "discord",
-        "website",
-        "mobile",
+        "Telegram",
+        "Twitter",
+        "Discord",
+        "Website",
+        "Mobile",
       ];
       if (!validPlatforms.includes(updateData.platform)) {
         return NextResponse.json(
@@ -265,7 +260,7 @@ export async function PUT(request: Request) {
     delete cleanUpdateData.endDate;
     delete cleanUpdateData.status;
 
-    // Create duration object if dates are provided
+    // 🔧 FIX: Create duration object with proper UTC format for updates
     if (updateData.startDate || updateData.endDate) {
       let currentDuration: { start?: string; end?: string | null } = {};
 
@@ -279,41 +274,16 @@ export async function PUT(request: Request) {
         }
       }
 
-      // Update duration with new dates
+      // 🔧 FIX: Update duration - now simplified since DateTimePicker sends correct format
       const durationData = {
         ...currentDuration,
-        start: updateData.startDate
-          ? new Date(updateData.startDate).toISOString()
-          : currentDuration.start || new Date().toISOString(),
-        end: updateData.endDate
-          ? new Date(updateData.endDate).toISOString()
-          : updateData.endDate === null || updateData.endDate === undefined
-          ? null
-          : currentDuration.end,
+        start: updateData.startDate || currentDuration.start || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        end: updateData.endDate !== undefined ? updateData.endDate : currentDuration.end,
       };
 
-      cleanUpdateData.duration = JSON.stringify(durationData);
+      cleanUpdateData.duration = JSON.stringify(durationData, null, 0).replace(/,"/g, ', "').replace(/":"/g, '": "'); // Custom spacing
       console.log("Updated duration data:", durationData);
     }
-
-    // ✅ NEW: Handle targeting data for updates
-    // COMMENTED OUT: targeting field since it doesn't exist in Grist table yet
-    /*
-    if (updateData.missionTargeting !== undefined) {
-      if (updateData.missionTargeting === null) {
-        cleanUpdateData.targeting = null;
-      } else {
-        cleanUpdateData.targeting = typeof updateData.missionTargeting === 'string' 
-          ? updateData.missionTargeting 
-          : JSON.stringify(updateData.missionTargeting);
-      }
-      
-      // Remove the original field name to avoid confusion
-      delete cleanUpdateData.missionTargeting;
-      
-      console.log("🎯 Updated targeting data:", cleanUpdateData.targeting);
-    }
-    */
 
     // Remove missionTargeting field to avoid errors
     delete cleanUpdateData.missionTargeting;

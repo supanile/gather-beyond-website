@@ -12,7 +12,7 @@ export const formatDate = (timestamp: number) => {
 
 // Status styling utilities 
 export const getStatusColor = (status: string | null | undefined) => {
-  if (!status) {
+  if (!status || typeof status !== 'string' || status.trim() === '') {
     return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
   }
   
@@ -112,14 +112,14 @@ export const sortMissions = (
 
 // Status card configuration
 export const getStatusCardConfig = (status: string | null | undefined) => {
-  if (!status) {
+  if (!status || typeof status !== 'string' || status.trim() === '') {
     return {
       color: "text-gray-600 dark:text-gray-400",
       bgColor: "bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/10 dark:to-slate-900/10",
     };
   }
   
-  switch (status) {
+  switch (status.toLowerCase()) {
     case "active":
       return {
         color: "text-green-600 dark:text-green-400",

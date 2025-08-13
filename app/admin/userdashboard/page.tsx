@@ -259,16 +259,155 @@ const DashboardPage = () => {
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* Main Pagination Loading */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-              <Skeleton className="h-4 w-24" />
-              <div className="flex items-center space-x-1">
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
-                <Skeleton className="h-8 w-8" />
+          {/* Chart Cards Loading - 2 columns */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <Skeleton className="h-96 rounded-2xl" />
+            <Skeleton className="h-96 rounded-2xl" />
+          </div>
+
+          {/* Daily Submission Line Chart - full width */}
+          <div className="grid grid-cols-1 gap-6">
+            <Skeleton className="h-96 rounded-2xl" />
+          </div>
+
+          {/* Main Content Tabs Loading */}
+          <div className="space-y-6">
+            {/* Tabs Loading */}
+            <div className="grid w-full grid-cols-2 h-16 bg-muted rounded-lg p-1 mb-6">
+              <Skeleton className="h-full rounded-md" />
+              <Skeleton className="h-full rounded-md" />
+            </div>
+
+            {/* User Dashboard Loading */}
+            <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+              {/* Controls Section */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+                <div className="flex items-center gap-2">
+                  {/* Sort Dropdown Skeleton */}
+                  <Skeleton className="h-8 w-24" />
+                </div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-8 w-20" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Input Loading */}
+              <div className="relative mb-6">
+                <Skeleton className="w-full h-10 rounded-lg" />
+              </div>
+
+              {/* User List Loading - Detailed user cards matching AdminUserTable */}
+              <div className="space-y-4 mb-6">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-background rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-300"
+                  >
+                    {/* User Header - Matching UserProfileHeader */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Skeleton className="h-5 w-48" /> {/* Email */}
+                          <Skeleton className="h-5 w-16 rounded-full" />{" "}
+                          {/* Status Badge */}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <Skeleton className="h-4 w-24" /> {/* Agent info */}
+                          <Skeleton className="h-4 w-20" /> {/* Level */}
+                          <Skeleton className="h-4 w-32" /> {/* Last active */}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mission Status Overview - Matching StatusCard grid */}
+                    <div className="mb-6 -my-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                        <Skeleton className="h-5 w-48" /> {/* Title */}
+                        <Skeleton className="h-4 w-24" /> {/* Total missions */}
+                      </div>
+                      {/* Status Cards Grid - 4 columns like real StatusCard */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                        {Array.from({ length: 4 }).map((_, statusIndex) => (
+                          <div
+                            key={statusIndex}
+                            className="p-3 rounded-lg bg-muted/50"
+                          >
+                            <div className="flex items-center justify-between">
+                              <Skeleton className="h-4 w-4 rounded" />
+                              <Skeleton className="h-6 w-8" />
+                            </div>
+                            <Skeleton className="h-3 w-16 mt-1" />
+                            <Skeleton className="h-2 w-20 mt-1" />{" "}
+                            {/* Progress bar */}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Missions DataTable - Matching UserMissionsTable */}
+                    <div className="mb-4">
+                      {/* Table Header */}
+                      <div className="flex items-center justify-between mb-3">
+                        <Skeleton className="h-4 w-32" />{" "}
+                        {/* Mission Details title */}
+                        <div className="flex gap-2">
+                          <Skeleton className="h-6 w-16" /> {/* View button */}
+                          <Skeleton className="h-6 w-16" />{" "}
+                          {/* Column toggle */}
+                        </div>
+                      </div>
+
+                      {/* Table Content */}
+                      <div className="space-y-2">
+                        {Array.from({ length: 3 }).map((_, missionIndex) => (
+                          <div
+                            key={missionIndex}
+                            className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg"
+                          >
+                            <Skeleton className="h-4 w-16" /> {/* Mission ID */}
+                            <Skeleton className="h-5 w-20 rounded-full" />{" "}
+                            {/* Status badge */}
+                            <Skeleton className="h-4 w-24" /> {/* Date */}
+                            <Skeleton className="h-4 w-32" /> {/* Link */}
+                            <Skeleton className="h-6 w-6 rounded" />{" "}
+                            {/* Actions */}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Pagination - Matching UserMissionsPagination */}
+                    <div className="flex justify-between items-center pt-3 border-t border-border">
+                      <Skeleton className="h-4 w-24" /> {/* Page info */}
+                      <div className="flex gap-1">
+                        <Skeleton className="h-8 w-8" /> {/* Previous */}
+                        <Skeleton className="h-8 w-8" /> {/* Page 1 */}
+                        <Skeleton className="h-8 w-8" /> {/* Page 2 */}
+                        <Skeleton className="h-8 w-8" /> {/* Next */}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Main Pagination Loading */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
+                <Skeleton className="h-4 w-24" />
+                <div className="flex items-center space-x-1">
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                </div>
               </div>
             </div>
           </div>
@@ -474,7 +613,7 @@ const DashboardPage = () => {
                 />
                 <AdminStatCard
                   title="Total Missions"
-                  value={missions.length.toLocaleString()}
+                  value={stats?.totalmissions?.toLocaleString() ?? "0"}
                   icon={Crosshair}
                 />
                 <AdminStatCard
@@ -515,19 +654,22 @@ const DashboardPage = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-fit grid-cols-2">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              User Overview
+            <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 md:h-16">
+            <TabsTrigger
+              value="overview"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
+            >
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">User Overview</span>
             </TabsTrigger>
             <TabsTrigger
               value="user-management"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
             >
-              <UserCog className="h-4 w-4" />
-              User Management
+              <UserCog className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">User Management</span>
             </TabsTrigger>
-          </TabsList>
+            </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview">
@@ -537,13 +679,12 @@ const DashboardPage = () => {
                   {/* Sort Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8">
+                      <Button variant="outline" size="sm" className="h-8 cursor-pointer">
                         <Filter className="h-4 w-4 mr-1" />
                         {getSortIcon()}
-                        <span className="hidden sm:inline ml-1">
+                        <span className="sm:inline ml-1">
                           {sortConfig.label}
                         </span>
-                        <span className="sm:hidden ml-1">Sort</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-54">
@@ -653,14 +794,14 @@ const DashboardPage = () => {
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap ">
                       Show:
                     </span>
                     <Select
                       value={itemsPerPage.toString()}
                       onValueChange={handleItemsPerPageChange}
                     >
-                      <SelectTrigger className="w-20 h-8">
+                      <SelectTrigger className="w-20 h-8 cursor-pointer">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
