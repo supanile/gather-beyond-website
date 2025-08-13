@@ -122,23 +122,23 @@ export const getStatusCardConfig = (status: string | null | undefined) => {
   switch (status.toLowerCase()) {
     case "active":
       return {
-        color: "text-green-600 dark:text-green-400",
-        bgColor: "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10",
+        color: "text-green-600 dark:text-green-300",
+        bgColor: "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20",
       };
     case "upcoming":
       return {
-        color: "text-orange-600 dark:text-orange-400",
-        bgColor: "bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10",
+        color: "text-orange-600 dark:text-orange-300",
+        bgColor: "bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20",
       };
     case "completed":
       return {
-        color: "text-blue-600 dark:text-blue-400",
-        bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10",
+        color: "text-blue-600 dark:text-blue-300",
+        bgColor: "bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20",
       };
     case "ended":
       return {
-        color: "text-red-600 dark:text-red-400",
-        bgColor: "bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/10 dark:to-rose-900/10",
+        color: "text-red-600 dark:text-red-300",
+        bgColor: "bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20",
       };
     default:
       return {

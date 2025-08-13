@@ -98,8 +98,8 @@ const AdminUserTable = ({
                 status="completed"
                 count={statusStats.completed}
                 icon={CheckCircle}
-                color="text-green-600 dark:text-green-400"
-                bgColor="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10"
+                color="text-green-600 dark:text-green-300"
+                bgColor="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20"
                 isSelected={selectedStatus === "completed"}
                 onClick={setSelectedStatus}
                 totalMissions={totalMissions}
@@ -108,8 +108,8 @@ const AdminUserTable = ({
                 status="submitted"
                 count={statusStats.submitted}
                 icon={Upload}
-                color="text-yellow-600 dark:text-yellow-400"
-                bgColor="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/10 dark:to-amber-900/10"
+                color="text-yellow-600 dark:text-yellow-300"
+                bgColor="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20"
                 isSelected={selectedStatus === "submitted"}
                 onClick={setSelectedStatus}
                 totalMissions={totalMissions}
@@ -118,8 +118,8 @@ const AdminUserTable = ({
                 status="accepted"
                 count={statusStats.accepted}
                 icon={Clock}
-                color="text-blue-600 dark:text-blue-400"
-                bgColor="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10"
+                color="text-blue-600 dark:text-blue-300"
+                bgColor="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20"
                 isSelected={selectedStatus === "accepted"}
                 onClick={setSelectedStatus}
                 totalMissions={totalMissions}
@@ -128,8 +128,8 @@ const AdminUserTable = ({
                 status="rejected"
                 count={statusStats.rejected}
                 icon={XCircle}
-                color="text-red-600 dark:text-red-400"
-                bgColor="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/10 dark:to-rose-900/10"
+                color="text-red-600 dark:text-red-300"
+                bgColor="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20"
                 isSelected={selectedStatus === "rejected"}
                 onClick={setSelectedStatus}
                 totalMissions={totalMissions}

@@ -144,17 +144,17 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
   };
 
   const getHealthColor = (health: number) => {
-    if (health >= 80) return "text-green-600 dark:text-green-400";
-    if (health >= 60) return "text-yellow-600 dark:text-yellow-400";
-    if (health >= 40) return "text-orange-600 dark:text-orange-400";
-    return "text-red-600 dark:text-red-400";
+    if (health >= 80) return "text-green-600 dark:text-green-300";
+    if (health >= 60) return "text-yellow-600 dark:text-yellow-300";
+    if (health >= 40) return "text-orange-600 dark:text-orange-300";
+    return "text-red-600 dark:text-red-300";
   };
 
   const getHealthBarColor = (health: number) => {
-    if (health >= 80) return "bg-green-600 dark:bg-green-500";
-    if (health >= 60) return "bg-yellow-600 dark:bg-yellow-500";
-    if (health >= 40) return "bg-orange-600 dark:bg-orange-500";
-    return "bg-red-600 dark:bg-red-500";
+    if (health >= 80) return "bg-green-600 dark:bg-green-400";
+    if (health >= 60) return "bg-yellow-600 dark:bg-yellow-400";
+    if (health >= 40) return "bg-orange-600 dark:bg-orange-400";
+    return "bg-red-600 dark:bg-red-400";
   };
 
   const getLevelBadgeColor = (level: number, allUsers: UserWithAgent[]) => {
