@@ -116,7 +116,7 @@ const Header: React.FC = () => {
                 <NavigationMenu>
                   <NavigationMenuList>
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger className="cursor-pointer text-muted-foreground hover:text-primary transition-all duration-300 font-medium bg-transparent hover:bg-accent/50 rounded-lg px-3 py-2 relative group border-none after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-gray-600 after:to-slate-600 after:transition-all after:duration-300 hover:after:w-full">
+                      <NavigationMenuTrigger className="cursor-pointer text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 font-medium bg-transparent hover:bg-accent/50 rounded-lg px-3 py-2 relative group border-none after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-gray-600 after:to-slate-600 after:transition-all after:duration-300 hover:after:w-full">
                         Features
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
@@ -139,7 +139,7 @@ const Header: React.FC = () => {
                       </NavigationMenuContent>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger className="cursor-pointer text-muted-foreground hover:text-primary transition-all duration-300 font-medium bg-transparent hover:bg-accent/50 rounded-lg px-3 py-2 relative group border-none after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-gray-600 after:to-slate-600 after:transition-all after:duration-300 hover:after:w-full">
+                      <NavigationMenuTrigger className="cursor-pointer text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 font-medium bg-transparent hover:bg-accent/50 rounded-lg px-3 py-2 relative group border-none after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-gray-600 after:to-slate-600 after:transition-all after:duration-300 hover:after:w-full">
                         Resources
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
@@ -170,7 +170,7 @@ const Header: React.FC = () => {
                 {/* Show when user is NOT signed in */}
                 <SignedOut>
                   <SignInButton mode="modal">
-                    <button className="cursor-pointer text-muted-foreground hover:text-primary transition-all duration-300 font-medium px-4 py-2 rounded-lg hover:bg-accent/50 relative group after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r after:from-gray-600/20 after:to-slate-600/20 after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300">
+                    <button className="cursor-pointer text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 font-medium px-4 py-2 rounded-lg hover:bg-accent/50 relative group after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r after:from-gray-600/20 after:to-slate-600/20 after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300">
                       <span className="relative z-10">Sign In</span>
                     </button>
                   </SignInButton>
@@ -241,7 +241,7 @@ const Header: React.FC = () => {
                         <Link
                           key={feature.title}
                           href={feature.href}
-                          className="cursor-pointer block p-3 text-sm text-muted-foreground hover:text-primary transition-all duration-300 rounded-lg hover:bg-accent/50 transform hover:scale-105 animate-fade-up"
+                          className="cursor-pointer block p-3 text-sm text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 rounded-lg hover:bg-accent/50 transform hover:scale-105 animate-fade-up"
                           style={{ animationDelay: `${index * 100}ms` }}
                         >
                           <div className="font-medium">{feature.title}</div>
@@ -260,7 +260,7 @@ const Header: React.FC = () => {
                         <Link
                           key={resource.title}
                           href={resource.href}
-                          className="cursor-pointer block p-3 text-sm text-muted-foreground hover:text-primary transition-all duration-300 rounded-lg hover:bg-accent/50 transform hover:scale-105 animate-fade-up"
+                          className="cursor-pointer block p-3 text-sm text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 rounded-lg hover:bg-accent/50 transform hover:scale-105 animate-fade-up"
                           style={{ animationDelay: `${index * 100 + 400}ms` }}
                         >
                           <div className="font-medium">{resource.title}</div>
@@ -273,7 +273,7 @@ const Header: React.FC = () => {
                     {/* Mobile Authentication - Show when NOT signed in */}
                     <SignedOut>
                       <SignInButton mode="modal">
-                        <button className="cursor-pointer w-full text-center text-muted-foreground hover:text-primary transition-all duration-300 font-medium py-3 px-4 rounded-xl border border-border/50 hover:bg-accent/50 hover:border-primary/50 transform hover:scale-105">
+                        <button className="cursor-pointer w-full text-center text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 font-medium py-3 px-4 rounded-xl border border-border/50 hover:bg-accent/50 hover:border-gray-500/50 dark:hover:border-slate-400/50 transform hover:scale-105">
                           Sign In
                         </button>
                       </SignInButton>

@@ -180,7 +180,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                     placeholder="Search projects..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200"
+                    className="w-full pl-10 pr-4 py-3 bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-gray-500/50 dark:focus:ring-slate-400/50 focus:border-gray-500/50 dark:focus:border-slate-400/50 transition-all duration-200"
                   />
                 </div>
               )}
@@ -191,7 +191,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                     <select
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="appearance-none bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl px-4 py-3 pr-8 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200"
+                      className="appearance-none bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl px-4 py-3 pr-8 text-foreground focus:outline-none focus:ring-2 focus:ring-gray-500/50 dark:focus:ring-slate-400/50 focus:border-gray-500/50 dark:focus:border-slate-400/50 transition-all duration-200"
                     >
                       {categories.map((category) => (
                         <option key={category} value={category}>
@@ -202,7 +202,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                     <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   </div>
 
-                  <button className="flex items-center gap-2 bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl px-4 py-3 text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-200">
+                  <button className="flex items-center gap-2 bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl px-4 py-3 text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 hover:border-gray-500/50 dark:hover:border-slate-400/50 transition-all duration-200">
                     <Filter className="w-4 h-4" />
                     More Filters
                   </button>
@@ -305,7 +305,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                           </div>
                         )}
                         <div>
-                          <div className="font-medium text-foreground group-hover:text-primary transition-colors duration-200">
+                          <div className="font-medium text-foreground group-hover:text-gray-800 dark:group-hover:text-slate-200 transition-colors duration-200">
                             {project.name}
                           </div>
                           {project.verified && (
