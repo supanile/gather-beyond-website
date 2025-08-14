@@ -4,7 +4,7 @@ import * as React from "react";
 import { BarChart3, Crosshair, Home, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ModeToggle } from "@/components/Header/Darkmode";
+import { ModeToggle } from "@/components/LandingDashboard/Header/Darkmode";
 
 import {
   Sidebar,
