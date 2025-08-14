@@ -12,10 +12,10 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+
 import { cn } from "@/lib/utils";
 
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { Search } from "lucide-react";
 
 // Define types for props
 interface ListItemProps {
@@ -32,9 +32,9 @@ interface FeatureItem {
 }
 
 
+
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
 
   const toggleMenu = (): void => {
     setIsMenuOpen(!isMenuOpen);
@@ -85,30 +85,6 @@ const Header: React.FC = () => {
       description: "Latest news and updates",
     },
   ];
-
-  // Search items combining features and resources
-  const searchItems: SearchItem[] = [
-    ...features.map(item => ({ ...item, category: "Features" })),
-    ...resources.map(item => ({ ...item, category: "Resources" })),
-    {
-      title: "Dashboard",
-      href: "/admin/userdashboard",
-      category: "Navigation",
-      description: "Access your admin dashboard"
-    },
-    {
-      title: "Home",
-      href: "/",
-      category: "Navigation", 
-      description: "Go to homepage"
-    }
-  ];
-
-  const handleSearch = (href: string) => {
-    setIsSearchOpen(false);
-    // You can add additional search logic here
-    window.location.href = href;
-  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -191,16 +167,6 @@ const Header: React.FC = () => {
 
               {/* Desktop Search & CTA */}
               <div className="hidden md:flex items-center space-x-4">
-                {/* Search Button */}
-                <button
-                  onClick={() => setIsSearchOpen(true)}
-                  className="cursor-pointer flex items-center space-x-2 text-muted-foreground hover:text-primary transition-all duration-300 font-medium px-4 py-2 rounded-lg hover:bg-accent/50 relative group after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-r after:from-gray-600/20 after:to-slate-600/20 after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300 border border-border/50 hover:border-primary/50"
-                >
-                  <Search className="w-4 h-4" />
-                  <span className="relative z-10">Search</span>
-                  <span className="text-xs text-muted-foreground/60 ml-2 relative z-10">⌘K</span>
-                </button>
-
                 {/* Show when user is NOT signed in */}
                 <SignedOut>
                   <SignInButton mode="modal">
@@ -265,15 +231,6 @@ const Header: React.FC = () => {
             >
               <div className="relative bg-background/90 backdrop-blur-xl border border-border/50 rounded-2xl m-4 p-6 shadow-2xl before:absolute before:inset-0 before:bg-gradient-to-br before:from-gray-50/30 before:to-slate-50/30 dark:before:from-gray-950/30 dark:before:to-slate-950/30 before:rounded-2xl">
                 <nav className="relative space-y-6 z-10">
-                  {/* Mobile Search */}
-                  <button
-                    onClick={() => setIsSearchOpen(true)}
-                    className="cursor-pointer w-full flex items-center space-x-3 text-muted-foreground hover:text-primary transition-all duration-300 font-medium p-4 rounded-xl border border-border/50 hover:bg-accent/50 hover:border-primary/50 transform hover:scale-105"
-                  >
-                    <Search className="w-5 h-5" />
-                    <span>Search...</span>
-                  </button>
-
                   {/* Mobile Features */}
                   <div className="space-y-3">
                     <h3 className="font-semibold text-lg bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text text-transparent">
@@ -350,21 +307,6 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Keyboard shortcut listener */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            document.addEventListener('keydown', function(e) {
-              if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                // This would trigger the search dialog in React
-                // You'll need to handle this in your actual component
-              }
-            });
-          `,
-        }}
-      />
     </header>
   );
 };
