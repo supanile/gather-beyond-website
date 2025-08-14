@@ -48,7 +48,7 @@ const HeroSection: React.FC = () => {
             {filters.map((filter, index) => (
               <button
                 key={filter}
-                className="px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-border/50 bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-accent/50 transition-all duration-300 transform hover:scale-105 animate-fade-up text-sm sm:text-base whitespace-nowrap"
+                className="px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-border/50 bg-background/60 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:border-border hover:bg-accent/50 transition-all duration-300 transform hover:scale-105 animate-fade-up text-sm sm:text-base whitespace-nowrap"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {filter}
