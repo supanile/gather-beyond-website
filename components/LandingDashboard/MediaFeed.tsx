@@ -131,7 +131,7 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
           <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text text-transparent">
             Media Feed
           </h2>
-          <button className="text-sm text-muted-foreground hover:text-primary transition-colors duration-300 flex items-center gap-1">
+          <button className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-300 flex items-center gap-1">
             View all
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -142,7 +142,7 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
           <div className="mb-8">
             <article
               onClick={() => handleArticleClick(featuredArticles[0].id)}
-              className="group bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-8 hover:border-primary/50 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
+              className="group bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-8 hover:border-foreground/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
             >
               <div className="flex items-start gap-6">
                 <div className="flex-1 space-y-4">
@@ -162,7 +162,7 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
                     </span>
                   </div>
 
-                  <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                  <h3 className="text-2xl font-bold text-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
                     {featuredArticles[0].title}
                   </h3>
 
@@ -183,7 +183,7 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
                         <span>{featuredArticles[0].publishedAt}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-primary transition-colors duration-300">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
                       <span>Read more</span>
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
@@ -200,7 +200,7 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
             <article
               key={article.id || index}
               onClick={() => handleArticleClick(article.id)}
-              className="group bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-primary/50 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer animate-fade-up"
+              className="group bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-foreground/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer animate-fade-up"
               style={{ animationDelay: `${index * 150}ms` }}
             >
               <div className="space-y-4">
@@ -217,7 +217,7 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
                   </span>
                 </div>
 
-                <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors duration-300 line-clamp-2">
+                <h3 className="text-xl font-semibold text-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 line-clamp-2">
                   {article.title}
                 </h3>
 
@@ -240,10 +240,10 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                  <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors duration-300">
+                  <span className="text-sm text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
                     Read more
                   </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 group-hover:translate-x-1 transition-all duration-300" />
                 </div>
               </div>
             </article>
