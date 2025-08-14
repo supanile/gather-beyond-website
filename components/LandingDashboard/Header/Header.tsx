@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { Search } from "lucide-react";
 
 // Define types for props
 interface ListItemProps {
