@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronRight, Calendar, User, Badge } from "lucide-react";
+import { ChevronRight, Calendar, Badge } from "lucide-react";
 
 interface Article {
   id?: number;
@@ -142,11 +142,11 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
           <div className="mb-8">
             <article
               onClick={() => handleArticleClick(featuredArticles[0].id)}
-              className="group bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-8 hover:border-foreground/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
+              className="group bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-foreground/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
             >
-              <div className="flex items-start gap-6">
+              <div className="flex flex-col lg:flex-row lg:items-start gap-6">
                 <div className="flex-1 space-y-4">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <span
                       className={`px-3 py-1 rounded-lg text-xs font-medium ${getCategoryColor(
                         featuredArticles[0].category
@@ -162,31 +162,33 @@ const MediaFeed: React.FC<MediaFeedProps> = ({
                     </span>
                   </div>
 
-                  <h3 className="text-2xl font-bold text-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
+                  <h3 className="text-xl font-semibold text-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 line-clamp-2">
                     {featuredArticles[0].title}
                   </h3>
 
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
                     {featuredArticles[0].subtitle}
                   </p>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      {featuredArticles[0].author && (
-                        <div className="flex items-center gap-1">
-                          <User className="w-4 h-4" />
-                          <span>By {featuredArticles[0].author}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        {getTypeIcon(featuredArticles[0].type)}
+                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
+                    <div className="flex items-center gap-2">
+                      {getTypeIcon(featuredArticles[0].type)}
+                      {featuredArticles[0].author ? (
+                        <span>By {featuredArticles[0].author}</span>
+                      ) : (
                         <span>{featuredArticles[0].publishedAt}</span>
-                      </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
-                      <span>Read more</span>
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
+                    {featuredArticles[0].author && featuredArticles[0].publishedAt && (
+                      <span>{featuredArticles[0].publishedAt}</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                    <span className="text-sm text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
+                      Read more
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 group-hover:translate-x-1 transition-all duration-300" />
                   </div>
                 </div>
               </div>
