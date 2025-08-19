@@ -1,121 +1,20 @@
 import React from "react";
 import { Shield, Activity, ChevronLeft, ChevronRight } from "lucide-react";
+import { featuredProjects, Project } from "@/data/admin/projectMockData";
 
-interface Project {
-  id: number;
-  name: string;
-  logo: string;
-  tags: string[];
-  trustScore: number;
-  mindshareScore: number;
-  category: string;
-}
-
+// interface for props
 interface FeaturedProjectsProps {
   projects?: Project[];
 }
 
-const defaultProjects: Project[] = [
-  {
-    id: 1,
-    name: "DecentraDAO",
-    logo: "🏛️",
-    tags: ["Gaming", "DePIN"],
-    trustScore: 85,
-    mindshareScore: 72,
-    category: "DAO",
-  },
-  {
-    id: 2,
-    name: "AiAgent Protocol",
-    logo: "🤖",
-    tags: ["AI", "Infrastructure"],
-    trustScore: 20,
-    mindshareScore: 28,
-    category: "AI",
-  },
-  {
-    id: 3,
-    name: "CryptoGuild",
-    logo: "⚔️",
-    tags: ["Gaming", "NFT"],
-    trustScore: 78,
-    mindshareScore: 65,
-    category: "Gaming",
-  },
-  {
-    id: 4,
-    name: "Web3Social",
-    logo: "🌐",
-    tags: ["Social", "DeFi"],
-    trustScore: 92,
-    mindshareScore: 88,
-    category: "Social",
-  },
-  {
-    id: 5,
-    name: "MetaVerse Hub",
-    logo: "🚀",
-    tags: ["Metaverse", "VR"],
-    trustScore: 67,
-    mindshareScore: 54,
-    category: "Metaverse",
-  },
-  {
-    id: 6,
-    name: "BlockChain Games",
-    logo: "🎮",
-    tags: ["Gaming", "Blockchain"],
-    trustScore: 73,
-    mindshareScore: 61,
-    category: "Gaming",
-  },
-  {
-    id: 7,
-    name: "DeFi Protocol",
-    logo: "💰",
-    tags: ["DeFi", "Finance"],
-    trustScore: 88,
-    mindshareScore: 79,
-    category: "DeFi",
-  },
-  {
-    id: 8,
-    name: "NFT Marketplace",
-    logo: "🎨",
-    tags: ["NFT", "Art"],
-    trustScore: 81,
-    mindshareScore: 68,
-    category: "NFT",
-  },
-  {
-    id: 9,
-    name: "Smart Contracts",
-    logo: "📋",
-    tags: ["Smart Contract", "Security"],
-    trustScore: 95,
-    mindshareScore: 85,
-    category: "Infrastructure",
-  },
-  {
-    id: 10,
-    name: "Crypto Wallet",
-    logo: "💳",
-    tags: ["Wallet", "Security"],
-    trustScore: 90,
-    mindshareScore: 82,
-    category: "Wallet",
-  },
-];
-
 export const FeaturedProjects: React.FC<FeaturedProjectsProps> = ({
-  projects = defaultProjects,
+  projects = featuredProjects,
 }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
 
   // Responsive cards per view
   const getCardsPerView = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       if (window.innerWidth < 768) return 1; // Mobile
       if (window.innerWidth < 1024) return 2; // Tablet
       return 3; // Desktop
@@ -130,8 +29,8 @@ export const FeaturedProjects: React.FC<FeaturedProjectsProps> = ({
       setCardsPerView(getCardsPerView());
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const maxIndex = Math.max(0, Math.ceil(projects.length / cardsPerView) - 1);
@@ -142,10 +41,6 @@ export const FeaturedProjects: React.FC<FeaturedProjectsProps> = ({
 
   const prevSlide = () => {
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
-  };
-
-  const handleViewProfile = (projectId: number) => {
-    console.log(`View profile for project ${projectId}`);
   };
 
   const getScoreColor = (score: number, type: "trust" | "mindshare") => {
@@ -190,13 +85,19 @@ export const FeaturedProjects: React.FC<FeaturedProjectsProps> = ({
               (_, slideIndex) => (
                 <div key={slideIndex} className="w-full flex-shrink-0 flex">
                   {projects
-                    .slice(slideIndex * cardsPerView, (slideIndex + 1) * cardsPerView)
+                    .slice(
+                      slideIndex * cardsPerView,
+                      (slideIndex + 1) * cardsPerView
+                    )
                     .map((project) => (
                       <div
                         key={project.id}
                         className={`flex-shrink-0 px-2 sm:px-3 ${
-                          cardsPerView === 1 ? 'w-full' : 
-                          cardsPerView === 2 ? 'w-1/2' : 'w-1/3'
+                          cardsPerView === 1
+                            ? "w-full"
+                            : cardsPerView === 2
+                            ? "w-1/2"
+                            : "w-1/3"
                         }`}
                       >
                         <div className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-300/70 dark:hover:border-gray-600/70 hover:shadow-2xl dark:hover:shadow-gray-900/30 transition-all duration-300 hover:scale-105 h-full hover:z-10">
@@ -276,28 +177,39 @@ export const FeaturedProjects: React.FC<FeaturedProjectsProps> = ({
                               </div>
                             </div>
 
-                            <button
-                              onClick={() => handleViewProfile(project.id)}
-                              className="w-full mt-3 sm:mt-4 bg-gradient-to-r from-gray-800 to-slate-700 dark:from-gray-200 dark:to-slate-300 text-white dark:text-black py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium hover:from-gray-900 hover:to-slate-800 dark:hover:from-gray-100 dark:hover:to-slate-200 transition-all duration-300 shadow-lg hover:shadow-xl dark:shadow-gray-900/50 dark:hover:shadow-gray-800/50 group-hover:shadow-xl text-sm sm:text-base"
+                            <a
+                              href={`/project-profile?id=${project.id}`}
+                              className="block w-full mt-3 sm:mt-4 bg-gradient-to-r from-gray-800 to-slate-700 dark:from-gray-200 dark:to-slate-300 text-white dark:text-black py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium hover:from-gray-900 hover:to-slate-800 dark:hover:from-gray-100 dark:hover:to-slate-200 transition-all duration-300 shadow-lg hover:shadow-xl dark:shadow-gray-900/50 dark:hover:shadow-gray-800/50 group-hover:shadow-xl text-sm sm:text-base text-center"
                             >
                               View Profile
-                            </button>
+                            </a>
                           </div>
                         </div>
                       </div>
                     ))}
                   {/* Fill empty slots if less than cardsPerView cards in last slide */}
-                  {projects.slice(slideIndex * cardsPerView, (slideIndex + 1) * cardsPerView).length < cardsPerView &&
+                  {projects.slice(
+                    slideIndex * cardsPerView,
+                    (slideIndex + 1) * cardsPerView
+                  ).length < cardsPerView &&
                     Array.from(
                       {
-                        length: cardsPerView - projects.slice(slideIndex * cardsPerView, (slideIndex + 1) * cardsPerView).length,
+                        length:
+                          cardsPerView -
+                          projects.slice(
+                            slideIndex * cardsPerView,
+                            (slideIndex + 1) * cardsPerView
+                          ).length,
                       },
                       (_, emptyIndex) => (
                         <div
                           key={`empty-${emptyIndex}`}
                           className={`flex-shrink-0 px-2 sm:px-3 ${
-                            cardsPerView === 1 ? 'w-full' : 
-                            cardsPerView === 2 ? 'w-1/2' : 'w-1/3'
+                            cardsPerView === 1
+                              ? "w-full"
+                              : cardsPerView === 2
+                              ? "w-1/2"
+                              : "w-1/3"
                           }`}
                         ></div>
                       )
