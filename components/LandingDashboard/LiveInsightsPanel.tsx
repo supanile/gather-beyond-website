@@ -1,20 +1,24 @@
 import React from "react";
 import { TrendingUp, AlertTriangle, Shield } from "lucide-react";
+import { allProjects as projects, Project } from "@/data/admin/projectMockData";
 
 interface GainerItem {
   name: string;
   gain: string;
+  project: Project;
 }
 
 interface RiskItem {
   name: string;
   risk: "High" | "Medium" | "Low";
+  project: Project;
 }
 
 interface VerifiedCommunity {
   name: string;
   verifiedDate: string;
   category: string;
+  project: Project;
 }
 
 interface LiveInsightsPanelProps {
@@ -23,33 +27,53 @@ interface LiveInsightsPanelProps {
   recentlyVerified?: VerifiedCommunity[];
 }
 
-const defaultTopGainers: GainerItem[] = [
-  { name: "MetaVerse DAO", gain: "+45%" },
-  { name: "DeFi Protocol X", gain: "+38%" },
-  { name: "GameFi Alliance", gain: "+32%" },
-  { name: "AI Collective", gain: "+28%" },
-];
+// Generate dynamic data from projects
+const generateTopGainers = (): GainerItem[] => {
+  return projects
+    .filter((p: Project) => p.mindshareScore >= 70)
+    .sort((a: Project, b: Project) => b.mindshareScore - a.mindshareScore)
+    .slice(0, 4)
+    .map((project: Project) => ({
+      name: project.name,
+      gain: `+${Math.floor(Math.random() * 20 + 25)}%`,
+      project
+    }));
+};
 
-const defaultRiskWatchlist: RiskItem[] = [
-  { name: "Failed Campaign #1", risk: "High" },
-  { name: "Disputed Protocol", risk: "Medium" },
-  { name: "Unverified Project", risk: "High" },
-  { name: "Low Activity DAO", risk: "Low" },
-];
+const generateRiskWatchlist = (): RiskItem[] => {
+  const riskProjects = projects
+    .filter((p: Project) => p.trustScore < 60)
+    .slice(0, 4);
+  
+  return riskProjects.map((project: Project) => ({
+    name: project.name,
+    risk: project.trustScore < 30 ? "High" as const : 
+          project.trustScore < 50 ? "Medium" as const : "Low" as const,
+    project
+  }));
+};
 
-const defaultRecentlyVerified: VerifiedCommunity[] = [
-  { name: "CommunityX DAO", verifiedDate: "2 hours ago", category: "DAO" },
-  { name: "BlockchainGuild", verifiedDate: "5 hours ago", category: "DeFi" },
-  { name: "AIAgents Network", verifiedDate: "1 day ago", category: "AI" },
-  { name: "GameFi Collective", verifiedDate: "2 days ago", category: "Gaming" },
-];
+const generateRecentlyVerified = (): VerifiedCommunity[] => {
+  const verifiedProjects = projects
+    .filter((p: Project) => p.trustScore >= 80)
+    .slice(0, 4);
+  
+  const timeframes = ["2 hours ago", "5 hours ago", "1 day ago", "2 days ago"];
+  
+  return verifiedProjects.map((project: Project, index: number) => ({
+    name: project.name,
+    verifiedDate: timeframes[index] || `${index + 1} days ago`,
+    category: project.category,
+    project
+  }));
+};
 
 const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
-  topGainers = defaultTopGainers,
-  riskWatchlist = defaultRiskWatchlist,
-  recentlyVerified = defaultRecentlyVerified,
+  topGainers = generateTopGainers(),
+  riskWatchlist = generateRiskWatchlist(),
+  recentlyVerified = generateRecentlyVerified(),
 }) => {
-  const getRiskBadgeStyle = (risk: string) => {
+  const getRiskBadgeStyle = (risk: string): string => {
     switch (risk) {
       case "High":
         return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
@@ -62,13 +86,17 @@ const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
     }
   };
 
-  const getCategoryBadgeStyle = (category: string) => {
+  const getCategoryBadgeStyle = (category: string): string => {
     const colors: { [key: string]: string } = {
       DAO: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
       DeFi: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
       AI: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-      Gaming:
-        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+      Gaming: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+      NFT: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400",
+      Infrastructure: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
+      Social: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400",
+      Metaverse: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+      Wallet: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400",
     };
     return (
       colors[category] ||
@@ -76,17 +104,19 @@ const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
     );
   };
 
+  const handleItemClick = (project: Project): void => {
+    // Navigate to project profile
+    window.location.href = `/project-profile?id=${project.id}`;
+  };
+
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-gray-50/30 to-slate-50/30 dark:from-gray-950/30 dark:to-slate-950/30">
-      {/* Adjusted padding for smaller screens */}
       <div className="max-w-full sm:max-w-4xl lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Responsive max-width for better content scaling */}
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text text-transparent">
           Live Insights Panel
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          {/* Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop */}
           {/* Top Gainers */}
           <div className="bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-4 sm:p-6 hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center space-x-3 mb-4 sm:mb-6">
@@ -100,14 +130,18 @@ const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
             </div>
 
             <div className="space-y-3 sm:space-y-4">
-              {topGainers.map((item, index) => (
+              {topGainers.map((item: GainerItem, index: number) => (
                 <div
                   key={index}
+                  onClick={() => handleItemClick(item.project)}
                   className="flex justify-between items-center p-3 rounded-xl bg-accent/30 hover:bg-accent/50 transition-all duration-200 cursor-pointer transform hover:scale-105"
                 >
-                  <span className="font-medium text-foreground text-sm sm:text-base">
-                    {item.name}
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">{item.project.logo}</span>
+                    <span className="font-medium text-foreground text-sm sm:text-base">
+                      {item.name}
+                    </span>
+                  </div>
                   <span className="text-green-600 dark:text-green-400 font-semibold text-sm sm:text-base">
                     {item.gain}
                   </span>
@@ -126,14 +160,18 @@ const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
             </div>
 
             <div className="space-y-3 sm:space-y-4">
-              {riskWatchlist.map((item, index) => (
+              {riskWatchlist.map((item: RiskItem, index: number) => (
                 <div
                   key={index}
+                  onClick={() => handleItemClick(item.project)}
                   className="flex justify-between items-center p-3 rounded-xl bg-accent/30 hover:bg-accent/50 transition-all duration-200 cursor-pointer transform hover:scale-105"
                 >
-                  <span className="font-medium text-foreground text-sm sm:text-base">
-                    {item.name}
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">{item.project.logo}</span>
+                    <span className="font-medium text-foreground text-sm sm:text-base">
+                      {item.name}
+                    </span>
+                  </div>
                   <span
                     className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold ${getRiskBadgeStyle(
                       item.risk
@@ -156,15 +194,19 @@ const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
             </div>
 
             <div className="space-y-3 sm:space-y-4">
-              {recentlyVerified.map((item, index) => (
+              {recentlyVerified.map((item: VerifiedCommunity, index: number) => (
                 <div
                   key={index}
+                  onClick={() => handleItemClick(item.project)}
                   className="p-3 rounded-xl bg-accent/30 hover:bg-accent/50 transition-all duration-200 cursor-pointer transform hover:scale-105"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium text-foreground text-sm sm:text-base">
-                      {item.name}
-                    </span>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-lg">{item.project.logo}</span>
+                      <span className="font-medium text-foreground text-sm sm:text-base">
+                        {item.name}
+                      </span>
+                    </div>
                     <span
                       className={`px-2 py-1 rounded-lg text-xs sm:text-sm font-medium ${getCategoryBadgeStyle(
                         item.category
