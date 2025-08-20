@@ -66,7 +66,7 @@
 //     wallet_address: "0xabcdefabcdef1234",
 //     created_at: "2024-01-03T11:30:00Z",
 //   },
-//   // เพิ่มข้อมูลสำหรับ user_id ที่ยังไม่มีใน mockUsers
+//   // ข้อมูลสำหรับ user_id ที่ยังไม่มีใน mockUsers
 //   {
 //     _id: "686d666f143af8f677e6b4b0",
 //     discord_id: "821338779580792",
@@ -116,7 +116,7 @@
 //     status: "submitted",
 //     accepted_at: "2025-06-17 13:17:34",
 //     submitted_at: "2025-06-17 13:18:00",
-//     completed_at: "2025-06-17 13:25:00", // เพิ่มเวลาที่คาดว่าจะเสร็จ
+//     completed_at: "2025-06-17 13:25:00",
 //     submission_link: "https://example.com/submission1",
 //   },
 //   {
@@ -126,7 +126,7 @@
 //     status: "submitted",
 //     accepted_at: "2025-06-17 13:17:49",
 //     submitted_at: "2025-06-17 13:19:00",
-//     completed_at: "2025-06-17 13:30:00", // เพิ่มเวลาที่คาดว่าจะเสร็จ
+//     completed_at: "2025-06-17 13:30:00",
 //     submission_link: "https://example.com/sub1",
 //   },
 //   {
@@ -146,7 +146,7 @@
 //     status: "rejected",
 //     accepted_at: "2025-06-17 12:21:52",
 //     submitted_at: "2025-06-17 12:22:30",
-//     completed_at: "2025-06-17 12:25:00", // เพิ่มเวลาที่ถูกปฏิเสธ
+//     completed_at: "2025-06-17 12:25:00",
 //     submission_link: "https://example.com/sub3",
 //   },
 //   {

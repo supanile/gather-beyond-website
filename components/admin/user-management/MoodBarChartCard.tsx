@@ -145,7 +145,7 @@ const MoodBarChartCard: React.FC<MoodBarChartCardProps> = ({
               <BarChart
                 data={data}
                 margin={{
-                  top: 60, // เพิ่ม top margin สำหรับ emoji และ percentage
+                  top: 60,
                   right: 30,
                   left: 20,
                   bottom: -15,
