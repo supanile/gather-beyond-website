@@ -50,6 +50,8 @@ import {
 
 // Import the Mission Targeting Form component
 import MissionTargetingForm from "./MissionTargetingForm";
+// Import the new Preview Modal component
+import { MissionPreviewModal } from "./MissionPreviewModal";
 
 // Define the NewMissionForm interface
 interface DraftData {
@@ -229,7 +231,7 @@ const DateTimePicker = ({
       // Format as ISO string but keep local timezone
       // Remove 'Z' to prevent UTC conversion
       const formattedDateTime = format(localDate, "yyyy-MM-dd'T'HH:mm:ss");
-      
+
       onChange(formattedDateTime);
     }
   };
@@ -252,7 +254,7 @@ const DateTimePicker = ({
 
       // Format as ISO string but keep local timezone
       const formattedDateTime = format(localDate, "yyyy-MM-dd'T'HH:mm:ss");
-      
+
       onChange(formattedDateTime);
     }
   };
@@ -438,6 +440,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
   // Internal loading state for better UX
   const [internalLoading, setInternalLoading] = useState(false);
+  
+  // Preview modal state
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  
   // draft key
   const draftKey = `mission_draft_${
     isEditMode ? newMission.title || "edit" : "new"
@@ -616,10 +622,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       errors.format = "Format is required";
     }
 
-    if (!newMission.useful_link?.trim()) {
-      errors.useful_link = "Useful Link is required";
-    }
-
     if (!newMission.startDate?.trim()) {
       errors.startDate = "Start Date is required";
     }
@@ -630,10 +632,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
     if (!newMission.action_request?.trim()) {
       errors.action_request = "Action Request is required";
-    }
-
-    if (!newMission.requirements?.trim()) {
-      errors.requirements = "Requirements is required";
     }
 
     // Level Required validation
@@ -808,6 +806,11 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   };
 
+  // Handle preview mission
+  const handlePreviewMission = () => {
+    setIsPreviewOpen(true);
+  };
+
   // error message summary for the alert
   const getErrorSummary = () => {
     const errorCount = Object.keys(validationErrors).length;
@@ -839,535 +842,552 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      {!isEditMode && (
-        <DialogTrigger asChild>
-          <Button className="bg-black text-white hover:bg-black/90 hover:text-white dark:bg-white dark:text-black dark:hover:bg-white/90 dark:hover:text-black cursor-pointer">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Mission
-          </Button>
-        </DialogTrigger>
-      )}
-      <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto modal-content">
-        <DialogHeader className="pb-6">
-          <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        {!isEditMode && (
+          <DialogTrigger asChild>
+            <Button className="bg-black text-white hover:bg-black/90 hover:text-white dark:bg-white dark:text-black dark:hover:bg-white/90 dark:hover:text-black cursor-pointer">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Mission
+            </Button>
+          </DialogTrigger>
+        )}
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto modal-content">
+          <DialogHeader className="pb-6">
+            <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
+          </DialogHeader>
 
-        {/* Notification Alert - ใหม่ */}
-        {notificationAlert.show && (
-          <Alert
-            className={cn(
-              "mb-6 relative transform transition-all duration-300 ease-in-out animate-in slide-in-from-top-2 fade-in-0",
-              notificationAlert.type === "success"
-                ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950"
-                : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950"
-            )}
-          >
-            {notificationAlert.type === "success" ? (
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-            ) : (
-              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-            )}
-            <AlertDescription
+          {/* Notification Alert - ใหม่ */}
+          {notificationAlert.show && (
+            <Alert
               className={cn(
-                "pr-8",
+                "mb-6 relative transform transition-all duration-300 ease-in-out animate-in slide-in-from-top-2 fade-in-0",
                 notificationAlert.type === "success"
-                  ? "text-green-700 dark:text-green-300"
-                  : "text-red-700 dark:text-red-300"
+                  ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950"
+                  : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950"
               )}
             >
-              <strong>{notificationAlert.title}</strong>
-              <br />
-              {notificationAlert.description}
-            </AlertDescription>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-transparent"
-              onClick={() =>
-                setNotificationAlert((prev) => ({ ...prev, show: false }))
-              }
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </Alert>
-        )}
-
-        {/* Validation Alert */}
-        {showValidationAlert && Object.keys(validationErrors).length > 0 && (
-          <Alert className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
-            <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-            <AlertDescription className="text-red-700 dark:text-red-300">
-              <strong>Please correct the following errors:</strong>
-              <br />
-              {getErrorSummary()}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Tabs defaultValue="basic-info" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="basic-info" className="cursor-pointer">
-                Basic Information
-              </TabsTrigger>
-              <TabsTrigger value="targeting" className="cursor-pointer">
-                Mission Targeting
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="basic-info" className="space-y-6 mt-6">
-              <div className="grid grid-cols-1 gap-6">
-                {/* Title with improved validation */}
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-medium">
-                    Title <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="title"
-                    value={newMission.title}
-                    onChange={(e) => handleInputChange("title", e.target.value)}
-                    placeholder="Enter mission title"
-                    className={cn(
-                      "w-full",
-                      validationErrors.title &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    )}
-                  />
-                  {validationErrors.title && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.title}
-                    </p>
-                  )}
-                </div>
-
-                {/* Description with improved validation */}
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-medium">
-                    Description <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={newMission.description}
-                    onChange={(e) =>
-                      handleInputChange("description", e.target.value)
-                    }
-                    placeholder="Enter mission description"
-                    rows={4}
-                    className={cn(
-                      "w-full resize-none",
-                      validationErrors.description &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    )}
-                  />
-                  {validationErrors.description && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Type */}
-                <div className="space-y-2">
-                  <Label htmlFor="type" className="text-sm font-medium">
-                    Type <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={newMission.type || ""}
-                    onValueChange={(value) => handleInputChange("type", value)}
-                  >
-                    <SelectTrigger
-                      className={cn(
-                        "w-full",
-                        validationErrors.type && "border-red-500"
-                      )}
-                    >
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TYPE_OPTIONS.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {validationErrors.type && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.type}
-                    </p>
-                  )}
-                </div>
-
-                {/* Platform */}
-                <div className="space-y-2">
-                  <Label htmlFor="platform" className="text-sm font-medium">
-                    Platform <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={newMission.platform || ""}
-                    onValueChange={(value) =>
-                      handleInputChange("platform", value)
-                    }
-                  >
-                    <SelectTrigger
-                      className={cn(
-                        "w-full",
-                        validationErrors.platform && "border-red-500"
-                      )}
-                    >
-                      <SelectValue placeholder="Select platform" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PLATFORM_OPTIONS.map((platform) => (
-                        <SelectItem key={platform.value} value={platform.value}>
-                          {platform.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {validationErrors.platform && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.platform}
-                    </p>
-                  )}
-                </div>
-
-                {/* Partner */}
-                <div className="space-y-2">
-                  <Label htmlFor="partner" className="text-sm font-medium">
-                    Partner <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={
-                      newMission.partner && newMission.partner.trim() !== ""
-                        ? newMission.partner
-                        : undefined
-                    }
-                    onValueChange={(value) => {
-                      handleInputChange("partner", value);
-                    }}
-                  >
-                    <SelectTrigger
-                      className={cn(
-                        "w-full",
-                        validationErrors.partner && "border-red-500"
-                      )}
-                    >
-                      <SelectValue placeholder="Select partner" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PARTNER_OPTIONS.map((partner) => (
-                        <SelectItem key={partner} value={partner}>
-                          {partner}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {validationErrors.partner && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.partner}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {/* Level Required พื้นที่ */}
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="level_required"
-                    className="text-sm font-medium"
-                  >
-                    Level Required <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="level_required"
-                    type="number"
-                    value={newMission.level_required || ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === "") {
-                        handleInputChange("level_required", "");
-                      } else {
-                        const numValue = parseInt(value);
-                        if (!isNaN(numValue) && numValue >= 1) {
-                          handleInputChange("level_required", numValue);
-                        }
-                      }
-                    }}
-                    min="1"
-                    placeholder="1"
-                    className={cn(
-                      "w-full",
-                      validationErrors.level_required &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    )}
-                  />
-                  {validationErrors.level_required && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.level_required}
-                    </p>
-                  )}
-                </div>
-
-                {/* Reward - 3/4 พื้นที่ */}
-                <div className="space-y-2 col-span-3">
-                  <Label htmlFor="reward" className="text-sm font-medium">
-                    Reward <span className="text-red-500">*</span>
-                  </Label>
-                  <RewardInput
-                    value={newMission.reward || ""}
-                    onChange={(value) => handleInputChange("reward", value)}
-                    error={!!validationErrors.reward}
-                  />
-                  {validationErrors.reward && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.reward}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Format */}
-                <div className="space-y-2">
-                  <Label htmlFor="format" className="text-sm font-medium">
-                    Format <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={newMission.format || ""}
-                    onValueChange={(value) =>
-                      handleInputChange("format", value)
-                    }
-                  >
-                    <SelectTrigger
-                      className={cn(
-                        "w-full",
-                        validationErrors.format && "border-red-500"
-                      )}
-                    >
-                      <SelectValue placeholder="Select format" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FORMAT_OPTIONS.map((format) => (
-                        <SelectItem key={format.value} value={format.value}>
-                          {format.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {validationErrors.format && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.format}
-                    </p>
-                  )}
-                </div>
-
-                {/* Useful Link */}
-                <div className="space-y-2">
-                  <Label htmlFor="useful_link" className="text-sm font-medium">
-                    Useful Link <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="useful_link"
-                    type="url"
-                    value={newMission.useful_link || ""}
-                    onChange={(e) =>
-                      handleInputChange("useful_link", e.target.value)
-                    }
-                    placeholder="https://example.com"
-                    className={cn(
-                      "w-full",
-                      validationErrors.useful_link &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    )}
-                  />
-                  {validationErrors.useful_link && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.useful_link}
-                    </p>
-                  )}
-                </div>
-
-                {/* Start Date */}
-                <div className="space-y-2">
-                  <Label htmlFor="startDate" className="text-sm font-medium">
-                    Start Date & Time <span className="text-red-500">*</span>
-                  </Label>
-                  <DateTimePicker
-                    value={newMission.startDate}
-                    onChange={(value) => handleInputChange("startDate", value)}
-                    placeholder="Select start date and time"
-                    error={!!validationErrors.startDate}
-                  />
-                  {validationErrors.startDate && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.startDate}
-                    </p>
-                  )}
-                </div>
-
-                {/* End Date */}
-                <div className="space-y-2">
-                  <Label htmlFor="endDate" className="text-sm font-medium">
-                    End Date & Time <span className="text-red-500">*</span>
-                  </Label>
-                  <DateTimePicker
-                    value={newMission.endDate}
-                    onChange={(value) => handleInputChange("endDate", value)}
-                    placeholder="Select end date and time"
-                    error={!!validationErrors.endDate}
-                  />
-                  {validationErrors.endDate && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.endDate}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6">
-                {/* Action Request */}
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="action_request"
-                    className="text-sm font-medium"
-                  >
-                    Action Request <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="action_request"
-                    value={newMission.action_request || ""}
-                    onChange={(e) =>
-                      handleInputChange("action_request", e.target.value)
-                    }
-                    placeholder="Enter action request"
-                    rows={3}
-                    className={cn(
-                      "w-full resize-none",
-                      validationErrors.action_request &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    )}
-                  />
-                  {validationErrors.action_request && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.action_request}
-                    </p>
-                  )}
-                </div>
-
-                {/* Requirements */}
-                <div className="space-y-2">
-                  <Label htmlFor="requirements" className="text-sm font-medium">
-                    Requirements <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="requirements"
-                    value={newMission.requirements || ""}
-                    onChange={(e) =>
-                      handleInputChange("requirements", e.target.value)
-                    }
-                    placeholder="Enter requirements"
-                    rows={3}
-                    className={cn(
-                      "w-full resize-none",
-                      validationErrors.requirements &&
-                        "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    )}
-                  />
-                  {validationErrors.requirements && (
-                    <p className="text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" />
-                      {validationErrors.requirements}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="targeting" className="space-y-6 mt-6">
-              <MissionTargetingForm
-                onTargetingChange={setMissionTargeting}
-                initialData={missionTargeting}
-              />
-            </TabsContent>
-          </Tabs>
-
-          {/* Action Buttons - Mobile Responsive Only */}
-          <div className="flex justify-between items-center pt-6 border-t max-sm:flex-col max-sm:gap-4">
-            <div className="flex items-center gap-3 max-sm:flex-col max-sm:w-full max-sm:gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
-                disabled={isLoading}
-              >
-                <Eye className="h-4 w-4" />
-                Preview Mission
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
-                disabled={isLoading}
-                onClick={handleSaveDraft}
-              >
-                <Save className="h-4 w-4" />
-                Save Draft
-              </Button>
-            </div>
-
-            <div className="flex gap-3 max-sm:w-full">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="px-6 cursor-pointer max-sm:flex-1"
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="bg-black text-white hover:bg-black/90 hover:text-white dark:bg-white dark:text-black dark:hover:bg-white/90 dark:hover:text-black px-6 cursor-pointer max-sm:flex-1"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Loading...
-                  </div>
-                ) : isEditMode ? (
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4" />
-                    Update Mission
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Send className="h-4 w-4" />
-                    Publish to Users
-                  </div>
+              {notificationAlert.type === "success" ? (
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+              )}
+              <AlertDescription
+                className={cn(
+                  "pr-8",
+                  notificationAlert.type === "success"
+                    ? "text-green-700 dark:text-green-300"
+                    : "text-red-700 dark:text-red-300"
                 )}
+              >
+                <strong>{notificationAlert.title}</strong>
+                <br />
+                {notificationAlert.description}
+              </AlertDescription>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-transparent"
+                onClick={() =>
+                  setNotificationAlert((prev) => ({ ...prev, show: false }))
+                }
+              >
+                <X className="h-3 w-3" />
               </Button>
+            </Alert>
+          )}
+
+          {/* Validation Alert */}
+          {showValidationAlert && Object.keys(validationErrors).length > 0 && (
+            <Alert className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <AlertDescription className="text-red-700 dark:text-red-300">
+                <strong>Please correct the following errors:</strong>
+                <br />
+                {getErrorSummary()}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <Tabs defaultValue="basic-info" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="basic-info" className="cursor-pointer">
+                  Basic Information
+                </TabsTrigger>
+                <TabsTrigger value="targeting" className="cursor-pointer">
+                  Mission Targeting
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="basic-info" className="space-y-6 mt-6">
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Title with improved validation */}
+                  <div className="space-y-2">
+                    <Label htmlFor="title" className="text-sm font-medium">
+                      Title <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="title"
+                      value={newMission.title}
+                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      placeholder="Enter mission title"
+                      className={cn(
+                        "w-full",
+                        validationErrors.title &&
+                          "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      )}
+                    />
+                    {validationErrors.title && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.title}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Description with improved validation */}
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-medium">
+                      Description <span className="text-red-500">*</span>
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={newMission.description}
+                      onChange={(e) =>
+                        handleInputChange("description", e.target.value)
+                      }
+                      placeholder="Enter mission description"
+                      rows={4}
+                      className={cn(
+                        "w-full resize-none",
+                        validationErrors.description &&
+                          "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      )}
+                    />
+                    {validationErrors.description && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Type */}
+                  <div className="space-y-2">
+                    <Label htmlFor="type" className="text-sm font-medium">
+                      Type <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={newMission.type || ""}
+                      onValueChange={(value) => handleInputChange("type", value)}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          validationErrors.type && "border-red-500"
+                        )}
+                      >
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TYPE_OPTIONS.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {validationErrors.type && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.type}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Platform */}
+                  <div className="space-y-2">
+                    <Label htmlFor="platform" className="text-sm font-medium">
+                      Platform <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={newMission.platform || ""}
+                      onValueChange={(value) =>
+                        handleInputChange("platform", value)
+                      }
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          validationErrors.platform && "border-red-500"
+                        )}
+                      >
+                        <SelectValue placeholder="Select platform" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PLATFORM_OPTIONS.map((platform) => (
+                          <SelectItem key={platform.value} value={platform.value}>
+                            {platform.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {validationErrors.platform && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.platform}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Partner */}
+                  <div className="space-y-2">
+                    <Label htmlFor="partner" className="text-sm font-medium">
+                      Partner <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={
+                        newMission.partner && newMission.partner.trim() !== ""
+                          ? newMission.partner
+                          : undefined
+                      }
+                      onValueChange={(value) => {
+                        handleInputChange("partner", value);
+                      }}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          validationErrors.partner && "border-red-500"
+                        )}
+                      >
+                        <SelectValue placeholder="Select partner" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PARTNER_OPTIONS.map((partner) => (
+                          <SelectItem key={partner} value={partner}>
+                            {partner}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {validationErrors.partner && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.partner}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  {/* Level Required พื้นที่ */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="level_required"
+                      className="text-sm font-medium"
+                    >
+                      Level Required <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="level_required"
+                      type="number"
+                      value={newMission.level_required || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "") {
+                          handleInputChange("level_required", "");
+                        } else {
+                          const numValue = parseInt(value);
+                          if (!isNaN(numValue) && numValue >= 1) {
+                            handleInputChange("level_required", numValue);
+                          }
+                        }
+                      }}
+                      min="1"
+                      placeholder="1"
+                      className={cn(
+                        "w-full",
+                        validationErrors.level_required &&
+                          "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      )}
+                    />
+                    {validationErrors.level_required && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.level_required}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Reward - 3/4 พื้นที่ */}
+                  <div className="space-y-2 col-span-3">
+                    <Label htmlFor="reward" className="text-sm font-medium">
+                      Reward <span className="text-red-500">*</span>
+                    </Label>
+                    <RewardInput
+                      value={newMission.reward || ""}
+                      onChange={(value) => handleInputChange("reward", value)}
+                      error={!!validationErrors.reward}
+                    />
+                    {validationErrors.reward && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.reward}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Format */}
+                  <div className="space-y-2">
+                    <Label htmlFor="format" className="text-sm font-medium">
+                      Format <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={newMission.format || ""}
+                      onValueChange={(value) =>
+                        handleInputChange("format", value)
+                      }
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          validationErrors.format && "border-red-500"
+                        )}
+                      >
+                        <SelectValue placeholder="Select format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FORMAT_OPTIONS.map((format) => (
+                          <SelectItem key={format.value} value={format.value}>
+                            {format.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {validationErrors.format && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.format}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Useful Link */}
+                  <div className="space-y-2">
+                    <Label htmlFor="useful_link" className="text-sm font-medium">
+                      Useful Link
+                    </Label>
+                    <Input
+                      id="useful_link"
+                      type="url"
+                      value={newMission.useful_link || ""}
+                      onChange={(e) =>
+                        handleInputChange("useful_link", e.target.value)
+                      }
+                      placeholder="https://example.com"
+                      className={cn(
+                        "w-full",
+                        validationErrors.useful_link &&
+                          "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      )}
+                    />
+                    {validationErrors.useful_link && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.useful_link}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Start Date */}
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate" className="text-sm font-medium">
+                      Start Date & Time <span className="text-red-500">*</span>
+                    </Label>
+                    <DateTimePicker
+                      value={newMission.startDate}
+                      onChange={(value) => handleInputChange("startDate", value)}
+                      placeholder="Select start date and time"
+                      error={!!validationErrors.startDate}
+                    />
+                    {validationErrors.startDate && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.startDate}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* End Date */}
+                  <div className="space-y-2">
+                    <Label htmlFor="endDate" className="text-sm font-medium">
+                      End Date & Time <span className="text-red-500">*</span>
+                    </Label>
+                    <DateTimePicker
+                      value={newMission.endDate}
+                      onChange={(value) => handleInputChange("endDate", value)}
+                      placeholder="Select end date and time"
+                      error={!!validationErrors.endDate}
+                    />
+                    {validationErrors.endDate && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.endDate}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Action Request */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="action_request"
+                      className="text-sm font-medium"
+                    >
+                      Action Request <span className="text-red-500">*</span>
+                    </Label>
+                    <Textarea
+                      id="action_request"
+                      value={newMission.action_request || ""}
+                      onChange={(e) =>
+                        handleInputChange("action_request", e.target.value)
+                      }
+                      placeholder="Enter action request"
+                      rows={3}
+                      className={cn(
+                        "w-full resize-none",
+                        validationErrors.action_request &&
+                          "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      )}
+                    />
+                    {validationErrors.action_request && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.action_request}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Requirements */}
+                  <div className="space-y-2">
+                    <Label htmlFor="requirements" className="text-sm font-medium">
+                      Requirements
+                    </Label>
+                    <Textarea
+                      id="requirements"
+                      value={newMission.requirements || ""}
+                      onChange={(e) =>
+                        handleInputChange("requirements", e.target.value)
+                      }
+                      placeholder="Enter requirements"
+                      rows={3}
+                      className={cn(
+                        "w-full resize-none",
+                        validationErrors.requirements &&
+                          "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      )}
+                    />
+                    {validationErrors.requirements && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {validationErrors.requirements}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="targeting" className="space-y-6 mt-6">
+                <MissionTargetingForm
+                  onTargetingChange={setMissionTargeting}
+                  initialData={missionTargeting}
+                />
+              </TabsContent>
+            </Tabs>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center pt-6 border-t max-sm:flex-col max-sm:gap-4">
+              {!isEditMode && (
+                <div className="flex items-center gap-3 max-sm:flex-col max-sm:w-full max-sm:gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
+                    disabled={isLoading}
+                    onClick={handlePreviewMission}
+                  >
+                    <Eye className="h-4 w-4" />
+                    Preview Mission
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
+                    disabled={isLoading}
+                    onClick={handleSaveDraft}
+                  >
+                    <Save className="h-4 w-4" />
+                    Save Draft
+                  </Button>
+                </div>
+              )}
+
+              <div
+                className={cn(
+                  "flex gap-3 max-sm:w-full",
+                  isEditMode && "w-full justify-end"
+                )}
+              >
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="px-6 cursor-pointer max-sm:flex-1"
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-black text-white hover:bg-black/90 hover:text-white dark:bg-white dark:text-black dark:hover:bg-white/90 dark:hover:text-black px-6 cursor-pointer max-sm:flex-1"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Loading...
+                    </div>
+                  ) : isEditMode ? (
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4" />
+                      Update Mission
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Send className="h-4 w-4" />
+                      Publish to Users
+                    </div>
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mission Preview Modal */}
+      <MissionPreviewModal
+        isOpen={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        mission={newMission}
+      />
+    </>
   );
 };
