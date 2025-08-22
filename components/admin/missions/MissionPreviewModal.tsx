@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Target, Calendar, Star, ExternalLink, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,9 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { NewMissionForm } from "@/types/admin/missions/missionTypes";
 import {
   DiscordMessages,
@@ -17,8 +15,6 @@ import {
   DiscordEmbed,
   DiscordEmbedField,
   DiscordEmbedFields,
-  DiscordMention,
-  DiscordTime,
 } from "@derockdev/discord-components-react";
 
 interface MissionPreviewModalProps {
@@ -100,82 +96,85 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
         </DialogHeader>
 
         <div className="p-6">
-          {/* Discord Components Preview */}
-          <div className="discord-preview">
+          {/* Discord-like preview using the library */}
+          <div className="rounded-lg overflow-hidden">
             <DiscordMessages>
               <DiscordMessage
                 author="Super Agent"
-                avatar="https://cdn.discordapp.com/avatars/123456789/avatar.png"
-                bot
-                verified
-                timestamp={new Date()}
+                avatar="https://cdn.discordapp.com/embed/avatars/0.png"
+                bot={true}
+                timestamp="Today at 11:20"
               >
                 <DiscordEmbed
                   slot="embeds"
                   color="#5865f2"
-                  authorName="🗺️ Available Missions"
-                  authorIcon="https://cdn.discordapp.com/emojis/world_map.png"
+                  embedTitle="🗺️ Available Missions"
                 >
-                  <div slot="title">
-                    🎯 Mission 1: {mission.title || "Untitled Mission"}
-                  </div>
-                  
+                  {/* Mission header */}
                   <div slot="description">
-                    <div className="flex items-center gap-4 text-sm mb-3">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-400" />
-                        <span>Level {mission.level_required || 1}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4 text-red-400" />
-                        <span>Ends in {timeRemaining}</span>
+                    <div className="mb-4">
+                      <h3 className="text-white font-semibold text-lg mb-2 flex items-center gap-2">
+                        🎯 Mission 1: {mission.title || "Untitled Mission"}
+                      </h3>
+                      
+                      <div className="flex items-center gap-4 text-sm mb-3">
+                        <div className="flex items-center gap-1">
+                          ⭐ Level {mission.level_required || 1}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          🗓️ Ends in {timeRemaining}
+                        </div>
                       </div>
                     </div>
 
-                    <p className="mb-4">
-                      {mission.description || "No description provided."}
-                    </p>
+                    {/* Mission description */}
+                    <div className="mb-4">
+                      <p className="text-sm leading-relaxed">
+                        {mission.description || "No description provided."}
+                      </p>
+                    </div>
 
+                    {/* Mission details */}
                     <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-start gap-2">
                         <span>💰</span>
                         <span className="font-medium">Reward:</span>
                         <span>{parseReward(mission.reward || "")}</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-start gap-2">
                         <span>🎯</span>
                         <span className="font-medium">Status:</span>
                         <span className="text-green-400">Available to accept</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-start gap-2">
                         <span>📝</span>
                         <span className="font-medium">Format:</span>
                         <span>{mission.format || "Not specified"}</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span>📍</span>
+                      <div className="flex items-start gap-2">
+                        <span>❓</span>
                         <span className="font-medium">Action to submit:</span>
                         <span>{mission.action_request || "Not specified"}</span>
                       </div>
                     </div>
 
-                    {/* Requirements section */}
+                    {/* Additional info if available */}
                     {mission.requirements && (
-                      <div className="mt-4 p-3 bg-yellow-900/20 border-l-2 border-yellow-400 rounded">
+                      <div className="mt-4 p-3 bg-yellow-900/20 rounded border-l-4 border-yellow-400">
                         <div className="flex items-center gap-2 mb-1">
                           <span>⚠️</span>
                           <span className="font-medium text-sm">Requirements:</span>
                         </div>
-                        <p className="text-xs leading-relaxed">
+                        <p className="text-xs leading-relaxed opacity-90">
                           {mission.requirements}
                         </p>
                       </div>
                     )}
 
-                    {/* Useful link */}
+                    {/* Useful link if provided */}
                     {mission.useful_link && (
                       <div className="mt-4">
                         <a
@@ -184,24 +183,11 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-blue-400 hover:underline text-sm"
                         >
-                          <ExternalLink className="w-3 h-3" />
-                          Useful Resource
+                          🔗 Useful Resource
                         </a>
                       </div>
                     )}
                   </div>
-
-                  <DiscordEmbedFields slot="fields">
-                    <DiscordEmbedField fieldTitle="💰 Reward" inline>
-                      {parseReward(mission.reward || "")}
-                    </DiscordEmbedField>
-                    <DiscordEmbedField fieldTitle="🎯 Status" inline>
-                      Available to accept
-                    </DiscordEmbedField>
-                    <DiscordEmbedField fieldTitle="📝 Format" inline>
-                      {mission.format || "Not specified"}
-                    </DiscordEmbedField>
-                  </DiscordEmbedFields>
 
                   <div slot="footer">
                     6 available missions | Use /my_missions to view your accepted missions

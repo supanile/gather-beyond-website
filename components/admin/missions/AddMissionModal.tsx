@@ -7,7 +7,6 @@ import {
   AlertCircle,
   CheckCircle,
   X,
-  Eye,
   Save,
   RefreshCw,
   Send,
@@ -806,11 +805,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   };
 
-  // Handle preview mission
-  const handlePreviewMission = () => {
-    setIsPreviewOpen(true);
-  };
-
   // error message summary for the alert
   const getErrorSummary = () => {
     const errorCount = Object.keys(validationErrors).length;
@@ -1316,7 +1310,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
             <div className="flex justify-between items-center pt-6 border-t max-sm:flex-col max-sm:gap-4">
               {!isEditMode && (
                 <div className="flex items-center gap-3 max-sm:flex-col max-sm:w-full max-sm:gap-2">
-                  <Button
+                  {/* <Button
                     type="button"
                     variant="outline"
                     className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
@@ -1325,7 +1319,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                   >
                     <Eye className="h-4 w-4" />
                     Preview Mission
-                  </Button>
+                  </Button> */}
                   <Button
                     type="button"
                     variant="outline"

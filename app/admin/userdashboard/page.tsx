@@ -118,7 +118,8 @@ const DashboardPage = () => {
           .includes(searchTerm.toLowerCase()) ||
         (user.twitter_handle || "")
           .toLowerCase()
-          .includes(searchTerm.toLowerCase())
+          .includes(searchTerm.toLowerCase()) ||
+        (user.discord_id || "").toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       let aValue: string | number | null | undefined;
@@ -679,7 +680,7 @@ const DashboardPage = () => {
                 <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search users by email, interests, or X handle..."
+                  placeholder="Search users by Discord ID, Email, Interests, or X handle..."
                   className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-xs sm:placeholder:text-sm md:placeholder:text-base placeholder:text-muted-foreground"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
