@@ -13,8 +13,6 @@ import {
   DiscordMessages,
   DiscordMessage,
   DiscordEmbed,
-  DiscordEmbedField,
-  DiscordEmbedFields,
 } from "@derockdev/discord-components-react";
 
 interface MissionPreviewModalProps {

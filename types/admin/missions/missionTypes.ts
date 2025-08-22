@@ -66,7 +66,7 @@ export interface NewMissionForm {
 
 // Add MissionTargetingData interface
 export interface MissionTargetingData {
-  audienceType: "global" | "custom";
+  audienceType: "global" | "custom" | "custom-discord";
   behaviorFilters: {
     xpLevel: { enabled: boolean; min: number; max: number };
     missionStreak: { enabled: boolean; value: number };
@@ -85,6 +85,11 @@ export interface MissionTargetingData {
     language: string[];
     ageRange: string;
     gender: string;
+  };
+  discordFilters: {
+    servers: string[];
+    roles: string[];
+    channels: string[];
   };
   deliveryOptions: {
     channel: string;

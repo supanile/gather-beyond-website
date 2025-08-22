@@ -1,12 +1,111 @@
-import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import OverviewTab from "./OverviewTab";
 import ScoresTab from "./ScoresTab";
 import CampaignHistoryTab from "./CampaignHistoryTab";
 import ReviewsTab from "./ReviewsTab";
 
+// Define interfaces for the project data
+interface Wallet {
+  address: string;
+  type: string;
+  verified: boolean;
+}
+
+interface Audit {
+  company: string;
+  date: string;
+  status: string;
+  score: number;
+}
+
+interface CommunityLinks {
+  discord?: string;
+  telegram?: string;
+  twitter?: string;
+  github?: string;
+  website?: string;
+}
+
+interface Overview {
+  about: string;
+  verifiedWallets: Wallet[];
+  audits: Audit[];
+  communityLinks: CommunityLinks;
+}
+
+interface TrustBreakdown {
+  communityHealth: number;
+  campaignSuccess: number;
+  onchainBehavior: number;
+}
+
+interface MindshareDataPoint {
+  date: string;
+  value: number;
+}
+
+interface Sentiment {
+  positive: number;
+  neutral: number;
+  negative: number;
+}
+
+interface Influencer {
+  name: string;
+  mentions: number;
+  followers: string;
+}
+
+interface Scores {
+  trustBreakdown: TrustBreakdown;
+  mindshareHistory: MindshareDataPoint[];
+  sentiment: Sentiment;
+  topInfluencers: Influencer[];
+}
+
+interface Campaign {
+  id: number;
+  name: string;
+  successRate: number;
+  avgXP: number;
+  completionTime: string;
+  participants: number;
+}
+
+interface Review {
+  id: number;
+  rating: number;
+  comment: string;
+  author: string;
+  type: string;
+  date: string;
+  verified: boolean;
+}
+
+interface ReviewBreakdown {
+  5: number;
+  4: number;
+  3: number;
+  2: number;
+  1: number;
+}
+
+interface Reviews {
+  averageRating: number;
+  totalReviews: number;
+  breakdown: ReviewBreakdown;
+  recent: Review[];
+}
+
+interface Project {
+  overview: Overview;
+  scores: Scores;
+  campaigns: Campaign[];
+  reviews: Reviews;
+}
+
 interface ProjectTabsProps {
-  project: any; // Using any for simplicity, should be properly typed in real implementation
+  project: Project;
 }
 
 const ProjectTabs: React.FC<ProjectTabsProps> = ({ project }) => {

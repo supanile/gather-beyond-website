@@ -34,6 +34,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { MissionTargetingData } from "@/types/admin/missions/missionTypes";
 
 // Define interfaces
 interface BehaviorFilters {
@@ -68,14 +69,6 @@ interface DeliveryOptions {
   scope: string;
   schedule: string;
   scheduledDate: string;
-}
-
-interface MissionTargetingData {
-  audienceType: "global" | "custom" | "custom-discord"; // แก้ไขบรรทัดนี้
-  behaviorFilters: BehaviorFilters;
-  demographicFilters: DemographicFilters;
-  discordFilters: DiscordFilters;
-  deliveryOptions: DeliveryOptions;
 }
 
 interface UserSegment {

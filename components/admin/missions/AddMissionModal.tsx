@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Plus,
   CalendarIcon,
@@ -45,6 +45,7 @@ import {
   TYPE_OPTIONS,
   PLATFORM_OPTIONS,
   FORMAT_OPTIONS,
+  MissionTargetingData,
 } from "@/types/admin/missions/missionTypes";
 
 // Import the Mission Targeting Form component
@@ -57,36 +58,6 @@ interface DraftData {
   basicInfo: NewMissionForm;
   targetingData: MissionTargetingData | null;
   savedAt: string;
-}
-
-// Define targeting data interface
-interface MissionTargetingData {
-  audienceType: "global" | "custom";
-  behaviorFilters: {
-    xpLevel: { enabled: boolean; min: number; max: number };
-    missionStreak: { enabled: boolean; value: number };
-    lastActive: { enabled: boolean; value: string };
-    failedMissions: { enabled: boolean; value: number };
-    trustScore: { enabled: boolean; value: number[] };
-    connectedWallet: { enabled: boolean; value: boolean };
-    joinedViaPartner: { enabled: boolean; value: string };
-    referredUsers: { enabled: boolean; value: number };
-    agentHealth: { enabled: boolean; value: number[] };
-    memoryProofSubmitted: { enabled: boolean; value: boolean };
-    taggedInterests: { enabled: boolean; value: string[] };
-  };
-  demographicFilters: {
-    location: string[];
-    language: string[];
-    ageRange: string;
-    gender: string;
-  };
-  deliveryOptions: {
-    channel: string;
-    scope: string;
-    schedule: string;
-    scheduledDate: string;
-  };
 }
 
 interface AddMissionModalProps {
@@ -465,26 +436,8 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   );
 
-  // useEffect for load draft
-  useEffect(() => {
-    if (isOpen && !isEditMode) {
-      // check if there is a draft
-      if (hasDraft()) {
-        loadDraft();
-
-        // show notification that draft has been loaded
-        setNotificationAlert({
-          show: true,
-          type: "success",
-          title: "Draft Loaded",
-          description: "Your previously saved draft has been loaded.",
-        });
-      }
-    }
-  }, [isOpen, isEditMode]);
-
   // Functions for draft
-  const saveDraft = () => {
+  const saveDraft = useCallback(() => {
     try {
       const draftData: DraftData = {
         basicInfo: newMission,
@@ -500,9 +453,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       console.error("Error saving draft:", error);
       return false;
     }
-  };
+  }, [draftKey, newMission, missionTargeting]);
 
-  const loadDraft = () => {
+  const loadDraft = useCallback(() => {
     try {
       const savedDraft = localStorage.getItem(draftKey);
 
@@ -525,7 +478,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       console.error("Error loading draft:", error);
       return false;
     }
-  };
+  }, [draftKey, onMissionChange]);
 
   const clearDraft = () => {
     try {
@@ -536,7 +489,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   };
 
-  const hasDraft = () => {
+  const hasDraft = useCallback(() => {
     try {
       const savedDraft = localStorage.getItem(draftKey);
       return savedDraft !== null;
@@ -544,7 +497,25 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       console.error("Error checking draft:", error);
       return false;
     }
-  };
+  }, [draftKey]);
+
+  // useEffect for load draft
+  useEffect(() => {
+    if (isOpen && !isEditMode) {
+      // check if there is a draft
+      if (hasDraft()) {
+        loadDraft();
+
+        // show notification that draft has been loaded
+        setNotificationAlert({
+          show: true,
+          type: "success",
+          title: "Draft Loaded",
+          description: "Your previously saved draft has been loaded.",
+        });
+      }
+    }
+  }, [isOpen, isEditMode, hasDraft, loadDraft]);
 
   // auto-save useEffect
   useEffect(() => {
@@ -575,7 +546,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }, 10000); // ลดเวลาเหลือ 10 วินาที สำหรับการทดสอบ
 
     return () => clearInterval(autoSaveInterval);
-  }, [isOpen, isEditMode, newMission, missionTargeting]);
+  }, [isOpen, isEditMode, newMission, missionTargeting, saveDraft]);
 
   // Auto-hide notification alert after 5 seconds
   useEffect(() => {
