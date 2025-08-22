@@ -118,7 +118,8 @@ const DashboardPage = () => {
           .includes(searchTerm.toLowerCase()) ||
         (user.twitter_handle || "")
           .toLowerCase()
-          .includes(searchTerm.toLowerCase())
+          .includes(searchTerm.toLowerCase()) ||
+        (user.discord_id || "").toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       let aValue: string | number | null | undefined;
@@ -508,15 +509,8 @@ const DashboardPage = () => {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 md:h-16">
-            <TabsTrigger
-              value="overview"
-              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
-            >
-              <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
-              <span className="truncate">User Overview</span>
-            </TabsTrigger>
+        <Tabs defaultValue="user-management" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 md:h-16">
             <TabsTrigger
               value="user-management"
               className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
@@ -524,7 +518,14 @@ const DashboardPage = () => {
               <UserCog className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
               <span className="truncate">User Management</span>
             </TabsTrigger>
-            </TabsList>
+            <TabsTrigger
+              value="overview"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
+            >
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">User Overview</span>
+            </TabsTrigger>
+          </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview">
@@ -534,7 +535,11 @@ const DashboardPage = () => {
                   {/* Sort Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-8 cursor-pointer">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 cursor-pointer"
+                      >
                         <Filter className="h-4 w-4 mr-1" />
                         {getSortIcon()}
                         <span className="sm:inline ml-1">
@@ -675,7 +680,7 @@ const DashboardPage = () => {
                 <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search users by email, interests, or X handle..."
+                  placeholder="Search users by Discord ID, Email, Interests, or X handle..."
                   className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-xs sm:placeholder:text-sm md:placeholder:text-base placeholder:text-muted-foreground"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}

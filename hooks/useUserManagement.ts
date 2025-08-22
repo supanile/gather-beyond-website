@@ -38,7 +38,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
   // Filter users based on filter config
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      // Search filter
+      // Search filter - now includes Discord ID
       if (filterConfig.search) {
         const searchTerm = filterConfig.search.toLowerCase();
         const searchableFields = [
@@ -46,6 +46,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
           user.interests,
           user.twitter_handle,
           user.telegram_handle,
+          user.discord_id,
         ].filter(Boolean);
 
         const matchesSearch = searchableFields.some((field) =>

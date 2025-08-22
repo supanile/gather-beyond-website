@@ -34,6 +34,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { MissionTargetingData } from "@/types/admin/missions/missionTypes";
 
 // Define interfaces
 interface BehaviorFilters {
@@ -50,6 +51,12 @@ interface BehaviorFilters {
   taggedInterests: { enabled: boolean; value: string[] };
 }
 
+interface DiscordFilters {
+  servers: string[];
+  roles: string[];
+  channels: string[];
+}
+
 interface DemographicFilters {
   location: string[];
   language: string[];
@@ -62,13 +69,6 @@ interface DeliveryOptions {
   scope: string;
   schedule: string;
   scheduledDate: string;
-}
-
-interface MissionTargetingData {
-  audienceType: "global" | "custom";
-  behaviorFilters: BehaviorFilters;
-  demographicFilters: DemographicFilters;
-  deliveryOptions: DeliveryOptions;
 }
 
 interface UserSegment {
@@ -138,6 +138,79 @@ const DEGEN_INTEREST_TAGS = [
   "leverage",
 ];
 
+const DISCORD_SERVERS = [
+  {
+    id: "710813849808273478",
+    name: "Fłøeт¢ıвøυ's server",
+    members: 8760,
+    icon: "👨‍💻",
+    description: "Personal dev and crypto community run by Fłøeт¢ıвøυ",
+  },
+  {
+    id: "749954850430910534",
+    name: "Harold's server",
+    members: 3420,
+    icon: "👥",
+    description: "Harold's general community and announcements",
+  },
+  {
+    id: "908568690033844246",
+    name: "Super Connector",
+    members: 2950,
+    icon: "🤖",
+    description: "Networking hub for intros, partnerships, and collabs",
+  },
+  {
+    id: "989296048356851712",
+    name: "aki | Cryptopia's server",
+    members: 4120,
+    icon: "🪙",
+    description: "Cryptopia builders, alpha, and crypto discussions",
+  },
+  {
+    id: "1037957827899179009",
+    name: "스타이카 Staika",
+    members: 9320,
+    icon: "🌟",
+    description: "Korean Staika community and updates",
+  },
+  {
+    id: "1082381282144694332",
+    name: "Godot 3.0 - Tutorial Links",
+    members: 2480,
+    icon: "📚",
+    description: "Curated links and help for Godot 3.0 learners",
+  },
+  {
+    id: "1099368008721379399",
+    name: "ALLGUDINDAHUD",
+    members: 1270,
+    icon: "🎮",
+    description: "Gaming and community hangout",
+  },
+  {
+    id: "1246002839621210122",
+    name: "Indzil's server",
+    members: 980,
+    icon: "🧑‍💻",
+    description: "Indzil's developer community",
+  },
+  {
+    id: "1260578187616718879",
+    name: "PlayitForward",
+    members: 5760,
+    icon: "🎯",
+    description: "Play-to-earn guild and gaming community",
+  },
+  {
+    id: "1317782730582265906",
+    name: "BABE Coin server",
+    members: 7540,
+    icon: "🪙",
+    description: "Official community for BABE Coin holders",
+  },
+];
+
 interface MissionTargetingFormProps {
   onTargetingChange?: (targeting: MissionTargetingData) => void;
   initialData?: MissionTargetingData | null;
@@ -176,10 +249,16 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
     scheduledDate: "",
   };
 
+  const defaultDiscordFilters: DiscordFilters = {
+    servers: [],
+    roles: [],
+    channels: [],
+  };
+
   // Targeting state
-  const [audienceType, setAudienceType] = useState<"global" | "custom">(
-    initialData?.audienceType || "global"
-  );
+  const [audienceType, setAudienceType] = useState<
+    "global" | "custom" | "custom-discord"
+  >(initialData?.audienceType || "global");
 
   const [behaviorFilters, setBehaviorFilters] = useState<BehaviorFilters>(
     initialData?.behaviorFilters || defaultBehaviorFilters
@@ -190,352 +269,368 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
       initialData?.demographicFilters || defaultDemographicFilters
     );
 
+  const [discordFilters, setDiscordFilters] = useState<DiscordFilters>(
+    initialData?.discordFilters || defaultDiscordFilters
+  );
+
   const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptions>(
     initialData?.deliveryOptions || defaultDeliveryOptions
   );
 
   // Enhanced segment classification logic following your requirements
-  const classifyUserSegments = useCallback((filters: BehaviorFilters): UserSegment[] => {
-    // Calculate base filtering multipliers
-    let totalFilteredUsers = BASE_USER_DATA.total;
+  const classifyUserSegments = useCallback(
+    (filters: BehaviorFilters): UserSegment[] => {
+      // Calculate base filtering multipliers
+      let totalFilteredUsers = BASE_USER_DATA.total;
 
-    // Apply behavioral filters to reduce total pool
-    if (filters.xpLevel.enabled) {
-      const xpRange = (filters.xpLevel.max - filters.xpLevel.min) / 100;
-      totalFilteredUsers *= Math.max(0.1, xpRange);
-    }
+      // Apply behavioral filters to reduce total pool
+      if (filters.xpLevel.enabled) {
+        const xpRange = (filters.xpLevel.max - filters.xpLevel.min) / 100;
+        totalFilteredUsers *= Math.max(0.1, xpRange);
+      }
 
-    if (filters.trustScore.enabled) {
-      const trustMultiplier = 0.3 + (filters.trustScore.value[0] / 100) * 0.7;
-      totalFilteredUsers *= trustMultiplier;
-    }
+      if (filters.trustScore.enabled) {
+        const trustMultiplier = 0.3 + (filters.trustScore.value[0] / 100) * 0.7;
+        totalFilteredUsers *= trustMultiplier;
+      }
 
-    if (filters.lastActive.enabled) {
-      const activeMultipliers = {
-        today: 0.15,
-        "3days": 0.35,
-        "7days": 0.65,
-        inactive: 0.1,
-      };
-      totalFilteredUsers *=
-        activeMultipliers[
-          filters.lastActive.value as keyof typeof activeMultipliers
-        ] || 1;
-    }
+      if (filters.lastActive.enabled) {
+        const activeMultipliers = {
+          today: 0.15,
+          "3days": 0.35,
+          "7days": 0.65,
+          inactive: 0.1,
+        };
+        totalFilteredUsers *=
+          activeMultipliers[
+            filters.lastActive.value as keyof typeof activeMultipliers
+          ] || 1;
+      }
 
-    if (filters.connectedWallet.enabled) {
-      totalFilteredUsers *= filters.connectedWallet.value ? 0.42 : 0.58;
-    }
+      if (filters.connectedWallet.enabled) {
+        totalFilteredUsers *= filters.connectedWallet.value ? 0.42 : 0.58;
+      }
 
-    if (filters.referredUsers.enabled && filters.referredUsers.value > 0) {
-      const referralMultiplier = Math.min(
-        0.1 + (filters.referredUsers.value / 10) * 0.9,
-        1
-      );
-      totalFilteredUsers *= referralMultiplier;
-    }
+      if (filters.referredUsers.enabled && filters.referredUsers.value > 0) {
+        const referralMultiplier = Math.min(
+          0.1 + (filters.referredUsers.value / 10) * 0.9,
+          1
+        );
+        totalFilteredUsers *= referralMultiplier;
+      }
 
-    // Apply demographic filters
-    if (demographicFilters.location.length > 0) {
-      const locationMultiplier = Math.min(
-        demographicFilters.location.length * 0.08,
-        0.8
-      );
-      totalFilteredUsers *= locationMultiplier;
-    }
+      // Apply demographic filters
+      if (demographicFilters.location.length > 0) {
+        const locationMultiplier = Math.min(
+          demographicFilters.location.length * 0.08,
+          0.8
+        );
+        totalFilteredUsers *= locationMultiplier;
+      }
 
-    if (demographicFilters.language.length > 0) {
-      const langMultiplier = Math.min(
-        demographicFilters.language.length * 0.12,
-        0.9
-      );
-      totalFilteredUsers *= langMultiplier;
-    }
+      if (demographicFilters.language.length > 0) {
+        const langMultiplier = Math.min(
+          demographicFilters.language.length * 0.12,
+          0.9
+        );
+        totalFilteredUsers *= langMultiplier;
+      }
 
-    // Enhanced segment logic based on your requirements
-    const calculateSegmentScore = {
-      explorer: () => {
-        let score = 0;
-        const conditions: string[] = [];
+      // Enhanced segment logic based on your requirements
+      const calculateSegmentScore = {
+        explorer: () => {
+          let score = 0;
+          const conditions: string[] = [];
 
-        // Low XP condition
-        if (!filters.xpLevel.enabled || filters.xpLevel.max <= 30) {
-          score += 0.4;
-          conditions.push("Low XP (≤30)");
-        }
+          // Low XP condition
+          if (!filters.xpLevel.enabled || filters.xpLevel.max <= 30) {
+            score += 0.4;
+            conditions.push("Low XP (≤30)");
+          }
 
-        // Recently joined (assume based on low XP or not filtered)
-        if (!filters.xpLevel.enabled || filters.xpLevel.max <= 20) {
-          score += 0.3;
-          conditions.push("Recently joined");
-        }
+          // Recently joined (assume based on low XP or not filtered)
+          if (!filters.xpLevel.enabled || filters.xpLevel.max <= 20) {
+            score += 0.3;
+            conditions.push("Recently joined");
+          }
 
-        // No wallet yet
-        if (
-          !filters.connectedWallet.enabled ||
-          !filters.connectedWallet.value
-        ) {
-          score += 0.2;
-          conditions.push("No wallet connected");
-        }
+          // No wallet yet
+          if (
+            !filters.connectedWallet.enabled ||
+            !filters.connectedWallet.value
+          ) {
+            score += 0.2;
+            conditions.push("No wallet connected");
+          }
 
-        // Some activity (recently active)
-        if (
-          filters.lastActive.enabled &&
-          ["today", "3days"].includes(filters.lastActive.value)
-        ) {
-          score += 0.15;
-          conditions.push("Recently active");
-        }
+          // Some activity (recently active)
+          if (
+            filters.lastActive.enabled &&
+            ["today", "3days"].includes(filters.lastActive.value)
+          ) {
+            score += 0.15;
+            conditions.push("Recently active");
+          }
 
-        return { score: Math.min(score, 0.45), conditions };
-      },
-
-      builder: () => {
-        let score = 0;
-        const conditions: string[] = [];
-
-        // High XP
-        if (filters.xpLevel.enabled && filters.xpLevel.min >= 50) {
-          score += 0.35;
-          conditions.push("High XP (≥50)");
-        }
-
-        // High mission streak
-        if (
-          filters.missionStreak.enabled &&
-          filters.missionStreak.value >= 10
-        ) {
-          score += 0.25;
-          conditions.push("High mission streak (≥10)");
-        }
-
-        // Wallet connected
-        if (filters.connectedWallet.enabled && filters.connectedWallet.value) {
-          score += 0.2;
-          conditions.push("Wallet connected");
-        }
-
-        // Memory proof submitted
-        if (
-          filters.memoryProofSubmitted.enabled &&
-          filters.memoryProofSubmitted.value
-        ) {
-          score += 0.15;
-          conditions.push("Memory proof submitted");
-        }
-
-        // High trust score
-        if (filters.trustScore.enabled && filters.trustScore.value[0] >= 70) {
-          score += 0.1;
-          conditions.push("High trust score (≥70)");
-        }
-
-        return { score: Math.min(score, 0.55), conditions };
-      },
-
-      grinder: () => {
-        let score = 0;
-        const conditions: string[] = [];
-
-        // High XP but low trust
-        if (filters.xpLevel.enabled && filters.xpLevel.min >= 40) {
-          score += 0.25;
-          conditions.push("High XP (≥40)");
-        }
-
-        if (filters.trustScore.enabled && filters.trustScore.value[0] < 50) {
-          score += 0.3;
-          conditions.push("Low trust score (<50)");
-        }
-
-        // Many missions failed
-        if (
-          filters.failedMissions.enabled &&
-          filters.failedMissions.value <= 3
-        ) {
-          score += 0.25;
-          conditions.push("Some failed missions");
-        }
-
-        // Often active
-        if (
-          filters.lastActive.enabled &&
-          ["today", "3days"].includes(filters.lastActive.value)
-        ) {
-          score += 0.15;
-          conditions.push("Often active");
-        }
-
-        return { score: Math.min(score, 0.25), conditions };
-      },
-
-      lurker: () => {
-        let score = 0;
-        const conditions: string[] = [];
-
-        // Inactive for 7+ days
-        if (
-          filters.lastActive.enabled &&
-          filters.lastActive.value === "inactive"
-        ) {
-          score += 0.4;
-          conditions.push("Inactive 7+ days");
-        }
-
-        // Low XP
-        if (filters.xpLevel.enabled && filters.xpLevel.max <= 20) {
-          score += 0.3;
-          conditions.push("Low XP (≤20)");
-        }
-
-        // No engagement (low mission streak)
-        if (
-          !filters.missionStreak.enabled ||
-          filters.missionStreak.value === 0
-        ) {
-          score += 0.2;
-          conditions.push("No engagement");
-        }
-
-        return { score: Math.min(score, 0.15), conditions };
-      },
-
-      degen: () => {
-        let score = 0;
-        const conditions: string[] = [];
-
-        // High referral count
-        if (filters.referredUsers.enabled && filters.referredUsers.value >= 3) {
-          score += 0.3;
-          conditions.push("High referrals (≥3)");
-        }
-
-        // Connected wallet
-        if (filters.connectedWallet.enabled && filters.connectedWallet.value) {
-          score += 0.25;
-          conditions.push("Wallet connected");
-        }
-
-        // Tagged interests like degen trading, airdrops
-        if (
-          filters.taggedInterests.enabled &&
-          filters.taggedInterests.value.some((tag) =>
-            DEGEN_INTEREST_TAGS.includes(tag.toLowerCase())
-          )
-        ) {
-          score += 0.3;
-          conditions.push("Degen interests tagged");
-        }
-
-        // Some XP (not complete beginner)
-        if (filters.xpLevel.enabled && filters.xpLevel.min >= 20) {
-          score += 0.15;
-          conditions.push("Some XP (≥20)");
-        }
-
-        return { score: Math.min(score, 0.35), conditions };
-      },
-    };
-
-    // Calculate segment scores and conditions
-    const segmentResults = {
-      explorer: calculateSegmentScore.explorer(),
-      builder: calculateSegmentScore.builder(),
-      grinder: calculateSegmentScore.grinder(),
-      lurker: calculateSegmentScore.lurker(),
-      degen: calculateSegmentScore.degen(),
-    };
-
-    // Normalize scores to ensure they sum to 1
-    const totalScore = Object.values(segmentResults).reduce(
-      (sum, { score }) => sum + score,
-      0
-    );
-    const normalizedScores = Object.fromEntries(
-      Object.entries(segmentResults).map(([key, { score, conditions }]) => [
-        key,
-        {
-          score: totalScore > 0 ? score / totalScore : 0.2, // Default equal distribution if no filters
-          conditions,
+          return { score: Math.min(score, 0.45), conditions };
         },
-      ])
-    );
 
-    // Create segment objects with estimated counts
-    const segments: UserSegment[] = [
-      {
-        id: "explorer",
-        name: "Explorer",
-        icon: Eye,
-        color: "text-purple-600",
-        bgColor: "bg-purple-50",
-        description: "Low XP, recently joined, no wallet yet, some activity",
-        estimatedCount: Math.round(
-          totalFilteredUsers * normalizedScores.explorer.score
-        ),
-        percentage: normalizedScores.explorer.score * 100,
-        conditions: normalizedScores.explorer.conditions,
-      },
-      {
-        id: "builder",
-        name: "Builder",
-        icon: Building,
-        color: "text-blue-600",
-        bgColor: "bg-blue-50",
-        description:
-          "High XP, high mission streak, wallet connected, memory proof submitted",
-        estimatedCount: Math.round(
-          totalFilteredUsers * normalizedScores.builder.score
-        ),
-        percentage: normalizedScores.builder.score * 100,
-        conditions: normalizedScores.builder.conditions,
-      },
-      {
-        id: "grinder",
-        name: "Grinder",
-        icon: Zap,
-        color: "text-orange-600",
-        bgColor: "bg-orange-50",
-        description:
-          "High XP but low trust, many missions failed, often active",
-        estimatedCount: Math.round(
-          totalFilteredUsers * normalizedScores.grinder.score
-        ),
-        percentage: normalizedScores.grinder.score * 100,
-        conditions: normalizedScores.grinder.conditions,
-      },
-      {
-        id: "lurker",
-        name: "Lurker",
-        icon: Activity,
-        color: "text-gray-600",
-        bgColor: "bg-gray-50",
-        description: "Inactive for 7+ days, low XP, no engagement",
-        estimatedCount: Math.round(
-          totalFilteredUsers * normalizedScores.lurker.score
-        ),
-        percentage: normalizedScores.lurker.score * 100,
-        conditions: normalizedScores.lurker.conditions,
-      },
-      {
-        id: "degen",
-        name: "Degen",
-        icon: TrendingUp,
-        color: "text-green-600",
-        bgColor: "bg-green-50",
-        description:
-          "High referral count, connected wallet, tagged interests like degen trading, airdrops",
-        estimatedCount: Math.round(
-          totalFilteredUsers * normalizedScores.degen.score
-        ),
-        percentage: normalizedScores.degen.score * 100,
-        conditions: normalizedScores.degen.conditions,
-      },
-    ];
+        builder: () => {
+          let score = 0;
+          const conditions: string[] = [];
 
-    return segments.filter((s) => s.estimatedCount > 0);
-  }, [demographicFilters.language.length, demographicFilters.location.length]);
+          // High XP
+          if (filters.xpLevel.enabled && filters.xpLevel.min >= 50) {
+            score += 0.35;
+            conditions.push("High XP (≥50)");
+          }
+
+          // High mission streak
+          if (
+            filters.missionStreak.enabled &&
+            filters.missionStreak.value >= 10
+          ) {
+            score += 0.25;
+            conditions.push("High mission streak (≥10)");
+          }
+
+          // Wallet connected
+          if (
+            filters.connectedWallet.enabled &&
+            filters.connectedWallet.value
+          ) {
+            score += 0.2;
+            conditions.push("Wallet connected");
+          }
+
+          // Memory proof submitted
+          if (
+            filters.memoryProofSubmitted.enabled &&
+            filters.memoryProofSubmitted.value
+          ) {
+            score += 0.15;
+            conditions.push("Memory proof submitted");
+          }
+
+          // High trust score
+          if (filters.trustScore.enabled && filters.trustScore.value[0] >= 70) {
+            score += 0.1;
+            conditions.push("High trust score (≥70)");
+          }
+
+          return { score: Math.min(score, 0.55), conditions };
+        },
+
+        grinder: () => {
+          let score = 0;
+          const conditions: string[] = [];
+
+          // High XP but low trust
+          if (filters.xpLevel.enabled && filters.xpLevel.min >= 40) {
+            score += 0.25;
+            conditions.push("High XP (≥40)");
+          }
+
+          if (filters.trustScore.enabled && filters.trustScore.value[0] < 50) {
+            score += 0.3;
+            conditions.push("Low trust score (<50)");
+          }
+
+          // Many missions failed
+          if (
+            filters.failedMissions.enabled &&
+            filters.failedMissions.value <= 3
+          ) {
+            score += 0.25;
+            conditions.push("Some failed missions");
+          }
+
+          // Often active
+          if (
+            filters.lastActive.enabled &&
+            ["today", "3days"].includes(filters.lastActive.value)
+          ) {
+            score += 0.15;
+            conditions.push("Often active");
+          }
+
+          return { score: Math.min(score, 0.25), conditions };
+        },
+
+        lurker: () => {
+          let score = 0;
+          const conditions: string[] = [];
+
+          // Inactive for 7+ days
+          if (
+            filters.lastActive.enabled &&
+            filters.lastActive.value === "inactive"
+          ) {
+            score += 0.4;
+            conditions.push("Inactive 7+ days");
+          }
+
+          // Low XP
+          if (filters.xpLevel.enabled && filters.xpLevel.max <= 20) {
+            score += 0.3;
+            conditions.push("Low XP (≤20)");
+          }
+
+          // No engagement (low mission streak)
+          if (
+            !filters.missionStreak.enabled ||
+            filters.missionStreak.value === 0
+          ) {
+            score += 0.2;
+            conditions.push("No engagement");
+          }
+
+          return { score: Math.min(score, 0.15), conditions };
+        },
+
+        degen: () => {
+          let score = 0;
+          const conditions: string[] = [];
+
+          // High referral count
+          if (
+            filters.referredUsers.enabled &&
+            filters.referredUsers.value >= 3
+          ) {
+            score += 0.3;
+            conditions.push("High referrals (≥3)");
+          }
+
+          // Connected wallet
+          if (
+            filters.connectedWallet.enabled &&
+            filters.connectedWallet.value
+          ) {
+            score += 0.25;
+            conditions.push("Wallet connected");
+          }
+
+          // Tagged interests like degen trading, airdrops
+          if (
+            filters.taggedInterests.enabled &&
+            filters.taggedInterests.value.some((tag) =>
+              DEGEN_INTEREST_TAGS.includes(tag.toLowerCase())
+            )
+          ) {
+            score += 0.3;
+            conditions.push("Degen interests tagged");
+          }
+
+          // Some XP (not complete beginner)
+          if (filters.xpLevel.enabled && filters.xpLevel.min >= 20) {
+            score += 0.15;
+            conditions.push("Some XP (≥20)");
+          }
+
+          return { score: Math.min(score, 0.35), conditions };
+        },
+      };
+
+      // Calculate segment scores and conditions
+      const segmentResults = {
+        explorer: calculateSegmentScore.explorer(),
+        builder: calculateSegmentScore.builder(),
+        grinder: calculateSegmentScore.grinder(),
+        lurker: calculateSegmentScore.lurker(),
+        degen: calculateSegmentScore.degen(),
+      };
+
+      // Normalize scores to ensure they sum to 1
+      const totalScore = Object.values(segmentResults).reduce(
+        (sum, { score }) => sum + score,
+        0
+      );
+      const normalizedScores = Object.fromEntries(
+        Object.entries(segmentResults).map(([key, { score, conditions }]) => [
+          key,
+          {
+            score: totalScore > 0 ? score / totalScore : 0.2, // Default equal distribution if no filters
+            conditions,
+          },
+        ])
+      );
+
+      // Create segment objects with estimated counts
+      const segments: UserSegment[] = [
+        {
+          id: "explorer",
+          name: "Explorer",
+          icon: Eye,
+          color: "text-purple-600",
+          bgColor: "bg-purple-50",
+          description: "Low XP, recently joined, no wallet yet, some activity",
+          estimatedCount: Math.round(
+            totalFilteredUsers * normalizedScores.explorer.score
+          ),
+          percentage: normalizedScores.explorer.score * 100,
+          conditions: normalizedScores.explorer.conditions,
+        },
+        {
+          id: "builder",
+          name: "Builder",
+          icon: Building,
+          color: "text-blue-600",
+          bgColor: "bg-blue-50",
+          description:
+            "High XP, high mission streak, wallet connected, memory proof submitted",
+          estimatedCount: Math.round(
+            totalFilteredUsers * normalizedScores.builder.score
+          ),
+          percentage: normalizedScores.builder.score * 100,
+          conditions: normalizedScores.builder.conditions,
+        },
+        {
+          id: "grinder",
+          name: "Grinder",
+          icon: Zap,
+          color: "text-orange-600",
+          bgColor: "bg-orange-50",
+          description:
+            "High XP but low trust, many missions failed, often active",
+          estimatedCount: Math.round(
+            totalFilteredUsers * normalizedScores.grinder.score
+          ),
+          percentage: normalizedScores.grinder.score * 100,
+          conditions: normalizedScores.grinder.conditions,
+        },
+        {
+          id: "lurker",
+          name: "Lurker",
+          icon: Activity,
+          color: "text-gray-600",
+          bgColor: "bg-gray-50",
+          description: "Inactive for 7+ days, low XP, no engagement",
+          estimatedCount: Math.round(
+            totalFilteredUsers * normalizedScores.lurker.score
+          ),
+          percentage: normalizedScores.lurker.score * 100,
+          conditions: normalizedScores.lurker.conditions,
+        },
+        {
+          id: "degen",
+          name: "Degen",
+          icon: TrendingUp,
+          color: "text-green-600",
+          bgColor: "bg-green-50",
+          description:
+            "High referral count, connected wallet, tagged interests like degen trading, airdrops",
+          estimatedCount: Math.round(
+            totalFilteredUsers * normalizedScores.degen.score
+          ),
+          percentage: normalizedScores.degen.score * 100,
+          conditions: normalizedScores.degen.conditions,
+        },
+      ];
+
+      return segments.filter((s) => s.estimatedCount > 0);
+    },
+    [demographicFilters.language.length, demographicFilters.location.length]
+  );
 
   // Calculate audience estimate with enhanced logic
   const audienceEstimate = useMemo((): AudienceEstimate => {
@@ -655,6 +750,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
         audienceType,
         behaviorFilters,
         demographicFilters,
+        discordFilters,
         deliveryOptions,
       });
     }
@@ -662,6 +758,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
     audienceType,
     behaviorFilters,
     demographicFilters,
+    discordFilters,
     deliveryOptions,
     onTargetingChange,
   ]);
@@ -731,6 +828,20 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
         ...prev.taggedInterests,
         value: prev.taggedInterests.value.filter((tag) => tag !== interest),
       },
+    }));
+  };
+
+  const addDiscordFilter = (type: keyof DiscordFilters, value: string) => {
+    setDiscordFilters((prev) => ({
+      ...prev,
+      [type]: [...prev[type], value],
+    }));
+  };
+
+  const removeDiscordFilter = (type: keyof DiscordFilters, value: string) => {
+    setDiscordFilters((prev) => ({
+      ...prev,
+      [type]: prev[type].filter((item: string) => item !== value),
     }));
   };
 
@@ -895,7 +1006,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
             <Label className="text-base font-medium">Audience Type</Label>
             <RadioGroup
               value={audienceType}
-              onValueChange={(value: "global" | "custom") =>
+              onValueChange={(value: "global" | "custom" | "custom-discord") =>
                 setAudienceType(value)
               }
               className="flex gap-6"
@@ -903,6 +1014,12 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="global" id="global" />
                 <Label htmlFor="global">🌍 Global – Send to all users</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="custom-discord" id="custom-discord" />
+                <Label htmlFor="custom-discord">
+                  💬 Custom – Discord servers
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="custom" id="custom" />
@@ -1691,6 +1808,275 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                       Live updating
                     </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Discord Filters - Only show when Custom Discord is selected */}
+          {audienceType === "custom-discord" && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Discord Filters */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Discord Server Selection */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      💬 Discord Server Selection
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Server Selection */}
+                    <div className="space-y-3">
+                      <Label className="font-medium">Target Servers</Label>
+                      <div className="grid grid-cols-1 gap-3">
+                        {DISCORD_SERVERS.map((server) => (
+                          <div
+                            key={server.id}
+                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                              discordFilters.servers.includes(server.id)
+                                ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
+                                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                            }`}
+                            onClick={() =>
+                              discordFilters.servers.includes(server.id)
+                                ? removeDiscordFilter("servers", server.id)
+                                : addDiscordFilter("servers", server.id)
+                            }
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl">{server.icon}</span>
+                                <div>
+                                  <div className="font-semibold text-lg">
+                                    {server.name}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {server.description}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <Badge
+                                  variant={
+                                    discordFilters.servers.includes(server.id)
+                                      ? "default"
+                                      : "outline"
+                                  }
+                                  className="mb-1"
+                                >
+                                  {server.members.toLocaleString()} members
+                                </Badge>
+                                <div className="text-xs text-muted-foreground">
+                                  {discordFilters.servers.includes(server.id)
+                                    ? "Selected"
+                                    : "Click to select"}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {discordFilters.servers.length === 0 && (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p>Select one or more Discord servers to target</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Selected Servers Summary */}
+                    {/* {discordFilters.servers.length > 0 && (
+                      <div className="mt-6 p-4 bg-blue-50 rounded-lg border">
+                        <Label className="font-medium text-blue-800 mb-2 block">
+                          Selected Servers ({discordFilters.servers.length})
+                        </Label>
+                        <div className="flex flex-wrap gap-2">
+                          {discordFilters.servers.map((serverId) => {
+                            const server = DISCORD_SERVERS.find(
+                              (s) => s.id === serverId
+                            );
+                            return server ? (
+                              <Badge
+                                key={serverId}
+                                variant="default"
+                                className="cursor-pointer bg-blue-600 hover:bg-blue-700"
+                                onClick={() =>
+                                  removeDiscordFilter("servers", serverId)
+                                }
+                              >
+                                {server.icon} {server.name}
+                                <X className="h-3 w-3 ml-1" />
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    )} */}
+
+                    {/* Additional Discord Options */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      {/* Role Targeting */}
+                      <div className="space-y-2">
+                        {/* <Label className="font-medium">
+                          Target Roles (Optional)
+                        </Label>
+                        <Select
+                          onValueChange={(value) =>
+                            addDiscordFilter("roles", value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Add role filters" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="moderator">Moderator</SelectItem>
+                            <SelectItem value="contributor">
+                              Contributor
+                            </SelectItem>
+                            <SelectItem value="builder">Builder</SelectItem>
+                            <SelectItem value="member">Member</SelectItem>
+                            <SelectItem value="new-member">
+                              New Member
+                            </SelectItem>
+                          </SelectContent>
+                        </Select> */}
+                        <div className="flex flex-wrap gap-2">
+                          {discordFilters.roles.map((role) => (
+                            <Badge
+                              key={role}
+                              variant="secondary"
+                              className="cursor-pointer"
+                              onClick={() => removeDiscordFilter("roles", role)}
+                            >
+                              {role} <X className="h-3 w-3 ml-1" />
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Channel Targeting */}
+                      <div className="space-y-2">
+                        {/* <Label className="font-medium">
+                          Target Channels (Optional)
+                        </Label>
+                        <Select
+                          onValueChange={(value) =>
+                            addDiscordFilter("channels", value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Add channel filters" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="general">General</SelectItem>
+                            <SelectItem value="announcements">
+                              Announcements
+                            </SelectItem>
+                            <SelectItem value="missions">Missions</SelectItem>
+                            <SelectItem value="trading">Trading</SelectItem>
+                            <SelectItem value="support">Support</SelectItem>
+                            <SelectItem value="off-topic">Off Topic</SelectItem>
+                          </SelectContent>
+                        </Select> */}
+                        <div className="flex flex-wrap gap-2">
+                          {discordFilters.channels.map((channel) => (
+                            <Badge
+                              key={channel}
+                              variant="secondary"
+                              className="cursor-pointer"
+                              onClick={() =>
+                                removeDiscordFilter("channels", channel)
+                              }
+                            >
+                              #{channel} <X className="h-3 w-3 ml-1" />
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right Column - Discord Audience Preview */}
+              <div className="lg:col-span-1">
+                <Card className="sticky top-4">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      💬 Discord Reach
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Estimated Discord Reach */}
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600">
+                        {discordFilters.servers
+                          .reduce((total, serverId) => {
+                            const server = DISCORD_SERVERS.find(
+                              (s) => s.id === serverId
+                            );
+                            return total + (server ? server.members : 0);
+                          }, 0)
+                          .toLocaleString()}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Discord members
+                      </div>
+                    </div>
+
+                    {/* Server Breakdown */}
+                    {discordFilters.servers.length > 0 && (
+                      <div className="space-y-3">
+                        <Label className="font-medium">Server Breakdown:</Label>
+                        <div className="space-y-2">
+                          {discordFilters.servers.map((serverId) => {
+                            const server = DISCORD_SERVERS.find(
+                              (s) => s.id === serverId
+                            );
+                            return server ? (
+                              <div
+                                key={serverId}
+                                className="flex justify-between items-center p-2 bg-gray-50 rounded"
+                              >
+                                <span className="text-sm flex items-center gap-2">
+                                  {server.icon} {server.name}
+                                </span>
+                                <Badge variant="outline">
+                                  {server.members.toLocaleString()}
+                                </Badge>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Filter Summary */}
+                    {(discordFilters.roles.length > 0 ||
+                      discordFilters.channels.length > 0) && (
+                      <div className="space-y-2">
+                        <Label className="font-medium">Active Filters:</Label>
+                        <div className="space-y-1">
+                          {discordFilters.roles.length > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              Roles: {discordFilters.roles.join(", ")}
+                            </div>
+                          )}
+                          {discordFilters.channels.length > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              Channels:{" "}
+                              {discordFilters.channels
+                                .map((c) => `#${c}`)
+                                .join(", ")}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>

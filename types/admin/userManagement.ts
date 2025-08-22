@@ -41,7 +41,7 @@ export interface User {
 
 export interface UserWithAgent extends User {
   agent?: UserAgent;
-  userMissions?: Mission[]; // เพิ่มบรรทัดนี้
+  userMissions?: Mission[];
 }
 
 export interface UserTableColumn {

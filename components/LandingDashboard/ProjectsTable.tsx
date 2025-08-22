@@ -1,90 +1,30 @@
 import React, { useState } from "react";
 import { Star, Filter, ChevronDown, Search } from "lucide-react";
-
-interface ProjectData {
-  id: number;
-  name: string;
-  category: string;
-  trustScore: number;
-  mindshareScore: number;
-  reviews: number;
-  reviewCount: number;
-  logo?: string;
-  verified?: boolean;
-}
+import { allProjects as projects, Project } from "@/data/admin/projectMockData";
 
 interface ProjectsTableProps {
-  projects?: ProjectData[];
+  projects?: Project[];
   showSearch?: boolean;
   showFilters?: boolean;
 }
 
-const defaultProjects: ProjectData[] = [
-  {
-    id: 1,
-    name: "DecentraDAO",
-    category: "DAO",
-    trustScore: 80,
-    mindshareScore: 72,
-    reviews: 3.5,
-    reviewCount: 128,
-    logo: "🏛️",
-    verified: true,
-  },
-  {
-    id: 2,
-    name: "AiAgent Protocol",
-    category: "AI",
-    trustScore: 92,
-    mindshareScore: 88,
-    reviews: 5,
-    reviewCount: 256,
-    logo: "🤖",
-    verified: true,
-  },
-  {
-    id: 3,
-    name: "CryptoGuild",
-    category: "Gaming",
-    trustScore: 28,
-    mindshareScore: 65,
-    reviews: 2.2,
-    reviewCount: 94,
-    logo: "⚔️",
-    verified: false,
-  },
-  {
-    id: 4,
-    name: "DeFi Alliance",
-    category: "DeFi",
-    trustScore: 69,
-    mindshareScore: 76,
-    reviews: 4.6,
-    reviewCount: 187,
-    logo: "💰",
-    verified: true,
-  },
-];
-
 const ProjectsTable: React.FC<ProjectsTableProps> = ({
-  projects = defaultProjects,
+  projects: propProjects = projects,
   showSearch = true,
   showFilters = true,
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState<
-    "name" | "trustScore" | "mindshareScore" | "reviews"
-  >("trustScore");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<"name" | "trustScore" | "mindshareScore" | "reviews">("trustScore");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  const categories = [
+  const categories: string[] = [
     "All",
-    ...Array.from(new Set(projects.map((p) => p.category))),
+    ...Array.from(new Set(propProjects.map((p: Project) => p.category))),
   ];
 
-  const filteredAndSortedProjects = projects
-    .filter((project) => {
+  const filteredAndSortedProjects = propProjects
+    .filter((project: Project) => {
       const matchesSearch = project.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
@@ -92,7 +32,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
         selectedCategory === "All" || project.category === selectedCategory;
       return matchesSearch && matchesCategory;
     })
-    .sort((a, b) => {
+    .sort((a: Project, b: Project) => {
       const direction = sortDirection === "asc" ? 1 : -1;
       switch (sortBy) {
         case "name":
@@ -102,13 +42,16 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
         case "mindshareScore":
           return (a.mindshareScore - b.mindshareScore) * direction;
         case "reviews":
-          return (a.reviews - b.reviews) * direction;
+          // Generate review score from trust and mindshare scores for consistency
+          const aReviews = (a.trustScore + a.mindshareScore) / 40; // Convert to 0-5 scale
+          const bReviews = (b.trustScore + b.mindshareScore) / 40;
+          return (aReviews - bReviews) * direction;
         default:
           return 0;
       }
     });
 
-  const handleSort = (column: typeof sortBy) => {
+  const handleSort = (column: typeof sortBy): void => {
     if (sortBy === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -117,13 +60,15 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
     }
   };
 
-  const handleProjectClick = (projectId: number) => {
-    console.log(`Navigate to project ${projectId}`);
-    // Add navigation logic here
+  const handleProjectClick = (project: Project): void => {
+    window.location.href = `/project-profile?id=${project.id}`;
   };
 
-  const renderStars = (rating: number) => {
-    return [...Array(5)].map((_, i) => (
+  const renderStars = (trustScore: number, mindshareScore: number): React.ReactElement[] => {
+    // Calculate rating from trust and mindshare scores (0-5 scale)
+    const rating = Math.min(5, (trustScore + mindshareScore) / 40);
+    
+    return [...Array(5)].map((_, i: number) => (
       <Star
         key={i}
         className={`w-4 h-4 ${
@@ -137,7 +82,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
     ));
   };
 
-  const getScoreColor = (score: number, type: "trust" | "mindshare") => {
+  const getScoreColor = (score: number, type: "trust" | "mindshare"): string => {
     if (type === "trust") {
       return score >= 80
         ? "from-green-500 to-green-600"
@@ -149,8 +94,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
     }
   };
 
-  // New: text color to match the bar color
-  const getScoreTextColor = (score: number, type: "trust" | "mindshare") => {
+  const getScoreTextColor = (score: number, type: "trust" | "mindshare"): string => {
     if (type === "trust") {
       return score >= 80
         ? "text-green-600 dark:text-green-400"
@@ -159,6 +103,12 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
         : "text-red-600 dark:text-red-400";
     }
     return "text-blue-600 dark:text-blue-400";
+  };
+
+  const getReviewCount = (trustScore: number, mindshareScore: number): number => {
+    // Generate review count based on scores (higher scores = more reviews)
+    const baseCount = Math.floor((trustScore + mindshareScore) / 2);
+    return Math.max(10, baseCount + Math.floor(Math.random() * 100));
   };
 
   return (
@@ -179,7 +129,7 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                     type="text"
                     placeholder="Search projects..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-gray-500/50 dark:focus:ring-slate-400/50 focus:border-gray-500/50 dark:focus:border-slate-400/50 transition-all duration-200"
                   />
                 </div>
@@ -190,10 +140,10 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                   <div className="relative">
                     <select
                       value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedCategory(e.target.value)}
                       className="appearance-none bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl px-4 py-3 pr-8 text-foreground focus:outline-none focus:ring-2 focus:ring-gray-500/50 dark:focus:ring-slate-400/50 focus:border-gray-500/50 dark:focus:border-slate-400/50 transition-all duration-200"
                     >
-                      {categories.map((category) => (
+                      {categories.map((category: string) => (
                         <option key={category} value={category}>
                           {category}
                         </option>
@@ -291,88 +241,93 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {filteredAndSortedProjects.map((project) => (
-                  <tr
-                    key={project.id}
-                    onClick={() => handleProjectClick(project.id)}
-                    className="hover:bg-accent/20 transition-all duration-200 cursor-pointer group"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-3">
-                        {project.logo && (
-                          <div className="w-10 h-10 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg flex items-center justify-center text-lg">
-                            {project.logo}
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-medium text-foreground group-hover:text-gray-800 dark:group-hover:text-slate-200 transition-colors duration-200">
-                            {project.name}
-                          </div>
-                          {project.verified && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                              <span className="text-xs text-green-600 dark:text-green-400">
-                                Verified
-                              </span>
+                {filteredAndSortedProjects.map((project: Project) => {
+                  const reviewCount = getReviewCount(project.trustScore, project.mindshareScore);
+                  // const reviewScore = Math.min(5, (project.trustScore + project.mindshareScore) / 40);
+                  
+                  return (
+                    <tr
+                      key={project.id}
+                      onClick={() => handleProjectClick(project)}
+                      className="hover:bg-accent/20 transition-all duration-200 cursor-pointer group"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-3">
+                          {project.logo && (
+                            <div className="w-10 h-10 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg flex items-center justify-center text-lg">
+                              {project.logo}
                             </div>
                           )}
+                          <div>
+                            <div className="font-medium text-foreground group-hover:text-gray-800 dark:group-hover:text-slate-200 transition-colors duration-200">
+                              {project.name}
+                            </div>
+                            {project.trustScore >= 80 && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span className="text-xs text-green-600 dark:text-green-400">
+                                  Verified
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-secondary/50 text-secondary-foreground text-xs rounded-lg">
-                        {project.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex-1 bg-secondary/50 rounded-full h-2 w-20">
-                          <div
-                            className={`bg-gradient-to-r ${getScoreColor(
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-3 py-1 bg-secondary/50 text-secondary-foreground text-xs rounded-lg">
+                          {project.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-1 bg-secondary/50 rounded-full h-2 w-20">
+                            <div
+                              className={`bg-gradient-to-r ${getScoreColor(
+                                project.trustScore,
+                                "trust"
+                              )} h-2 rounded-full transition-all duration-500`}
+                              style={{ width: `${project.trustScore}%` }}
+                            ></div>
+                          </div>
+                          <span
+                            className={`text-sm font-semibold ${getScoreTextColor(
                               project.trustScore,
                               "trust"
-                            )} h-2 rounded-full transition-all duration-500`}
-                            style={{ width: `${project.trustScore}%` }}
-                          ></div>
+                            )} min-w-[2rem]`}
+                          >
+                            {project.trustScore}
+                          </span>
                         </div>
-                        <span
-                          className={`text-sm font-semibold ${getScoreTextColor(
-                            project.trustScore,
-                            "trust"
-                          )} min-w-[2rem]`}
-                        >
-                          {project.trustScore}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex-1 bg-secondary/50 rounded-full h-2 w-20">
-                          <div
-                            className={`bg-gradient-to-r ${getScoreColor(
-                              project.mindshareScore,
-                              "mindshare"
-                            )} h-2 rounded-full transition-all duration-500`}
-                            style={{ width: `${project.mindshareScore}%` }}
-                          ></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-1 bg-secondary/50 rounded-full h-2 w-20">
+                            <div
+                              className={`bg-gradient-to-r ${getScoreColor(
+                                project.mindshareScore,
+                                "mindshare"
+                              )} h-2 rounded-full transition-all duration-500`}
+                              style={{ width: `${project.mindshareScore}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 min-w-[2rem]">
+                            {project.mindshareScore}
+                          </span>
                         </div>
-                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 min-w-[2rem]">
-                          {project.mindshareScore}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex">
-                          {renderStars(project.reviews)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex">
+                            {renderStars(project.trustScore, project.mindshareScore)}
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            ({reviewCount})
+                          </span>
                         </div>
-                        <span className="text-sm text-muted-foreground">
-                          ({project.reviewCount})
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
