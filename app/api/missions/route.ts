@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     // Validate platform with capitalized values
     const validPlatforms = [
       "Telegram",
-      "Twitter",
+      "X",
       "Discord",
       "Website",
       "Mobile",
@@ -219,7 +219,7 @@ export async function PUT(request: Request) {
     if (updateData.platform) {
       const validPlatforms = [
         "Telegram",
-        "Twitter",
+        "X",
         "Discord",
         "Website",
         "Mobile",

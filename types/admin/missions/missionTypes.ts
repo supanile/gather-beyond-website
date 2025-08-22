@@ -66,7 +66,7 @@ export interface NewMissionForm {
 
 // Add MissionTargetingData interface
 export interface MissionTargetingData {
-  audienceType: "global" | "custom";
+  audienceType: "global" | "custom" | "custom-discord";
   behaviorFilters: {
     xpLevel: { enabled: boolean; min: number; max: number };
     missionStreak: { enabled: boolean; value: number };
@@ -85,6 +85,11 @@ export interface MissionTargetingData {
     language: string[];
     ageRange: string;
     gender: string;
+  };
+  discordFilters: {
+    servers: string[];
+    roles: string[];
+    channels: string[];
   };
   deliveryOptions: {
     channel: string;
@@ -122,7 +127,7 @@ export type TypeOption = typeof TYPE_OPTIONS[number];
 // Platform options with proper mapping
 export const PLATFORM_OPTIONS = [
   { value: "Telegram", label: "Telegram" },
-  { value: "Twitter", label: "Twitter" },
+  { value: "X", label: "X" },
   { value: "Discord", label: "Discord" },
   { value: "Website", label: "Website" },
   { value: "Mobile", label: "Mobile" }
@@ -139,6 +144,15 @@ export const STATUS_OPTIONS = [
 ] as const;
 
 export type StatusOption = typeof STATUS_OPTIONS[number];
+
+// Format options
+export const FORMAT_OPTIONS = [
+  { value: "Link", label: "Link" },
+  { value: "Message", label: "Message" }, 
+  { value: "Image", label: "Image" }
+] as const;
+
+export type FormatOption = typeof FORMAT_OPTIONS[number];
 
 export interface PaginationState {
   currentPage: number;
