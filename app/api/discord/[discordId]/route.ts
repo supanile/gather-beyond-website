@@ -1,4 +1,3 @@
-import { grist } from "@/lib/grist";
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -23,18 +22,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ disc
 
     const member = await response.json();
     
-    // Handle avatar URL with proper null checks
     let avatarUrl: string;
     if (member.avatar) {
-      // User has a custom avatar
       const extension = member.avatar.startsWith("a_") ? "gif" : "png";
+      
       avatarUrl = `https://cdn.discordapp.com/avatars/${member.id}/${member.avatar}.${extension}`;
     } else {
-      // User doesn't have a custom avatar, use default
-      // For users without discriminator (new username system), use user ID
       const discriminatorValue = member.discriminator && member.discriminator !== "0" 
         ? parseInt(member.discriminator) 
         : parseInt(member.id.slice(-1));
+
       avatarUrl = `https://cdn.discordapp.com/embed/avatars/${discriminatorValue % 5}.png`;
     }
 
