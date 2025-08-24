@@ -24,16 +24,47 @@ interface UserProfileHeaderProps {
   totalMissions: number;
 }
 
-const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
+interface DiscordData {
+  username: string;
+  avatarUrl: string;
+}
+
+async function fetchDiscordData(params: { discordId: string }): Promise<DiscordData | null> {
+  try {
+    const response = await fetch(`/api/discord/${params.discordId}`, { next: { revalidate: 3600 } });
+    if (!response.ok) {
+      throw new Error("Failed to fetch Discord data");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+const UserProfileHeader: React.FC<UserProfileHeaderProps> = async ({
   user,
   userAgent,
   totalMissions,
 }) => {
+  const discordData = user.discord_id ? await fetchDiscordData({ discordId: user.discord_id }) : null;
+
   return (
     <div className="p-6 -my-6 -ml-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
         <div className="flex items-center space-x-3 sm:space-x-4">
+          {discordData?.avatarUrl ? (
+            <img
+              src={discordData.avatarUrl}
+              alt={`${discordData.username}'s avatar`}
+              className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full shadow-lg"
+            />
+          ) : (
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
+              {user.email.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
             {user.email.charAt(0).toUpperCase()}
           </div>
@@ -70,7 +101,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
               missions completed
             </span>
           </div>
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 dark:text-green-400 flex-shrink-0" />
             <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
               {user.total_points || 0}
@@ -78,7 +109,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
             <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
               {(user.total_points || 0) === 1 ? 'credit' : 'credits'}
             </span>
-            </div>
+          </div>
           <div className="flex items-center space-x-2">
             <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 dark:text-purple-400 flex-shrink-0" />
             <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
