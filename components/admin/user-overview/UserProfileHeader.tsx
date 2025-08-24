@@ -1,4 +1,6 @@
-import React from "react";
+"use client"
+
+import React, { useEffect, useState } from "react";
 import { UserWithAgent } from "@/types/admin/userManagement";
 import { UserAgent } from "@/types/admin/userTableTypes";
 import { Badge } from "@/components/ui/badge";
@@ -29,32 +31,45 @@ interface DiscordData {
   avatarUrl: string;
 }
 
-async function fetchDiscordData(params: { discordId: string }): Promise<DiscordData | null> {
-  try {
-    const response = await fetch(`/api/discord/${params.discordId}`, { next: { revalidate: 3600 } });
-    if (!response.ok) {
-      throw new Error("Failed to fetch Discord data");
-    }
-    return await response.json();
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-}
-
-const UserProfileHeader: React.FC<UserProfileHeaderProps> = async ({
+const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   user,
   userAgent,
   totalMissions,
 }) => {
-  const discordData = user.discord_id ? await fetchDiscordData({ discordId: user.discord_id }) : null;
+  const [discordData, setDiscordData] = useState<DiscordData | null>(null);
+  const [isLoadingDiscord, setIsLoadingDiscord] = useState(false);
+
+  useEffect(() => {
+    async function fetchDiscordData() {
+      if (!user.discord_id) return;
+      
+      setIsLoadingDiscord(true);
+      try {
+        const response = await fetch(`/api/discord/${user.discord_id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch Discord data");
+        }
+        const data = await response.json();
+        setDiscordData(data);
+      } catch (error) {
+        console.error(error);
+        setDiscordData(null);
+      } finally {
+        setIsLoadingDiscord(false);
+      }
+    }
+
+    fetchDiscordData();
+  }, [user.discord_id]);
 
   return (
     <div className="p-6 -my-6 -ml-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
         <div className="flex items-center space-x-3 sm:space-x-4">
-          {discordData?.avatarUrl ? (
+          {isLoadingDiscord ? (
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
+          ) : discordData?.avatarUrl ? (
             <img
               src={discordData.avatarUrl}
               alt={`${discordData.username}'s avatar`}
@@ -65,9 +80,6 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = async ({
               {user.email.charAt(0).toUpperCase()}
             </div>
           )}
-          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
-            {user.email.charAt(0).toUpperCase()}
-          </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm sm:text-base md:text-lg font-semibold text-foreground truncate">
               {user.email}
