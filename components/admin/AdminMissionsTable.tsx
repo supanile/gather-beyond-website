@@ -185,6 +185,7 @@ const AdminMissionsTable = () => {
       regex: mission.regex || "",
       duration: mission.duration || "",
       missionTargeting: missionTargeting,
+      serverId: mission.serverId || "[]",
     };
 
     setMissionToEdit(missionForm);
@@ -527,6 +528,7 @@ const AdminMissionsTable = () => {
             format: "",
             useful_link: "",
             partner: "Super Connector",
+            serverId: "[]",
           }
         }
         onMissionChange={(mission) => {
@@ -544,6 +546,7 @@ const AdminMissionsTable = () => {
                 useful_link: "",
                 status: "upcoming",
                 partner: "Super Connector",
+                serverId: "[]",
               };
               const updated = mission(currentMission);
               return updated;

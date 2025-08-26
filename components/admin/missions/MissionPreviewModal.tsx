@@ -7,14 +7,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { NewMissionForm } from "@/types/admin/missions/missionTypes";
 import {
   DiscordMessages,
   DiscordMessage,
   DiscordEmbed,
-  DiscordEmbedField,
-  DiscordEmbedFields,
 } from "@derockdev/discord-components-react";
 
 interface MissionPreviewModalProps {
@@ -41,16 +44,46 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
     return "No reward";
   };
 
-  // Format date for display
+  // Format date for display - ใช้ JavaScript native
   const formatDate = (dateStr: string) => {
     try {
       if (dateStr) {
-        return format(new Date(dateStr), "PPP 'at' HH:mm");
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) {
+          return "Invalid date";
+        }
+        // Format "Wednesday, 27 August BE 2025 at 00:00"
+        const options: Intl.DateTimeFormatOptions = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+        const formatted = date.toLocaleDateString("en-US", options);
+        // Convert to Buddhist Era (BE) by adding 543 to the year
+        const beYear = date.getFullYear() + 543;
+        return formatted.replace(date.getFullYear().toString(), `BE ${beYear}`).replace(" at ", " at ");
       }
     } catch {
       return "Invalid date";
     }
     return "Not set";
+  };
+
+  // Get current time in HH:MM format
+  const getCurrentTime = () => {
+    return new Date().toISOString();
+  };
+
+  // Format current time for footer display (Today at HH:MM)
+  const getCurrentTimeForFooter = () => {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    return `Today at ${hours}:${minutes}`;
   };
 
   // Calculate time remaining
@@ -83,6 +116,17 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
     ? getTimeRemaining(mission.endDate)
     : "Not set";
 
+  const currentTime = getCurrentTime();
+  const footerTime = getCurrentTimeForFooter();
+
+  // Format end date for tooltip
+  const getEndDateForTooltip = () => {
+    if (mission.endDate) {
+      return formatDate(mission.endDate);
+    }
+    return "End date not set";
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0">
@@ -99,86 +143,84 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
           {/* Discord-like preview using the library */}
           <div className="rounded-lg overflow-hidden">
             <DiscordMessages>
-              <DiscordMessage
+                <DiscordMessage
                 author="Super Agent"
-                avatar="https://cdn.discordapp.com/embed/avatars/0.png"
-                bot={false}
-                timestamp="Today at 11:20"
-                roleColor="#5865f2"
-              >
+                avatar="/images/superagent-profile.png"
+                bot={true}
+                timestamp={currentTime}
+                roleColor="gold"
+                >
                 <DiscordEmbed
                   slot="embeds"
-                  color="#5865f2"
+                  color="#047AFE"
                   embedTitle="🗺️ Available Missions"
                 >
-                  <div slot="description" className="text-base leading-relaxed">
-                    <div className="text-lg font-bold text-white mb-3">
-                      🎯 Mission 1: {mission.title || "Untitled Mission"}
-                    </div>
-                    
-                    <div className="text-sm text-gray-400 mb-3 flex items-center gap-2">
-                      <span>⭐ Level {mission.level_required || 1}</span>
-                      <span>|</span>
-                      <span>🕐 Ends in {timeRemaining}</span>
-                    </div>
-                    
-                    <div className="text-[15px] text-gray-300 leading-normal">
-                      {mission.description || "No description provided."}
-                    </div>
+                  <div slot="description">
+                  <div className="text-lg font-bold text-white mb-2">
+                    🎯 Mission 1: {mission.title || "Untitled Mission"}
                   </div>
 
-                  <DiscordEmbedFields slot="fields">
-                    <DiscordEmbedField fieldTitle="💰 Reward:" inline>
-                      <span className="text-sm font-medium text-white">
-                        {parseReward(mission.reward || "")}
-                      </span>
-                    </DiscordEmbedField>
-                    
-                    <DiscordEmbedField fieldTitle="🎯 Status:" inline>
-                      <span className="text-sm font-medium text-green-400">
-                        Available to accept
-                      </span>
-                    </DiscordEmbedField>
-                    
-                    <DiscordEmbedField fieldTitle="📋 Format:" inline>
-                      <span className="text-sm font-medium text-white">
-                        {mission.format || "Not specified"}
-                      </span>
-                    </DiscordEmbedField>
-                    
-                    <DiscordEmbedField fieldTitle="❗ Action to submit:">
-                      <span className="text-sm font-medium text-white">
-                        {mission.action_request || "Not specified"}
-                      </span>
-                    </DiscordEmbedField>
+                  <div className="text-base text-white font-bold mb-4 flex items-center gap-2">
+                    <span>⭐ Level {mission.level_required || 1}</span>
+                    <span>|</span>
+                    <span>
+                    ⏰ <span className="font-bold">Ends</span>{" "}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="px-1.5 py-0 bg-gray-500/20 rounded-md font-medium text-gray-100 cursor-help hover:bg-gray-500/30 transition-colors">
+                            in {timeRemaining}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getEndDateForTooltip()}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    </span>
+                  </div>
 
-                    {mission.requirements && (
-                      <DiscordEmbedField fieldTitle="⚠️ Requirements:">
-                        <span className="text-sm font-medium text-white">
-                          {mission.requirements}
-                        </span>
-                      </DiscordEmbedField>
-                    )}
+                  <div className="text-base text-gray-300 leading-normal mb-4">
+                    {mission.description || "No description provided."}
+                  </div>
 
-                    {mission.useful_link && (
-                      <DiscordEmbedField fieldTitle="🔗 Useful Resource:">
-                        <a
-                          href={mission.useful_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 text-sm font-medium underline hover:text-blue-300 transition-colors"
-                        >
-                          {mission.useful_link}
-                        </a>
-                      </DiscordEmbedField>
-                    )}
-                  </DiscordEmbedFields>
+                  <div className="mt-4">
+                    <div className="text-base">
+                    <span className="font-bold">💰 Reward:</span>{" "}
+                    <span className="font-medium">
+                      {parseReward(mission.reward || "")}
+                    </span>
+                    </div>
 
-                  <div slot="footer" className="text-xs text-gray-500 font-normal">
-                    6 available missions | Use /my_missions to view your accepted missions
+                    <div className="text-base">
+                    <span className="font-bold">🎯 Status:</span>{" "}
+                    <span className="font-medium">Available to accept</span>
+                    </div>
+
+                    <div className="text-base">
+                    <span className="font-bold">📋 Format:</span>{" "}
+                    <span className="font-medium">
+                      {mission.format || "Not specified"}
+                    </span>
+                    </div>
+
+                    <div className="text-base">
+                    <span className="font-bold">⚡ Action to submit:</span>{" "}
+                    <span className="font-medium">
+                      {mission.action_request || "Not specified"}
+                    </span>
+                    </div>
+                  </div>
+                  </div>
+
+                  <div slot="footer">
+                  <div className="text-xs text-gray-200 font-medium mt-3">
+                    99 available missions | Use /my_missions to view your
+                    accepted missions • {footerTime}
+                  </div>
                   </div>
                 </DiscordEmbed>
-              </DiscordMessage>
+                </DiscordMessage>
             </DiscordMessages>
           </div>
 

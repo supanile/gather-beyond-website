@@ -100,6 +100,7 @@ export const useMissionsTable = () => {
     format: "",
     useful_link: "",
     partner: "Super Connector",
+    serverId: "[]",
   });
 
   // Fetch missions data
@@ -328,6 +329,7 @@ export const useMissionsTable = () => {
             start: startDate,
             end: endDate,
           }),
+        serverId: newMission.serverId || "[]",
       };
 
       console.log("Sending mission data:", missionData);
@@ -357,6 +359,7 @@ export const useMissionsTable = () => {
           format: "",
           useful_link: "",
           partner: "Super Connector",
+          serverId: "[]",
         });
 
         await fetchMissions();
@@ -424,6 +427,7 @@ export const useMissionsTable = () => {
             start: startDate,
             end: endDate,
           }),
+        serverId: updateData.serverId || "[]",
       };
 
       console.log("Updating mission with data:", missionUpdateData);

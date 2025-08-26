@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { UserWithAgent } from "@/types/admin/userManagement";
 import { UserAgent } from "@/types/admin/userTableTypes";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +43,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   useEffect(() => {
     async function fetchDiscordData() {
       if (!user.discord_id) return;
-      
+
       setIsLoadingDiscord(true);
       try {
         const response = await fetch(`/api/discord/${user.discord_id}`);
@@ -70,11 +71,15 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
           {isLoadingDiscord ? (
             <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
           ) : discordData?.avatarUrl ? (
-            <img
-              src={discordData.avatarUrl}
-              alt={`${discordData.username}'s avatar`}
-              className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full shadow-lg"
-            />
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full shadow-lg overflow-hidden">
+              <Image
+                src={discordData.avatarUrl}
+                alt={`${discordData.username}'s avatar`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 56px"
+              />
+            </div>
           ) : (
             <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
               {user.email.charAt(0).toUpperCase()}
@@ -119,7 +124,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
               {user.total_points || 0}
             </span>
             <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
-              {(user.total_points || 0) === 1 ? 'credit' : 'credits'}
+              {(user.total_points || 0) === 1 ? "credit" : "credits"}
             </span>
           </div>
           <div className="flex items-center space-x-2">
@@ -138,7 +143,9 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                 Joined:
               </span>
               <span className="text-sm sm:text-base md:text-lg text-foreground font-medium ml-1 break-words">
-                {userAgent.created_at ? formatDate(userAgent.created_at) : "Unknown"}
+                {userAgent.created_at
+                  ? formatDate(userAgent.created_at)
+                  : "Unknown"}
               </span>
             </div>
           </div>

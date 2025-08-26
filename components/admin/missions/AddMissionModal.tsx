@@ -90,6 +90,7 @@ interface ValidationErrors {
   action_request?: string;
   requirements?: string;
   level_required?: string;
+  discordServers?: string;
 }
 
 // interface for notification alert
@@ -439,7 +440,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   );
 
-  // Add the missing handlePreviewMission function
+  // missing handlePreviewMission function
   const handlePreviewMission = () => {
     setIsPreviewOpen(true);
   };
@@ -468,15 +469,15 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       const savedDraft = localStorage.getItem(draftKey);
       if (savedDraft) {
         const draftData: DraftData = JSON.parse(savedDraft);
-        
+
         // Load basic info
         onMissionChange(draftData.basicInfo);
-        
+
         // Load targeting data
         if (draftData.targetingData) {
           setMissionTargeting(draftData.targetingData);
         }
-        
+
         console.log("Draft loaded successfully:", draftKey);
         return true;
       }
@@ -616,6 +617,13 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       errors.level_required = "Level Required must be at least 1";
     }
 
+    // Discord server validation - check if targeting data exists and is custom-discord
+    if (missionTargeting?.audienceType === "custom-discord") {
+      if (!missionTargeting?.discordFilters?.servers?.length) {
+        errors.discordServers = "At least one Discord server must be selected";
+      }
+    }
+
     // URL validation for useful_link
     if (newMission.useful_link && newMission.useful_link.trim()) {
       try {
@@ -690,13 +698,20 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       // Set internal loading state
       setInternalLoading(true);
 
-      // Add targeting data to mission before submission
+      // Collect selected Discord server IDs
+      let selectedServerIds: string[] = [];
+      if (missionTargeting?.discordFilters?.servers) {
+        selectedServerIds = missionTargeting.discordFilters.servers;
+      }
+
+      // targeting data to mission before submission
       const missionWithTargeting = {
         ...newMission,
         missionTargeting: missionTargeting,
+        serverId: JSON.stringify(selectedServerIds),
       };
 
-      // Update the mission form data with targeting before calling onSubmit
+      // mission form data with targeting before calling onSubmit
       onMissionChange(missionWithTargeting);
 
       // Call the parent's submit handler
@@ -804,6 +819,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         action_request: "Action Request",
         requirements: "Requirements",
         level_required: "Level Required",
+        discordServers: "Discord Servers",
       };
       return fieldLabels[key] || key;
     });
@@ -1298,6 +1314,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                 <MissionTargetingForm
                   onTargetingChange={setMissionTargeting}
                   initialData={missionTargeting}
+                  validationErrors={validationErrors}
                 />
               </TabsContent>
             </Tabs>

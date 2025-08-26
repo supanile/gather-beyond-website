@@ -101,13 +101,7 @@ export async function POST(request: Request) {
     }
 
     // Validate platform with capitalized values
-    const validPlatforms = [
-      "Telegram",
-      "X",
-      "Discord",
-      "Website",
-      "Mobile",
-    ];
+    const validPlatforms = ["Telegram", "X", "Discord", "Website", "Mobile"];
     if (!validPlatforms.includes(body.platform)) {
       return NextResponse.json(
         {
@@ -133,7 +127,8 @@ export async function POST(request: Request) {
 
     console.log(`Partner "${body.partner}" mapped to ID: ${partnerId}`);
     const durationData = {
-      start: body.startDate || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      start:
+        body.startDate || new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
       end: body.endDate || null,
     };
 
@@ -144,7 +139,7 @@ export async function POST(request: Request) {
       title: body.title,
       description: body.description,
       type: body.type,
-      platform: body.platform, 
+      platform: body.platform,
       reward: body.reward || JSON.stringify({ amount: 0, token: "XP" }),
       partner: partnerId,
       level_required: body.level_required || 1,
@@ -152,9 +147,12 @@ export async function POST(request: Request) {
       format: body.format || "",
       useful_link: body.useful_link || "",
       requirements: body.requirements || JSON.stringify({}),
-      duration: JSON.stringify(durationData, null, 0).replace(/,"/g, ', "').replace(/":"/g, '": "'), 
+      duration: JSON.stringify(durationData, null, 0)
+        .replace(/,"/g, ', "')
+        .replace(/":"/g, '": "'),
       repeatable: body.repeatable || 0,
       regex: body.regex || "",
+      serverId: body.serverId || "[]",
     };
 
     console.log("Prepared mission data for Grist:", missionData);
@@ -217,13 +215,7 @@ export async function PUT(request: Request) {
 
     // Validate platform with capitalized values
     if (updateData.platform) {
-      const validPlatforms = [
-        "Telegram",
-        "X",
-        "Discord",
-        "Website",
-        "Mobile",
-      ];
+      const validPlatforms = ["Telegram", "X", "Discord", "Website", "Mobile"];
       if (!validPlatforms.includes(updateData.platform)) {
         return NextResponse.json(
           {
@@ -273,16 +265,29 @@ export async function PUT(request: Request) {
 
       const durationData = {
         ...currentDuration,
-        start: updateData.startDate || currentDuration.start || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
-        end: updateData.endDate !== undefined ? updateData.endDate : currentDuration.end,
+        start:
+          updateData.startDate ||
+          currentDuration.start ||
+          new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+        end:
+          updateData.endDate !== undefined
+            ? updateData.endDate
+            : currentDuration.end,
       };
 
-      cleanUpdateData.duration = JSON.stringify(durationData, null, 0).replace(/,"/g, ', "').replace(/":"/g, '": "'); // Custom spacing
+      cleanUpdateData.duration = JSON.stringify(durationData, null, 0)
+        .replace(/,"/g, ', "')
+        .replace(/":"/g, '": "'); // Custom spacing
       console.log("Updated duration data:", durationData);
     }
 
     // Remove missionTargeting field to avoid errors
     delete cleanUpdateData.missionTargeting;
+
+    // Handle serverId updates
+    if (body.serverId !== undefined) {
+      cleanUpdateData.serverId = body.serverId;
+    }
 
     const finalUpdateData = {
       ...cleanUpdateData,
