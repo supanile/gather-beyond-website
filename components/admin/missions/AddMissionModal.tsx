@@ -10,6 +10,7 @@ import {
   Save,
   RefreshCw,
   Send,
+  Eye,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -255,6 +256,8 @@ const DateTimePicker = ({
             selected={date}
             onSelect={handleDateSelect}
             captionLayout="dropdown"
+            fromYear={2024}
+            toYear={new Date().getFullYear()}
             initialFocus
           />
         </div>
@@ -410,10 +413,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
   // Internal loading state for better UX
   const [internalLoading, setInternalLoading] = useState(false);
-  
+
   // Preview modal state
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  
+
   // draft key
   const draftKey = `mission_draft_${
     isEditMode ? newMission.title || "edit" : "new"
@@ -436,7 +439,12 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   );
 
-  // Functions for draft
+  // Add the missing handlePreviewMission function
+  const handlePreviewMission = () => {
+    setIsPreviewOpen(true);
+  };
+
+  // Fixed Functions for draft with localStorage
   const saveDraft = useCallback(() => {
     try {
       const draftData: DraftData = {
@@ -445,9 +453,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         savedAt: new Date().toISOString(),
       };
 
-      // save to localStorage
+      // Save to localStorage
       localStorage.setItem(draftKey, JSON.stringify(draftData));
-      console.log("Draft saved to localStorage:", draftKey, draftData);
+      console.log("Draft saved successfully:", draftKey);
       return true;
     } catch (error) {
       console.error("Error saving draft:", error);
@@ -458,19 +466,18 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   const loadDraft = useCallback(() => {
     try {
       const savedDraft = localStorage.getItem(draftKey);
-
       if (savedDraft) {
-        const parsedDraft: DraftData = JSON.parse(savedDraft);
-        console.log("Loading draft from localStorage:", parsedDraft);
-
-        // โหลดข้อมูล basic info
-        onMissionChange(parsedDraft.basicInfo);
-
-        // โหลดข้อมูล targeting
-        if (parsedDraft.targetingData) {
-          setMissionTargeting(parsedDraft.targetingData);
+        const draftData: DraftData = JSON.parse(savedDraft);
+        
+        // Load basic info
+        onMissionChange(draftData.basicInfo);
+        
+        // Load targeting data
+        if (draftData.targetingData) {
+          setMissionTargeting(draftData.targetingData);
         }
-
+        
+        console.log("Draft loaded successfully:", draftKey);
         return true;
       }
       return false;
@@ -483,7 +490,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   const clearDraft = () => {
     try {
       localStorage.removeItem(draftKey);
-      console.log("Draft cleared from localStorage:", draftKey);
+      console.log("Draft cleared:", draftKey);
     } catch (error) {
       console.error("Error clearing draft:", error);
     }
@@ -492,7 +499,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   const hasDraft = useCallback(() => {
     try {
       const savedDraft = localStorage.getItem(draftKey);
-      return savedDraft !== null;
+      return !!savedDraft;
     } catch (error) {
       console.error("Error checking draft:", error);
       return false;
@@ -543,7 +550,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
           console.log("Auto-saved draft at:", new Date().toLocaleTimeString());
         }
       }
-    }, 10000); // ลดเวลาเหลือ 10 วินาที สำหรับการทดสอบ
+    }, 10000); // Auto-save every 10 seconds
 
     return () => clearInterval(autoSaveInterval);
   }, [isOpen, isEditMode, newMission, missionTargeting, saveDraft]);
@@ -714,7 +721,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     try {
       setInternalLoading(true);
 
-      // save targeting data before saving draft
+      // Save targeting data before saving draft
       const missionWithTargeting = {
         ...newMission,
         missionTargeting: missionTargeting,
@@ -723,7 +730,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       // Update mission state
       onMissionChange(missionWithTargeting);
 
-      // save to localStorage
+      // Save to localStorage
       const success = saveDraft();
 
       if (success) {
@@ -822,7 +829,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
             <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
           </DialogHeader>
 
-          {/* Notification Alert - ใหม่ */}
+          {/* Notification Alert */}
           {notificationAlert.show && (
             <Alert
               className={cn(
@@ -895,7 +902,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     <Input
                       id="title"
                       value={newMission.title}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("title", e.target.value)
+                      }
                       placeholder="Enter mission title"
                       className={cn(
                         "w-full",
@@ -913,7 +922,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
                   {/* Description with improved validation */}
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-medium">
+                    <Label
+                      htmlFor="description"
+                      className="text-sm font-medium"
+                    >
                       Description <span className="text-red-500">*</span>
                     </Label>
                     <Textarea
@@ -947,7 +959,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     </Label>
                     <Select
                       value={newMission.type || ""}
-                      onValueChange={(value) => handleInputChange("type", value)}
+                      onValueChange={(value) =>
+                        handleInputChange("type", value)
+                      }
                     >
                       <SelectTrigger
                         className={cn(
@@ -994,7 +1008,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                       </SelectTrigger>
                       <SelectContent>
                         {PLATFORM_OPTIONS.map((platform) => (
-                          <SelectItem key={platform.value} value={platform.value}>
+                          <SelectItem
+                            key={platform.value}
+                            value={platform.value}
+                          >
                             {platform.label}
                           </SelectItem>
                         ))}
@@ -1049,7 +1066,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  {/* Level Required พื้นที่ */}
+                  {/* Level Required */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="level_required"
@@ -1088,7 +1105,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     )}
                   </div>
 
-                  {/* Reward - 3/4 พื้นที่ */}
+                  {/* Reward - 3/4 columns */}
                   <div className="space-y-2 col-span-3">
                     <Label htmlFor="reward" className="text-sm font-medium">
                       Reward <span className="text-red-500">*</span>
@@ -1145,7 +1162,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
                   {/* Useful Link */}
                   <div className="space-y-2">
-                    <Label htmlFor="useful_link" className="text-sm font-medium">
+                    <Label
+                      htmlFor="useful_link"
+                      className="text-sm font-medium"
+                    >
                       Useful Link
                     </Label>
                     <Input
@@ -1177,7 +1197,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     </Label>
                     <DateTimePicker
                       value={newMission.startDate}
-                      onChange={(value) => handleInputChange("startDate", value)}
+                      onChange={(value) =>
+                        handleInputChange("startDate", value)
+                      }
                       placeholder="Select start date and time"
                       error={!!validationErrors.startDate}
                     />
@@ -1242,7 +1264,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
                   {/* Requirements */}
                   <div className="space-y-2">
-                    <Label htmlFor="requirements" className="text-sm font-medium">
+                    <Label
+                      htmlFor="requirements"
+                      className="text-sm font-medium"
+                    >
                       Requirements
                     </Label>
                     <Textarea
@@ -1281,7 +1306,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
             <div className="flex justify-between items-center pt-6 border-t max-sm:flex-col max-sm:gap-4">
               {!isEditMode && (
                 <div className="flex items-center gap-3 max-sm:flex-col max-sm:w-full max-sm:gap-2">
-                  {/* <Button
+                  <Button
                     type="button"
                     variant="outline"
                     className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
@@ -1290,7 +1315,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                   >
                     <Eye className="h-4 w-4" />
                     Preview Mission
-                  </Button> */}
+                  </Button>
                   <Button
                     type="button"
                     variant="outline"

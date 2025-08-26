@@ -13,6 +13,8 @@ import {
   DiscordMessages,
   DiscordMessage,
   DiscordEmbed,
+  DiscordEmbedField,
+  DiscordEmbedFields,
 } from "@derockdev/discord-components-react";
 
 interface MissionPreviewModalProps {
@@ -100,94 +102,79 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
               <DiscordMessage
                 author="Super Agent"
                 avatar="https://cdn.discordapp.com/embed/avatars/0.png"
-                bot={true}
+                bot={false}
                 timestamp="Today at 11:20"
+                roleColor="#5865f2"
               >
                 <DiscordEmbed
                   slot="embeds"
                   color="#5865f2"
                   embedTitle="🗺️ Available Missions"
                 >
-                  {/* Mission header */}
-                  <div slot="description">
-                    <div className="mb-4">
-                      <h3 className="text-white font-semibold text-lg mb-2 flex items-center gap-2">
-                        🎯 Mission 1: {mission.title || "Untitled Mission"}
-                      </h3>
-                      
-                      <div className="flex items-center gap-4 text-sm mb-3">
-                        <div className="flex items-center gap-1">
-                          ⭐ Level {mission.level_required || 1}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          🗓️ Ends in {timeRemaining}
-                        </div>
-                      </div>
+                  <div slot="description" className="text-base leading-relaxed">
+                    <div className="text-lg font-bold text-white mb-3">
+                      🎯 Mission 1: {mission.title || "Untitled Mission"}
                     </div>
-
-                    {/* Mission description */}
-                    <div className="mb-4">
-                      <p className="text-sm leading-relaxed">
-                        {mission.description || "No description provided."}
-                      </p>
+                    
+                    <div className="text-sm text-gray-400 mb-3 flex items-center gap-2">
+                      <span>⭐ Level {mission.level_required || 1}</span>
+                      <span>|</span>
+                      <span>🕐 Ends in {timeRemaining}</span>
                     </div>
-
-                    {/* Mission details */}
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-start gap-2">
-                        <span>💰</span>
-                        <span className="font-medium">Reward:</span>
-                        <span>{parseReward(mission.reward || "")}</span>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <span>🎯</span>
-                        <span className="font-medium">Status:</span>
-                        <span className="text-green-400">Available to accept</span>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <span>📝</span>
-                        <span className="font-medium">Format:</span>
-                        <span>{mission.format || "Not specified"}</span>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <span>❓</span>
-                        <span className="font-medium">Action to submit:</span>
-                        <span>{mission.action_request || "Not specified"}</span>
-                      </div>
+                    
+                    <div className="text-[15px] text-gray-300 leading-normal">
+                      {mission.description || "No description provided."}
                     </div>
+                  </div>
 
-                    {/* Additional info if available */}
+                  <DiscordEmbedFields slot="fields">
+                    <DiscordEmbedField fieldTitle="💰 Reward:" inline>
+                      <span className="text-sm font-medium text-white">
+                        {parseReward(mission.reward || "")}
+                      </span>
+                    </DiscordEmbedField>
+                    
+                    <DiscordEmbedField fieldTitle="🎯 Status:" inline>
+                      <span className="text-sm font-medium text-green-400">
+                        Available to accept
+                      </span>
+                    </DiscordEmbedField>
+                    
+                    <DiscordEmbedField fieldTitle="📋 Format:" inline>
+                      <span className="text-sm font-medium text-white">
+                        {mission.format || "Not specified"}
+                      </span>
+                    </DiscordEmbedField>
+                    
+                    <DiscordEmbedField fieldTitle="❗ Action to submit:">
+                      <span className="text-sm font-medium text-white">
+                        {mission.action_request || "Not specified"}
+                      </span>
+                    </DiscordEmbedField>
+
                     {mission.requirements && (
-                      <div className="mt-4 p-3 bg-yellow-900/20 rounded border-l-4 border-yellow-400">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span>⚠️</span>
-                          <span className="font-medium text-sm">Requirements:</span>
-                        </div>
-                        <p className="text-xs leading-relaxed opacity-90">
+                      <DiscordEmbedField fieldTitle="⚠️ Requirements:">
+                        <span className="text-sm font-medium text-white">
                           {mission.requirements}
-                        </p>
-                      </div>
+                        </span>
+                      </DiscordEmbedField>
                     )}
 
-                    {/* Useful link if provided */}
                     {mission.useful_link && (
-                      <div className="mt-4">
+                      <DiscordEmbedField fieldTitle="🔗 Useful Resource:">
                         <a
                           href={mission.useful_link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-blue-400 hover:underline text-sm"
+                          className="text-blue-400 text-sm font-medium underline hover:text-blue-300 transition-colors"
                         >
-                          🔗 Useful Resource
+                          {mission.useful_link}
                         </a>
-                      </div>
+                      </DiscordEmbedField>
                     )}
-                  </div>
+                  </DiscordEmbedFields>
 
-                  <div slot="footer">
+                  <div slot="footer" className="text-xs text-gray-500 font-normal">
                     6 available missions | Use /my_missions to view your accepted missions
                   </div>
                 </DiscordEmbed>

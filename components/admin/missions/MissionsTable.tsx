@@ -71,18 +71,17 @@ const formatDateWithTime = (
 
     // ใช้ local timezone (Bangkok) โดยตรง
     const options: Intl.DateTimeFormatOptions = {
-      timeZone: 'Asia/Bangkok',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
+      timeZone: "Asia/Bangkok",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     };
 
-    const formatter = new Intl.DateTimeFormat('en-GB', options);
+    const formatter = new Intl.DateTimeFormat("en-GB", options);
     return formatter.format(date);
-
   } catch (error) {
     console.error("Error formatting date with time:", error);
     return "N/A";
@@ -111,6 +110,16 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
     );
   };
 
+  // ฟังก์ชันสำหรับการ sort แยกแต่ละ direction
+  const handleSort = (field: keyof Mission, direction: "asc" | "desc") => {
+    // ถ้าเป็น field เดียวกันแต่ direction ต่าง หรือ field ต่าง ให้ส่ง field ไป
+    // logic การ toggle จะถูกจัดการใน parent component
+    if (sortState.field === field && sortState.direction === direction) {
+      return; // ไม่ทำอะไรถ้าเลือกแบบเดียวกัน
+    }
+    onSort(field);
+  };
+
   const EmptyRow = () => (
     <TableRow>
       <TableCell
@@ -122,239 +131,68 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
     </TableRow>
   );
 
+  // ฟังก์ชันสร้าง dropdown สำหรับแต่ละ column
+  const createColumnHeader = (
+    field: keyof Mission,
+    label: string,
+    className: string
+  ) => (
+    <TableHead className={className}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+          >
+            {label}
+            {getSortIcon(field)}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onClick={() => handleSort(field, "asc")}>
+            <div className="flex items-center">
+              <ChevronUp className="w-4 h-4 mr-2" />
+              Asc
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleSort(field, "desc")}>
+            <div className="flex items-center">
+              <ChevronDown className="w-4 h-4 mr-2" />
+              Desc
+            </div>
+          </DropdownMenuItem>
+          <div className="bg-border -mx-1 my-1 h-px"></div>
+          <DropdownMenuItem
+            onClick={() =>
+              onToggleColumnVisibility(field as keyof ColumnVisibility)
+            }
+          >
+            <div className="flex items-center">
+              <EyeOff className="w-4 h-4 mr-2" />
+              Hide
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </TableHead>
+  );
+
   return (
     <div className="w-full">
       <Table className="table-fixed w-full">
         <TableHeader>
           <TableRow>
-            {columnVisibility.id && (
-              <TableHead className="w-16 px-1">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
-                    >
-                      ID
-                      {getSortIcon("id")}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("id")}>
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("id")}>
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
-                    </DropdownMenuItem>
-                    <div className="bg-border -mx-1 my-1 h-px"></div>
-                    <DropdownMenuItem
-                      onClick={() => onToggleColumnVisibility("id")}
-                    >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableHead>
-            )}
-            {columnVisibility.title && (
-              <TableHead className="w-48 px-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
-                    >
-                      Title
-                      {getSortIcon("title")}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("title")}>
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("title")}>
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
-                    </DropdownMenuItem>
-                    <div className="bg-border -mx-1 my-1 h-px"></div>
-                    <DropdownMenuItem
-                      onClick={() => onToggleColumnVisibility("title")}
-                    >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableHead>
-            )}
-            {columnVisibility.type && (
-              <TableHead className="w-20 px-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
-                    >
-                      Type
-                      {getSortIcon("type")}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("type")}>
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("type")}>
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
-                    </DropdownMenuItem>
-                    <div className="bg-border -mx-1 my-1 h-px"></div>
-                    <DropdownMenuItem
-                      onClick={() => onToggleColumnVisibility("type")}
-                    >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableHead>
-            )}
-            {columnVisibility.platform && (
-              <TableHead className="w-20 px-3">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
-                    >
-                      Platform
-                      {getSortIcon("platform")}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("platform")}>
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("platform")}>
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
-                    </DropdownMenuItem>
-                    <div className="bg-border -mx-1 my-1 h-px"></div>
-                    <DropdownMenuItem
-                      onClick={() => onToggleColumnVisibility("platform")}
-                    >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableHead>
-            )}
-            {columnVisibility.status && (
-              <TableHead className="w-20 px-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
-                    >
-                      Status
-                      {getSortIcon("status")}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("status")}>
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("status")}>
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
-                    </DropdownMenuItem>
-                    <div className="bg-border -mx-1 my-1 h-px"></div>
-                    <DropdownMenuItem
-                      onClick={() => onToggleColumnVisibility("status")}
-                    >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableHead>
-            )}
-            {columnVisibility.reward && (
-              <TableHead className="w-20 px-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
-                    >
-                      Reward
-                      {getSortIcon("reward")}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("reward")}>
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("reward")}>
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
-                    </DropdownMenuItem>
-                    <div className="bg-border -mx-1 my-1 h-px"></div>
-                    <DropdownMenuItem
-                      onClick={() => onToggleColumnVisibility("reward")}
-                    >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableHead>
-            )}
+            {columnVisibility.id && createColumnHeader("id", "ID", "w-16 px-1")}
+            {columnVisibility.title &&
+              createColumnHeader("title", "Title", "w-48 px-0")}
+            {columnVisibility.type &&
+              createColumnHeader("type", "Type", "w-20 px-0")}
+            {columnVisibility.platform &&
+              createColumnHeader("platform", "Platform", "w-20 px-3")}
+            {columnVisibility.status &&
+              createColumnHeader("status", "Status", "w-20 px-2")}
+            {columnVisibility.reward &&
+              createColumnHeader("reward", "Reward", "w-20 px-0")}
             {columnVisibility.partner && (
               <TableHead className="w-28 px-0">
                 <DropdownMenu>
@@ -368,13 +206,17 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("partnerName")}>
+                    <DropdownMenuItem
+                      onClick={() => handleSort("partnerName", "asc")}
+                    >
                       <div className="flex items-center">
                         <ChevronUp className="w-4 h-4 mr-2" />
                         Asc
                       </div>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("partnerName")}>
+                    <DropdownMenuItem
+                      onClick={() => handleSort("partnerName", "desc")}
+                    >
                       <div className="flex items-center">
                         <ChevronDown className="w-4 h-4 mr-2" />
                         Desc
@@ -393,82 +235,10 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
                 </DropdownMenu>
               </TableHead>
             )}
-            {columnVisibility.startDate && (
-              <TableHead className="w-32 px-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
-                    >
-                      Start Date
-                      {getSortIcon("startDate")}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("startDate")}>
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("startDate")}>
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
-                    </DropdownMenuItem>
-                    <div className="bg-border -mx-1 my-1 h-px"></div>
-                    <DropdownMenuItem
-                      onClick={() => onToggleColumnVisibility("startDate")}
-                    >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableHead>
-            )}
-            {columnVisibility.endDate && (
-              <TableHead className="w-32 px-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
-                    >
-                      End Date
-                      {getSortIcon("endDate")}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem onClick={() => onSort("endDate")}>
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onSort("endDate")}>
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
-                    </DropdownMenuItem>
-                    <div className="bg-border -mx-1 my-1 h-px"></div>
-                    <DropdownMenuItem
-                      onClick={() => onToggleColumnVisibility("endDate")}
-                    >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableHead>
-            )}
+            {columnVisibility.startDate &&
+              createColumnHeader("startDate", "Start Date", "w-32 px-0")}
+            {columnVisibility.endDate &&
+              createColumnHeader("endDate", "End Date", "w-32 px-0")}
             <TableHead className="w-28 px-0 text-xs">Actions</TableHead>
           </TableRow>
         </TableHeader>
