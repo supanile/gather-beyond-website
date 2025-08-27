@@ -29,7 +29,15 @@ export async function GET() {
     });
 
     if (!guildsResponse.ok) {
-      throw new Error(`Discord API error: ${guildsResponse.status}`);
+      console.error(`Discord API error: ${guildsResponse.status}`);
+      
+      // Return empty result for rate limit or other API errors instead of throwing
+      return NextResponse.json({
+        success: false,
+        guilds: [],
+        totalGuilds: 0,
+        error: `Discord API error: ${guildsResponse.status}`,
+      });
     }
 
     const guilds: DiscordGuild[] = await guildsResponse.json();
@@ -93,12 +101,14 @@ export async function GET() {
 
   } catch (error) {
     console.error('Error fetching Discord guilds:', error);
-    return NextResponse.json(
-      { 
-        error: "Failed to fetch Discord servers",
-        details: error instanceof Error ? error.message : "Unknown error"
-      },
-      { status: 500 }
-    );
+    
+    // Return empty result instead of error status for better error handling
+    return NextResponse.json({
+      success: false,
+      guilds: [],
+      totalGuilds: 0,
+      error: "Failed to fetch Discord servers",
+      details: error instanceof Error ? error.message : "Unknown error"
+    });
   }
 }

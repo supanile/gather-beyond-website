@@ -57,44 +57,6 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   const [isLoadingDiscord, setIsLoadingDiscord] = useState(false);
   const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
 
-  // Mock data for Discord guilds (to be replaced with actual API call later)
-  const mockDiscordGuilds: DiscordGuildsData = {
-    success: true,
-    guilds: [
-      {
-        name: "Fłøeт¢ıвøυ's server",
-        serverId: "710813849808273478",
-        icon: "https://cdn.discordapp.com/icons/710813849808273478/d4de87dd25641d07affd890ed98786bd.png",
-        memberCount: 5
-      },
-      {
-        name: "Harold's server",
-        serverId: "749954850430910534",
-        icon: null,
-        memberCount: 5
-      },
-      {
-        name: "Super Connector",
-        serverId: "908568690033844246",
-        icon: "https://cdn.discordapp.com/icons/908568690033844246/35d6d7aba59bef7102940cc0288c507d.png",
-        memberCount: 2658
-      },
-      {
-        name: "aki server",
-        serverId: "989296048356851712",
-        icon: null,
-        memberCount: 9
-      },
-      {
-        name: "스타이카 Staika",
-        serverId: "1037957827899179009",
-        icon: "https://cdn.discordapp.com/icons/1037957827899179009/aa3fc8ff36347e19ba0f160e582da9a6.png",
-        memberCount: 30396
-      }
-    ],
-    totalGuilds: 5
-  };
-
   useEffect(() => {
     async function fetchDiscordData() {
       if (!user.discord_id) return;
@@ -124,16 +86,51 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
 
       setIsLoadingGuilds(true);
       try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`/api/discord/${user.discord_id}/guilds`);
-        // const data = await response.json();
+        const response = await fetch(`/api/discord/checkuser/${user.discord_id}`);
         
-        // Using mock data for now
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-        setDiscordGuilds(mockDiscordGuilds);
+        if (!response.ok) {
+          // If API fails or returns error, set empty guilds data
+          setDiscordGuilds({
+            success: false,
+            guilds: [],
+            totalGuilds: 0
+          });
+          return;
+        }
+        
+        const data = await response.json();
+        
+        // Handle case when no servers found or server array is empty
+        if (!data.server || data.server.length === 0) {
+          setDiscordGuilds({
+            success: true,
+            guilds: [],
+            totalGuilds: 0
+          });
+          return;
+        }
+        
+        // Transform the response to match DiscordGuildsData interface
+        const guildsData: DiscordGuildsData = {
+          success: true,
+          guilds: data.server.map((server: any) => ({
+            name: server.serverName,
+            serverId: server.serverId,
+            icon: null, // The checkuser API doesn't return icon info
+            memberCount: 0 // The checkuser API doesn't return member count
+          })),
+          totalGuilds: data.server.length
+        };
+        
+        setDiscordGuilds(guildsData);
       } catch (error) {
-        console.error(error);
-        setDiscordGuilds(null);
+        console.error('Error fetching Discord guilds:', error);
+        // Set empty guilds data instead of null to show "not found" message
+        setDiscordGuilds({
+          success: false,
+          guilds: [],
+          totalGuilds: 0
+        });
       } finally {
         setIsLoadingGuilds(false);
       }
@@ -280,7 +277,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
           <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
             Discord Servers
           </span>
-          {discordGuilds && (
+          {discordGuilds && discordGuilds.totalGuilds > 0 && (
             <Badge variant="secondary" className="text-xs">
               {discordGuilds.totalGuilds} servers
             </Badge>
@@ -297,7 +294,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
               ></div>
             ))}
           </div>
-        ) : discordGuilds?.success && discordGuilds.guilds.length > 0 ? (
+        ) : discordGuilds && discordGuilds.guilds.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {discordGuilds.guilds.map((guild) => (
               <Badge
@@ -320,17 +317,19 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                     <ServerIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                   )}
                   <span className="truncate max-w-[120px]">{guild.name}</span>
-                  <div className="flex items-center space-x-1 text-muted-foreground">
-                    <UsersIcon className="w-3 h-3" />
-                    <span className="text-xs">{guild.memberCount}</span>
-                  </div>
+                  {guild.memberCount > 0 && (
+                    <div className="flex items-center space-x-1 text-muted-foreground">
+                      <UsersIcon className="w-3 h-3" />
+                      <span className="text-xs">{guild.memberCount}</span>
+                    </div>
+                  )}
                 </div>
               </Badge>
             ))}
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            No Discord servers found
+            Discord servers not found
           </p>
         )}
       </div>

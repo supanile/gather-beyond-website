@@ -52,22 +52,43 @@ export async function GET(request: NextRequest, { params }: Params) {
 
     // ดึงข้อมูล Discord servers จาก /api/discord/getserver
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${request.nextUrl.protocol}//${request.nextUrl.host}`;
-    const serverResponse = await fetch(`${baseUrl}/api/discord/getserver`);
-
-    if (!serverResponse.ok) {
-      throw new Error(`Failed to fetch servers: ${serverResponse.status}`);
-    }
-
-    const serverData = await serverResponse.json();
+    let botServers: ServerInfo[] = [];
     
-    if (!serverData.success || !serverData.guilds) {
-      throw new Error("Invalid server response format");
-    }
+    try {
+      const serverResponse = await fetch(`${baseUrl}/api/discord/getserver`);
 
-    const botServers: ServerInfo[] = serverData.guilds;
+      // getserver now returns 200 even on error, check success field instead
+      const serverData = await serverResponse.json();
+      
+      if (!serverResponse.ok || !serverData.success || !serverData.guilds) {
+        console.error(`Failed to fetch servers: ${serverResponse.status}`, serverData.error);
+        // Return empty servers list instead of throwing error
+        return NextResponse.json({
+          discordId: String(targetUser.discord_id || ''),
+          server: [],
+        });
+      }
+
+      botServers = serverData.guilds;
+    } catch (error) {
+      console.error('Error fetching Discord servers:', error);
+      // Return empty servers list instead of throwing error
+      return NextResponse.json({
+        discordId: String(targetUser.discord_id || ''),
+        server: [],
+      });
+    }
 
     // เช็คว่า user อยู่ในแต่ละ server หรือไม่ และเก็บเฉพาะ server ที่ user อยู่
     const userServers = [];
+    
+    // If no bot servers available, return empty result
+    if (botServers.length === 0) {
+      return NextResponse.json({
+        discordId: String(targetUser.discord_id || ''),
+        server: [],
+      });
+    }
     
     for (const server of botServers) {
       try {
