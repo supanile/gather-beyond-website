@@ -356,13 +356,15 @@ const DailySubmissionLineChartCard = () => {
       <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm border border-border h-full flex flex-col">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
           <div className="flex-1">
-            <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-              <Send className="h-4 w-4 sm:h-5 sm:w-5" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-3">
+              <div className="p-3 rounded-full bg-gray-200 dark:bg-white">
+                <Send className="w-6 h-6 text-gray-700 dark:text-gray-900" />
+              </div>
               Daily Mission Submissions
             </h3>
           </div>
-          <div className="p-2 sm:p-3 rounded-full bg-primary/10 self-start sm:self-center">
-            <Send className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+          <div className="p-3 rounded-full bg-gray-200 dark:bg-white self-start sm:self-center">
+            <Send className="w-6 h-6 text-gray-700 dark:text-gray-900" />
           </div>
         </div>
         <div className="flex-1 flex items-center justify-center">
@@ -431,8 +433,8 @@ const DailySubmissionLineChartCard = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="p-2 sm:p-3 rounded-full bg-primary/10">
-            <Send className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+          <div className="p-3 rounded-full bg-gray-200 dark:bg-white">
+            <Send className="w-6 h-6 text-gray-700 dark:text-gray-900" />
           </div>
         </div>
       </div>

@@ -173,8 +173,8 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
             {usersWithInterests} of {totalUsers} users have interests listed
           </p>
         </div>
-        <div className="p-3 rounded-full bg-primary/10 shrink-0">
-          <ChartPie className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+        <div className="p-3 rounded-full bg-gray-200 dark:bg-white shrink-0">
+          <ChartPie className="w-6 h-6 text-gray-700 dark:text-gray-900" />
         </div>
       </div>
 
