@@ -151,29 +151,32 @@ export async function POST(request: Request) {
 
     console.log("Duration data created:", durationData);
 
-    // Handle serverId updates with consistent logic
-    // default to empty array string; will be overwritten if valid data provided
+    // Handle serverId with improved logic (similar to PUT method)
     let finalServerId: string = "[]";
 
-    if (body.serverId !== undefined) {
-      console.log("=== SERVERID UPDATE ===");
-      console.log("Original body.serverId:", body.serverId);
-      console.log("Type of serverId:", typeof body.serverId);
-      console.log("body.missionTargeting:", body.missionTargeting);
+    console.log("=== POST SERVERID UPDATE ===");
+    console.log("Original body.serverId:", body.serverId);
+    console.log("Type of serverId:", typeof body.serverId);
+    console.log("body.missionTargeting:", body.missionTargeting);
+    console.log("body.missionTargeting?.discordFilters?.servers:", body.missionTargeting?.discordFilters?.servers);
 
-      // Priority 1: Check for missionTargeting servers first (from Discord targeting form)
-      if (
-        body.missionTargeting?.discordFilters?.servers &&
-        Array.isArray(body.missionTargeting.discordFilters.servers) &&
-        body.missionTargeting.discordFilters.servers.length > 0
-      ) {
-        finalServerId = JSON.stringify(
-          body.missionTargeting.discordFilters.servers
-        );
-        console.log("✅ POST Priority 1: Using servers from missionTargeting:", finalServerId);
-      }
-      // Priority 2: If serverId is provided directly and not empty
-      else if (typeof body.serverId === "string" && body.serverId !== "[]" && body.serverId !== "") {
+    // Priority 1: Check for missionTargeting servers first (from Discord targeting form)
+    if (
+      body.missionTargeting?.discordFilters?.servers &&
+      Array.isArray(body.missionTargeting.discordFilters.servers) &&
+      body.missionTargeting.discordFilters.servers.length > 0
+    ) {
+      finalServerId = JSON.stringify(body.missionTargeting.discordFilters.servers);
+      console.log("✅ POST Priority 1: Using servers from missionTargeting:", finalServerId);
+    }
+    // Priority 2: If serverId is provided directly and not empty
+    else if (
+      body.serverId !== undefined &&
+      body.serverId !== null &&
+      body.serverId !== "[]" &&
+      body.serverId !== ""
+    ) {
+      if (typeof body.serverId === "string") {
         try {
           const parsed = JSON.parse(body.serverId);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -184,20 +187,30 @@ export async function POST(request: Request) {
             finalServerId = "[]";
           }
         } catch {
-          console.log("⚠️ POST Priority 2: Invalid JSON in serverId, using default");
-          finalServerId = "[]";
+          // If parse fails but it's not empty string, treat as single server ID
+          if (body.serverId.trim() !== "") {
+            finalServerId = JSON.stringify([body.serverId]);
+            console.log("✅ POST Priority 2: Converted string to array:", finalServerId);
+          } else {
+            console.log("⚠️ POST Priority 2: Invalid serverId string, using default");
+            finalServerId = "[]";
+          }
         }
       } else if (Array.isArray(body.serverId) && body.serverId.length > 0) {
         finalServerId = JSON.stringify(body.serverId);
         console.log("✅ POST Priority 2: Converting array to JSON:", finalServerId);
       } else {
-        // Default to empty array if undefined or invalid
+        console.log("⚠️ POST Priority 2: Unexpected serverId type:", typeof body.serverId);
         finalServerId = "[]";
-        console.log("⚠️ POST Priority 3: Using default empty array");
       }
-
-      console.log("🔥 POST Final serverId:", finalServerId);
     }
+    // Priority 3: Default to empty array
+    else {
+      console.log("ℹ️ POST Priority 3: No serverId provided, using default empty array");
+      finalServerId = "[]";
+    }
+
+    console.log("🔥 POST Final serverId:", finalServerId);
 
     // Prepare data for Grist
     const missionData = {
@@ -221,10 +234,12 @@ export async function POST(request: Request) {
     };
 
     console.log("Prepared mission data for Grist:", missionData);
+    console.log("🔥 Final serverId being sent to database:", missionData.serverId);
     console.log("Duration field:", missionData.duration);
 
     const result = await grist.addRecords("Missions", [missionData]);
     console.log("Grist response:", result);
+    console.log("✅ POST Mission created successfully with serverId:", missionData.serverId);
 
     return NextResponse.json(
       { message: "Mission added successfully", data: result },
@@ -249,13 +264,6 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json();
     const { id, ...updateData } = body;
-
-    console.log("=== PUT REQUEST DEBUG ===");
-    console.log("Request body:", JSON.stringify(body, null, 2));
-    console.log("Mission ID:", id);
-    console.log("updateData.serverId:", updateData.serverId);
-    console.log("updateData.missionTargeting:", updateData.missionTargeting);
-    console.log("updateData.missionTargeting?.discordFilters?.servers:", updateData.missionTargeting?.discordFilters?.servers);
 
     if (!id) {
       return NextResponse.json(
@@ -318,9 +326,6 @@ export async function PUT(request: Request) {
 
     // Extract missionTargeting BEFORE cleaning updateData
     const missionTargeting = updateData.missionTargeting;
-    console.log("=== EXTRACTED MISSION TARGETING ===");
-    console.log("missionTargeting:", missionTargeting);
-    console.log("missionTargeting?.discordFilters?.servers:", missionTargeting?.discordFilters?.servers);
 
     // Handle duration properly for updates
     const cleanUpdateData = { ...updateData };
@@ -360,10 +365,6 @@ export async function PUT(request: Request) {
       console.log("Updated duration data:", durationData);
     }
 
-    // === SERVERID LOGIC DEBUG ===
-    console.log("updateData.serverId:", updateData.serverId);
-    console.log("missionTargeting (extracted):", missionTargeting);
-
     // First, fetch the existing mission to get current serverId
     let existingServerId: string[] = [];
     try {
@@ -380,7 +381,6 @@ export async function PUT(request: Request) {
           existingServerId = [];
         }
       }
-      console.log("📋 Existing serverId:", existingServerId);
     } catch (error) {
       console.error("Failed to fetch existing mission:", error);
       existingServerId = [];
@@ -407,11 +407,6 @@ export async function PUT(request: Request) {
       });
       
       finalServerId = JSON.stringify(mergedServers);
-      console.log(
-        "✅ Priority 1: Merging missionTargeting servers with existing:",
-        { existing: existingServerId, new: newServers, merged: mergedServers }
-      );
-      console.log("✅ Final serverId from missionTargeting:", finalServerId);
     }
     // Priority 2: ถ้า client ส่ง serverId มาโดยตรง และไม่ใช่ array ว่าง
     else if (
@@ -452,30 +447,22 @@ export async function PUT(request: Request) {
         });
         
         finalServerId = JSON.stringify(mergedServers);
-        console.log("✅ Priority 2: Merging serverId with existing:", 
-                   { existing: existingServerId, new: newServerIds, merged: mergedServers });
       } else {
-        console.log("⚠️ Priority 2: No valid serverIds to merge, keeping existing");
         finalServerId = JSON.stringify(existingServerId);
       }
     }
     // Priority 3: ไม่มีข้อมูล serverId ใหม่ - รักษาค่าเดิมไว้
     else {
-      console.log("ℹ️ Priority 3: No serverId update requested, preserving existing");
       finalServerId = JSON.stringify(existingServerId);
     }
 
     // ใส่กลับเข้า cleanUpdateData เสมอ
     cleanUpdateData.serverId = finalServerId;
-    console.log("🔥 Final serverId for database:", finalServerId);
 
     const finalUpdateData = {
       ...cleanUpdateData,
       partner: partnerId,
     };
-
-    console.log("Final update data being sent to Grist:", finalUpdateData);
-    console.log("🚀 About to call grist.updateRecords with:", { id, ...finalUpdateData });
 
     const result = await grist.updateRecords("Missions", [
       { id, ...finalUpdateData },

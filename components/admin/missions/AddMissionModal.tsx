@@ -424,9 +424,20 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   // Memoized callback for targeting changes to prevent infinite loops
   const handleTargetingChange = useCallback(
     (data: MissionTargetingData | null) => {
+      console.log("🎯 handleTargetingChange called with:", data);
       setMissionTargeting(data);
+      
+      // Also update parent component immediately
+      onMissionChange((prev) => {
+        const updated = {
+          ...prev,
+          missionTargeting: data,
+        };
+        console.log("🎯 Updated mission with targeting:", updated);
+        return updated;
+      });
     },
-    []
+    [onMissionChange]
   );
 
   // Internal loading state for better UX
@@ -731,7 +742,15 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       const updated = {
         ...prev,
         [field]: value,
+        // Always preserve missionTargeting from either source
+        missionTargeting: prev.missionTargeting || missionTargeting || null,
       };
+      
+      console.log("🔧 handleInputChange - field:", field, "value:", value);
+      console.log("🔧 prev.missionTargeting:", prev.missionTargeting);
+      console.log("🔧 local missionTargeting:", missionTargeting);
+      console.log("🔧 final missionTargeting:", updated.missionTargeting);
+      
       return updated;
     });
 
@@ -884,10 +903,30 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     try {
       setInternalLoading(true);
 
+      // Calculate server ID from targeting data (similar to handleFormSubmit)
+      let finalServerId = "[]";
+      
+      const hasTargetingServers =
+        missionTargeting?.discordFilters?.servers &&
+        Array.isArray(missionTargeting.discordFilters.servers) &&
+        missionTargeting.discordFilters.servers.length > 0;
+
+      if (hasTargetingServers) {
+        finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
+      } else if (
+        isEditMode &&
+        newMission.serverId &&
+        newMission.serverId !== "" &&
+        newMission.serverId !== "[]"
+      ) {
+        finalServerId = newMission.serverId;
+      }
+
       // Save targeting data before saving draft
       const missionWithTargeting = {
         ...newMission,
         missionTargeting: missionTargeting,
+        serverId: finalServerId,
       };
 
       // Update mission state

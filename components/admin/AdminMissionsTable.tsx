@@ -111,16 +111,18 @@ const AdminMissionsTable = () => {
     console.log("🔄 Mission serverId:", typeof mission === 'object' && mission && 'serverId' in mission ? mission.serverId : 'N/A');
     
     if (typeof mission === "function") {
-      const updated = mission(newMission);
-      console.log("🔄 Function result:", updated);
-      setNewMission(updated);
-      setLatestMissionData(updated);
+      setNewMission(prevMission => {
+        const updated = mission(prevMission);
+        console.log("🔄 Function result:", updated);
+        setLatestMissionData(updated);
+        return updated;
+      });
     } else {
       console.log("🔄 Direct mission:", mission);
       setNewMission(mission);
       setLatestMissionData(mission);
     }
-  }, [newMission, setNewMission]);
+  }, [setNewMission]); // Remove newMission from dependency array
 
   // Memoized callback for edit mission changes
   const handleEditMissionChange = useCallback((mission: NewMissionForm | ((prev: NewMissionForm) => NewMissionForm)) => {
@@ -165,17 +167,28 @@ const AdminMissionsTable = () => {
       console.log("🚀 latestMissionData:", latestMissionData);
       console.log("🚀 latestMissionData has missionTargeting:", !!latestMissionData?.missionTargeting);
       console.log("🚀 latestMissionData.serverId:", latestMissionData?.serverId);
+      console.log("🚀 newMission from hook:", newMission);
+      console.log("🚀 newMission has missionTargeting:", !!newMission?.missionTargeting);
+      console.log("🚀 newMission.serverId:", newMission?.serverId);
       
-      if (latestMissionData) {
-        // Use the latest mission data instead of the hook's state
-        console.log("🚀 Using latestMissionData for submission");
+      // Use the most complete data available - prioritize the one with missionTargeting
+      const missionDataToSubmit = (latestMissionData?.missionTargeting || latestMissionData?.serverId) 
+        ? latestMissionData 
+        : newMission;
         
-        // Call handleAddMission but first update the hook's state
-        setNewMission(latestMissionData);
+      console.log("🚀 Final mission data to submit:", missionDataToSubmit);
+      console.log("🚀 Final has missionTargeting:", !!missionDataToSubmit?.missionTargeting);
+      console.log("🚀 Final serverId:", missionDataToSubmit?.serverId);
+      
+      if (missionDataToSubmit && (missionDataToSubmit.missionTargeting || missionDataToSubmit.serverId)) {
+        // Update the hook's state with complete mission data
+        console.log("🚀 Updating newMission state with complete data");
+        setNewMission(missionDataToSubmit);
         
         // Wait for state update
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 100));
         
+        console.log("🚀 Calling handleAddMission with updated state");
         await handleAddMission();
       } else {
         console.log("🚀 Using hook's newMission state");
