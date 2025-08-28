@@ -67,8 +67,11 @@ export async function POST(request: Request) {
     console.log("body.serverId:", body.serverId);
     console.log("body.serverId type:", typeof body.serverId);
     console.log("body.missionTargeting:", body.missionTargeting);
-    console.log("body.missionTargeting?.discordFilters?.servers:", body.missionTargeting?.discordFilters?.servers);
-    
+    console.log(
+      "body.missionTargeting?.discordFilters?.servers:",
+      body.missionTargeting?.discordFilters?.servers
+    );
+
     // Log all properties of body to see what's being sent
     console.log("=== ALL BODY PROPERTIES ===");
     console.log("Body keys:", Object.keys(body));
@@ -84,7 +87,7 @@ export async function POST(request: Request) {
       "platform",
       "partner",
     ];
-    
+
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -148,21 +151,53 @@ export async function POST(request: Request) {
 
     console.log("Duration data created:", durationData);
 
-    // Handle serverId properly - check missionTargeting first, then fallback to body.serverId
-    let finalServerId = "[]";
-    if (body.missionTargeting?.discordFilters?.servers && 
+    // Handle serverId updates with consistent logic
+    // default to empty array string; will be overwritten if valid data provided
+    let finalServerId: string = "[]";
+
+    if (body.serverId !== undefined) {
+      console.log("=== SERVERID UPDATE ===");
+      console.log("Original body.serverId:", body.serverId);
+      console.log("Type of serverId:", typeof body.serverId);
+      console.log("body.missionTargeting:", body.missionTargeting);
+
+      // Priority 1: Check for missionTargeting servers first (from Discord targeting form)
+      if (
+        body.missionTargeting?.discordFilters?.servers &&
         Array.isArray(body.missionTargeting.discordFilters.servers) &&
-        body.missionTargeting.discordFilters.servers.length > 0) {
-      finalServerId = JSON.stringify(body.missionTargeting.discordFilters.servers);
-      console.log("✅ Using servers from missionTargeting:", finalServerId);
-    } else if (body.serverId && body.serverId !== "" && body.serverId !== "[]") {
-      finalServerId = body.serverId;
-      console.log("✅ Using body.serverId:", body.serverId);
-    } else {
-      console.log("✅ Using empty array (no servers found)");
+        body.missionTargeting.discordFilters.servers.length > 0
+      ) {
+        finalServerId = JSON.stringify(
+          body.missionTargeting.discordFilters.servers
+        );
+        console.log("✅ POST Priority 1: Using servers from missionTargeting:", finalServerId);
+      }
+      // Priority 2: If serverId is provided directly and not empty
+      else if (typeof body.serverId === "string" && body.serverId !== "[]" && body.serverId !== "") {
+        try {
+          const parsed = JSON.parse(body.serverId);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            finalServerId = body.serverId;
+            console.log("✅ POST Priority 2: Using existing serverId string:", body.serverId);
+          } else {
+            console.log("⚠️ POST Priority 2: ServerId is empty array, using default");
+            finalServerId = "[]";
+          }
+        } catch {
+          console.log("⚠️ POST Priority 2: Invalid JSON in serverId, using default");
+          finalServerId = "[]";
+        }
+      } else if (Array.isArray(body.serverId) && body.serverId.length > 0) {
+        finalServerId = JSON.stringify(body.serverId);
+        console.log("✅ POST Priority 2: Converting array to JSON:", finalServerId);
+      } else {
+        // Default to empty array if undefined or invalid
+        finalServerId = "[]";
+        console.log("⚠️ POST Priority 3: Using default empty array");
+      }
+
+      console.log("🔥 POST Final serverId:", finalServerId);
     }
-    
-    console.log("🔥 Final serverId for POST:", finalServerId);
 
     // Prepare data for Grist
     const missionData = {
@@ -214,6 +249,11 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json();
     const { id, ...updateData } = body;
+
+    console.log("=== PUT REQUEST DEBUG ===");
+    console.log("Request body:", JSON.stringify(body, null, 2));
+    console.log("updateData.serverId:", updateData.serverId);
+    console.log("updateData.missionTargeting:", updateData.missionTargeting);
 
     if (!id) {
       return NextResponse.json(
@@ -274,11 +314,18 @@ export async function PUT(request: Request) {
       console.log(`Partner "${updateData.partner}" mapped to ID: ${partnerId}`);
     }
 
+    // Extract missionTargeting BEFORE cleaning updateData
+    const missionTargeting = updateData.missionTargeting;
+    console.log("=== EXTRACTED MISSION TARGETING ===");
+    console.log("missionTargeting:", missionTargeting);
+    console.log("missionTargeting?.discordFilters?.servers:", missionTargeting?.discordFilters?.servers);
+
     // Handle duration properly for updates
     const cleanUpdateData = { ...updateData };
     delete cleanUpdateData.startDate;
     delete cleanUpdateData.endDate;
     delete cleanUpdateData.status;
+    delete cleanUpdateData.missionTargeting; // Remove here after extraction
 
     if (updateData.startDate || updateData.endDate) {
       let currentDuration: { start?: string; end?: string | null } = {};
@@ -311,35 +358,88 @@ export async function PUT(request: Request) {
       console.log("Updated duration data:", durationData);
     }
 
-    // Remove missionTargeting field to avoid errors
-    delete cleanUpdateData.missionTargeting;
+    // === SERVERID LOGIC DEBUG ===
+    console.log("updateData.serverId:", updateData.serverId);
+    console.log("missionTargeting (extracted):", missionTargeting);
 
-    // Handle serverId updates
-    if (body.serverId !== undefined) {
-      console.log("=== SERVERID UPDATE ===");
-      console.log("Original body.serverId:", body.serverId);
-      console.log("Type of serverId:", typeof body.serverId);
-      
-      // If serverId is already a JSON string, use it directly
-      // If it's an array, convert it to JSON string
-      if (typeof body.serverId === 'string') {
-        cleanUpdateData.serverId = body.serverId;
-      } else if (Array.isArray(body.serverId)) {
-        cleanUpdateData.serverId = JSON.stringify(body.serverId);
-      } else {
-        // Default to empty array if undefined or invalid
-        cleanUpdateData.serverId = "[]";
-      }
-      
-      console.log("Final cleanUpdateData.serverId:", cleanUpdateData.serverId);
+    // Initialize with original serverId if exists
+    let finalServerId: string | undefined = "[]";
+
+    // Priority 1: ใช้ missionTargeting ถ้ามี servers (มีการเลือกจาก Discord targeting form)
+    if (
+      missionTargeting?.discordFilters?.servers &&
+      Array.isArray(missionTargeting.discordFilters.servers) &&
+      missionTargeting.discordFilters.servers.length > 0
+    ) {
+      finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
+      console.log(
+        "✅ Priority 1: Using missionTargeting servers:",
+        missionTargeting.discordFilters.servers
+      );
+      console.log("✅ Final serverId from missionTargeting:", finalServerId);
     }
+    // Priority 2: ถ้า client ส่ง serverId มาโดยตรง และไม่ใช่ array ว่าง
+    else if (
+      updateData.serverId !== undefined &&
+      updateData.serverId !== null &&
+      updateData.serverId !== "[]" &&
+      updateData.serverId !== ""
+    ) {
+      if (typeof updateData.serverId === "string") {
+        try {
+          // ถ้าเป็น JSON string ให้ parse เพื่อตรวจสอบ
+          const parsed = JSON.parse(updateData.serverId);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            finalServerId = updateData.serverId; // ใช้ original string
+            console.log("✅ Priority 2: Using valid serverId string:", finalServerId);
+          } else {
+            console.log("⚠️ Priority 2: ServerId is empty array, keeping empty");
+            finalServerId = "[]";
+          }
+        } catch {
+          // ถ้า parse ไม่ได้ แต่ไม่ใช่ string ว่าง ให้ลองใช้เป็น array with single item
+          if (updateData.serverId.trim() !== "") {
+            finalServerId = JSON.stringify([updateData.serverId]);
+            console.log("✅ Priority 2: Converted string to array:", finalServerId);
+          } else {
+            console.log("⚠️ Priority 2: Invalid serverId string, using empty");
+            finalServerId = "[]";
+          }
+        }
+      } else if (Array.isArray(updateData.serverId)) {
+        if (updateData.serverId.length > 0) {
+          finalServerId = JSON.stringify(updateData.serverId);
+          console.log("✅ Priority 2: Converting serverId array to JSON:", finalServerId);
+        } else {
+          console.log("⚠️ Priority 2: Empty serverId array, using empty");
+          finalServerId = "[]";
+        }
+      } else {
+        console.log("⚠️ Priority 2: Unexpected serverId type:", typeof updateData.serverId);
+        finalServerId = "[]";
+      }
+    }
+    // Priority 3: ไม่มีข้อมูล serverId ใหม่ - ไม่ต้องอัปเดต field นี้
+    else {
+      console.log("ℹ️ Priority 3: No serverId update requested");
+      // สำหรับ Edit Mission ถ้าไม่มีข้อมูลใหม่ ให้รักษาค่าเดิมไว้
+      // ไม่ต้องใส่ serverId ใน update payload
+      console.log("ℹ️ Preserving existing serverId value in database");
+      finalServerId = undefined; // จะไม่ถูกใส่ใน cleanUpdateData
+    }
+
+    // ใส่กลับเข้า cleanUpdateData เสมอ (ยกเว้นกรณีที่ต้องการรักษาค่าเดิม)
+    if (finalServerId !== undefined) {
+      cleanUpdateData.serverId = finalServerId;
+    }
+    console.log("🔥 Final serverId for database:", finalServerId);
 
     const finalUpdateData = {
       ...cleanUpdateData,
       partner: partnerId,
     };
 
-    console.log("Final update data:", finalUpdateData);
+    console.log("Final update data being sent to Grist:", finalUpdateData);
 
     const result = await grist.updateRecords("Missions", [
       { id, ...finalUpdateData },

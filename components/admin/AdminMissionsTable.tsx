@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react";
 import {
   Calendar,
   Clock,
@@ -102,6 +102,59 @@ const AdminMissionsTable = () => {
 
   // State to track the latest mission data from AddMissionModal
   const [latestMissionData, setLatestMissionData] = React.useState<NewMissionForm | null>(null);
+
+  // Memoized callback for new mission changes
+  const handleNewMissionChange = useCallback((mission: NewMissionForm | ((prev: NewMissionForm) => NewMissionForm)) => {
+    console.log("🔄 AdminMissionsTable onMissionChange called");
+    console.log("🔄 Mission data:", mission);
+    console.log("🔄 Mission has missionTargeting:", typeof mission === 'object' && mission && 'missionTargeting' in mission ? !!mission.missionTargeting : 'N/A');
+    console.log("🔄 Mission serverId:", typeof mission === 'object' && mission && 'serverId' in mission ? mission.serverId : 'N/A');
+    
+    if (typeof mission === "function") {
+      const updated = mission(newMission);
+      console.log("🔄 Function result:", updated);
+      setNewMission(updated);
+      setLatestMissionData(updated);
+    } else {
+      console.log("🔄 Direct mission:", mission);
+      setNewMission(mission);
+      setLatestMissionData(mission);
+    }
+  }, [newMission, setNewMission]);
+
+  // Memoized callback for edit mission changes
+  const handleEditMissionChange = useCallback((mission: NewMissionForm | ((prev: NewMissionForm) => NewMissionForm)) => {
+    if (typeof mission === "function") {
+      setMissionToEdit((prev) => {
+        const currentMission = prev || {
+          title: "",
+          description: "",
+          type: "",
+          platform: "",
+          reward: "",
+          level_required: 1,
+          action_request: "",
+          format: "",
+          useful_link: "",
+          status: "upcoming",
+          partner: "Super Connector",
+          serverId: "",
+        };
+        const updated = mission(currentMission);
+        console.log("🔄 AdminMissionsTable onMissionChange (function):", updated);
+        console.log("🔄 missionTargeting in updated:", updated.missionTargeting);
+        console.log("🔄 serverId in updated:", updated.serverId);
+        return updated;
+      });
+    } else {
+      console.log("🔄 AdminMissionsTable onMissionChange (direct):", mission);
+      console.log("🔄 missionTargeting in mission:", mission.missionTargeting);
+      console.log("🔄 serverId in mission:", mission.serverId);
+      setMissionToEdit(mission);
+      // Store in ref for immediate access
+      latestMissionDataRef.current = mission;
+    }
+  }, []);
 
   // Wrapper function to handle mission submission with complete data
   const handleAddMissionSubmit = async () => {
@@ -337,23 +390,7 @@ const AdminMissionsTable = () => {
             isOpen={isAddModalOpen}
             onOpenChange={setIsAddModalOpen}
             newMission={newMission}
-            onMissionChange={(mission) => {
-              console.log("🔄 AdminMissionsTable onMissionChange called");
-              console.log("🔄 Mission data:", mission);
-              console.log("🔄 Mission has missionTargeting:", typeof mission === 'object' && mission && 'missionTargeting' in mission ? !!mission.missionTargeting : 'N/A');
-              console.log("🔄 Mission serverId:", typeof mission === 'object' && mission && 'serverId' in mission ? mission.serverId : 'N/A');
-              
-              if (typeof mission === "function") {
-                const updated = mission(newMission);
-                console.log("🔄 Function result:", updated);
-                setNewMission(updated);
-                setLatestMissionData(updated);
-              } else {
-                console.log("🔄 Direct mission object");
-                setNewMission(mission);
-                setLatestMissionData(mission);
-              }
-            }}
+            onMissionChange={handleNewMissionChange}
             onSubmit={handleAddMissionSubmit}
           />
         </div>
@@ -586,38 +623,7 @@ const AdminMissionsTable = () => {
             serverId: "",
           }
         }
-        onMissionChange={(mission) => {
-          if (typeof mission === "function") {
-            setMissionToEdit((prev) => {
-              const currentMission = prev || {
-                title: "",
-                description: "",
-                type: "",
-                platform: "",
-                reward: "",
-                level_required: 1,
-                action_request: "",
-                format: "",
-                useful_link: "",
-                status: "upcoming",
-                partner: "Super Connector",
-                serverId: "",
-              };
-              const updated = mission(currentMission);
-              console.log("🔄 AdminMissionsTable onMissionChange (function):", updated);
-              console.log("🔄 missionTargeting in updated:", updated.missionTargeting);
-              console.log("🔄 serverId in updated:", updated.serverId);
-              return updated;
-            });
-          } else {
-            console.log("🔄 AdminMissionsTable onMissionChange (direct):", mission);
-            console.log("🔄 missionTargeting in mission:", mission.missionTargeting);
-            console.log("🔄 serverId in mission:", mission.serverId);
-            setMissionToEdit(mission);
-            // Store in ref for immediate access
-            latestMissionDataRef.current = mission;
-          }
-        }}
+        onMissionChange={handleEditMissionChange}
         onSubmit={async () => {
           // Use ref to get the latest mission data
           const latestMission = latestMissionDataRef.current || missionToEdit;

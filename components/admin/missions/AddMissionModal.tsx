@@ -299,17 +299,26 @@ const RewardInput = ({
     { value: "CREDITS", label: "Credits" },
   ];
 
-  // Parse existing value on component mount
+  // Parse existing value on component mount and when value changes
   useEffect(() => {
     if (value && value.trim()) {
       try {
         const parsed = JSON.parse(value);
-        if (parsed.amount !== undefined) setAmount(parsed.amount.toString());
-        if (parsed.token) setToken(parsed.token);
+        if (
+          parsed.amount !== undefined &&
+          parsed.amount.toString() !== amount
+        ) {
+          setAmount(parsed.amount.toString());
+        }
+        if (parsed.token && parsed.token !== token) {
+          setToken(parsed.token);
+        }
       } catch {
         // If parsing fails, keep existing value
       }
     }
+    // Only depend on value, not amount or token to avoid loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   // Update parent component when amount or token changes
@@ -412,6 +421,14 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   const [missionTargeting, setMissionTargeting] =
     useState<MissionTargetingData | null>(null);
 
+  // Memoized callback for targeting changes to prevent infinite loops
+  const handleTargetingChange = useCallback(
+    (data: MissionTargetingData | null) => {
+      setMissionTargeting(data);
+    },
+    []
+  );
+
   // Internal loading state for better UX
   const [internalLoading, setInternalLoading] = useState(false);
 
@@ -464,30 +481,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   }, [draftKey, newMission, missionTargeting]);
 
-  const loadDraft = useCallback(() => {
-    try {
-      const savedDraft = localStorage.getItem(draftKey);
-      if (savedDraft) {
-        const draftData: DraftData = JSON.parse(savedDraft);
-
-        // Load basic info
-        onMissionChange(draftData.basicInfo);
-
-        // Load targeting data
-        if (draftData.targetingData) {
-          setMissionTargeting(draftData.targetingData);
-        }
-
-        console.log("Draft loaded successfully:", draftKey);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error loading draft:", error);
-      return false;
-    }
-  }, [draftKey, onMissionChange]);
-
   const clearDraft = () => {
     try {
       localStorage.removeItem(draftKey);
@@ -497,33 +490,38 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   };
 
-  const hasDraft = useCallback(() => {
-    try {
-      const savedDraft = localStorage.getItem(draftKey);
-      return !!savedDraft;
-    } catch (error) {
-      console.error("Error checking draft:", error);
-      return false;
-    }
-  }, [draftKey]);
-
   // useEffect for load draft
   useEffect(() => {
     if (isOpen && !isEditMode) {
       // check if there is a draft
-      if (hasDraft()) {
-        loadDraft();
+      try {
+        const savedDraft = localStorage.getItem(draftKey);
+        if (savedDraft) {
+          const draftData: DraftData = JSON.parse(savedDraft);
 
-        // show notification that draft has been loaded
-        setNotificationAlert({
-          show: true,
-          type: "success",
-          title: "Draft Loaded",
-          description: "Your previously saved draft has been loaded.",
-        });
+          // Load basic info
+          onMissionChange(draftData.basicInfo);
+
+          // Load targeting data
+          if (draftData.targetingData) {
+            setMissionTargeting(draftData.targetingData);
+          }
+
+          console.log("Draft loaded successfully:", draftKey);
+
+          // show notification that draft has been loaded
+          setNotificationAlert({
+            show: true,
+            type: "success",
+            title: "Draft Loaded",
+            description: "Your previously saved draft has been loaded.",
+          });
+        }
+      } catch (error) {
+        console.error("Error loading draft:", error);
       }
     }
-  }, [isOpen, isEditMode, hasDraft, loadDraft]);
+  }, [isOpen, isEditMode, draftKey, onMissionChange]);
 
   // useEffect for edit mode - load existing mission targeting data
   useEffect(() => {
@@ -532,7 +530,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       console.log("newMission:", newMission);
       console.log("newMission.missionTargeting:", newMission.missionTargeting);
       console.log("newMission.serverId:", newMission.serverId);
-      
+
       // Load targeting data from existing mission
       if (newMission.missionTargeting) {
         console.log("Loading from newMission.missionTargeting");
@@ -549,7 +547,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
               discordFilters: {
                 servers: serverIds,
                 roles: [],
-                channels: []
+                channels: [],
               },
               behaviorFilters: {
                 xpLevel: { enabled: false, min: 0, max: 100 },
@@ -562,22 +560,25 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                 referredUsers: { enabled: false, value: 0 },
                 agentHealth: { enabled: false, value: [50] },
                 memoryProofSubmitted: { enabled: false, value: false },
-                taggedInterests: { enabled: false, value: [] }
+                taggedInterests: { enabled: false, value: [] },
               },
               demographicFilters: {
                 location: [],
                 language: [],
                 ageRange: "",
-                gender: ""
+                gender: "",
               },
               deliveryOptions: {
                 channel: "discord",
                 scope: "targeted",
                 schedule: "immediate",
-                scheduledDate: ""
-              }
+                scheduledDate: "",
+              },
             };
-            console.log("Setting reconstructed targeting:", reconstructedTargeting);
+            console.log(
+              "Setting reconstructed targeting:",
+              reconstructedTargeting
+            );
             setMissionTargeting(reconstructedTargeting);
           } else {
             console.log("No server IDs found or empty array");
@@ -589,7 +590,8 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         console.log("No targeting data and no serverId to reconstruct from");
       }
     }
-  }, [isOpen, isEditMode, newMission.missionTargeting, newMission.serverId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isEditMode]);
 
   // auto-save useEffect
   useEffect(() => {
@@ -612,15 +614,25 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         missionTargeting;
 
       if (hasData) {
-        const success = saveDraft();
-        if (success) {
+        try {
+          const draftData: DraftData = {
+            basicInfo: newMission,
+            targetingData: missionTargeting,
+            savedAt: new Date().toISOString(),
+          };
+
+          // Save to localStorage
+          localStorage.setItem(draftKey, JSON.stringify(draftData));
           console.log("Auto-saved draft at:", new Date().toLocaleTimeString());
+        } catch (error) {
+          console.error("Error auto-saving draft:", error);
         }
       }
     }, 10000); // Auto-save every 10 seconds
 
     return () => clearInterval(autoSaveInterval);
-  }, [isOpen, isEditMode, newMission, missionTargeting, saveDraft]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isEditMode]);
 
   // Auto-hide notification alert after 5 seconds
   useEffect(() => {
@@ -766,50 +778,89 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
       // Collect selected Discord server IDs
       let finalServerId: string;
-      
+
       console.log("=== DEBUG SUBMIT ===");
       console.log("isEditMode:", isEditMode);
       console.log("missionTargeting:", missionTargeting);
-      
+
       // Check if missionTargeting exists and has servers
-      const hasTargetingServers = missionTargeting?.discordFilters?.servers && 
-        Array.isArray(missionTargeting.discordFilters.servers) && 
+      const hasTargetingServers =
+        missionTargeting?.discordFilters?.servers &&
+        Array.isArray(missionTargeting.discordFilters.servers) &&
         missionTargeting.discordFilters.servers.length > 0;
-        
+
       console.log("hasTargetingServers:", hasTargetingServers);
-      console.log("missionTargeting?.discordFilters?.servers:", missionTargeting?.discordFilters?.servers);
+      console.log(
+        "missionTargeting?.discordFilters?.servers:",
+        missionTargeting?.discordFilters?.servers
+      );
       console.log("newMission.serverId:", newMission.serverId);
       console.log("newMission.serverId type:", typeof newMission.serverId);
-      
+
       if (hasTargetingServers) {
         // If targeting data exists and has servers, use it
         finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
-        console.log("✅ Using missionTargeting servers:", missionTargeting.discordFilters.servers);
+        console.log(
+          "✅ Using missionTargeting servers:",
+          missionTargeting.discordFilters.servers
+        );
         console.log("✅ Converted to JSON:", finalServerId);
-      } else if (isEditMode && newMission.serverId && newMission.serverId !== "" && newMission.serverId !== "[]") {
+      } else if (
+        isEditMode &&
+        newMission.serverId &&
+        newMission.serverId !== "" &&
+        newMission.serverId !== "[]"
+      ) {
         // In edit mode, if no new targeting data but existing serverId is not empty array, preserve it
-        finalServerId = newMission.serverId
-        console.log("⚠️ Edit mode: preserving existing serverId:", finalServerId);
+        finalServerId = newMission.serverId;
+        console.log(
+          "⚠️ Edit mode: preserving existing serverId:",
+          finalServerId
+        );
       } else {
         // Default to empty array in JSON format
         finalServerId = "[]";
-        console.log("✅ Using empty array (no servers found)");
-        console.log("✅ Reason: hasTargetingServers =", hasTargetingServers, ", isEditMode =", isEditMode, ", newMission.serverId =", newMission.serverId);
+        console.log("⚠️ Using empty array (no servers found)");
+        console.log(
+          "⚠️ Reason: hasTargetingServers =",
+          hasTargetingServers,
+          ", isEditMode =",
+          isEditMode,
+          ", newMission.serverId =",
+          newMission.serverId
+        );
       }
-      
-      console.log("🔥 Final serverId that will be sent to backend:", finalServerId);
 
-      // targeting data to mission before submission
+      console.log(
+        "🔥 Final serverId that will be sent to backend:",
+        finalServerId
+      );
+
+      // ENSURE missionTargeting is included in the final submission
       const missionWithTargeting = {
         ...newMission,
-        missionTargeting: missionTargeting,
+        missionTargeting: missionTargeting, // Always include current targeting state
         serverId: finalServerId,
       };
-      
-      console.log("🚀 Complete missionWithTargeting object:", missionWithTargeting);
 
-      // mission form data with targeting before calling onSubmit
+      console.log(
+        "🚀 Complete missionWithTargeting object:",
+        missionWithTargeting
+      );
+      console.log(
+        "🚀 missionWithTargeting.missionTargeting:",
+        missionWithTargeting.missionTargeting
+      );
+      console.log(
+        "🚀 missionWithTargeting.serverId:",
+        missionWithTargeting.serverId
+      );
+
+      // Update mission form data with targeting before calling onSubmit
       onMissionChange(missionWithTargeting);
+
+      // Wait a moment to ensure state is updated
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Call the parent's submit handler
       await onSubmit();
@@ -1409,7 +1460,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
               <TabsContent value="targeting" className="space-y-6 mt-6">
                 <MissionTargetingForm
-                  onTargetingChange={setMissionTargeting}
+                  onTargetingChange={handleTargetingChange}
                   initialData={missionTargeting}
                   validationErrors={validationErrors}
                 />
