@@ -100,7 +100,7 @@ export const useMissionsTable = () => {
     format: "",
     useful_link: "",
     partner: "Super Connector",
-    serverId: "[]",
+    serverId: "",
   });
 
   // Fetch missions data
@@ -330,9 +330,15 @@ export const useMissionsTable = () => {
             end: endDate,
           }),
         serverId: newMission.serverId || "[]",
+        missionTargeting: newMission.missionTargeting, // ส่ง missionTargeting ไป API ด้วย
       };
 
       console.log("Sending mission data:", missionData);
+      console.log("=== useMissionsTable POST DEBUG ===");
+      console.log("newMission.missionTargeting:", newMission.missionTargeting);
+      console.log("newMission.serverId:", newMission.serverId);
+      console.log("missionData.missionTargeting:", missionData.missionTargeting);
+      console.log("missionData.serverId:", missionData.serverId);
 
       const response = await fetch("/api/missions", {
         method: "POST",
@@ -404,6 +410,27 @@ export const useMissionsTable = () => {
       });
 
       // Prepare update data
+      console.log("=== useMissionsTable DEBUG ===");
+      console.log("updateData.missionTargeting:", updateData.missionTargeting);
+      console.log("updateData.serverId:", updateData.serverId);
+      console.log("missionTargeting servers:", updateData.missionTargeting?.discordFilters?.servers);
+      
+      // Extract serverId with proper logic
+      let finalServerId = "[]";
+      if (updateData.missionTargeting?.discordFilters?.servers && 
+          Array.isArray(updateData.missionTargeting.discordFilters.servers) &&
+          updateData.missionTargeting.discordFilters.servers.length > 0) {
+        finalServerId = JSON.stringify(updateData.missionTargeting.discordFilters.servers);
+        console.log("✅ Using servers from missionTargeting:", updateData.missionTargeting.discordFilters.servers);
+      } else if (updateData.serverId && updateData.serverId !== "" && updateData.serverId !== "[]") {
+        finalServerId = updateData.serverId;
+        console.log("⚠️ Using existing serverId:", updateData.serverId);
+      } else {
+        console.log("✅ Using empty array");
+      }
+      
+      console.log("🔥 Final serverId for update:", finalServerId);
+      
       const missionUpdateData = {
         id: missionId,
         title: updateData.title,
@@ -427,10 +454,16 @@ export const useMissionsTable = () => {
             start: startDate,
             end: endDate,
           }),
-        serverId: updateData.serverId || "[]",
+        // Handle serverId from missionTargeting or preserve existing
+        serverId: finalServerId,
+        missionTargeting: updateData.missionTargeting, // ส่ง missionTargeting ไป API ด้วย
       };
 
       console.log("Updating mission with data:", missionUpdateData);
+      console.log("=== useMissionsTable PUT DEBUG ===");
+      console.log("updateData.missionTargeting:", updateData.missionTargeting);
+      console.log("missionUpdateData.missionTargeting:", missionUpdateData.missionTargeting);
+      console.log("missionUpdateData.serverId:", missionUpdateData.serverId);
 
       const response = await fetch("/api/missions", {
         method: "PUT",

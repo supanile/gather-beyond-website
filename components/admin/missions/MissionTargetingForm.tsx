@@ -226,11 +226,11 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
       console.log("Fetching Discord servers...");
       const response = await fetch("/api/discord/getserver");
       console.log("Response status:", response.status, response.statusText);
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log("API response data:", data);
-        
+
         if (data.success && data.guilds) {
           // Transform the API response to match our interface
           const transformedServers: DiscordServer[] = data.guilds.map(
@@ -298,7 +298,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
         };
         totalFilteredUsers *=
           activeMultipliers[
-            filters.lastActive.value as keyof typeof activeMultipliers
+          filters.lastActive.value as keyof typeof activeMultipliers
           ] || 1;
       }
 
@@ -717,7 +717,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
 
     const selectedChannelMultiplier =
       channelMultipliers[
-        deliveryOptions.channel as keyof typeof channelMultipliers
+      deliveryOptions.channel as keyof typeof channelMultipliers
       ] || 0.58;
     const channelReach = Math.round(totalReach * selectedChannelMultiplier);
 
@@ -1845,9 +1845,9 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                           <AlertCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
                           <p className="font-medium">Failed to load Discord servers</p>
                           <p className="text-sm text-muted-foreground mt-1">{serverFetchError}</p>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="mt-3"
                             onClick={fetchDiscordServers}
                             disabled={isLoadingServers}
@@ -1865,17 +1865,16 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                           {discordServers.map((server) => (
                             <div
                               key={server.serverId}
-                              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                                discordFilters.servers.includes(server.serverId)
+                              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${discordFilters.servers.includes(server.serverId)
                                   ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
                                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                              }`}
+                                }`}
                               onClick={() =>
                                 discordFilters.servers.includes(server.serverId)
                                   ? removeDiscordFilter(
-                                      "servers",
-                                      server.serverId
-                                    )
+                                    "servers",
+                                    server.serverId
+                                  )
                                   : addDiscordFilter("servers", server.serverId)
                               }
                             >
@@ -2117,25 +2116,25 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                     {/* Filter Summary */}
                     {(discordFilters.roles.length > 0 ||
                       discordFilters.channels.length > 0) && (
-                      <div className="space-y-2">
-                        <Label className="font-medium">Active Filters:</Label>
-                        <div className="space-y-1">
-                          {discordFilters.roles.length > 0 && (
-                            <div className="text-xs text-muted-foreground">
-                              Roles: {discordFilters.roles.join(", ")}
-                            </div>
-                          )}
-                          {discordFilters.channels.length > 0 && (
-                            <div className="text-xs text-muted-foreground">
-                              Channels:{" "}
-                              {discordFilters.channels
-                                .map((c) => `#${c}`)
-                                .join(", ")}
-                            </div>
-                          )}
+                        <div className="space-y-2">
+                          <Label className="font-medium">Active Filters:</Label>
+                          <div className="space-y-1">
+                            {discordFilters.roles.length > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                Roles: {discordFilters.roles.join(", ")}
+                              </div>
+                            )}
+                            {discordFilters.channels.length > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                Channels:{" "}
+                                {discordFilters.channels
+                                  .map((c) => `#${c}`)
+                                  .join(", ")}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </CardContent>
                 </Card>
               </div>

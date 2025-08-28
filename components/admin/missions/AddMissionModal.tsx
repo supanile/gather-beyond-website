@@ -525,6 +525,72 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   }, [isOpen, isEditMode, hasDraft, loadDraft]);
 
+  // useEffect for edit mode - load existing mission targeting data
+  useEffect(() => {
+    if (isOpen && isEditMode) {
+      console.log("=== EDIT MODE LOADING ===");
+      console.log("newMission:", newMission);
+      console.log("newMission.missionTargeting:", newMission.missionTargeting);
+      console.log("newMission.serverId:", newMission.serverId);
+      
+      // Load targeting data from existing mission
+      if (newMission.missionTargeting) {
+        console.log("Loading from newMission.missionTargeting");
+        setMissionTargeting(newMission.missionTargeting);
+      } else if (newMission.serverId) {
+        // If serverId exists but no missionTargeting, reconstruct targeting data
+        console.log("Reconstructing targeting data from serverId");
+        try {
+          const serverIds = JSON.parse(newMission.serverId);
+          console.log("Parsed serverIds:", serverIds);
+          if (Array.isArray(serverIds) && serverIds.length > 0) {
+            const reconstructedTargeting: MissionTargetingData = {
+              audienceType: "custom-discord",
+              discordFilters: {
+                servers: serverIds,
+                roles: [],
+                channels: []
+              },
+              behaviorFilters: {
+                xpLevel: { enabled: false, min: 0, max: 100 },
+                missionStreak: { enabled: false, value: 0 },
+                lastActive: { enabled: false, value: "today" },
+                failedMissions: { enabled: false, value: 0 },
+                trustScore: { enabled: false, value: [50] },
+                connectedWallet: { enabled: false, value: false },
+                joinedViaPartner: { enabled: false, value: "" },
+                referredUsers: { enabled: false, value: 0 },
+                agentHealth: { enabled: false, value: [50] },
+                memoryProofSubmitted: { enabled: false, value: false },
+                taggedInterests: { enabled: false, value: [] }
+              },
+              demographicFilters: {
+                location: [],
+                language: [],
+                ageRange: "",
+                gender: ""
+              },
+              deliveryOptions: {
+                channel: "discord",
+                scope: "targeted",
+                schedule: "immediate",
+                scheduledDate: ""
+              }
+            };
+            console.log("Setting reconstructed targeting:", reconstructedTargeting);
+            setMissionTargeting(reconstructedTargeting);
+          } else {
+            console.log("No server IDs found or empty array");
+          }
+        } catch (error) {
+          console.error("Error parsing serverId:", error);
+        }
+      } else {
+        console.log("No targeting data and no serverId to reconstruct from");
+      }
+    }
+  }, [isOpen, isEditMode, newMission.missionTargeting, newMission.serverId]);
+
   // auto-save useEffect
   useEffect(() => {
     if (!isOpen || isEditMode) return;
@@ -699,17 +765,48 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       setInternalLoading(true);
 
       // Collect selected Discord server IDs
-      let selectedServerIds: string[] = [];
-      if (missionTargeting?.discordFilters?.servers) {
-        selectedServerIds = missionTargeting.discordFilters.servers;
+      let finalServerId: string;
+      
+      console.log("=== DEBUG SUBMIT ===");
+      console.log("isEditMode:", isEditMode);
+      console.log("missionTargeting:", missionTargeting);
+      
+      // Check if missionTargeting exists and has servers
+      const hasTargetingServers = missionTargeting?.discordFilters?.servers && 
+        Array.isArray(missionTargeting.discordFilters.servers) && 
+        missionTargeting.discordFilters.servers.length > 0;
+        
+      console.log("hasTargetingServers:", hasTargetingServers);
+      console.log("missionTargeting?.discordFilters?.servers:", missionTargeting?.discordFilters?.servers);
+      console.log("newMission.serverId:", newMission.serverId);
+      console.log("newMission.serverId type:", typeof newMission.serverId);
+      
+      if (hasTargetingServers) {
+        // If targeting data exists and has servers, use it
+        finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
+        console.log("✅ Using missionTargeting servers:", missionTargeting.discordFilters.servers);
+        console.log("✅ Converted to JSON:", finalServerId);
+      } else if (isEditMode && newMission.serverId && newMission.serverId !== "" && newMission.serverId !== "[]") {
+        // In edit mode, if no new targeting data but existing serverId is not empty array, preserve it
+        finalServerId = newMission.serverId;
+        console.log("⚠️ Edit mode: preserving existing serverId:", finalServerId);
+      } else {
+        // Default to empty array in JSON format
+        finalServerId = "[]";
+        console.log("✅ Using empty array (no servers found)");
+        console.log("✅ Reason: hasTargetingServers =", hasTargetingServers, ", isEditMode =", isEditMode, ", newMission.serverId =", newMission.serverId);
       }
+      
+      console.log("🔥 Final serverId that will be sent to backend:", finalServerId);
 
       // targeting data to mission before submission
       const missionWithTargeting = {
         ...newMission,
         missionTargeting: missionTargeting,
-        serverId: JSON.stringify(selectedServerIds),
+        serverId: finalServerId,
       };
+      
+      console.log("🚀 Complete missionWithTargeting object:", missionWithTargeting);
 
       // mission form data with targeting before calling onSubmit
       onMissionChange(missionWithTargeting);

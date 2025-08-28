@@ -63,6 +63,18 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     console.log("Received mission data:", body);
+    console.log("=== DEBUG SERVERID ===");
+    console.log("body.serverId:", body.serverId);
+    console.log("body.serverId type:", typeof body.serverId);
+    console.log("body.missionTargeting:", body.missionTargeting);
+    console.log("body.missionTargeting?.discordFilters?.servers:", body.missionTargeting?.discordFilters?.servers);
+    
+    // Log all properties of body to see what's being sent
+    console.log("=== ALL BODY PROPERTIES ===");
+    console.log("Body keys:", Object.keys(body));
+    for (const [key, value] of Object.entries(body)) {
+      console.log(`${key}:`, value);
+    }
 
     // Validate required fields
     const requiredFields = [
@@ -72,6 +84,7 @@ export async function POST(request: Request) {
       "platform",
       "partner",
     ];
+    
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -89,6 +102,7 @@ export async function POST(request: Request) {
       "Referral",
       "Engagement",
     ];
+
     if (!validTypes.includes(body.type)) {
       return NextResponse.json(
         {
@@ -134,6 +148,22 @@ export async function POST(request: Request) {
 
     console.log("Duration data created:", durationData);
 
+    // Handle serverId properly - check missionTargeting first, then fallback to body.serverId
+    let finalServerId = "[]";
+    if (body.missionTargeting?.discordFilters?.servers && 
+        Array.isArray(body.missionTargeting.discordFilters.servers) &&
+        body.missionTargeting.discordFilters.servers.length > 0) {
+      finalServerId = JSON.stringify(body.missionTargeting.discordFilters.servers);
+      console.log("✅ Using servers from missionTargeting:", finalServerId);
+    } else if (body.serverId && body.serverId !== "" && body.serverId !== "[]") {
+      finalServerId = body.serverId;
+      console.log("✅ Using body.serverId:", body.serverId);
+    } else {
+      console.log("✅ Using empty array (no servers found)");
+    }
+    
+    console.log("🔥 Final serverId for POST:", finalServerId);
+
     // Prepare data for Grist
     const missionData = {
       title: body.title,
@@ -152,7 +182,7 @@ export async function POST(request: Request) {
         .replace(/":"/g, '": "'),
       repeatable: body.repeatable || 0,
       regex: body.regex || "",
-      serverId: body.serverId || "[]",
+      serverId: finalServerId,
     };
 
     console.log("Prepared mission data for Grist:", missionData);
@@ -286,7 +316,22 @@ export async function PUT(request: Request) {
 
     // Handle serverId updates
     if (body.serverId !== undefined) {
-      cleanUpdateData.serverId = body.serverId;
+      console.log("=== SERVERID UPDATE ===");
+      console.log("Original body.serverId:", body.serverId);
+      console.log("Type of serverId:", typeof body.serverId);
+      
+      // If serverId is already a JSON string, use it directly
+      // If it's an array, convert it to JSON string
+      if (typeof body.serverId === 'string') {
+        cleanUpdateData.serverId = body.serverId;
+      } else if (Array.isArray(body.serverId)) {
+        cleanUpdateData.serverId = JSON.stringify(body.serverId);
+      } else {
+        // Default to empty array if undefined or invalid
+        cleanUpdateData.serverId = "[]";
+      }
+      
+      console.log("Final cleanUpdateData.serverId:", cleanUpdateData.serverId);
     }
 
     const finalUpdateData = {

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import {
   Calendar,
   Clock,
@@ -96,6 +96,41 @@ const AdminMissionsTable = () => {
   );
   const [confirmDeleteInput, setConfirmDeleteInput] = React.useState("");
   const [hasConfirmedWarning, setHasConfirmedWarning] = React.useState(false);
+  
+  // Use ref to store latest mission data to avoid state timing issues
+  const latestMissionDataRef = useRef<NewMissionForm | null>(null);
+
+  // State to track the latest mission data from AddMissionModal
+  const [latestMissionData, setLatestMissionData] = React.useState<NewMissionForm | null>(null);
+
+  // Wrapper function to handle mission submission with complete data
+  const handleAddMissionSubmit = async () => {
+    try {
+      console.log("🚀 AdminMissionsTable handleAddMissionSubmit called");
+      console.log("🚀 latestMissionData:", latestMissionData);
+      console.log("🚀 latestMissionData has missionTargeting:", !!latestMissionData?.missionTargeting);
+      console.log("🚀 latestMissionData.serverId:", latestMissionData?.serverId);
+      
+      if (latestMissionData) {
+        // Use the latest mission data instead of the hook's state
+        console.log("🚀 Using latestMissionData for submission");
+        
+        // Call handleAddMission but first update the hook's state
+        setNewMission(latestMissionData);
+        
+        // Wait for state update
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        await handleAddMission();
+      } else {
+        console.log("🚀 Using hook's newMission state");
+        await handleAddMission();
+      }
+    } catch (error) {
+      console.error("Error in handleAddMissionSubmit:", error);
+      throw error;
+    }
+  };
 
   // Reset all filters handler
   const handleResetAllFilters = () => {
@@ -185,7 +220,7 @@ const AdminMissionsTable = () => {
       regex: mission.regex || "",
       duration: mission.duration || "",
       missionTargeting: missionTargeting,
-      serverId: mission.serverId || "[]",
+      serverId: mission.serverId || "",
     };
 
     setMissionToEdit(missionForm);
@@ -228,12 +263,16 @@ const AdminMissionsTable = () => {
   // Update Mission Handler
   const handleUpdateMissionSubmit = async (missionForm: NewMissionForm) => {
     if (missionToEdit && selectedMission) {
-      // Ensure we have the current form data, not the old missionToEdit
-      const currentFormData = missionForm || missionToEdit;
-
+      // Use missionToEdit which contains the latest data from onMissionChange
+      console.log("🚀 handleUpdateMissionSubmit input missionForm:", missionForm);
+      console.log("🚀 handleUpdateMissionSubmit missionToEdit:", missionToEdit);
+      console.log("🚀 missionToEdit has missionTargeting:", !!missionToEdit.missionTargeting);
+      console.log("🚀 missionToEdit serverId:", missionToEdit.serverId);
+      
+      // Use missionToEdit directly as it has the latest data
       const success = await handleUpdateMission(
         selectedMission.id,
-        currentFormData
+        missionToEdit  // Use missionToEdit instead of currentFormData
       );
       if (success) {
         setIsEditModalOpen(false);
@@ -298,8 +337,24 @@ const AdminMissionsTable = () => {
             isOpen={isAddModalOpen}
             onOpenChange={setIsAddModalOpen}
             newMission={newMission}
-            onMissionChange={setNewMission}
-            onSubmit={handleAddMission}
+            onMissionChange={(mission) => {
+              console.log("🔄 AdminMissionsTable onMissionChange called");
+              console.log("🔄 Mission data:", mission);
+              console.log("🔄 Mission has missionTargeting:", typeof mission === 'object' && mission && 'missionTargeting' in mission ? !!mission.missionTargeting : 'N/A');
+              console.log("🔄 Mission serverId:", typeof mission === 'object' && mission && 'serverId' in mission ? mission.serverId : 'N/A');
+              
+              if (typeof mission === "function") {
+                const updated = mission(newMission);
+                console.log("🔄 Function result:", updated);
+                setNewMission(updated);
+                setLatestMissionData(updated);
+              } else {
+                console.log("🔄 Direct mission object");
+                setNewMission(mission);
+                setLatestMissionData(mission);
+              }
+            }}
+            onSubmit={handleAddMissionSubmit}
           />
         </div>
 
@@ -528,7 +583,7 @@ const AdminMissionsTable = () => {
             format: "",
             useful_link: "",
             partner: "Super Connector",
-            serverId: "[]",
+            serverId: "",
           }
         }
         onMissionChange={(mission) => {
@@ -546,19 +601,31 @@ const AdminMissionsTable = () => {
                 useful_link: "",
                 status: "upcoming",
                 partner: "Super Connector",
-                serverId: "[]",
+                serverId: "",
               };
               const updated = mission(currentMission);
+              console.log("🔄 AdminMissionsTable onMissionChange (function):", updated);
+              console.log("🔄 missionTargeting in updated:", updated.missionTargeting);
+              console.log("🔄 serverId in updated:", updated.serverId);
               return updated;
             });
           } else {
+            console.log("🔄 AdminMissionsTable onMissionChange (direct):", mission);
+            console.log("🔄 missionTargeting in mission:", mission.missionTargeting);
+            console.log("🔄 serverId in mission:", mission.serverId);
             setMissionToEdit(mission);
+            // Store in ref for immediate access
+            latestMissionDataRef.current = mission;
           }
         }}
         onSubmit={async () => {
-          if (missionToEdit) {
-            // Use the current missionToEdit state which should have the latest form data
-            return handleUpdateMissionSubmit(missionToEdit);
+          // Use ref to get the latest mission data
+          const latestMission = latestMissionDataRef.current || missionToEdit;
+          if (latestMission) {
+            console.log("🚀 AdminMissionsTable onSubmit using latest mission:", latestMission);
+            console.log("🚀 Latest mission has missionTargeting:", !!latestMission.missionTargeting);
+            console.log("🚀 Latest mission serverId:", latestMission.serverId);
+            return handleUpdateMissionSubmit(latestMission);
           }
           return Promise.resolve();
         }}
