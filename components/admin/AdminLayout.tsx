@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Crosshair, Home, Menu } from "lucide-react";
+import { BarChart3, Crosshair, Home, Menu, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/LandingDashboard/Header/Darkmode";
@@ -62,6 +62,11 @@ const items = [
     title: "Missions Management",
     url: "/admin/missions",
     icon: Crosshair,
+  },
+  {
+    title: "Super Store",
+    url: "/admin/superstore",
+    icon: ShoppingBag,
   },
 ];
 
@@ -218,6 +223,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const getPageTitle = () => {
     if (pathname === "/admin/missions") return "Missions Management";
     if (pathname === "/admin/userdashboard") return "Users Dashboard";
+    if (pathname === "/admin/superstore") return "Super Store";
     if (pathname === "/") return "Home";
     return "Admin Panel";
   };
