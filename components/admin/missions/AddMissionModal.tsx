@@ -746,11 +746,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         missionTargeting: prev.missionTargeting || missionTargeting || null,
       };
       
-      console.log("🔧 handleInputChange - field:", field, "value:", value);
-      console.log("🔧 prev.missionTargeting:", prev.missionTargeting);
-      console.log("🔧 local missionTargeting:", missionTargeting);
-      console.log("🔧 final missionTargeting:", updated.missionTargeting);
-      
       return updated;
     });
 
@@ -792,15 +787,8 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
 
     try {
-      // Set internal loading state
       setInternalLoading(true);
-
-      // Collect selected Discord server IDs
       let finalServerId: string;
-
-      console.log("=== DEBUG SUBMIT ===");
-      console.log("isEditMode:", isEditMode);
-      console.log("missionTargeting:", missionTargeting);
 
       // Check if missionTargeting exists and has servers
       const hasTargetingServers =
@@ -808,23 +796,11 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         Array.isArray(missionTargeting.discordFilters.servers) &&
         missionTargeting.discordFilters.servers.length > 0;
 
-      console.log("hasTargetingServers:", hasTargetingServers);
-      console.log(
-        "missionTargeting?.discordFilters?.servers:",
-        missionTargeting?.discordFilters?.servers
-      );
-      console.log("newMission.serverId:", newMission.serverId);
-      console.log("newMission.serverId type:", typeof newMission.serverId);
-
       if (hasTargetingServers) {
-        // If targeting data exists and has servers, use it
+
         finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
-        console.log(
-          "✅ Using missionTargeting servers:",
-          missionTargeting.discordFilters.servers
-        );
-        console.log("✅ Converted to JSON:", finalServerId);
       } else if (
+
         isEditMode &&
         newMission.serverId &&
         newMission.serverId !== "" &&
@@ -832,28 +808,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       ) {
         // In edit mode, if no new targeting data but existing serverId is not empty array, preserve it
         finalServerId = newMission.serverId;
-        console.log(
-          "⚠️ Edit mode: preserving existing serverId:",
-          finalServerId
-        );
       } else {
         // Default to empty array in JSON format
         finalServerId = "[]";
-        console.log("⚠️ Using empty array (no servers found)");
-        console.log(
-          "⚠️ Reason: hasTargetingServers =",
-          hasTargetingServers,
-          ", isEditMode =",
-          isEditMode,
-          ", newMission.serverId =",
-          newMission.serverId
-        );
       }
-
-      console.log(
-        "🔥 Final serverId that will be sent to backend:",
-        finalServerId
-      );
 
       // ENSURE missionTargeting is included in the final submission
       const missionWithTargeting = {
@@ -861,19 +819,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         missionTargeting: missionTargeting, // Always include current targeting state
         serverId: finalServerId,
       };
-
-      console.log(
-        "🚀 Complete missionWithTargeting object:",
-        missionWithTargeting
-      );
-      console.log(
-        "🚀 missionWithTargeting.missionTargeting:",
-        missionWithTargeting.missionTargeting
-      );
-      console.log(
-        "🚀 missionWithTargeting.serverId:",
-        missionWithTargeting.serverId
-      );
 
       // Update mission form data with targeting before calling onSubmit
       onMissionChange(missionWithTargeting);

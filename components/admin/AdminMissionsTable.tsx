@@ -163,39 +163,23 @@ const AdminMissionsTable = () => {
   // Wrapper function to handle mission submission with complete data
   const handleAddMissionSubmit = async () => {
     try {
-      console.log("🚀 AdminMissionsTable handleAddMissionSubmit called");
-      console.log("🚀 latestMissionData:", latestMissionData);
-      console.log("🚀 latestMissionData has missionTargeting:", !!latestMissionData?.missionTargeting);
-      console.log("🚀 latestMissionData.serverId:", latestMissionData?.serverId);
-      console.log("🚀 newMission from hook:", newMission);
-      console.log("🚀 newMission has missionTargeting:", !!newMission?.missionTargeting);
-      console.log("🚀 newMission.serverId:", newMission?.serverId);
-      
       // Use the most complete data available - prioritize the one with missionTargeting
       const missionDataToSubmit = (latestMissionData?.missionTargeting || latestMissionData?.serverId) 
         ? latestMissionData 
         : newMission;
-        
-      console.log("🚀 Final mission data to submit:", missionDataToSubmit);
-      console.log("🚀 Final has missionTargeting:", !!missionDataToSubmit?.missionTargeting);
-      console.log("🚀 Final serverId:", missionDataToSubmit?.serverId);
       
       if (missionDataToSubmit && (missionDataToSubmit.missionTargeting || missionDataToSubmit.serverId)) {
         // Update the hook's state with complete mission data
-        console.log("🚀 Updating newMission state with complete data");
         setNewMission(missionDataToSubmit);
         
         // Wait for state update
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        console.log("🚀 Calling handleAddMission with updated state");
         await handleAddMission();
       } else {
-        console.log("🚀 Using hook's newMission state");
         await handleAddMission();
       }
     } catch (error) {
-      console.error("Error in handleAddMissionSubmit:", error);
       throw error;
     }
   };

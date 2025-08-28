@@ -333,13 +333,6 @@ export const useMissionsTable = () => {
         missionTargeting: newMission.missionTargeting, // ส่ง missionTargeting ไป API ด้วย
       };
 
-      console.log("Sending mission data:", missionData);
-      console.log("=== useMissionsTable POST DEBUG ===");
-      console.log("newMission.missionTargeting:", newMission.missionTargeting);
-      console.log("newMission.serverId:", newMission.serverId);
-      console.log("missionData.missionTargeting:", missionData.missionTargeting);
-      console.log("missionData.serverId:", missionData.serverId);
-
       const response = await fetch("/api/missions", {
         method: "POST",
         headers: {
@@ -401,19 +394,6 @@ export const useMissionsTable = () => {
       const endDate = updateData.endDate
         ? updateData.endDate // ใช้ค่าที่ส่งมาตรงๆ
         : null;
-
-      console.log("Update processed dates:", {
-        originalStart: updateData.startDate,
-        processedStart: startDate,
-        originalEnd: updateData.endDate,
-        processedEnd: endDate,
-      });
-
-      // Prepare update data
-      console.log("=== useMissionsTable DEBUG ===");
-      console.log("updateData.missionTargeting:", updateData.missionTargeting);
-      console.log("updateData.serverId:", updateData.serverId);
-      console.log("missionTargeting servers:", updateData.missionTargeting?.discordFilters?.servers);
       
       const missionUpdateData = {
         id: missionId,
@@ -442,12 +422,6 @@ export const useMissionsTable = () => {
         serverId: updateData.serverId || "[]",
         missionTargeting: updateData.missionTargeting,
       };
-
-      console.log("Updating mission with data:", missionUpdateData);
-      console.log("=== useMissionsTable PUT DEBUG ===");
-      console.log("updateData.missionTargeting:", updateData.missionTargeting);
-      console.log("missionUpdateData.missionTargeting:", missionUpdateData.missionTargeting);
-      console.log("missionUpdateData.serverId:", missionUpdateData.serverId);
 
       const response = await fetch("/api/missions", {
         method: "PUT",
