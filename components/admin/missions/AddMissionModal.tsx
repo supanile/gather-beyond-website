@@ -165,6 +165,7 @@ const TimePicker = ({
 };
 
 // DateTime picker component
+// DateTime picker component - แทนที่ component เดิมตั้งแต่บรรทัด 143-242
 const DateTimePicker = ({
   value,
   onChange,
@@ -176,103 +177,49 @@ const DateTimePicker = ({
   placeholder?: string;
   error?: boolean;
 }) => {
-  const [date, setDate] = useState<Date | undefined>(
-    value ? new Date(value) : undefined
-  );
-  const [time, setTime] = useState<string>(
-    value ? format(new Date(value), "HH:mm") : "00:00"
-  );
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (selectedDate) {
-      setDate(selectedDate);
-      const [hours, minutes] = time.split(":");
-
-      // Create date in local timezone without conversion
-      const localDate = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        selectedDate.getDate(),
-        parseInt(hours, 10),
-        parseInt(minutes, 10),
-        0,
-        0
-      );
-
-      // Format as ISO string but keep local timezone
-      // Remove 'Z' to prevent UTC conversion
-      const formattedDateTime = format(localDate, "yyyy-MM-dd'T'HH:mm:ss");
-
-      onChange(formattedDateTime);
-    }
+  // Convert ISO string to datetime-local format (YYYY-MM-DDTHH:MM)
+  const formatForInput = (isoString: string): string => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  const handleTimeChange = (newTime: string) => {
-    setTime(newTime);
-    if (date) {
-      const [hours, minutes] = newTime.split(":");
+  // Convert datetime-local format to ISO string
+  const formatForOutput = (datetimeLocal: string): string => {
+    if (!datetimeLocal) return "";
+    return datetimeLocal + ":00"; // Add seconds for ISO format
+  };
 
-      // Create date in local timezone without conversion
-      const localDate = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        parseInt(hours, 10),
-        parseInt(minutes, 10),
-        0,
-        0
-      );
+  const inputValue = value ? formatForInput(value) : "";
 
-      // Format as ISO string but keep local timezone
-      const formattedDateTime = format(localDate, "yyyy-MM-dd'T'HH:mm:ss");
-
-      onChange(formattedDateTime);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    if (newValue) {
+      onChange(formatForOutput(newValue));
+    } else {
+      onChange("");
     }
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !date && "text-muted-foreground",
-            error && "border-red-500"
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? (
-            format(date, "PPP") + " at " + time
-          ) : (
-            <span>{placeholder}</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <div className="p-3 border-b">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleDateSelect}
-            captionLayout="dropdown"
-            fromYear={2024}
-            toYear={new Date().getFullYear()}
-            initialFocus
-          />
-        </div>
-        <div className="p-3 flex flex-col items-center">
-          <Label className="text-sm font-medium mb-2 block">Time</Label>
-          <TimePicker value={time} onChange={handleTimeChange} />
-        </div>
-        <div className="p-3 pt-0">
-          <Button className="w-full" onClick={() => setIsOpen(false)} size="sm">
-            Confirm
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <div className="relative">
+      <Input
+        type="datetime-local"
+        value={inputValue}
+        onChange={handleChange}
+        className={cn(
+          "w-full",
+          error && "border-red-500 focus:border-red-500 focus:ring-red-500"
+        )}
+        placeholder={placeholder}
+      />
+      <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+    </div>
   );
 };
 
