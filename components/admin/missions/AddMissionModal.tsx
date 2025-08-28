@@ -788,7 +788,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         console.log("✅ Converted to JSON:", finalServerId);
       } else if (isEditMode && newMission.serverId && newMission.serverId !== "" && newMission.serverId !== "[]") {
         // In edit mode, if no new targeting data but existing serverId is not empty array, preserve it
-        finalServerId = newMission.serverId;
+        finalServerId = newMission.serverId
         console.log("⚠️ Edit mode: preserving existing serverId:", finalServerId);
       } else {
         // Default to empty array in JSON format
