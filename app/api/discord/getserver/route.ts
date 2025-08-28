@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 interface DiscordGuild {
   id: string;
@@ -19,7 +19,7 @@ interface ServerInfo {
   memberCount: number;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const guildsResponse = await fetch('https://discord.com/api/v10/users/@me/guilds', {
       headers: {
