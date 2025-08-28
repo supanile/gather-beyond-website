@@ -252,8 +252,10 @@ export async function PUT(request: Request) {
 
     console.log("=== PUT REQUEST DEBUG ===");
     console.log("Request body:", JSON.stringify(body, null, 2));
+    console.log("Mission ID:", id);
     console.log("updateData.serverId:", updateData.serverId);
     console.log("updateData.missionTargeting:", updateData.missionTargeting);
+    console.log("updateData.missionTargeting?.discordFilters?.servers:", updateData.missionTargeting?.discordFilters?.servers);
 
     if (!id) {
       return NextResponse.json(
@@ -362,8 +364,30 @@ export async function PUT(request: Request) {
     console.log("updateData.serverId:", updateData.serverId);
     console.log("missionTargeting (extracted):", missionTargeting);
 
-    // Initialize with original serverId if exists
-    let finalServerId: string | undefined = "[]";
+    // First, fetch the existing mission to get current serverId
+    let existingServerId: string[] = [];
+    try {
+      const existingMissions = await grist.fetchTable("Missions");
+      const mission = existingMissions.find((record: any) => record.id === id);
+      if (mission?.serverId && typeof mission.serverId === 'string') {
+        try {
+          existingServerId = JSON.parse(mission.serverId);
+          if (!Array.isArray(existingServerId)) {
+            existingServerId = [];
+          }
+        } catch {
+          console.warn("Failed to parse existing serverId, using empty array");
+          existingServerId = [];
+        }
+      }
+      console.log("📋 Existing serverId:", existingServerId);
+    } catch (error) {
+      console.error("Failed to fetch existing mission:", error);
+      existingServerId = [];
+    }
+
+    // Initialize with existing serverId
+    let finalServerId: string | undefined = JSON.stringify(existingServerId);
 
     // Priority 1: ใช้ missionTargeting ถ้ามี servers (มีการเลือกจาก Discord targeting form)
     if (
@@ -371,10 +395,21 @@ export async function PUT(request: Request) {
       Array.isArray(missionTargeting.discordFilters.servers) &&
       missionTargeting.discordFilters.servers.length > 0
     ) {
-      finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
+      // Merge with existing servers, avoiding duplicates
+      const newServers = missionTargeting.discordFilters.servers;
+      const mergedServers = [...existingServerId];
+      
+      // Add new servers if they don't already exist
+      newServers.forEach((serverId: string) => {
+        if (!mergedServers.includes(serverId)) {
+          mergedServers.push(serverId);
+        }
+      });
+      
+      finalServerId = JSON.stringify(mergedServers);
       console.log(
-        "✅ Priority 1: Using missionTargeting servers:",
-        missionTargeting.discordFilters.servers
+        "✅ Priority 1: Merging missionTargeting servers with existing:",
+        { existing: existingServerId, new: newServers, merged: mergedServers }
       );
       console.log("✅ Final serverId from missionTargeting:", finalServerId);
     }
@@ -385,53 +420,53 @@ export async function PUT(request: Request) {
       updateData.serverId !== "[]" &&
       updateData.serverId !== ""
     ) {
+      let newServerIds: string[] = [];
+      
       if (typeof updateData.serverId === "string") {
         try {
           // ถ้าเป็น JSON string ให้ parse เพื่อตรวจสอบ
           const parsed = JSON.parse(updateData.serverId);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            finalServerId = updateData.serverId; // ใช้ original string
-            console.log("✅ Priority 2: Using valid serverId string:", finalServerId);
+          if (Array.isArray(parsed)) {
+            newServerIds = parsed;
           } else {
-            console.log("⚠️ Priority 2: ServerId is empty array, keeping empty");
-            finalServerId = "[]";
+            newServerIds = [];
           }
         } catch {
-          // ถ้า parse ไม่ได้ แต่ไม่ใช่ string ว่าง ให้ลองใช้เป็น array with single item
+          // ถ้า parse ไม่ได้ แต่ไม่ใช่ string ว่าง ให้ลองใช้เป็น single item
           if (updateData.serverId.trim() !== "") {
-            finalServerId = JSON.stringify([updateData.serverId]);
-            console.log("✅ Priority 2: Converted string to array:", finalServerId);
-          } else {
-            console.log("⚠️ Priority 2: Invalid serverId string, using empty");
-            finalServerId = "[]";
+            newServerIds = [updateData.serverId];
           }
         }
       } else if (Array.isArray(updateData.serverId)) {
-        if (updateData.serverId.length > 0) {
-          finalServerId = JSON.stringify(updateData.serverId);
-          console.log("✅ Priority 2: Converting serverId array to JSON:", finalServerId);
-        } else {
-          console.log("⚠️ Priority 2: Empty serverId array, using empty");
-          finalServerId = "[]";
-        }
+        newServerIds = updateData.serverId;
+      }
+      
+      if (newServerIds.length > 0) {
+        // Merge with existing servers, avoiding duplicates
+        const mergedServers = [...existingServerId];
+        
+        newServerIds.forEach((serverId: string) => {
+          if (!mergedServers.includes(serverId)) {
+            mergedServers.push(serverId);
+          }
+        });
+        
+        finalServerId = JSON.stringify(mergedServers);
+        console.log("✅ Priority 2: Merging serverId with existing:", 
+                   { existing: existingServerId, new: newServerIds, merged: mergedServers });
       } else {
-        console.log("⚠️ Priority 2: Unexpected serverId type:", typeof updateData.serverId);
-        finalServerId = "[]";
+        console.log("⚠️ Priority 2: No valid serverIds to merge, keeping existing");
+        finalServerId = JSON.stringify(existingServerId);
       }
     }
-    // Priority 3: ไม่มีข้อมูล serverId ใหม่ - ไม่ต้องอัปเดต field นี้
+    // Priority 3: ไม่มีข้อมูล serverId ใหม่ - รักษาค่าเดิมไว้
     else {
-      console.log("ℹ️ Priority 3: No serverId update requested");
-      // สำหรับ Edit Mission ถ้าไม่มีข้อมูลใหม่ ให้รักษาค่าเดิมไว้
-      // ไม่ต้องใส่ serverId ใน update payload
-      console.log("ℹ️ Preserving existing serverId value in database");
-      finalServerId = undefined; // จะไม่ถูกใส่ใน cleanUpdateData
+      console.log("ℹ️ Priority 3: No serverId update requested, preserving existing");
+      finalServerId = JSON.stringify(existingServerId);
     }
 
-    // ใส่กลับเข้า cleanUpdateData เสมอ (ยกเว้นกรณีที่ต้องการรักษาค่าเดิม)
-    if (finalServerId !== undefined) {
-      cleanUpdateData.serverId = finalServerId;
-    }
+    // ใส่กลับเข้า cleanUpdateData เสมอ
+    cleanUpdateData.serverId = finalServerId;
     console.log("🔥 Final serverId for database:", finalServerId);
 
     const finalUpdateData = {
@@ -440,6 +475,7 @@ export async function PUT(request: Request) {
     };
 
     console.log("Final update data being sent to Grist:", finalUpdateData);
+    console.log("🚀 About to call grist.updateRecords with:", { id, ...finalUpdateData });
 
     const result = await grist.updateRecords("Missions", [
       { id, ...finalUpdateData },

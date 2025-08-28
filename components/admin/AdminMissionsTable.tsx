@@ -144,6 +144,8 @@ const AdminMissionsTable = () => {
         console.log("🔄 AdminMissionsTable onMissionChange (function):", updated);
         console.log("🔄 missionTargeting in updated:", updated.missionTargeting);
         console.log("🔄 serverId in updated:", updated.serverId);
+        // Also store in ref for immediate access
+        latestMissionDataRef.current = updated;
         return updated;
       });
     } else {
@@ -310,28 +312,6 @@ const AdminMissionsTable = () => {
       }
     } else {
       toast.error("Please type the exact mission title to confirm deletion");
-    }
-  };
-
-  // Update Mission Handler
-  const handleUpdateMissionSubmit = async (missionForm: NewMissionForm) => {
-    if (missionToEdit && selectedMission) {
-      // Use missionToEdit which contains the latest data from onMissionChange
-      console.log("🚀 handleUpdateMissionSubmit input missionForm:", missionForm);
-      console.log("🚀 handleUpdateMissionSubmit missionToEdit:", missionToEdit);
-      console.log("🚀 missionToEdit has missionTargeting:", !!missionToEdit.missionTargeting);
-      console.log("🚀 missionToEdit serverId:", missionToEdit.serverId);
-      
-      // Use missionToEdit directly as it has the latest data
-      const success = await handleUpdateMission(
-        selectedMission.id,
-        missionToEdit  // Use missionToEdit instead of currentFormData
-      );
-      if (success) {
-        setIsEditModalOpen(false);
-        setMissionToEdit(null);
-        setSelectedMission(null); // Clear selected mission
-      }
     }
   };
 
@@ -606,6 +586,7 @@ const AdminMissionsTable = () => {
           setIsEditModalOpen(open);
           if (!open) {
             setMissionToEdit(null);
+            latestMissionDataRef.current = null; // Clear ref when modal closes
           }
         }}
         newMission={
@@ -631,7 +612,19 @@ const AdminMissionsTable = () => {
             console.log("🚀 AdminMissionsTable onSubmit using latest mission:", latestMission);
             console.log("🚀 Latest mission has missionTargeting:", !!latestMission.missionTargeting);
             console.log("🚀 Latest mission serverId:", latestMission.serverId);
-            return handleUpdateMissionSubmit(latestMission);
+            console.log("🚀 Latest mission missionTargeting details:", latestMission.missionTargeting);
+            
+            // Use the latest mission data directly, not missionToEdit state
+            const success = await handleUpdateMission(
+              selectedMission!.id,
+              latestMission  // Use latestMission instead of missionToEdit
+            );
+            if (success) {
+              setIsEditModalOpen(false);
+              setMissionToEdit(null);
+              setSelectedMission(null);
+              latestMissionDataRef.current = null; // Clear ref
+            }
           }
           return Promise.resolve();
         }}
