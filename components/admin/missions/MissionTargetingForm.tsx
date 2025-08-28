@@ -199,7 +199,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   // Targeting state
   const [audienceType, setAudienceType] = useState<
     "global" | "custom" | "custom-discord"
-  >(initialData?.audienceType || "global");
+  >(initialData?.audienceType || "custom-discord");
 
   const [behaviorFilters, setBehaviorFilters] = useState<BehaviorFilters>(
     initialData?.behaviorFilters || defaultBehaviorFilters
@@ -255,7 +255,12 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
         }
       } else {
         const errorData = await response.text();
-        console.error("Failed to fetch Discord servers. Status:", response.status, "Error:", errorData);
+        console.error(
+          "Failed to fetch Discord servers. Status:",
+          response.status,
+          "Error:",
+          errorData
+        );
         setServerFetchError(`Failed to fetch servers (${response.status})`);
         setDiscordServers([]);
       }
@@ -298,7 +303,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
         };
         totalFilteredUsers *=
           activeMultipliers[
-          filters.lastActive.value as keyof typeof activeMultipliers
+            filters.lastActive.value as keyof typeof activeMultipliers
           ] || 1;
       }
 
@@ -717,7 +722,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
 
     const selectedChannelMultiplier =
       channelMultipliers[
-      deliveryOptions.channel as keyof typeof channelMultipliers
+        deliveryOptions.channel as keyof typeof channelMultipliers
       ] || 0.58;
     const channelReach = Math.round(totalReach * selectedChannelMultiplier);
 
@@ -1750,7 +1755,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                           return (
                             <div
                               key={segment.id}
-                              className={`p-3 rounded-lg border ${segment.bgColor} ${segment.color}`}
+                              className={`p-3 rounded-lg border ${segment.bgColor} ${segment.color} dark:border-gray-700`}
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
@@ -1783,7 +1788,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                                         <Badge
                                           key={idx}
                                           variant="outline"
-                                          className="text-xs px-1 py-0"
+                                          className="text-xs px-1 py-0 dark:border-gray-600"
                                         >
                                           {condition}
                                         </Badge>
@@ -1817,7 +1822,8 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                 {/* Discord Server Selection */}
                 <Card
                   className={cn(
-                    validationErrors?.discordServers && "border-red-500"
+                    validationErrors?.discordServers &&
+                      "border-red-500 dark:border-red-400"
                   )}
                 >
                   <CardHeader>
@@ -1830,7 +1836,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                     <div className="space-y-3">
                       <Label className="font-medium">Target Servers</Label>
                       {validationErrors?.discordServers && (
-                        <p className="text-sm text-red-600 flex items-center gap-1">
+                        <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
                           <AlertCircle className="h-3 w-3" />
                           {validationErrors.discordServers}
                         </p>
@@ -1841,10 +1847,14 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                           <p>Loading Discord servers...</p>
                         </div>
                       ) : serverFetchError ? (
-                        <div className="text-center py-8 text-red-600">
+                        <div className="text-center py-8 text-red-600 dark:text-red-400">
                           <AlertCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                          <p className="font-medium">Failed to load Discord servers</p>
-                          <p className="text-sm text-muted-foreground mt-1">{serverFetchError}</p>
+                          <p className="font-medium">
+                            Failed to load Discord servers
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {serverFetchError}
+                          </p>
                           <Button
                             variant="outline"
                             size="sm"
@@ -1865,16 +1875,17 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                           {discordServers.map((server) => (
                             <div
                               key={server.serverId}
-                              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${discordFilters.servers.includes(server.serverId)
-                                  ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
-                                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                                }`}
+                              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                discordFilters.servers.includes(server.serverId)
+                                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950 ring-2 ring-blue-200 dark:ring-blue-800"
+                                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              }`}
                               onClick={() =>
                                 discordFilters.servers.includes(server.serverId)
                                   ? removeDiscordFilter(
-                                    "servers",
-                                    server.serverId
-                                  )
+                                      "servers",
+                                      server.serverId
+                                    )
                                   : addDiscordFilter("servers", server.serverId)
                               }
                             >
@@ -2088,7 +2099,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                             return server ? (
                               <div
                                 key={serverId}
-                                className="flex justify-between items-center p-2 bg-gray-50 rounded"
+                                className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded"
                               >
                                 <span className="text-sm flex items-center gap-2">
                                   {server.icon ? (
@@ -2116,25 +2127,25 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                     {/* Filter Summary */}
                     {(discordFilters.roles.length > 0 ||
                       discordFilters.channels.length > 0) && (
-                        <div className="space-y-2">
-                          <Label className="font-medium">Active Filters:</Label>
-                          <div className="space-y-1">
-                            {discordFilters.roles.length > 0 && (
-                              <div className="text-xs text-muted-foreground">
-                                Roles: {discordFilters.roles.join(", ")}
-                              </div>
-                            )}
-                            {discordFilters.channels.length > 0 && (
-                              <div className="text-xs text-muted-foreground">
-                                Channels:{" "}
-                                {discordFilters.channels
-                                  .map((c) => `#${c}`)
-                                  .join(", ")}
-                              </div>
-                            )}
-                          </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Active Filters:</Label>
+                        <div className="space-y-1">
+                          {discordFilters.roles.length > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              Roles: {discordFilters.roles.join(", ")}
+                            </div>
+                          )}
+                          {discordFilters.channels.length > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              Channels:{" "}
+                              {discordFilters.channels
+                                .map((c) => `#${c}`)
+                                .join(", ")}
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -2158,7 +2169,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                         return (
                           <div
                             key={segment.id}
-                            className={`p-4 rounded-lg border text-center ${segment.bgColor}`}
+                            className={`p-4 rounded-lg border text-center ${segment.bgColor} dark:border-gray-700`}
                           >
                             <IconComponent
                               className={`h-8 w-8 mx-auto mb-2 ${segment.color}`}
@@ -2219,7 +2230,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-green-600">
+                    <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       Maximum reach enabled
                     </div>
