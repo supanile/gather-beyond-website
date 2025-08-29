@@ -24,6 +24,7 @@ import {
   Zap,
   Building,
   CalendarIcon,
+  AlertCircle,
 } from "lucide-react";
 import {
   Popover,
@@ -71,6 +72,13 @@ interface DeliveryOptions {
   scheduledDate: string;
 }
 
+interface DiscordServer {
+  name: string;
+  serverId: string;
+  icon: string | null;
+  memberCount: number;
+}
+
 interface UserSegment {
   id: string;
   name: string;
@@ -108,7 +116,6 @@ const BASE_USER_DATA = {
     telegram: 5200,
     line: 1320,
   },
-  // Additional data for enhanced calculations
   behavioral: {
     highXP: 6200, // XP > 50
     connectedWallet: 6476, // 42% have wallets
@@ -214,12 +221,19 @@ const DISCORD_SERVERS = [
 interface MissionTargetingFormProps {
   onTargetingChange?: (targeting: MissionTargetingData) => void;
   initialData?: MissionTargetingData | null;
+  validationErrors?: { discordServers?: string };
 }
 
 const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   onTargetingChange,
   initialData,
+  validationErrors,
 }) => {
+  // Discord servers state
+  const [discordServers, setDiscordServers] = useState<DiscordServer[]>([]);
+  const [isLoadingServers, setIsLoadingServers] = useState(false);
+  const [serverFetchError, setServerFetchError] = useState<string | null>(null);
+
   // Enhanced default behavior filters
   const defaultBehaviorFilters: BehaviorFilters = {
     xpLevel: { enabled: false, min: 0, max: 100 },
@@ -258,7 +272,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   // Targeting state
   const [audienceType, setAudienceType] = useState<
     "global" | "custom" | "custom-discord"
-  >(initialData?.audienceType || "global");
+  >(initialData?.audienceType || "custom-discord");
 
   const [behaviorFilters, setBehaviorFilters] = useState<BehaviorFilters>(
     initialData?.behaviorFilters || defaultBehaviorFilters
@@ -276,6 +290,65 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptions>(
     initialData?.deliveryOptions || defaultDeliveryOptions
   );
+
+  // Fetch Discord servers from API
+  const fetchDiscordServers = useCallback(async () => {
+    setIsLoadingServers(true);
+    setServerFetchError(null);
+    try {
+      console.log("Fetching Discord servers...");
+      const response = await fetch("/api/discord/getserver");
+      console.log("Response status:", response.status, response.statusText);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("API response data:", data);
+
+        if (data.success && data.guilds) {
+          // Transform the API response to match our interface
+          const transformedServers: DiscordServer[] = data.guilds.map(
+            (guild: {
+              name: string;
+              serverId: string;
+              icon: string | null;
+              memberCount: number;
+            }) => ({
+              name: guild.name,
+              serverId: guild.serverId,
+              icon: guild.icon,
+              memberCount: guild.memberCount,
+            })
+          );
+          console.log("Transformed servers:", transformedServers);
+          setDiscordServers(transformedServers);
+        } else {
+          console.error("API response missing success or guilds:", data);
+          setServerFetchError("API response format error");
+          setDiscordServers([]);
+        }
+      } else {
+        const errorData = await response.text();
+        console.error(
+          "Failed to fetch Discord servers. Status:",
+          response.status,
+          "Error:",
+          errorData
+        );
+        setServerFetchError(`Failed to fetch servers (${response.status})`);
+        setDiscordServers([]);
+      }
+    } catch (error) {
+      console.error("Error fetching Discord servers:", error);
+      setServerFetchError("Network error occurred");
+      setDiscordServers([]);
+    } finally {
+      setIsLoadingServers(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDiscordServers();
+  }, [fetchDiscordServers]);
 
   // Enhanced segment classification logic following your requirements
   const classifyUserSegments = useCallback(
@@ -1011,20 +1084,20 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
               }
               className="flex gap-6"
             >
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <RadioGroupItem value="global" id="global" />
                 <Label htmlFor="global">🌍 Global – Send to all users</Label>
-              </div>
+              </div> */}
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="custom-discord" id="custom-discord" />
                 <Label htmlFor="custom-discord">
                   💬 Custom – Discord servers
                 </Label>
               </div>
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <RadioGroupItem value="custom" id="custom" />
                 <Label htmlFor="custom">🎯 Custom – Apply filters</Label>
-              </div>
+              </div> */}
             </RadioGroup>
           </div>
 
@@ -1755,7 +1828,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                           return (
                             <div
                               key={segment.id}
-                              className={`p-3 rounded-lg border ${segment.bgColor} ${segment.color}`}
+                              className={`p-3 rounded-lg border ${segment.bgColor} ${segment.color} dark:border-gray-700`}
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
@@ -1788,7 +1861,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                                         <Badge
                                           key={idx}
                                           variant="outline"
-                                          className="text-xs px-1 py-0"
+                                          className="text-xs px-1 py-0 dark:border-gray-600"
                                         >
                                           {condition}
                                         </Badge>
@@ -1820,7 +1893,12 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
               {/* Left Column - Discord Filters */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Discord Server Selection */}
-                <Card>
+                <Card
+                  className={cn(
+                    validationErrors?.discordServers &&
+                      "border-red-500 dark:border-red-400"
+                  )}
+                >
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       💬 Discord Server Selection
@@ -1830,54 +1908,108 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                     {/* Server Selection */}
                     <div className="space-y-3">
                       <Label className="font-medium">Target Servers</Label>
-                      <div className="grid grid-cols-1 gap-3">
-                        {DISCORD_SERVERS.map((server) => (
-                          <div
-                            key={server.id}
-                            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                              discordFilters.servers.includes(server.id)
-                                ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
-                                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                            }`}
-                            onClick={() =>
-                              discordFilters.servers.includes(server.id)
-                                ? removeDiscordFilter("servers", server.id)
-                                : addDiscordFilter("servers", server.id)
-                            }
+                      {validationErrors?.discordServers && (
+                        <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {validationErrors.discordServers}
+                        </p>
+                      )}
+                      {isLoadingServers ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent mx-auto mb-2"></div>
+                          <p>Loading Discord servers...</p>
+                        </div>
+                      ) : serverFetchError ? (
+                        <div className="text-center py-8 text-red-600 dark:text-red-400">
+                          <AlertCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p className="font-medium">
+                            Failed to load Discord servers
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {serverFetchError}
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-3"
+                            onClick={fetchDiscordServers}
+                            disabled={isLoadingServers}
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <span className="text-2xl">{server.icon}</span>
-                                <div>
-                                  <div className="font-semibold text-lg">
-                                    {server.name}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {server.description}
+                            {isLoadingServers ? "Retrying..." : "Retry"}
+                          </Button>
+                        </div>
+                      ) : discordServers.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                          <p>No Discord servers available</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-3">
+                          {discordServers.map((server) => (
+                            <div
+                              key={server.serverId}
+                              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                discordFilters.servers.includes(server.serverId)
+                                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950 ring-2 ring-blue-200 dark:ring-blue-800"
+                                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              }`}
+                              onClick={() =>
+                                discordFilters.servers.includes(server.serverId)
+                                  ? removeDiscordFilter(
+                                      "servers",
+                                      server.serverId
+                                    )
+                                  : addDiscordFilter("servers", server.serverId)
+                              }
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  {server.icon ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                      src={server.icon}
+                                      alt={server.name}
+                                      className="w-8 h-8 rounded"
+                                    />
+                                  ) : (
+                                    <span className="text-2xl">🌐</span>
+                                  )}
+                                  <div>
+                                    <div className="font-semibold text-lg">
+                                      {server.name}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {server.serverId}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <div className="text-right">
-                                <Badge
-                                  variant={
-                                    discordFilters.servers.includes(server.id)
-                                      ? "default"
-                                      : "outline"
-                                  }
-                                  className="mb-1"
-                                >
-                                  {server.members.toLocaleString()} members
-                                </Badge>
-                                <div className="text-xs text-muted-foreground">
-                                  {discordFilters.servers.includes(server.id)
-                                    ? "Selected"
-                                    : "Click to select"}
+                                <div className="text-right">
+                                  <Badge
+                                    variant={
+                                      discordFilters.servers.includes(
+                                        server.serverId
+                                      )
+                                        ? "default"
+                                        : "outline"
+                                    }
+                                    className="mb-1"
+                                  >
+                                    {server.memberCount.toLocaleString()}{" "}
+                                    members
+                                  </Badge>
+                                  <div className="text-xs text-muted-foreground">
+                                    {discordFilters.servers.includes(
+                                      server.serverId
+                                    )
+                                      ? "Selected"
+                                      : "Click to select"}
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      )}
 
                       {discordFilters.servers.length === 0 && (
                         <div className="text-center py-8 text-muted-foreground">
@@ -2016,10 +2148,10 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                       <div className="text-3xl font-bold text-blue-600">
                         {discordFilters.servers
                           .reduce((total, serverId) => {
-                            const server = DISCORD_SERVERS.find(
-                              (s) => s.id === serverId
+                            const server = discordServers.find(
+                              (s) => s.serverId === serverId
                             );
-                            return total + (server ? server.members : 0);
+                            return total + (server ? server.memberCount : 0);
                           }, 0)
                           .toLocaleString()}
                       </div>
@@ -2034,19 +2166,29 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                         <Label className="font-medium">Server Breakdown:</Label>
                         <div className="space-y-2">
                           {discordFilters.servers.map((serverId) => {
-                            const server = DISCORD_SERVERS.find(
-                              (s) => s.id === serverId
+                            const server = discordServers.find(
+                              (s) => s.serverId === serverId
                             );
                             return server ? (
                               <div
                                 key={serverId}
-                                className="flex justify-between items-center p-2 bg-gray-50 rounded"
+                                className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded"
                               >
                                 <span className="text-sm flex items-center gap-2">
-                                  {server.icon} {server.name}
+                                  {server.icon ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                      src={server.icon}
+                                      alt={server.name}
+                                      className="w-4 h-4 rounded"
+                                    />
+                                  ) : (
+                                    "🌐"
+                                  )}{" "}
+                                  {server.name}
                                 </span>
                                 <Badge variant="outline">
-                                  {server.members.toLocaleString()}
+                                  {server.memberCount.toLocaleString()}
                                 </Badge>
                               </div>
                             ) : null;
@@ -2100,7 +2242,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                         return (
                           <div
                             key={segment.id}
-                            className={`p-4 rounded-lg border text-center ${segment.bgColor}`}
+                            className={`p-4 rounded-lg border text-center ${segment.bgColor} dark:border-gray-700`}
                           >
                             <IconComponent
                               className={`h-8 w-8 mx-auto mb-2 ${segment.color}`}
@@ -2161,7 +2303,7 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-green-600">
+                    <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       Maximum reach enabled
                     </div>

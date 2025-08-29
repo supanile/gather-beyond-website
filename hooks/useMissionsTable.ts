@@ -100,6 +100,7 @@ export const useMissionsTable = () => {
     format: "",
     useful_link: "",
     partner: "Super Connector",
+    serverId: "",
   });
 
   // Fetch missions data
@@ -328,9 +329,9 @@ export const useMissionsTable = () => {
             start: startDate,
             end: endDate,
           }),
+        serverId: newMission.serverId || "[]",
+        missionTargeting: newMission.missionTargeting, // ส่ง missionTargeting ไป API ด้วย
       };
-
-      console.log("Sending mission data:", missionData);
 
       const response = await fetch("/api/missions", {
         method: "POST",
@@ -357,6 +358,7 @@ export const useMissionsTable = () => {
           format: "",
           useful_link: "",
           partner: "Super Connector",
+          serverId: "[]",
         });
 
         await fetchMissions();
@@ -392,15 +394,7 @@ export const useMissionsTable = () => {
       const endDate = updateData.endDate
         ? updateData.endDate // ใช้ค่าที่ส่งมาตรงๆ
         : null;
-
-      console.log("Update processed dates:", {
-        originalStart: updateData.startDate,
-        processedStart: startDate,
-        originalEnd: updateData.endDate,
-        processedEnd: endDate,
-      });
-
-      // Prepare update data
+      
       const missionUpdateData = {
         id: missionId,
         title: updateData.title,
@@ -424,9 +418,10 @@ export const useMissionsTable = () => {
             start: startDate,
             end: endDate,
           }),
+        // ส่ง serverId และ missionTargeting ให้ API จัดการเอง
+        serverId: updateData.serverId || "[]",
+        missionTargeting: updateData.missionTargeting,
       };
-
-      console.log("Updating mission with data:", missionUpdateData);
 
       const response = await fetch("/api/missions", {
         method: "PUT",

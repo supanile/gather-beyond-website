@@ -17,6 +17,7 @@ import {
   CheckIcon,
   Zap,
   UserCog,
+  Server,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
@@ -45,6 +46,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InterestsPieChartCard from "@/components/admin/user-management/InterestsPieChartCard";
 import MoodBarChartCard from "@/components/admin/user-management/MoodBarChartCard";
 import DailySubmissionLineChartCard from "@/components/admin/user-management/DailySubmissionLineChartCard";
+import { useDiscordServers } from "@/hooks/useDiscordServers";
 
 type SortOption = {
   field:
@@ -67,6 +69,7 @@ const DashboardPage = () => {
     label: "Email A-Z",
   });
 
+  const { totalGuilds } = useDiscordServers();
   const {
     stats,
     isLoading: isLoadingStats,
@@ -245,7 +248,7 @@ const DashboardPage = () => {
           <div className="space-y-6">
             {/* Regular Stats Cards - 3 columns layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 5 }).map((_, index) => (
+              {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={index}
                   className="bg-card rounded-2xl shadow-sm border border-border p-6"
@@ -467,6 +470,11 @@ const DashboardPage = () => {
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
                 />
+                  <AdminStatCard
+                    title="Total Servers"
+                    value={totalGuilds.toLocaleString()}
+                    icon={Server}
+                  />
                 <AdminStatCard
                   title="Total Missions"
                   value={stats?.totalmissions?.toLocaleString() ?? "0"}

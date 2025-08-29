@@ -101,7 +101,7 @@ export const FeaturedProjects: React.FC<FeaturedProjectsProps> = ({
                         }`}
                       >
                         <div className="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-300/70 dark:hover:border-gray-600/70 hover:shadow-2xl dark:hover:shadow-gray-900/30 transition-all duration-300 hover:scale-105 h-full hover:z-10">
-                          <div className="absolute inset-0 bg-gradient-to-br from-gray-50/20 to-slate-50/20 dark:from-gray-950/20 dark:to-slate-950/20 rounded-xl sm:rounded-2xl"></div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-gray-100/40 dark:from-black/80 dark:to-slate-900/80 rounded-xl sm:rounded-2xl"></div>
 
                           <div className="relative space-y-3 sm:space-y-4">
                             <div className="flex items-center space-x-3">

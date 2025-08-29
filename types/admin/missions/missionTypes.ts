@@ -22,6 +22,7 @@ export interface Mission {
   partnerId: string;
   status: string;
   gristHelper_Display2: string;
+  serverId: string;
 }
 
 export interface ColumnVisibility {
@@ -61,7 +62,8 @@ export interface NewMissionForm {
   regex?: string;
   duration?: string;
   level_required?: number;
-  missionTargeting?: MissionTargetingData | null; // Add targeting data
+  missionTargeting?: MissionTargetingData | null;
+  serverId: string;
 }
 
 // Add MissionTargetingData interface
