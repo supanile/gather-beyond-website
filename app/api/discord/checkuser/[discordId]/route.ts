@@ -41,7 +41,12 @@ export async function GET(request: NextRequest, { params }: Params) {
     }
 
     // หา user ที่ต้องการ
-    const targetUser = users.find((user: any) => String(user.discord_id) === discordId);
+    const targetUser = users.find((user: unknown) => {
+      if (typeof user === 'object' && user !== null && 'discord_id' in user) {
+        return String((user as { discord_id?: string }).discord_id) === discordId;
+      }
+      return false;
+    });
 
     if (!targetUser) {
       return NextResponse.json(

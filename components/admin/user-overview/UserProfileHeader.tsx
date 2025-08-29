@@ -57,43 +57,43 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   const [isLoadingDiscord, setIsLoadingDiscord] = useState(false);
   const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
 
-  // Mock data for Discord guilds (to be replaced with actual API call later)
-  const mockDiscordGuilds: DiscordGuildsData = {
-    success: true,
-    guilds: [
-      {
-        name: "Fłøeт¢ıвøυ's server",
-        serverId: "710813849808273478",
-        icon: "https://cdn.discordapp.com/icons/710813849808273478/d4de87dd25641d07affd890ed98786bd.png",
-        memberCount: 5
-      },
-      {
-        name: "Harold's server",
-        serverId: "749954850430910534",
-        icon: null,
-        memberCount: 5
-      },
-      {
-        name: "Super Connector",
-        serverId: "908568690033844246",
-        icon: "https://cdn.discordapp.com/icons/908568690033844246/35d6d7aba59bef7102940cc0288c507d.png",
-        memberCount: 2658
-      },
-      {
-        name: "aki server",
-        serverId: "989296048356851712",
-        icon: null,
-        memberCount: 9
-      },
-      {
-        name: "스타이카 Staika",
-        serverId: "1037957827899179009",
-        icon: "https://cdn.discordapp.com/icons/1037957827899179009/aa3fc8ff36347e19ba0f160e582da9a6.png",
-        memberCount: 30396
-      }
-    ],
-    totalGuilds: 5
-  };
+// Mock data for Discord guilds (to be replaced with actual API call later)
+const mockDiscordGuilds: DiscordGuildsData = {
+  success: true,
+  guilds: [
+    {
+      name: "Fłøeт¢ıвøυ's server",
+      serverId: "710813849808273478",
+      icon: "https://cdn.discordapp.com/icons/710813849808273478/d4de87dd25641d07affd890ed98786bd.png",
+      memberCount: 5
+    },
+    {
+      name: "Harold's server",
+      serverId: "749954850430910534",
+      icon: null,
+      memberCount: 5
+    },
+    {
+      name: "Super Connector",
+      serverId: "908568690033844246",
+      icon: "https://cdn.discordapp.com/icons/908568690033844246/35d6d7aba59bef7102940cc0288c507d.png",
+      memberCount: 2658
+    },
+    {
+      name: "aki server",
+      serverId: "989296048356851712",
+      icon: null,
+      memberCount: 9
+    },
+    {
+      name: "스타이카 Staika",
+      serverId: "1037957827899179009",
+      icon: "https://cdn.discordapp.com/icons/1037957827899179009/aa3fc8ff36347e19ba0f160e582da9a6.png",
+      memberCount: 30396
+    }
+  ],
+  totalGuilds: 5
+};
 
   useEffect(() => {
     async function fetchDiscordData() {

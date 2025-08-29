@@ -369,7 +369,12 @@ export async function PUT(request: Request) {
     let existingServerId: string[] = [];
     try {
       const existingMissions = await grist.fetchTable("Missions");
-      const mission = existingMissions.find((record: any) => record.id === id);
+      const mission = existingMissions.find((record: unknown) => {
+        if (typeof record === 'object' && record !== null && 'id' in record) {
+          return (record as { id?: string }).id === id;
+        }
+        return false;
+      });
       if (mission?.serverId && typeof mission.serverId === 'string') {
         try {
           existingServerId = JSON.parse(mission.serverId);

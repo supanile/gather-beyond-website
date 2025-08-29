@@ -12,7 +12,7 @@ import {
   Send,
   Eye,
 } from "lucide-react";
-import { format } from "date-fns";
+// import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -28,12 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover";
+// import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -102,67 +102,67 @@ interface NotificationAlert {
 }
 
 // Time picker component
-const TimePicker = ({
-  value,
-  onChange,
-}: {
-  value?: string;
-  onChange: (time: string) => void;
-  placeholder?: string;
-}) => {
-  const [hours, setHours] = useState(value ? value.split(":")[0] : "12");
-  const [minutes, setMinutes] = useState(value ? value.split(":")[1] : "00");
+// const TimePicker = ({
+//   value,
+//   onChange,
+// }: {
+//   value?: string;
+//   onChange: (time: string) => void;
+//   placeholder?: string;
+// }) => {
+//   const [hours, setHours] = useState(value ? value.split(":")[0] : "12");
+//   const [minutes, setMinutes] = useState(value ? value.split(":")[1] : "00");
 
-  const updateTime = (newHours: string, newMinutes: string) => {
-    const timeString = `${newHours.padStart(2, "0")}:${newMinutes.padStart(
-      2,
-      "0"
-    )}`;
-    onChange(timeString);
-  };
+//   const updateTime = (newHours: string, newMinutes: string) => {
+//     const timeString = `${newHours.padStart(2, "0")}:${newMinutes.padStart(
+//       2,
+//       "0"
+//     )}`;
+//     onChange(timeString);
+//   };
 
-  return (
-    <div className="flex items-center space-x-2">
-      <Select
-        value={hours}
-        onValueChange={(newHours) => {
-          setHours(newHours);
-          updateTime(newHours, minutes);
-        }}
-      >
-        <SelectTrigger className="w-20">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {Array.from({ length: 24 }, (_, i) => (
-            <SelectItem key={i} value={i.toString().padStart(2, "0")}>
-              {i.toString().padStart(2, "0")}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <span className="text-muted-foreground">:</span>
-      <Select
-        value={minutes}
-        onValueChange={(newMinutes) => {
-          setMinutes(newMinutes);
-          updateTime(hours, newMinutes);
-        }}
-      >
-        <SelectTrigger className="w-20">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {Array.from({ length: 60 }, (_, i) => (
-            <SelectItem key={i} value={i.toString().padStart(2, "0")}>
-              {i.toString().padStart(2, "0")}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-};
+//   return (
+//     <div className="flex items-center space-x-2">
+//       <Select
+//         value={hours}
+//         onValueChange={(newHours) => {
+//           setHours(newHours);
+//           updateTime(newHours, minutes);
+//         }}
+//       >
+//         <SelectTrigger className="w-20">
+//           <SelectValue />
+//         </SelectTrigger>
+//         <SelectContent>
+//           {Array.from({ length: 24 }, (_, i) => (
+//             <SelectItem key={i} value={i.toString().padStart(2, "0")}>
+//               {i.toString().padStart(2, "0")}
+//             </SelectItem>
+//           ))}
+//         </SelectContent>
+//       </Select>
+//       <span className="text-muted-foreground">:</span>
+//       <Select
+//         value={minutes}
+//         onValueChange={(newMinutes) => {
+//           setMinutes(newMinutes);
+//           updateTime(hours, newMinutes);
+//         }}
+//       >
+//         <SelectTrigger className="w-20">
+//           <SelectValue />
+//         </SelectTrigger>
+//         <SelectContent>
+//           {Array.from({ length: 60 }, (_, i) => (
+//             <SelectItem key={i} value={i.toString().padStart(2, "0")}>
+//               {i.toString().padStart(2, "0")}
+//             </SelectItem>
+//           ))}
+//         </SelectContent>
+//       </Select>
+//     </div>
+//   );
+// };
 
 // DateTime picker component
 // DateTime picker component - แทนที่ component เดิมตั้งแต่บรรทัด 143-242
