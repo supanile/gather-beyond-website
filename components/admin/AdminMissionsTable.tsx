@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import {
   Calendar,
   Clock,
@@ -96,6 +96,93 @@ const AdminMissionsTable = () => {
   );
   const [confirmDeleteInput, setConfirmDeleteInput] = React.useState("");
   const [hasConfirmedWarning, setHasConfirmedWarning] = React.useState(false);
+  
+  // Use ref to store latest mission data to avoid state timing issues
+  const latestMissionDataRef = useRef<NewMissionForm | null>(null);
+
+  // State to track the latest mission data from AddMissionModal
+  const [latestMissionData, setLatestMissionData] = React.useState<NewMissionForm | null>(null);
+
+  // Memoized callback for new mission changes
+  const handleNewMissionChange = useCallback((mission: NewMissionForm | ((prev: NewMissionForm) => NewMissionForm)) => {
+    console.log("🔄 AdminMissionsTable onMissionChange called");
+    console.log("🔄 Mission data:", mission);
+    console.log("🔄 Mission has missionTargeting:", typeof mission === 'object' && mission && 'missionTargeting' in mission ? !!mission.missionTargeting : 'N/A');
+    console.log("🔄 Mission serverId:", typeof mission === 'object' && mission && 'serverId' in mission ? mission.serverId : 'N/A');
+    
+    if (typeof mission === "function") {
+      setNewMission(prevMission => {
+        const updated = mission(prevMission);
+        console.log("🔄 Function result:", updated);
+        setLatestMissionData(updated);
+        return updated;
+      });
+    } else {
+      console.log("🔄 Direct mission:", mission);
+      setNewMission(mission);
+      setLatestMissionData(mission);
+    }
+  }, [setNewMission]); // Remove newMission from dependency array
+
+  // Memoized callback for edit mission changes
+  const handleEditMissionChange = useCallback((mission: NewMissionForm | ((prev: NewMissionForm) => NewMissionForm)) => {
+    if (typeof mission === "function") {
+      setMissionToEdit((prev) => {
+        const currentMission = prev || {
+          title: "",
+          description: "",
+          type: "",
+          platform: "",
+          reward: "",
+          level_required: 1,
+          action_request: "",
+          format: "",
+          useful_link: "",
+          status: "upcoming",
+          partner: "Super Connector",
+          serverId: "",
+        };
+        const updated = mission(currentMission);
+        console.log("🔄 AdminMissionsTable onMissionChange (function):", updated);
+        console.log("🔄 missionTargeting in updated:", updated.missionTargeting);
+        console.log("🔄 serverId in updated:", updated.serverId);
+        // Also store in ref for immediate access
+        latestMissionDataRef.current = updated;
+        return updated;
+      });
+    } else {
+      console.log("🔄 AdminMissionsTable onMissionChange (direct):", mission);
+      console.log("🔄 missionTargeting in mission:", mission.missionTargeting);
+      console.log("🔄 serverId in mission:", mission.serverId);
+      setMissionToEdit(mission);
+      // Store in ref for immediate access
+      latestMissionDataRef.current = mission;
+    }
+  }, []);
+
+  // Wrapper function to handle mission submission with complete data
+  const handleAddMissionSubmit = async () => {
+    try {
+      // Use the most complete data available - prioritize the one with missionTargeting
+      const missionDataToSubmit = (latestMissionData?.missionTargeting || latestMissionData?.serverId) 
+        ? latestMissionData 
+        : newMission;
+      
+      if (missionDataToSubmit && (missionDataToSubmit.missionTargeting || missionDataToSubmit.serverId)) {
+        // Update the hook's state with complete mission data
+        setNewMission(missionDataToSubmit);
+        
+        // Wait for state update
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        await handleAddMission();
+      } else {
+        await handleAddMission();
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
 
   // Reset all filters handler
   const handleResetAllFilters = () => {
@@ -185,6 +272,7 @@ const AdminMissionsTable = () => {
       regex: mission.regex || "",
       duration: mission.duration || "",
       missionTargeting: missionTargeting,
+      serverId: mission.serverId || "",
     };
 
     setMissionToEdit(missionForm);
@@ -221,24 +309,6 @@ const AdminMissionsTable = () => {
       }
     } else {
       toast.error("Please type the exact mission title to confirm deletion");
-    }
-  };
-
-  // Update Mission Handler
-  const handleUpdateMissionSubmit = async (missionForm: NewMissionForm) => {
-    if (missionToEdit && selectedMission) {
-      // Ensure we have the current form data, not the old missionToEdit
-      const currentFormData = missionForm || missionToEdit;
-
-      const success = await handleUpdateMission(
-        selectedMission.id,
-        currentFormData
-      );
-      if (success) {
-        setIsEditModalOpen(false);
-        setMissionToEdit(null);
-        setSelectedMission(null); // Clear selected mission
-      }
     }
   };
 
@@ -297,8 +367,8 @@ const AdminMissionsTable = () => {
             isOpen={isAddModalOpen}
             onOpenChange={setIsAddModalOpen}
             newMission={newMission}
-            onMissionChange={setNewMission}
-            onSubmit={handleAddMission}
+            onMissionChange={handleNewMissionChange}
+            onSubmit={handleAddMissionSubmit}
           />
         </div>
 
@@ -513,6 +583,7 @@ const AdminMissionsTable = () => {
           setIsEditModalOpen(open);
           if (!open) {
             setMissionToEdit(null);
+            latestMissionDataRef.current = null; // Clear ref when modal closes
           }
         }}
         newMission={
@@ -527,35 +598,30 @@ const AdminMissionsTable = () => {
             format: "",
             useful_link: "",
             partner: "Super Connector",
+            serverId: "",
           }
         }
-        onMissionChange={(mission) => {
-          if (typeof mission === "function") {
-            setMissionToEdit((prev) => {
-              const currentMission = prev || {
-                title: "",
-                description: "",
-                type: "",
-                platform: "",
-                reward: "",
-                level_required: 1,
-                action_request: "",
-                format: "",
-                useful_link: "",
-                status: "upcoming",
-                partner: "Super Connector",
-              };
-              const updated = mission(currentMission);
-              return updated;
-            });
-          } else {
-            setMissionToEdit(mission);
-          }
-        }}
+        onMissionChange={handleEditMissionChange}
         onSubmit={async () => {
-          if (missionToEdit) {
-            // Use the current missionToEdit state which should have the latest form data
-            return handleUpdateMissionSubmit(missionToEdit);
+          // Use ref to get the latest mission data
+          const latestMission = latestMissionDataRef.current || missionToEdit;
+          if (latestMission) {
+            console.log("🚀 AdminMissionsTable onSubmit using latest mission:", latestMission);
+            console.log("🚀 Latest mission has missionTargeting:", !!latestMission.missionTargeting);
+            console.log("🚀 Latest mission serverId:", latestMission.serverId);
+            console.log("🚀 Latest mission missionTargeting details:", latestMission.missionTargeting);
+            
+            // Use the latest mission data directly, not missionToEdit state
+            const success = await handleUpdateMission(
+              selectedMission!.id,
+              latestMission  // Use latestMission instead of missionToEdit
+            );
+            if (success) {
+              setIsEditModalOpen(false);
+              setMissionToEdit(null);
+              setSelectedMission(null);
+              latestMissionDataRef.current = null; // Clear ref
+            }
           }
           return Promise.resolve();
         }}

@@ -63,6 +63,21 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     console.log("Received mission data:", body);
+    console.log("=== DEBUG SERVERID ===");
+    console.log("body.serverId:", body.serverId);
+    console.log("body.serverId type:", typeof body.serverId);
+    console.log("body.missionTargeting:", body.missionTargeting);
+    console.log(
+      "body.missionTargeting?.discordFilters?.servers:",
+      body.missionTargeting?.discordFilters?.servers
+    );
+
+    // Log all properties of body to see what's being sent
+    console.log("=== ALL BODY PROPERTIES ===");
+    console.log("Body keys:", Object.keys(body));
+    for (const [key, value] of Object.entries(body)) {
+      console.log(`${key}:`, value);
+    }
 
     // Validate required fields
     const requiredFields = [
@@ -72,6 +87,7 @@ export async function POST(request: Request) {
       "platform",
       "partner",
     ];
+
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -89,6 +105,7 @@ export async function POST(request: Request) {
       "Referral",
       "Engagement",
     ];
+
     if (!validTypes.includes(body.type)) {
       return NextResponse.json(
         {
@@ -101,13 +118,7 @@ export async function POST(request: Request) {
     }
 
     // Validate platform with capitalized values
-    const validPlatforms = [
-      "Telegram",
-      "X",
-      "Discord",
-      "Website",
-      "Mobile",
-    ];
+    const validPlatforms = ["Telegram", "X", "Discord", "Website", "Mobile"];
     if (!validPlatforms.includes(body.platform)) {
       return NextResponse.json(
         {
@@ -133,18 +144,80 @@ export async function POST(request: Request) {
 
     console.log(`Partner "${body.partner}" mapped to ID: ${partnerId}`);
     const durationData = {
-      start: body.startDate || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      start:
+        body.startDate || new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
       end: body.endDate || null,
     };
 
     console.log("Duration data created:", durationData);
+
+    // Handle serverId with improved logic (similar to PUT method)
+    let finalServerId: string = "[]";
+
+    console.log("=== POST SERVERID UPDATE ===");
+    console.log("Original body.serverId:", body.serverId);
+    console.log("Type of serverId:", typeof body.serverId);
+    console.log("body.missionTargeting:", body.missionTargeting);
+    console.log("body.missionTargeting?.discordFilters?.servers:", body.missionTargeting?.discordFilters?.servers);
+
+    // Priority 1: Check for missionTargeting servers first (from Discord targeting form)
+    if (
+      body.missionTargeting?.discordFilters?.servers &&
+      Array.isArray(body.missionTargeting.discordFilters.servers) &&
+      body.missionTargeting.discordFilters.servers.length > 0
+    ) {
+      finalServerId = JSON.stringify(body.missionTargeting.discordFilters.servers);
+      console.log("✅ POST Priority 1: Using servers from missionTargeting:", finalServerId);
+    }
+    // Priority 2: If serverId is provided directly and not empty
+    else if (
+      body.serverId !== undefined &&
+      body.serverId !== null &&
+      body.serverId !== "[]" &&
+      body.serverId !== ""
+    ) {
+      if (typeof body.serverId === "string") {
+        try {
+          const parsed = JSON.parse(body.serverId);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            finalServerId = body.serverId;
+            console.log("✅ POST Priority 2: Using existing serverId string:", body.serverId);
+          } else {
+            console.log("⚠️ POST Priority 2: ServerId is empty array, using default");
+            finalServerId = "[]";
+          }
+        } catch {
+          // If parse fails but it's not empty string, treat as single server ID
+          if (body.serverId.trim() !== "") {
+            finalServerId = JSON.stringify([body.serverId]);
+            console.log("✅ POST Priority 2: Converted string to array:", finalServerId);
+          } else {
+            console.log("⚠️ POST Priority 2: Invalid serverId string, using default");
+            finalServerId = "[]";
+          }
+        }
+      } else if (Array.isArray(body.serverId) && body.serverId.length > 0) {
+        finalServerId = JSON.stringify(body.serverId);
+        console.log("✅ POST Priority 2: Converting array to JSON:", finalServerId);
+      } else {
+        console.log("⚠️ POST Priority 2: Unexpected serverId type:", typeof body.serverId);
+        finalServerId = "[]";
+      }
+    }
+    // Priority 3: Default to empty array
+    else {
+      console.log("ℹ️ POST Priority 3: No serverId provided, using default empty array");
+      finalServerId = "[]";
+    }
+
+    console.log("🔥 POST Final serverId:", finalServerId);
 
     // Prepare data for Grist
     const missionData = {
       title: body.title,
       description: body.description,
       type: body.type,
-      platform: body.platform, 
+      platform: body.platform,
       reward: body.reward || JSON.stringify({ amount: 0, token: "XP" }),
       partner: partnerId,
       level_required: body.level_required || 1,
@@ -152,16 +225,21 @@ export async function POST(request: Request) {
       format: body.format || "",
       useful_link: body.useful_link || "",
       requirements: body.requirements || JSON.stringify({}),
-      duration: JSON.stringify(durationData, null, 0).replace(/,"/g, ', "').replace(/":"/g, '": "'), 
+      duration: JSON.stringify(durationData, null, 0)
+        .replace(/,"/g, ', "')
+        .replace(/":"/g, '": "'),
       repeatable: body.repeatable || 0,
       regex: body.regex || "",
+      serverId: finalServerId,
     };
 
     console.log("Prepared mission data for Grist:", missionData);
+    console.log("🔥 Final serverId being sent to database:", missionData.serverId);
     console.log("Duration field:", missionData.duration);
 
     const result = await grist.addRecords("Missions", [missionData]);
     console.log("Grist response:", result);
+    console.log("✅ POST Mission created successfully with serverId:", missionData.serverId);
 
     return NextResponse.json(
       { message: "Mission added successfully", data: result },
@@ -217,13 +295,7 @@ export async function PUT(request: Request) {
 
     // Validate platform with capitalized values
     if (updateData.platform) {
-      const validPlatforms = [
-        "Telegram",
-        "X",
-        "Discord",
-        "Website",
-        "Mobile",
-      ];
+      const validPlatforms = ["Telegram", "X", "Discord", "Website", "Mobile"];
       if (!validPlatforms.includes(updateData.platform)) {
         return NextResponse.json(
           {
@@ -252,11 +324,15 @@ export async function PUT(request: Request) {
       console.log(`Partner "${updateData.partner}" mapped to ID: ${partnerId}`);
     }
 
+    // Extract missionTargeting BEFORE cleaning updateData
+    const missionTargeting = updateData.missionTargeting;
+
     // Handle duration properly for updates
     const cleanUpdateData = { ...updateData };
     delete cleanUpdateData.startDate;
     delete cleanUpdateData.endDate;
     delete cleanUpdateData.status;
+    delete cleanUpdateData.missionTargeting; // Remove here after extraction
 
     if (updateData.startDate || updateData.endDate) {
       let currentDuration: { start?: string; end?: string | null } = {};
@@ -273,23 +349,125 @@ export async function PUT(request: Request) {
 
       const durationData = {
         ...currentDuration,
-        start: updateData.startDate || currentDuration.start || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
-        end: updateData.endDate !== undefined ? updateData.endDate : currentDuration.end,
+        start:
+          updateData.startDate ||
+          currentDuration.start ||
+          new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+        end:
+          updateData.endDate !== undefined
+            ? updateData.endDate
+            : currentDuration.end,
       };
 
-      cleanUpdateData.duration = JSON.stringify(durationData, null, 0).replace(/,"/g, ', "').replace(/":"/g, '": "'); // Custom spacing
+      cleanUpdateData.duration = JSON.stringify(durationData, null, 0)
+        .replace(/,"/g, ', "')
+        .replace(/":"/g, '": "'); // Custom spacing
       console.log("Updated duration data:", durationData);
     }
 
-    // Remove missionTargeting field to avoid errors
-    delete cleanUpdateData.missionTargeting;
+    // First, fetch the existing mission to get current serverId
+    let existingServerId: string[] = [];
+    try {
+      const existingMissions = await grist.fetchTable("Missions");
+      const mission = existingMissions.find((record: unknown) => {
+        if (typeof record === 'object' && record !== null && 'id' in record) {
+          return (record as { id?: string }).id === id;
+        }
+        return false;
+      });
+      if (mission?.serverId && typeof mission.serverId === 'string') {
+        try {
+          existingServerId = JSON.parse(mission.serverId);
+          if (!Array.isArray(existingServerId)) {
+            existingServerId = [];
+          }
+        } catch {
+          console.warn("Failed to parse existing serverId, using empty array");
+          existingServerId = [];
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch existing mission:", error);
+      existingServerId = [];
+    }
+
+    // Initialize with existing serverId
+    let finalServerId: string | undefined = JSON.stringify(existingServerId);
+
+    // Priority 1: ใช้ missionTargeting ถ้ามี servers (มีการเลือกจาก Discord targeting form)
+    if (
+      missionTargeting?.discordFilters?.servers &&
+      Array.isArray(missionTargeting.discordFilters.servers) &&
+      missionTargeting.discordFilters.servers.length > 0
+    ) {
+      // Merge with existing servers, avoiding duplicates
+      const newServers = missionTargeting.discordFilters.servers;
+      const mergedServers = [...existingServerId];
+      
+      // Add new servers if they don't already exist
+      newServers.forEach((serverId: string) => {
+        if (!mergedServers.includes(serverId)) {
+          mergedServers.push(serverId);
+        }
+      });
+      
+      finalServerId = JSON.stringify(mergedServers);
+    }
+    // Priority 2: ถ้า client ส่ง serverId มาโดยตรง และไม่ใช่ array ว่าง
+    else if (
+      updateData.serverId !== undefined &&
+      updateData.serverId !== null &&
+      updateData.serverId !== "[]" &&
+      updateData.serverId !== ""
+    ) {
+      let newServerIds: string[] = [];
+      
+      if (typeof updateData.serverId === "string") {
+        try {
+          // ถ้าเป็น JSON string ให้ parse เพื่อตรวจสอบ
+          const parsed = JSON.parse(updateData.serverId);
+          if (Array.isArray(parsed)) {
+            newServerIds = parsed;
+          } else {
+            newServerIds = [];
+          }
+        } catch {
+          // ถ้า parse ไม่ได้ แต่ไม่ใช่ string ว่าง ให้ลองใช้เป็น single item
+          if (updateData.serverId.trim() !== "") {
+            newServerIds = [updateData.serverId];
+          }
+        }
+      } else if (Array.isArray(updateData.serverId)) {
+        newServerIds = updateData.serverId;
+      }
+      
+      if (newServerIds.length > 0) {
+        // Merge with existing servers, avoiding duplicates
+        const mergedServers = [...existingServerId];
+        
+        newServerIds.forEach((serverId: string) => {
+          if (!mergedServers.includes(serverId)) {
+            mergedServers.push(serverId);
+          }
+        });
+        
+        finalServerId = JSON.stringify(mergedServers);
+      } else {
+        finalServerId = JSON.stringify(existingServerId);
+      }
+    }
+    // Priority 3: ไม่มีข้อมูล serverId ใหม่ - รักษาค่าเดิมไว้
+    else {
+      finalServerId = JSON.stringify(existingServerId);
+    }
+
+    // ใส่กลับเข้า cleanUpdateData เสมอ
+    cleanUpdateData.serverId = finalServerId;
 
     const finalUpdateData = {
       ...cleanUpdateData,
       partner: partnerId,
     };
-
-    console.log("Final update data:", finalUpdateData);
 
     const result = await grist.updateRecords("Missions", [
       { id, ...finalUpdateData },

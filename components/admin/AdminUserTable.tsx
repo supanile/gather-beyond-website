@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import { Mission } from "@/types/admin/adminTypes";
 import { UserWithAgent } from "@/types/admin/userManagement";

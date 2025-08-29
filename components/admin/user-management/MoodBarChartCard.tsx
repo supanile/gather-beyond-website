@@ -133,8 +133,8 @@ const MoodBarChartCard: React.FC<MoodBarChartCardProps> = ({
             {usersWithMood} of {totalUsers} users have mood data
           </p>
         </div>
-        <div className="p-3 rounded-full bg-primary/10">
-          <Smile className="w-6 h-6 text-primary" />
+        <div className="p-3 rounded-full bg-gray-200 dark:bg-white">
+          <Smile className="w-6 h-6 text-gray-700 dark:text-gray-900" />
         </div>
       </div>
 

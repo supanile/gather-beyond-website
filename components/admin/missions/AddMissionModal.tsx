@@ -10,8 +10,9 @@ import {
   Save,
   RefreshCw,
   Send,
+  Eye,
 } from "lucide-react";
-import { format } from "date-fns";
+// import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -27,12 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover";
+// import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,6 +90,7 @@ interface ValidationErrors {
   action_request?: string;
   requirements?: string;
   level_required?: string;
+  discordServers?: string;
 }
 
 // interface for notification alert
@@ -100,69 +102,70 @@ interface NotificationAlert {
 }
 
 // Time picker component
-const TimePicker = ({
-  value,
-  onChange,
-}: {
-  value?: string;
-  onChange: (time: string) => void;
-  placeholder?: string;
-}) => {
-  const [hours, setHours] = useState(value ? value.split(":")[0] : "12");
-  const [minutes, setMinutes] = useState(value ? value.split(":")[1] : "00");
+// const TimePicker = ({
+//   value,
+//   onChange,
+// }: {
+//   value?: string;
+//   onChange: (time: string) => void;
+//   placeholder?: string;
+// }) => {
+//   const [hours, setHours] = useState(value ? value.split(":")[0] : "12");
+//   const [minutes, setMinutes] = useState(value ? value.split(":")[1] : "00");
 
-  const updateTime = (newHours: string, newMinutes: string) => {
-    const timeString = `${newHours.padStart(2, "0")}:${newMinutes.padStart(
-      2,
-      "0"
-    )}`;
-    onChange(timeString);
-  };
+//   const updateTime = (newHours: string, newMinutes: string) => {
+//     const timeString = `${newHours.padStart(2, "0")}:${newMinutes.padStart(
+//       2,
+//       "0"
+//     )}`;
+//     onChange(timeString);
+//   };
 
-  return (
-    <div className="flex items-center space-x-2">
-      <Select
-        value={hours}
-        onValueChange={(newHours) => {
-          setHours(newHours);
-          updateTime(newHours, minutes);
-        }}
-      >
-        <SelectTrigger className="w-20">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {Array.from({ length: 24 }, (_, i) => (
-            <SelectItem key={i} value={i.toString().padStart(2, "0")}>
-              {i.toString().padStart(2, "0")}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <span className="text-muted-foreground">:</span>
-      <Select
-        value={minutes}
-        onValueChange={(newMinutes) => {
-          setMinutes(newMinutes);
-          updateTime(hours, newMinutes);
-        }}
-      >
-        <SelectTrigger className="w-20">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {Array.from({ length: 60 }, (_, i) => (
-            <SelectItem key={i} value={i.toString().padStart(2, "0")}>
-              {i.toString().padStart(2, "0")}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-};
+//   return (
+//     <div className="flex items-center space-x-2">
+//       <Select
+//         value={hours}
+//         onValueChange={(newHours) => {
+//           setHours(newHours);
+//           updateTime(newHours, minutes);
+//         }}
+//       >
+//         <SelectTrigger className="w-20">
+//           <SelectValue />
+//         </SelectTrigger>
+//         <SelectContent>
+//           {Array.from({ length: 24 }, (_, i) => (
+//             <SelectItem key={i} value={i.toString().padStart(2, "0")}>
+//               {i.toString().padStart(2, "0")}
+//             </SelectItem>
+//           ))}
+//         </SelectContent>
+//       </Select>
+//       <span className="text-muted-foreground">:</span>
+//       <Select
+//         value={minutes}
+//         onValueChange={(newMinutes) => {
+//           setMinutes(newMinutes);
+//           updateTime(hours, newMinutes);
+//         }}
+//       >
+//         <SelectTrigger className="w-20">
+//           <SelectValue />
+//         </SelectTrigger>
+//         <SelectContent>
+//           {Array.from({ length: 60 }, (_, i) => (
+//             <SelectItem key={i} value={i.toString().padStart(2, "0")}>
+//               {i.toString().padStart(2, "0")}
+//             </SelectItem>
+//           ))}
+//         </SelectContent>
+//       </Select>
+//     </div>
+//   );
+// };
 
 // DateTime picker component
+// DateTime picker component - แทนที่ component เดิมตั้งแต่บรรทัด 143-242
 const DateTimePicker = ({
   value,
   onChange,
@@ -174,101 +177,49 @@ const DateTimePicker = ({
   placeholder?: string;
   error?: boolean;
 }) => {
-  const [date, setDate] = useState<Date | undefined>(
-    value ? new Date(value) : undefined
-  );
-  const [time, setTime] = useState<string>(
-    value ? format(new Date(value), "HH:mm") : "00:00"
-  );
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (selectedDate) {
-      setDate(selectedDate);
-      const [hours, minutes] = time.split(":");
-
-      // Create date in local timezone without conversion
-      const localDate = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        selectedDate.getDate(),
-        parseInt(hours, 10),
-        parseInt(minutes, 10),
-        0,
-        0
-      );
-
-      // Format as ISO string but keep local timezone
-      // Remove 'Z' to prevent UTC conversion
-      const formattedDateTime = format(localDate, "yyyy-MM-dd'T'HH:mm:ss");
-
-      onChange(formattedDateTime);
-    }
+  // Convert ISO string to datetime-local format (YYYY-MM-DDTHH:MM)
+  const formatForInput = (isoString: string): string => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  const handleTimeChange = (newTime: string) => {
-    setTime(newTime);
-    if (date) {
-      const [hours, minutes] = newTime.split(":");
+  // Convert datetime-local format to ISO string
+  const formatForOutput = (datetimeLocal: string): string => {
+    if (!datetimeLocal) return "";
+    return datetimeLocal + ":00"; // Add seconds for ISO format
+  };
 
-      // Create date in local timezone without conversion
-      const localDate = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        parseInt(hours, 10),
-        parseInt(minutes, 10),
-        0,
-        0
-      );
+  const inputValue = value ? formatForInput(value) : "";
 
-      // Format as ISO string but keep local timezone
-      const formattedDateTime = format(localDate, "yyyy-MM-dd'T'HH:mm:ss");
-
-      onChange(formattedDateTime);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    if (newValue) {
+      onChange(formatForOutput(newValue));
+    } else {
+      onChange("");
     }
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !date && "text-muted-foreground",
-            error && "border-red-500"
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? (
-            format(date, "PPP") + " at " + time
-          ) : (
-            <span>{placeholder}</span>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <div className="p-3 border-b">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleDateSelect}
-            captionLayout="dropdown"
-            initialFocus
-          />
-        </div>
-        <div className="p-3 flex flex-col items-center">
-          <Label className="text-sm font-medium mb-2 block">Time</Label>
-          <TimePicker value={time} onChange={handleTimeChange} />
-        </div>
-        <div className="p-3 pt-0">
-          <Button className="w-full" onClick={() => setIsOpen(false)} size="sm">
-            Confirm
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <div className="relative">
+      <Input
+        type="datetime-local"
+        value={inputValue}
+        onChange={handleChange}
+        className={cn(
+          "w-full",
+          error && "border-red-500 focus:border-red-500 focus:ring-red-500"
+        )}
+        placeholder={placeholder}
+      />
+      <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+    </div>
   );
 };
 
@@ -295,17 +246,26 @@ const RewardInput = ({
     { value: "CREDITS", label: "Credits" },
   ];
 
-  // Parse existing value on component mount
+  // Parse existing value on component mount and when value changes
   useEffect(() => {
     if (value && value.trim()) {
       try {
         const parsed = JSON.parse(value);
-        if (parsed.amount !== undefined) setAmount(parsed.amount.toString());
-        if (parsed.token) setToken(parsed.token);
+        if (
+          parsed.amount !== undefined &&
+          parsed.amount.toString() !== amount
+        ) {
+          setAmount(parsed.amount.toString());
+        }
+        if (parsed.token && parsed.token !== token) {
+          setToken(parsed.token);
+        }
       } catch {
         // If parsing fails, keep existing value
       }
     }
+    // Only depend on value, not amount or token to avoid loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   // Update parent component when amount or token changes
@@ -408,12 +368,31 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   const [missionTargeting, setMissionTargeting] =
     useState<MissionTargetingData | null>(null);
 
+  // Memoized callback for targeting changes to prevent infinite loops
+  const handleTargetingChange = useCallback(
+    (data: MissionTargetingData | null) => {
+      console.log("🎯 handleTargetingChange called with:", data);
+      setMissionTargeting(data);
+      
+      // Also update parent component immediately
+      onMissionChange((prev) => {
+        const updated = {
+          ...prev,
+          missionTargeting: data,
+        };
+        console.log("🎯 Updated mission with targeting:", updated);
+        return updated;
+      });
+    },
+    [onMissionChange]
+  );
+
   // Internal loading state for better UX
   const [internalLoading, setInternalLoading] = useState(false);
-  
+
   // Preview modal state
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  
+
   // draft key
   const draftKey = `mission_draft_${
     isEditMode ? newMission.title || "edit" : "new"
@@ -436,7 +415,12 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   );
 
-  // Functions for draft
+  // missing handlePreviewMission function
+  const handlePreviewMission = () => {
+    setIsPreviewOpen(true);
+  };
+
+  // Fixed Functions for draft with localStorage
   const saveDraft = useCallback(() => {
     try {
       const draftData: DraftData = {
@@ -445,9 +429,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         savedAt: new Date().toISOString(),
       };
 
-      // save to localStorage
+      // Save to localStorage
       localStorage.setItem(draftKey, JSON.stringify(draftData));
-      console.log("Draft saved to localStorage:", draftKey, draftData);
+      console.log("Draft saved successfully:", draftKey);
       return true;
     } catch (error) {
       console.error("Error saving draft:", error);
@@ -455,67 +439,117 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   }, [draftKey, newMission, missionTargeting]);
 
-  const loadDraft = useCallback(() => {
-    try {
-      const savedDraft = localStorage.getItem(draftKey);
-
-      if (savedDraft) {
-        const parsedDraft: DraftData = JSON.parse(savedDraft);
-        console.log("Loading draft from localStorage:", parsedDraft);
-
-        // โหลดข้อมูล basic info
-        onMissionChange(parsedDraft.basicInfo);
-
-        // โหลดข้อมูล targeting
-        if (parsedDraft.targetingData) {
-          setMissionTargeting(parsedDraft.targetingData);
-        }
-
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error loading draft:", error);
-      return false;
-    }
-  }, [draftKey, onMissionChange]);
-
   const clearDraft = () => {
     try {
       localStorage.removeItem(draftKey);
-      console.log("Draft cleared from localStorage:", draftKey);
+      console.log("Draft cleared:", draftKey);
     } catch (error) {
       console.error("Error clearing draft:", error);
     }
   };
 
-  const hasDraft = useCallback(() => {
-    try {
-      const savedDraft = localStorage.getItem(draftKey);
-      return savedDraft !== null;
-    } catch (error) {
-      console.error("Error checking draft:", error);
-      return false;
-    }
-  }, [draftKey]);
-
   // useEffect for load draft
   useEffect(() => {
     if (isOpen && !isEditMode) {
       // check if there is a draft
-      if (hasDraft()) {
-        loadDraft();
+      try {
+        const savedDraft = localStorage.getItem(draftKey);
+        if (savedDraft) {
+          const draftData: DraftData = JSON.parse(savedDraft);
 
-        // show notification that draft has been loaded
-        setNotificationAlert({
-          show: true,
-          type: "success",
-          title: "Draft Loaded",
-          description: "Your previously saved draft has been loaded.",
-        });
+          // Load basic info
+          onMissionChange(draftData.basicInfo);
+
+          // Load targeting data
+          if (draftData.targetingData) {
+            setMissionTargeting(draftData.targetingData);
+          }
+
+          console.log("Draft loaded successfully:", draftKey);
+
+          // show notification that draft has been loaded
+          setNotificationAlert({
+            show: true,
+            type: "success",
+            title: "Draft Loaded",
+            description: "Your previously saved draft has been loaded.",
+          });
+        }
+      } catch (error) {
+        console.error("Error loading draft:", error);
       }
     }
-  }, [isOpen, isEditMode, hasDraft, loadDraft]);
+  }, [isOpen, isEditMode, draftKey, onMissionChange]);
+
+  // useEffect for edit mode - load existing mission targeting data
+  useEffect(() => {
+    if (isOpen && isEditMode) {
+      console.log("=== EDIT MODE LOADING ===");
+      console.log("newMission:", newMission);
+      console.log("newMission.missionTargeting:", newMission.missionTargeting);
+      console.log("newMission.serverId:", newMission.serverId);
+
+      // Load targeting data from existing mission
+      if (newMission.missionTargeting) {
+        console.log("Loading from newMission.missionTargeting");
+        setMissionTargeting(newMission.missionTargeting);
+      } else if (newMission.serverId) {
+        // If serverId exists but no missionTargeting, reconstruct targeting data
+        console.log("Reconstructing targeting data from serverId");
+        try {
+          const serverIds = JSON.parse(newMission.serverId);
+          console.log("Parsed serverIds:", serverIds);
+          if (Array.isArray(serverIds) && serverIds.length > 0) {
+            const reconstructedTargeting: MissionTargetingData = {
+              audienceType: "custom-discord",
+              discordFilters: {
+                servers: serverIds,
+                roles: [],
+                channels: [],
+              },
+              behaviorFilters: {
+                xpLevel: { enabled: false, min: 0, max: 100 },
+                missionStreak: { enabled: false, value: 0 },
+                lastActive: { enabled: false, value: "today" },
+                failedMissions: { enabled: false, value: 0 },
+                trustScore: { enabled: false, value: [50] },
+                connectedWallet: { enabled: false, value: false },
+                joinedViaPartner: { enabled: false, value: "" },
+                referredUsers: { enabled: false, value: 0 },
+                agentHealth: { enabled: false, value: [50] },
+                memoryProofSubmitted: { enabled: false, value: false },
+                taggedInterests: { enabled: false, value: [] },
+              },
+              demographicFilters: {
+                location: [],
+                language: [],
+                ageRange: "",
+                gender: "",
+              },
+              deliveryOptions: {
+                channel: "discord",
+                scope: "targeted",
+                schedule: "immediate",
+                scheduledDate: "",
+              },
+            };
+            console.log(
+              "Setting reconstructed targeting:",
+              reconstructedTargeting
+            );
+            setMissionTargeting(reconstructedTargeting);
+          } else {
+            console.log("No server IDs found or empty array");
+          }
+        } catch (error) {
+          console.error("Error parsing serverId:", error);
+        }
+      } else {
+        console.log("No targeting data and no serverId to reconstruct from");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isEditMode]);
 
   // auto-save useEffect
   useEffect(() => {
@@ -538,15 +572,25 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         missionTargeting;
 
       if (hasData) {
-        const success = saveDraft();
-        if (success) {
+        try {
+          const draftData: DraftData = {
+            basicInfo: newMission,
+            targetingData: missionTargeting,
+            savedAt: new Date().toISOString(),
+          };
+
+          // Save to localStorage
+          localStorage.setItem(draftKey, JSON.stringify(draftData));
           console.log("Auto-saved draft at:", new Date().toLocaleTimeString());
+        } catch (error) {
+          console.error("Error auto-saving draft:", error);
         }
       }
-    }, 10000); // ลดเวลาเหลือ 10 วินาที สำหรับการทดสอบ
+    }, 10000); // Auto-save every 10 seconds
 
     return () => clearInterval(autoSaveInterval);
-  }, [isOpen, isEditMode, newMission, missionTargeting, saveDraft]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isEditMode]);
 
   // Auto-hide notification alert after 5 seconds
   useEffect(() => {
@@ -609,6 +653,13 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       errors.level_required = "Level Required must be at least 1";
     }
 
+    // Discord server validation - check if targeting data exists and is custom-discord
+    if (missionTargeting?.audienceType === "custom-discord") {
+      if (!missionTargeting?.discordFilters?.servers?.length) {
+        errors.discordServers = "At least one Discord server must be selected";
+      }
+    }
+
     // URL validation for useful_link
     if (newMission.useful_link && newMission.useful_link.trim()) {
       try {
@@ -638,7 +689,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       const updated = {
         ...prev,
         [field]: value,
+        // Always preserve missionTargeting from either source
+        missionTargeting: prev.missionTargeting || missionTargeting || null,
       };
+      
       return updated;
     });
 
@@ -680,17 +734,44 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
 
     try {
-      // Set internal loading state
       setInternalLoading(true);
+      let finalServerId: string;
 
-      // Add targeting data to mission before submission
+      // Check if missionTargeting exists and has servers
+      const hasTargetingServers =
+        missionTargeting?.discordFilters?.servers &&
+        Array.isArray(missionTargeting.discordFilters.servers) &&
+        missionTargeting.discordFilters.servers.length > 0;
+
+      if (hasTargetingServers) {
+
+        finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
+      } else if (
+
+        isEditMode &&
+        newMission.serverId &&
+        newMission.serverId !== "" &&
+        newMission.serverId !== "[]"
+      ) {
+        // In edit mode, if no new targeting data but existing serverId is not empty array, preserve it
+        finalServerId = newMission.serverId;
+      } else {
+        // Default to empty array in JSON format
+        finalServerId = "[]";
+      }
+
+      // ENSURE missionTargeting is included in the final submission
       const missionWithTargeting = {
         ...newMission,
-        missionTargeting: missionTargeting,
+        missionTargeting: missionTargeting, // Always include current targeting state
+        serverId: finalServerId,
       };
 
-      // Update the mission form data with targeting before calling onSubmit
+      // Update mission form data with targeting before calling onSubmit
       onMissionChange(missionWithTargeting);
+
+      // Wait a moment to ensure state is updated
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Call the parent's submit handler
       await onSubmit();
@@ -714,16 +795,36 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     try {
       setInternalLoading(true);
 
-      // save targeting data before saving draft
+      // Calculate server ID from targeting data (similar to handleFormSubmit)
+      let finalServerId = "[]";
+      
+      const hasTargetingServers =
+        missionTargeting?.discordFilters?.servers &&
+        Array.isArray(missionTargeting.discordFilters.servers) &&
+        missionTargeting.discordFilters.servers.length > 0;
+
+      if (hasTargetingServers) {
+        finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
+      } else if (
+        isEditMode &&
+        newMission.serverId &&
+        newMission.serverId !== "" &&
+        newMission.serverId !== "[]"
+      ) {
+        finalServerId = newMission.serverId;
+      }
+
+      // Save targeting data before saving draft
       const missionWithTargeting = {
         ...newMission,
         missionTargeting: missionTargeting,
+        serverId: finalServerId,
       };
 
       // Update mission state
       onMissionChange(missionWithTargeting);
 
-      // save to localStorage
+      // Save to localStorage
       const success = saveDraft();
 
       if (success) {
@@ -797,6 +898,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         action_request: "Action Request",
         requirements: "Requirements",
         level_required: "Level Required",
+        discordServers: "Discord Servers",
       };
       return fieldLabels[key] || key;
     });
@@ -822,7 +924,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
             <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
           </DialogHeader>
 
-          {/* Notification Alert - ใหม่ */}
+          {/* Notification Alert */}
           {notificationAlert.show && (
             <Alert
               className={cn(
@@ -895,7 +997,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     <Input
                       id="title"
                       value={newMission.title}
-                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("title", e.target.value)
+                      }
                       placeholder="Enter mission title"
                       className={cn(
                         "w-full",
@@ -913,7 +1017,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
                   {/* Description with improved validation */}
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-medium">
+                    <Label
+                      htmlFor="description"
+                      className="text-sm font-medium"
+                    >
                       Description <span className="text-red-500">*</span>
                     </Label>
                     <Textarea
@@ -947,7 +1054,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     </Label>
                     <Select
                       value={newMission.type || ""}
-                      onValueChange={(value) => handleInputChange("type", value)}
+                      onValueChange={(value) =>
+                        handleInputChange("type", value)
+                      }
                     >
                       <SelectTrigger
                         className={cn(
@@ -994,7 +1103,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                       </SelectTrigger>
                       <SelectContent>
                         {PLATFORM_OPTIONS.map((platform) => (
-                          <SelectItem key={platform.value} value={platform.value}>
+                          <SelectItem
+                            key={platform.value}
+                            value={platform.value}
+                          >
                             {platform.label}
                           </SelectItem>
                         ))}
@@ -1049,7 +1161,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  {/* Level Required พื้นที่ */}
+                  {/* Level Required */}
                   <div className="space-y-2">
                     <Label
                       htmlFor="level_required"
@@ -1088,7 +1200,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     )}
                   </div>
 
-                  {/* Reward - 3/4 พื้นที่ */}
+                  {/* Reward - 3/4 columns */}
                   <div className="space-y-2 col-span-3">
                     <Label htmlFor="reward" className="text-sm font-medium">
                       Reward <span className="text-red-500">*</span>
@@ -1145,7 +1257,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
                   {/* Useful Link */}
                   <div className="space-y-2">
-                    <Label htmlFor="useful_link" className="text-sm font-medium">
+                    <Label
+                      htmlFor="useful_link"
+                      className="text-sm font-medium"
+                    >
                       Useful Link
                     </Label>
                     <Input
@@ -1177,7 +1292,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     </Label>
                     <DateTimePicker
                       value={newMission.startDate}
-                      onChange={(value) => handleInputChange("startDate", value)}
+                      onChange={(value) =>
+                        handleInputChange("startDate", value)
+                      }
                       placeholder="Select start date and time"
                       error={!!validationErrors.startDate}
                     />
@@ -1242,7 +1359,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
                   {/* Requirements */}
                   <div className="space-y-2">
-                    <Label htmlFor="requirements" className="text-sm font-medium">
+                    <Label
+                      htmlFor="requirements"
+                      className="text-sm font-medium"
+                    >
                       Requirements
                     </Label>
                     <Textarea
@@ -1271,8 +1391,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
               <TabsContent value="targeting" className="space-y-6 mt-6">
                 <MissionTargetingForm
-                  onTargetingChange={setMissionTargeting}
+                  onTargetingChange={handleTargetingChange}
                   initialData={missionTargeting}
+                  validationErrors={validationErrors}
                 />
               </TabsContent>
             </Tabs>
@@ -1281,7 +1402,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
             <div className="flex justify-between items-center pt-6 border-t max-sm:flex-col max-sm:gap-4">
               {!isEditMode && (
                 <div className="flex items-center gap-3 max-sm:flex-col max-sm:w-full max-sm:gap-2">
-                  {/* <Button
+                  <Button
                     type="button"
                     variant="outline"
                     className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
@@ -1290,7 +1411,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                   >
                     <Eye className="h-4 w-4" />
                     Preview Mission
-                  </Button> */}
+                  </Button>
                   <Button
                     type="button"
                     variant="outline"

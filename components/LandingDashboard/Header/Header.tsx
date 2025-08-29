@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { ModeToggle } from "./Darkmode";
 import SignOutLinks from "./SignOutLinks";
 import {
@@ -31,10 +33,9 @@ interface FeatureItem {
   description: string;
 }
 
-
-
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const { theme } = useTheme();
 
   const toggleMenu = (): void => {
     setIsMenuOpen(!isMenuOpen);
@@ -98,11 +99,15 @@ const Header: React.FC = () => {
               {/* Logo */}
               <div className="flex items-center group">
                 <Link href="/" className="flex items-center space-x-3">
-                  {/* Animated logo icon */}
-                  <div className="relative">
-                    <div className="w-8 h-8 bg-gradient-to-r from-gray-800 to-slate-700 dark:from-gray-200 dark:to-slate-300 rounded-lg flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-                      <div className="w-4 h-4 bg-white dark:bg-black rounded-sm transform group-hover:rotate-12 transition-transform duration-300"></div>
-                    </div>
+                  {/* Logo with theme-based image */}
+                  <div className="relative w-12 h-12 transform group-hover:scale-110 transition-transform duration-300">
+                    <Image
+                      src={theme === 'dark' ? '/images/gb-logo-dark.png' : '/images/gb-logo-light.png'}
+                      alt="Gather Beyond Logo"
+                      width={48}
+                      height={48}
+                      className="object-contain"
+                    />
                   </div>
 
                   <span className="text-xl font-bold bg-gradient-to-r from-gray-900 via-slate-800 to-zinc-700 dark:from-gray-100 dark:via-slate-200 dark:to-zinc-300 bg-clip-text text-transparent">

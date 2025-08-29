@@ -1,4 +1,7 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { UserWithAgent } from "@/types/admin/userManagement";
 import { UserAgent } from "@/types/admin/userTableTypes";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +19,8 @@ import {
   Clock as ClockIcon,
   Info as InfoIcon,
   CreditCard,
+  Server as ServerIcon,
+  Users as UsersIcon,
 } from "lucide-react";
 
 interface UserProfileHeaderProps {
@@ -24,19 +29,141 @@ interface UserProfileHeaderProps {
   totalMissions: number;
 }
 
+interface DiscordData {
+  username: string;
+  avatarUrl: string;
+}
+
+interface DiscordGuild {
+  name: string;
+  serverId: string;
+  icon: string | null;
+  memberCount: number;
+}
+
+interface DiscordGuildsData {
+  success: boolean;
+  guilds: DiscordGuild[];
+  totalGuilds: number;
+}
+
 const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   user,
   userAgent,
   totalMissions,
 }) => {
+  const [discordData, setDiscordData] = useState<DiscordData | null>(null);
+  const [discordGuilds, setDiscordGuilds] = useState<DiscordGuildsData | null>(null);
+  const [isLoadingDiscord, setIsLoadingDiscord] = useState(false);
+  const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
+
+// Mock data for Discord guilds (to be replaced with actual API call later)
+const mockDiscordGuilds: DiscordGuildsData = {
+  success: true,
+  guilds: [
+    {
+      name: "Fłøeт¢ıвøυ's server",
+      serverId: "710813849808273478",
+      icon: "https://cdn.discordapp.com/icons/710813849808273478/d4de87dd25641d07affd890ed98786bd.png",
+      memberCount: 5
+    },
+    {
+      name: "Harold's server",
+      serverId: "749954850430910534",
+      icon: null,
+      memberCount: 5
+    },
+    {
+      name: "Super Connector",
+      serverId: "908568690033844246",
+      icon: "https://cdn.discordapp.com/icons/908568690033844246/35d6d7aba59bef7102940cc0288c507d.png",
+      memberCount: 2658
+    },
+    {
+      name: "aki server",
+      serverId: "989296048356851712",
+      icon: null,
+      memberCount: 9
+    },
+    {
+      name: "스타이카 Staika",
+      serverId: "1037957827899179009",
+      icon: "https://cdn.discordapp.com/icons/1037957827899179009/aa3fc8ff36347e19ba0f160e582da9a6.png",
+      memberCount: 30396
+    }
+  ],
+  totalGuilds: 5
+};
+
+  useEffect(() => {
+    async function fetchDiscordData() {
+      if (!user.discord_id) return;
+
+      setIsLoadingDiscord(true);
+      try {
+        const response = await fetch(`/api/discord/${user.discord_id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch Discord data");
+        }
+        const data = await response.json();
+        setDiscordData(data);
+      } catch (error) {
+        console.error(error);
+        setDiscordData(null);
+      } finally {
+        setIsLoadingDiscord(false);
+      }
+    }
+
+    fetchDiscordData();
+  }, [user.discord_id]);
+
+  useEffect(() => {
+    async function fetchDiscordGuilds() {
+      if (!user.discord_id) return;
+
+      setIsLoadingGuilds(true);
+      try {
+        // TODO: Replace with actual API call
+        // const response = await fetch(`/api/discord/${user.discord_id}/guilds`);
+        // const data = await response.json();
+        
+        // Using mock data for now
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+        setDiscordGuilds(mockDiscordGuilds);
+      } catch (error) {
+        console.error(error);
+        setDiscordGuilds(null);
+      } finally {
+        setIsLoadingGuilds(false);
+      }
+    }
+
+    fetchDiscordGuilds();
+  }, [user.discord_id]);
+
   return (
     <div className="p-6 -my-6 -ml-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
         <div className="flex items-center space-x-3 sm:space-x-4">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
-            {user.email.charAt(0).toUpperCase()}
-          </div>
+          {isLoadingDiscord ? (
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
+          ) : discordData?.avatarUrl ? (
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full shadow-lg overflow-hidden">
+              <Image
+                src={discordData.avatarUrl}
+                alt={`${discordData.username}'s avatar`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 56px"
+              />
+            </div>
+          ) : (
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
+              {user.email.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <p className="text-sm sm:text-base md:text-lg font-semibold text-foreground truncate">
               {user.email}
@@ -70,13 +197,13 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
               missions completed
             </span>
           </div>
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 dark:text-green-400 flex-shrink-0" />
             <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
               {user.total_points || 0}
             </span>
             <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
-              {(user.total_points || 0) === 1 ? 'credit' : 'credits'}
+              {(user.total_points || 0) === 1 ? "credit" : "credits"}
             </span>
             </div>
           <div className="flex items-center space-x-2">
@@ -95,7 +222,9 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                 Joined:
               </span>
               <span className="text-sm sm:text-base md:text-lg text-foreground font-medium ml-1 break-words">
-                {userAgent.created_at ? formatDate(userAgent.created_at) : "Unknown"}
+                {userAgent.created_at
+                  ? formatDate(userAgent.created_at)
+                  : "Unknown"}
               </span>
             </div>
           </div>
@@ -142,6 +271,68 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Discord Servers Section */}
+      <div className="mt-3 sm:mt-4 md:mt-6 pt-3 sm:pt-4 border-t border-border">
+        <div className="flex items-center space-x-2 mb-3">
+          <ServerIcon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+          <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
+            Discord Servers
+          </span>
+          {discordGuilds && (
+            <Badge variant="secondary" className="text-xs">
+              {discordGuilds.totalGuilds} servers
+            </Badge>
+          )}
+        </div>
+        
+        {isLoadingGuilds ? (
+          <div className="flex flex-wrap gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="h-8 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"
+                style={{ width: `${80 + Math.random() * 60}px` }}
+              ></div>
+            ))}
+          </div>
+        ) : discordGuilds?.success && discordGuilds.guilds.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {discordGuilds.guilds.map((guild) => (
+              <Badge
+                key={guild.serverId}
+                variant="outline"
+                className="text-xs bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="flex items-center space-x-1">
+                  {guild.icon ? (
+                    <div className="relative w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
+                      <Image
+                        src={guild.icon}
+                        alt={`${guild.name} icon`}
+                        fill
+                        className="object-cover"
+                        sizes="16px"
+                      />
+                    </div>
+                  ) : (
+                    <ServerIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                  )}
+                  <span className="truncate max-w-[120px]">{guild.name}</span>
+                  <div className="flex items-center space-x-1 text-muted-foreground">
+                    <UsersIcon className="w-3 h-3" />
+                    <span className="text-xs">{guild.memberCount}</span>
+                  </div>
+                </div>
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No Discord servers found
+          </p>
+        )}
       </div>
 
       {/* Social Links */}

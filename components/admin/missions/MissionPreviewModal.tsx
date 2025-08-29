@@ -7,7 +7,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { NewMissionForm } from "@/types/admin/missions/missionTypes";
 import {
   DiscordMessages,
@@ -39,16 +44,46 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
     return "No reward";
   };
 
-  // Format date for display
+  // Format date for display - ใช้ JavaScript native
   const formatDate = (dateStr: string) => {
     try {
       if (dateStr) {
-        return format(new Date(dateStr), "PPP 'at' HH:mm");
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) {
+          return "Invalid date";
+        }
+        // Format "Wednesday, 27 August BE 2025 at 00:00"
+        const options: Intl.DateTimeFormatOptions = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+        const formatted = date.toLocaleDateString("en-US", options);
+        // Convert to Buddhist Era (BE) by adding 543 to the year
+        const beYear = date.getFullYear() + 543;
+        return formatted.replace(date.getFullYear().toString(), `BE ${beYear}`).replace(" at ", " at ");
       }
     } catch {
       return "Invalid date";
     }
     return "Not set";
+  };
+
+  // Get current time in HH:MM format
+  const getCurrentTime = () => {
+    return new Date().toISOString();
+  };
+
+  // Format current time for footer display (Today at HH:MM)
+  const getCurrentTimeForFooter = () => {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    return `Today at ${hours}:${minutes}`;
   };
 
   // Calculate time remaining
@@ -81,6 +116,17 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
     ? getTimeRemaining(mission.endDate)
     : "Not set";
 
+  const currentTime = getCurrentTime();
+  const footerTime = getCurrentTimeForFooter();
+
+  // Format end date for tooltip
+  const getEndDateForTooltip = () => {
+    if (mission.endDate) {
+      return formatDate(mission.endDate);
+    }
+    return "End date not set";
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0">
@@ -97,101 +143,84 @@ export const MissionPreviewModal: React.FC<MissionPreviewModalProps> = ({
           {/* Discord-like preview using the library */}
           <div className="rounded-lg overflow-hidden">
             <DiscordMessages>
-              <DiscordMessage
+                <DiscordMessage
                 author="Super Agent"
-                avatar="https://cdn.discordapp.com/embed/avatars/0.png"
+                avatar="/images/superagent-profile.png"
                 bot={true}
-                timestamp="Today at 11:20"
-              >
+                timestamp={currentTime}
+                roleColor="gold"
+                >
                 <DiscordEmbed
                   slot="embeds"
-                  color="#5865f2"
+                  color="#047AFE"
                   embedTitle="🗺️ Available Missions"
                 >
-                  {/* Mission header */}
                   <div slot="description">
-                    <div className="mb-4">
-                      <h3 className="text-white font-semibold text-lg mb-2 flex items-center gap-2">
-                        🎯 Mission 1: {mission.title || "Untitled Mission"}
-                      </h3>
-                      
-                      <div className="flex items-center gap-4 text-sm mb-3">
-                        <div className="flex items-center gap-1">
-                          ⭐ Level {mission.level_required || 1}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          🗓️ Ends in {timeRemaining}
-                        </div>
-                      </div>
+                  <div className="text-lg font-bold text-white mb-2">
+                    🎯 Mission 1: {mission.title || "Untitled Mission"}
+                  </div>
+
+                  <div className="text-base text-white font-bold mb-4 flex items-center gap-2">
+                    <span>⭐ Level {mission.level_required || 1}</span>
+                    <span>|</span>
+                    <span>
+                    ⏰ <span className="font-bold">Ends</span>{" "}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="px-1.5 py-0 bg-gray-500/20 rounded-md font-medium text-gray-100 cursor-help hover:bg-gray-500/30 transition-colors">
+                            in {timeRemaining}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{getEndDateForTooltip()}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    </span>
+                  </div>
+
+                  <div className="text-base text-gray-300 leading-normal mb-4">
+                    {mission.description || "No description provided."}
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="text-base">
+                    <span className="font-bold">💰 Reward:</span>{" "}
+                    <span className="font-medium">
+                      {parseReward(mission.reward || "")}
+                    </span>
                     </div>
 
-                    {/* Mission description */}
-                    <div className="mb-4">
-                      <p className="text-sm leading-relaxed">
-                        {mission.description || "No description provided."}
-                      </p>
+                    <div className="text-base">
+                    <span className="font-bold">🎯 Status:</span>{" "}
+                    <span className="font-medium">Available to accept</span>
                     </div>
 
-                    {/* Mission details */}
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-start gap-2">
-                        <span>💰</span>
-                        <span className="font-medium">Reward:</span>
-                        <span>{parseReward(mission.reward || "")}</span>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <span>🎯</span>
-                        <span className="font-medium">Status:</span>
-                        <span className="text-green-400">Available to accept</span>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <span>📝</span>
-                        <span className="font-medium">Format:</span>
-                        <span>{mission.format || "Not specified"}</span>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <span>❓</span>
-                        <span className="font-medium">Action to submit:</span>
-                        <span>{mission.action_request || "Not specified"}</span>
-                      </div>
+                    <div className="text-base">
+                    <span className="font-bold">📋 Format:</span>{" "}
+                    <span className="font-medium">
+                      {mission.format || "Not specified"}
+                    </span>
                     </div>
 
-                    {/* Additional info if available */}
-                    {mission.requirements && (
-                      <div className="mt-4 p-3 bg-yellow-900/20 rounded border-l-4 border-yellow-400">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span>⚠️</span>
-                          <span className="font-medium text-sm">Requirements:</span>
-                        </div>
-                        <p className="text-xs leading-relaxed opacity-90">
-                          {mission.requirements}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Useful link if provided */}
-                    {mission.useful_link && (
-                      <div className="mt-4">
-                        <a
-                          href={mission.useful_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-blue-400 hover:underline text-sm"
-                        >
-                          🔗 Useful Resource
-                        </a>
-                      </div>
-                    )}
+                    <div className="text-base">
+                    <span className="font-bold">⚡ Action to submit:</span>{" "}
+                    <span className="font-medium">
+                      {mission.action_request || "Not specified"}
+                    </span>
+                    </div>
+                  </div>
                   </div>
 
                   <div slot="footer">
-                    6 available missions | Use /my_missions to view your accepted missions
+                  <div className="text-xs text-gray-200 font-medium mt-3">
+                    99 available missions | Use /my_missions to view your
+                    accepted missions • {footerTime}
+                  </div>
                   </div>
                 </DiscordEmbed>
-              </DiscordMessage>
+                </DiscordMessage>
             </DiscordMessages>
           </div>
 
