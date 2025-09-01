@@ -12,7 +12,6 @@ import {
   Send,
   Eye,
 } from "lucide-react";
-// import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -101,71 +100,7 @@ interface NotificationAlert {
   description: string;
 }
 
-// Time picker component
-// const TimePicker = ({
-//   value,
-//   onChange,
-// }: {
-//   value?: string;
-//   onChange: (time: string) => void;
-//   placeholder?: string;
-// }) => {
-//   const [hours, setHours] = useState(value ? value.split(":")[0] : "12");
-//   const [minutes, setMinutes] = useState(value ? value.split(":")[1] : "00");
-
-//   const updateTime = (newHours: string, newMinutes: string) => {
-//     const timeString = `${newHours.padStart(2, "0")}:${newMinutes.padStart(
-//       2,
-//       "0"
-//     )}`;
-//     onChange(timeString);
-//   };
-
-//   return (
-//     <div className="flex items-center space-x-2">
-//       <Select
-//         value={hours}
-//         onValueChange={(newHours) => {
-//           setHours(newHours);
-//           updateTime(newHours, minutes);
-//         }}
-//       >
-//         <SelectTrigger className="w-20">
-//           <SelectValue />
-//         </SelectTrigger>
-//         <SelectContent>
-//           {Array.from({ length: 24 }, (_, i) => (
-//             <SelectItem key={i} value={i.toString().padStart(2, "0")}>
-//               {i.toString().padStart(2, "0")}
-//             </SelectItem>
-//           ))}
-//         </SelectContent>
-//       </Select>
-//       <span className="text-muted-foreground">:</span>
-//       <Select
-//         value={minutes}
-//         onValueChange={(newMinutes) => {
-//           setMinutes(newMinutes);
-//           updateTime(hours, newMinutes);
-//         }}
-//       >
-//         <SelectTrigger className="w-20">
-//           <SelectValue />
-//         </SelectTrigger>
-//         <SelectContent>
-//           {Array.from({ length: 60 }, (_, i) => (
-//             <SelectItem key={i} value={i.toString().padStart(2, "0")}>
-//               {i.toString().padStart(2, "0")}
-//             </SelectItem>
-//           ))}
-//         </SelectContent>
-//       </Select>
-//     </div>
-//   );
-// };
-
-// DateTime picker component
-// DateTime picker component - แทนที่ component เดิมตั้งแต่บรรทัด 143-242
+// Enhanced DateTime picker
 const DateTimePicker = ({
   value,
   onChange,
@@ -177,48 +112,415 @@ const DateTimePicker = ({
   placeholder?: string;
   error?: boolean;
 }) => {
-  // Convert ISO string to datetime-local format (YYYY-MM-DDTHH:MM)
-  const formatForInput = (isoString: string): string => {
-    if (!isoString) return "";
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    value ? new Date(value) : undefined
+  );
+
+  const parseISOToLocal = (isoString: string) => {
+    // Parse the ISO string manually to avoid timezone conversion
+    const match = isoString.match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
+    );
+    if (match) {
+      return {
+        year: parseInt(match[1]),
+        month: parseInt(match[2]) - 1,
+        day: parseInt(match[3]),
+        hours: parseInt(match[4]),
+        minutes: parseInt(match[5]),
+      };
+    }
+
     const date = new Date(isoString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth(),
+      day: date.getDate(),
+      hours: date.getHours(),
+      minutes: date.getMinutes(),
+    };
   };
 
-  // Convert datetime-local format to ISO string
-  const formatForOutput = (datetimeLocal: string): string => {
-    if (!datetimeLocal) return "";
-    return datetimeLocal + ":00"; // Add seconds for ISO format
+  // Separate state for hours, minutes using parsed values
+  const [hours, setHours] = useState<string>(() => {
+    if (value) {
+      const parsed = parseISOToLocal(value);
+      return String(parsed.hours).padStart(2, "0");
+    }
+    return "12";
+  });
+
+  const [minutes, setMinutes] = useState<string>(() => {
+    if (value) {
+      const parsed = parseISOToLocal(value);
+      return String(parsed.minutes).padStart(2, "0");
+    }
+    return "00";
+  });
+
+  const updateDateTime = (date: Date, h: string, m: string) => {
+    if (date && h && m) {
+      // สร้าง Date object ใหม่โดยใช้ local timezone
+      const year = date.getFullYear();
+      const month = date.getMonth(); // เก็บเป็น 0-based index
+      const day = date.getDate();
+      const hour = parseInt(h);
+      const minute = parseInt(m);
+
+      // สร้าง Date object ใหม่โดยใช้ constructor ที่รักษา local timezone
+      const localDateTime = new Date(year, month, day, hour, minute, 0);
+
+      // แปลงเป็น ISO string โดยใช้ local timezone
+      const isoString = localDateTime.toISOString();
+
+      console.log(
+        `Setting time: ${h}:${m} -> Local DateTime: ${localDateTime.toString()} -> ISO: ${isoString}`
+      );
+      onChange(isoString);
+    }
   };
 
-  const inputValue = value ? formatForInput(value) : "";
+  // Update local state when value prop changes
+  useEffect(() => {
+    if (value) {
+      const date = new Date(value);
+      const newHours = String(date.getHours()).padStart(2, "0");
+      const newMinutes = String(date.getMinutes()).padStart(2, "0");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    if (newValue) {
-      onChange(formatForOutput(newValue));
+      // Only update if the values are actually different to prevent loops
+      if (
+        !selectedDate ||
+        selectedDate.getTime() !== date.getTime() ||
+        hours !== newHours ||
+        minutes !== newMinutes
+      ) {
+        setSelectedDate(date);
+        setHours(newHours);
+        setMinutes(newMinutes);
+      }
+    } else if (!value && selectedDate) {
+      // Only clear if currently has a value
+      setSelectedDate(undefined);
+      setHours("12");
+      setMinutes("00");
+    }
+  }, [value, selectedDate, hours, minutes]);
+
+  // Generate options for dropdowns
+  const hourOptions = Array.from({ length: 24 }, (_, i) => ({
+    value: String(i).padStart(2, "0"),
+    label: String(i).padStart(2, "0"),
+  }));
+
+  const minuteOptions = Array.from({ length: 60 }, (_, i) => ({
+    value: String(i).padStart(2, "0"),
+    label: String(i).padStart(2, "0"),
+  }));
+
+  // Format date for display
+  const formatDisplayDate = (date: Date | undefined): string => {
+    if (!date) return placeholder;
+
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // Handle date selection from calendar
+  const handleDateSelect = (date: Date | undefined) => {
+    console.log("Date selected:", date);
+    if (date) {
+      setSelectedDate(date);
+      updateDateTime(date, hours, minutes);
+    }
+  };
+
+  // Handle time changes - NOW defined AFTER updateDateTime
+  const handleHoursChange = (newHours: string) => {
+    setHours(newHours);
+    if (selectedDate) {
+      updateDateTime(selectedDate, newHours, minutes);
+    }
+  };
+
+  const handleMinutesChange = (newMinutes: string) => {
+    setMinutes(newMinutes);
+    if (selectedDate) {
+      updateDateTime(selectedDate, hours, newMinutes);
+    }
+  };
+
+  // Current year for calendar year limitation
+  const fromYear = 2025;
+  const toYear = 2025;
+
+  return (
+    <div className="relative w-full">
+      <Popover modal={true} open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className={cn(
+              "w-full justify-start text-left font-normal h-10 px-3",
+              "hover:bg-accent hover:text-accent-foreground",
+              "focus:ring-2 focus:ring-ring focus:ring-offset-2",
+              !selectedDate && "text-muted-foreground",
+              error && "border-red-500 focus:border-red-500 focus:ring-red-500"
+            )}
+          >
+            <CalendarIcon className="mr-3 h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2">
+              <span className="flex-1">{formatDisplayDate(selectedDate)}</span>
+              {selectedDate && (
+                <div className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded">
+                  <span className="text-muted-foreground">at</span>
+                  <span className="font-medium">
+                    {hours}:{minutes}
+                  </span>
+                </div>
+              )}
+            </div>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-auto p-0"
+          align="start"
+          side="bottom"
+          sideOffset={4}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <div
+            className="flex flex-col"
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Calendar with limited year range */}
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              captionLayout="dropdown"
+              fromYear={fromYear}
+              toYear={toYear}
+              onSelect={handleDateSelect}
+              disabled={(date) =>
+                date < new Date(new Date().setHours(0, 0, 0, 0))
+              }
+              className="border-0 border-b rounded-none"
+            />
+
+            {/* Time Picker with Dropdowns */}
+            <div className="border-t bg-muted/50 p-3">
+              <Label className="text-xs text-muted-foreground mb-3 block">
+                Time
+              </Label>
+              <div className="flex items-center gap-2">
+                {/* Hours Dropdown */}
+                <div className="flex flex-col items-center gap-1">
+                  <Label className="text-xs text-muted-foreground">Hours</Label>
+                  <Select value={hours} onValueChange={handleHoursChange}>
+                    <SelectTrigger className="w-20 h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hourOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <span className="text-muted-foreground mt-5">:</span>
+
+                {/* Minutes Dropdown */}
+                <div className="flex flex-col items-center gap-1">
+                  <Label className="text-xs text-muted-foreground">
+                    Minutes
+                  </Label>
+                  <Select value={minutes} onValueChange={handleMinutesChange}>
+                    <SelectTrigger className="w-20 h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {minuteOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions - Only Now button */}
+            <div className="flex gap-1 p-2 border-t bg-background">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="w-full h-8 text-xs"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const now = new Date();
+                  setSelectedDate(now);
+                  const currentHours = String(now.getHours()).padStart(2, "0");
+                  const currentMinutes = String(now.getMinutes()).padStart(
+                    2,
+                    "0"
+                  );
+                  setHours(currentHours);
+                  setMinutes(currentMinutes);
+
+                  // ใช้ฟังก์ชัน updateDateTime ที่แก้ไขแล้ว
+                  updateDateTime(now, currentHours, currentMinutes);
+                  setTimeout(() => setIsOpen(false), 100);
+                }}
+              >
+                Now
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
+// Reward Input Component
+const RewardInput = ({
+  value,
+  onChange,
+  error,
+}: {
+  value?: string;
+  onChange: (value: string) => void;
+  error?: boolean;
+}) => {
+  const [amount, setAmount] = useState("");
+  const [token, setToken] = useState("XP");
+
+  // Token options
+  const TOKEN_OPTIONS = [
+    { value: "XP", label: "XP" },
+    { value: "COINS", label: "Coins" },
+    { value: "GEMS", label: "Gems" },
+    { value: "TOKENS", label: "Tokens" },
+    { value: "POINTS", label: "Points" },
+    { value: "CREDITS", label: "Credits" },
+  ];
+
+  // Parse existing value on component mount and when value changes
+  useEffect(() => {
+    if (value && value.trim()) {
+      try {
+        const parsed = JSON.parse(value);
+        if (
+          parsed.amount !== undefined &&
+          parsed.amount.toString() !== amount
+        ) {
+          setAmount(parsed.amount.toString());
+        }
+        if (parsed.token && parsed.token !== token) {
+          setToken(parsed.token);
+        }
+      } catch {
+        // If parsing fails, keep existing value
+      }
+    }
+    // Only depend on value, not amount or token to avoid loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  // Update parent component when amount or token changes
+  const updateReward = (newAmount: string, newToken: string) => {
+    if (newAmount && newToken) {
+      const rewardObject = {
+        amount: parseInt(newAmount) || 0,
+        token: newToken,
+      };
+      onChange(JSON.stringify(rewardObject));
     } else {
       onChange("");
     }
   };
 
+  const handleAmountChange = (newAmount: string) => {
+    setAmount(newAmount);
+    updateReward(newAmount, token);
+  };
+
+  const handleTokenChange = (newToken: string) => {
+    setToken(newToken);
+    updateReward(amount, newToken);
+  };
+
   return (
-    <div className="relative">
-      <Input
-        type="datetime-local"
-        value={inputValue}
-        onChange={handleChange}
-        className={cn(
-          "w-full",
-          error && "border-red-500 focus:border-red-500 focus:ring-red-500"
+    <div className="space-y-3">
+      <div className="grid grid-cols-4 gap-3">
+        {/* Amount Input */}
+        <div className="space-y-2 col-span-1">
+          <Label
+            htmlFor="reward-amount"
+            className="text-xs text-muted-foreground"
+          >
+            Amount
+          </Label>
+          <Input
+            id="reward-amount"
+            type="number"
+            value={amount}
+            onChange={(e) => handleAmountChange(e.target.value)}
+            placeholder="100"
+            min="0"
+            className={cn("w-full", error && "border-red-500")}
+          />
+        </div>
+
+        {/* Token Select */}
+        <div className="space-y-2 col-span-1">
+          <Label
+            htmlFor="reward-token"
+            className="text-xs text-muted-foreground"
+          >
+            Token Type
+          </Label>
+          <Select value={token} onValueChange={handleTokenChange}>
+            <SelectTrigger className={cn("w-full", error && "border-red-500")}>
+              <SelectValue placeholder="Select token" />
+            </SelectTrigger>
+            <SelectContent>
+              {TOKEN_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* JSON Preview - 2/4 */}
+        {amount && token && (
+          <div className="space-y-2 col-span-2">
+            <Label className="text-xs text-muted-foreground">
+              JSON Output:
+            </Label>
+            <div className="p-2 bg-muted/50 rounded-md border min-h-[40px] flex items-start">
+              <div className="text-xs font-mono text-foreground whitespace-pre-wrap break-all">
+                {`{"amount": ${parseInt(amount) || 0}, "token": "${token}"}`}
+              </div>
+            </div>
+          </div>
         )}
-        placeholder={placeholder}
-      />
-      <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+      </div>
     </div>
   );
 };
@@ -494,7 +796,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     (data: MissionTargetingData | null) => {
       console.log("🎯 handleTargetingChange called with:", data);
       setMissionTargeting(data);
-      
       // Also update parent component immediately
       onMissionChange((prev) => {
         const updated = {
@@ -813,7 +1114,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         // Always preserve missionTargeting from either source
         missionTargeting: prev.missionTargeting || missionTargeting || null,
       };
-      
       return updated;
     });
 
@@ -865,10 +1165,8 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         missionTargeting.discordFilters.servers.length > 0;
 
       if (hasTargetingServers) {
-
         finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
       } else if (
-
         isEditMode &&
         newMission.serverId &&
         newMission.serverId !== "" &&
@@ -918,7 +1216,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
       // Calculate server ID from targeting data (similar to handleFormSubmit)
       let finalServerId = "[]";
-      
       const hasTargetingServers =
         missionTargeting?.discordFilters?.servers &&
         Array.isArray(missionTargeting.discordFilters.servers) &&
@@ -1521,18 +1818,18 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
             {/* Action Buttons */}
             <div className="flex justify-between items-center pt-6 border-t max-sm:flex-col max-sm:gap-4">
-              {!isEditMode && (
-                <div className="flex items-center gap-3 max-sm:flex-col max-sm:w-full max-sm:gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
-                    disabled={isLoading}
-                    onClick={handlePreviewMission}
-                  >
-                    <Eye className="h-4 w-4" />
-                    Preview Mission
-                  </Button>
+              <div className="flex items-center gap-3 max-sm:flex-col max-sm:w-full max-sm:gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex items-center gap-2 cursor-pointer max-sm:w-full max-sm:justify-center"
+                  disabled={isLoading}
+                  onClick={handlePreviewMission}
+                >
+                  <Eye className="h-4 w-4" />
+                  Preview Mission
+                </Button>
+                {!isEditMode && (
                   <Button
                     type="button"
                     variant="outline"
@@ -1543,8 +1840,8 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                     <Save className="h-4 w-4" />
                     Save Draft
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
 
               <div
                 className={cn(

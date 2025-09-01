@@ -41,6 +41,7 @@ interface ColumnVisibility {
   email: boolean;
   xp: boolean;
   level: boolean;
+  credits: boolean;
   mood: boolean;
   health: boolean;
   interests: boolean;
@@ -69,6 +70,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     interests: true,
     lastActive: true,
     joinedDate: true,
+    credits: true,
   });
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithAgent | null>(null);
@@ -184,6 +186,22 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
       return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
     } else if (xp === maxXP) {
       return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800";
+    } else {
+      return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+    }
+  };
+
+  const getCreditsBadgeColor = (credits: number, allUsers: UserWithAgent[]) => {
+    const creditsValues = allUsers.map((user) => user.agent?.credits || 0);
+    const minCredits = Math.min(...creditsValues);
+    const maxCredits = Math.max(...creditsValues);
+
+    if (credits === minCredits && credits === maxCredits) {
+      return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+    } else if (credits === minCredits) {
+      return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800";
+    } else if (credits === maxCredits) {
+      return "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800";
     } else {
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     }
@@ -332,6 +350,17 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                       Level {user.agent?.level || 1}
                     </Badge>
                   )}
+                  {columnVisibility.credits && (
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${getCreditsBadgeColor(
+                        user.agent?.credits || 0,
+                        users
+                      )}`}
+                    >
+                      {user.agent?.credits?.toLocaleString() || "0"} Credits
+                    </Badge>
+                  )}
                   {columnVisibility.mood && user.agent?.mood && (
                     <Badge
                       variant="outline"
@@ -347,33 +376,38 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                 </div>
 
                 {/* Health Bar */}
-                {columnVisibility.health && user.agent?.health !== undefined && (
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">Health</span>
-                      <span
-                        className={`text-xs font-medium ${getHealthColor(
-                          user.agent.health
-                        )}`}
-                      >
-                        {user.agent.health}/100
-                      </span>
+                {columnVisibility.health &&
+                  user.agent?.health !== undefined && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-muted-foreground">
+                          Health
+                        </span>
+                        <span
+                          className={`text-xs font-medium ${getHealthColor(
+                            user.agent.health
+                          )}`}
+                        >
+                          {user.agent.health}/100
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${getHealthBarColor(
+                            user.agent.health
+                          )}`}
+                          style={{ width: `${user.agent.health}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${getHealthBarColor(
-                          user.agent.health
-                        )}`}
-                        style={{ width: `${user.agent.health}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Interests */}
                 {columnVisibility.interests && user.interests && (
                   <div className="space-y-1">
-                    <span className="text-xs text-muted-foreground">Interests</span>
+                    <span className="text-xs text-muted-foreground">
+                      Interests
+                    </span>
                     <div className="flex flex-wrap gap-1">
                       {user.interests
                         .split(",")
@@ -408,7 +442,9 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                 {/* Date Info */}
                 <div className="flex justify-between text-xs text-muted-foreground pt-2 border-t border-gray-200 dark:border-gray-700">
                   {columnVisibility.lastActive && user.agent?.last_active && (
-                    <span>Last: {formatLastActive(user.agent.last_active)}</span>
+                    <span>
+                      Last: {formatLastActive(user.agent.last_active)}
+                    </span>
                   )}
                   {columnVisibility.joinedDate && user.agent?.created_at && (
                     <span>Joined: {formatDate(user.agent.created_at)}</span>
@@ -548,6 +584,48 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("level")}
+                      >
+                        <div className="flex items-center">
+                          <EyeOff className="w-4 h-4 mr-2" />
+                          Hide
+                        </div>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableHead>
+              )}
+              {columnVisibility.credits && (
+                <TableHead>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+                      >
+                        Credits
+                        {getSortIcon("agent.credits")}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem
+                        onClick={() => handleSort("agent.credits")}
+                      >
+                        <div className="flex items-center">
+                          <ChevronUp className="w-4 h-4 mr-2" />
+                          Asc
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSort("agent.credits")}
+                      >
+                        <div className="flex items-center">
+                          <ChevronDown className="w-4 h-4 mr-2" />
+                          Desc
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => onToggleColumnVisibility("credits")}
                       >
                         <div className="flex items-center">
                           <EyeOff className="w-4 h-4 mr-2" />
@@ -801,6 +879,21 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                           )}
                         >
                           Level {user.agent?.level || 1}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                  )}
+                  {columnVisibility.credits && (
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <Badge
+                          variant="outline"
+                          className={getCreditsBadgeColor(
+                            user.agent?.credits || 0,
+                            users
+                          )}
+                        >
+                          {user.agent?.credits?.toLocaleString() || "0"} Credits
                         </Badge>
                       </div>
                     </TableCell>

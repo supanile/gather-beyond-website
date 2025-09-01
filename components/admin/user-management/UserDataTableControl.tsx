@@ -26,6 +26,7 @@ interface ColumnVisibility {
   interests: boolean;
   lastActive: boolean;
   joinedDate: boolean;
+  credits: boolean;
 }
 
 interface UserDataPaginationState {
@@ -56,6 +57,7 @@ export const UserDataTableControls: React.FC<UserDataTableControlsProps> = ({
       email: "User Email",
       xp: "XP",
       level: "Level",
+      credits: "Credits",
       mood: "Mood",
       health: "Health",
       interests: "Interests",

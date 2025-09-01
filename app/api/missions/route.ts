@@ -143,10 +143,23 @@ export async function POST(request: Request) {
     }
 
     console.log(`Partner "${body.partner}" mapped to ID: ${partnerId}`);
+    // Fix: treat startDate/endDate as UTC, format as ISO string without timezone conversion
+    function toIsoUtcString(dt: string | undefined) {
+      if (!dt) return undefined;
+      let s = dt.replace(" ", "T");
+      // If no seconds, add ':00'
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) {
+        s += ":00";
+      }
+      // Remove milliseconds if present
+      s = s.replace(/\.\d{3}/, "");
+      // Add 'Z' if not present
+      if (!s.endsWith("Z")) s += "Z";
+      return s;
+    }
     const durationData = {
-      start:
-        body.startDate || new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-      end: body.endDate || null,
+      start: body.startDate ? toIsoUtcString(body.startDate) : new Date().toISOString(),
+      end: body.endDate ? toIsoUtcString(body.endDate) : null,
     };
 
     console.log("Duration data created:", durationData);
@@ -158,7 +171,10 @@ export async function POST(request: Request) {
     console.log("Original body.serverId:", body.serverId);
     console.log("Type of serverId:", typeof body.serverId);
     console.log("body.missionTargeting:", body.missionTargeting);
-    console.log("body.missionTargeting?.discordFilters?.servers:", body.missionTargeting?.discordFilters?.servers);
+    console.log(
+      "body.missionTargeting?.discordFilters?.servers:",
+      body.missionTargeting?.discordFilters?.servers
+    );
 
     // Priority 1: Check for missionTargeting servers first (from Discord targeting form)
     if (
@@ -166,8 +182,13 @@ export async function POST(request: Request) {
       Array.isArray(body.missionTargeting.discordFilters.servers) &&
       body.missionTargeting.discordFilters.servers.length > 0
     ) {
-      finalServerId = JSON.stringify(body.missionTargeting.discordFilters.servers);
-      console.log("✅ POST Priority 1: Using servers from missionTargeting:", finalServerId);
+      finalServerId = JSON.stringify(
+        body.missionTargeting.discordFilters.servers
+      );
+      console.log(
+        "✅ POST Priority 1: Using servers from missionTargeting:",
+        finalServerId
+      );
     }
     // Priority 2: If serverId is provided directly and not empty
     else if (
@@ -181,32 +202,50 @@ export async function POST(request: Request) {
           const parsed = JSON.parse(body.serverId);
           if (Array.isArray(parsed) && parsed.length > 0) {
             finalServerId = body.serverId;
-            console.log("✅ POST Priority 2: Using existing serverId string:", body.serverId);
+            console.log(
+              "✅ POST Priority 2: Using existing serverId string:",
+              body.serverId
+            );
           } else {
-            console.log("⚠️ POST Priority 2: ServerId is empty array, using default");
+            console.log(
+              "⚠️ POST Priority 2: ServerId is empty array, using default"
+            );
             finalServerId = "[]";
           }
         } catch {
           // If parse fails but it's not empty string, treat as single server ID
           if (body.serverId.trim() !== "") {
             finalServerId = JSON.stringify([body.serverId]);
-            console.log("✅ POST Priority 2: Converted string to array:", finalServerId);
+            console.log(
+              "✅ POST Priority 2: Converted string to array:",
+              finalServerId
+            );
           } else {
-            console.log("⚠️ POST Priority 2: Invalid serverId string, using default");
+            console.log(
+              "⚠️ POST Priority 2: Invalid serverId string, using default"
+            );
             finalServerId = "[]";
           }
         }
       } else if (Array.isArray(body.serverId) && body.serverId.length > 0) {
         finalServerId = JSON.stringify(body.serverId);
-        console.log("✅ POST Priority 2: Converting array to JSON:", finalServerId);
+        console.log(
+          "✅ POST Priority 2: Converting array to JSON:",
+          finalServerId
+        );
       } else {
-        console.log("⚠️ POST Priority 2: Unexpected serverId type:", typeof body.serverId);
+        console.log(
+          "⚠️ POST Priority 2: Unexpected serverId type:",
+          typeof body.serverId
+        );
         finalServerId = "[]";
       }
     }
     // Priority 3: Default to empty array
     else {
-      console.log("ℹ️ POST Priority 3: No serverId provided, using default empty array");
+      console.log(
+        "ℹ️ POST Priority 3: No serverId provided, using default empty array"
+      );
       finalServerId = "[]";
     }
 
@@ -234,12 +273,18 @@ export async function POST(request: Request) {
     };
 
     console.log("Prepared mission data for Grist:", missionData);
-    console.log("🔥 Final serverId being sent to database:", missionData.serverId);
+    console.log(
+      "🔥 Final serverId being sent to database:",
+      missionData.serverId
+    );
     console.log("Duration field:", missionData.duration);
 
     const result = await grist.addRecords("Missions", [missionData]);
     console.log("Grist response:", result);
-    console.log("✅ POST Mission created successfully with serverId:", missionData.serverId);
+    console.log(
+      "✅ POST Mission created successfully with serverId:",
+      missionData.serverId
+    );
 
     return NextResponse.json(
       { message: "Mission added successfully", data: result },
@@ -347,15 +392,28 @@ export async function PUT(request: Request) {
         }
       }
 
+      // Fix: treat startDate/endDate as UTC, format as ISO string without timezone conversion
+      function toIsoUtcString(dt: string | undefined) {
+        if (!dt) return undefined;
+        let s = dt.replace(" ", "T");
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) {
+          s += ":00";
+        }
+        s = s.replace(/\.\d{3}/, "");
+        if (!s.endsWith("Z")) s += "Z";
+        return s;
+      }
+
       const durationData = {
         ...currentDuration,
-        start:
-          updateData.startDate ||
-          currentDuration.start ||
-          new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+        start: updateData.startDate
+          ? toIsoUtcString(updateData.startDate)
+          : currentDuration.start || new Date().toISOString(),
         end:
           updateData.endDate !== undefined
             ? updateData.endDate
+              ? toIsoUtcString(updateData.endDate)
+              : null
             : currentDuration.end,
       };
 
@@ -370,12 +428,12 @@ export async function PUT(request: Request) {
     try {
       const existingMissions = await grist.fetchTable("Missions");
       const mission = existingMissions.find((record: unknown) => {
-        if (typeof record === 'object' && record !== null && 'id' in record) {
+        if (typeof record === "object" && record !== null && "id" in record) {
           return (record as { id?: string }).id === id;
         }
         return false;
       });
-      if (mission?.serverId && typeof mission.serverId === 'string') {
+      if (mission?.serverId && typeof mission.serverId === "string") {
         try {
           existingServerId = JSON.parse(mission.serverId);
           if (!Array.isArray(existingServerId)) {
@@ -403,14 +461,14 @@ export async function PUT(request: Request) {
       // Merge with existing servers, avoiding duplicates
       const newServers = missionTargeting.discordFilters.servers;
       const mergedServers = [...existingServerId];
-      
+
       // Add new servers if they don't already exist
       newServers.forEach((serverId: string) => {
         if (!mergedServers.includes(serverId)) {
           mergedServers.push(serverId);
         }
       });
-      
+
       finalServerId = JSON.stringify(mergedServers);
     }
     // Priority 2: ถ้า client ส่ง serverId มาโดยตรง และไม่ใช่ array ว่าง
@@ -421,7 +479,7 @@ export async function PUT(request: Request) {
       updateData.serverId !== ""
     ) {
       let newServerIds: string[] = [];
-      
+
       if (typeof updateData.serverId === "string") {
         try {
           // ถ้าเป็น JSON string ให้ parse เพื่อตรวจสอบ
@@ -440,17 +498,17 @@ export async function PUT(request: Request) {
       } else if (Array.isArray(updateData.serverId)) {
         newServerIds = updateData.serverId;
       }
-      
+
       if (newServerIds.length > 0) {
         // Merge with existing servers, avoiding duplicates
         const mergedServers = [...existingServerId];
-        
+
         newServerIds.forEach((serverId: string) => {
           if (!mergedServers.includes(serverId)) {
             mergedServers.push(serverId);
           }
         });
-        
+
         finalServerId = JSON.stringify(mergedServers);
       } else {
         finalServerId = JSON.stringify(existingServerId);

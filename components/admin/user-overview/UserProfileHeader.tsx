@@ -47,16 +47,6 @@ interface DiscordGuildsData {
   totalGuilds: number;
 }
 
-const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
-  user,
-  userAgent,
-  totalMissions,
-}) => {
-  const [discordData, setDiscordData] = useState<DiscordData | null>(null);
-  const [discordGuilds, setDiscordGuilds] = useState<DiscordGuildsData | null>(null);
-  const [isLoadingDiscord, setIsLoadingDiscord] = useState(false);
-  const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
-
 // Mock data for Discord guilds (to be replaced with actual API call later)
 const mockDiscordGuilds: DiscordGuildsData = {
   success: true,
@@ -94,6 +84,16 @@ const mockDiscordGuilds: DiscordGuildsData = {
   ],
   totalGuilds: 5
 };
+
+const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
+  user,
+  userAgent,
+  totalMissions,
+}) => {
+  const [discordData, setDiscordData] = useState<DiscordData | null>(null);
+  const [discordGuilds, setDiscordGuilds] = useState<DiscordGuildsData | null>(null);
+  const [isLoadingDiscord, setIsLoadingDiscord] = useState(false);
+  const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
 
   useEffect(() => {
     async function fetchDiscordData() {

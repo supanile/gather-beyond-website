@@ -113,7 +113,6 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
     if (allUsers.length === 0) {
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     }
-    
     const xpValues = allUsers.map((user) => user.agent?.xp || 0);
     const minXP = Math.min(...xpValues);
     const maxXP = Math.max(...xpValues);
@@ -133,7 +132,6 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
     if (allUsers.length === 0) {
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     }
-    
     const levels = allUsers.map((user) => user.agent?.level || 1);
     const minLevel = Math.min(...levels);
     const maxLevel = Math.max(...levels);
@@ -144,6 +142,26 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
       return "bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800";
     } else if (level === maxLevel) {
       return "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800";
+    } else {
+      return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+    }
+  };
+
+  const getCreditsBadgeColor = (credits: number, allUsers: UserWithAgent[]) => {
+    if (allUsers.length === 0) {
+      return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+    }
+
+    const creditsValues = allUsers.map((user) => user.agent?.credits || 0);
+    const minCredits = Math.min(...creditsValues);
+    const maxCredits = Math.max(...creditsValues);
+
+    if (credits === minCredits && credits === maxCredits) {
+      return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+    } else if (credits === minCredits) {
+      return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800";
+    } else if (credits === maxCredits) {
+      return "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800";
     } else {
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     }
@@ -166,9 +184,7 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                   {user.twitter_handle && (
                     <span className="mr-2">{user.twitter_handle}</span>
                   )}
-                  {user.telegram_handle && (
-                    <span>{user.telegram_handle}</span>
-                  )}
+                  {user.telegram_handle && <span>{user.telegram_handle}</span>}
                   {!user.twitter_handle && !user.telegram_handle && (
                     <span>No social handles</span>
                   )}
@@ -177,7 +193,7 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
             </CardHeader>
             <CardContent className="space-y-4 p-3 sm:p-6 pt-2">
               {/* XP and Level - Same styling as table */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <Label className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 block">
                     XP
@@ -198,14 +214,32 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                   <div className="flex justify-start">
                     <Badge
                       variant="outline"
-                      className={getLevelBadgeColor(user.agent?.level || 1, allUsers)}
+                      className={getLevelBadgeColor(
+                        user.agent?.level || 1,
+                        allUsers
+                      )}
                     >
                       Level {user.agent?.level || 1}
                     </Badge>
                   </div>
                 </div>
+                <div>
+                  <Label className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 block">
+                    Credits
+                  </Label>
+                  <div className="flex justify-start">
+                    <Badge
+                      variant="outline"
+                      className={getCreditsBadgeColor(
+                        user.agent?.credits || 0,
+                        allUsers
+                      )}
+                    >
+                      {user.agent?.credits?.toLocaleString() || "0"} Credits
+                    </Badge>
+                  </div>
+                </div>
               </div>
-
               {/* Mood and Health - Same styling as table */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -227,7 +261,9 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                     </div>
                   ) : (
                     <div className="flex justify-start">
-                      <span className="text-muted-foreground text-xs sm:text-sm">-</span>
+                      <span className="text-muted-foreground text-xs sm:text-sm">
+                        -
+                      </span>
                     </div>
                   )}
                 </div>
@@ -255,12 +291,13 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                     </div>
                   ) : (
                     <div className="flex justify-start">
-                      <span className="text-muted-foreground text-xs sm:text-sm">-</span>
+                      <span className="text-muted-foreground text-xs sm:text-sm">
+                        -
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
-
               {/* Interests - Display ALL interests with full text (no truncation) */}
               <div>
                 <Label className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 block">
@@ -269,18 +306,16 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                 <div className="w-full">
                   {user.interests ? (
                     <div className="flex flex-wrap gap-1">
-                      {user.interests
-                        .split(",")
-                        .map((interest, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="secondary"
-                            className="text-xs break-words whitespace-normal"
-                            title={interest.trim()}
-                          >
-                            {interest.trim()}
-                          </Badge>
-                        ))}
+                      {user.interests.split(",").map((interest, idx) => (
+                        <Badge
+                          key={idx}
+                          variant="secondary"
+                          className="text-xs break-words whitespace-normal"
+                          title={interest.trim()}
+                        >
+                          {interest.trim()}
+                        </Badge>
+                      ))}
                     </div>
                   ) : (
                     <div className="flex justify-start">
@@ -291,7 +326,6 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                   )}
                 </div>
               </div>
-
               {/* Last Active and Joined Date */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
