@@ -145,78 +145,78 @@ const DEGEN_INTEREST_TAGS = [
   "leverage",
 ];
 
-const DISCORD_SERVERS = [
-  {
-    id: "710813849808273478",
-    name: "Fłøeт¢ıвøυ's server",
-    members: 8760,
-    icon: "👨‍💻",
-    description: "Personal dev and crypto community run by Fłøeт¢ıвøυ",
-  },
-  {
-    id: "749954850430910534",
-    name: "Harold's server",
-    members: 3420,
-    icon: "👥",
-    description: "Harold's general community and announcements",
-  },
-  {
-    id: "908568690033844246",
-    name: "Super Connector",
-    members: 2950,
-    icon: "🤖",
-    description: "Networking hub for intros, partnerships, and collabs",
-  },
-  {
-    id: "989296048356851712",
-    name: "aki | Cryptopia's server",
-    members: 4120,
-    icon: "🪙",
-    description: "Cryptopia builders, alpha, and crypto discussions",
-  },
-  {
-    id: "1037957827899179009",
-    name: "스타이카 Staika",
-    members: 9320,
-    icon: "🌟",
-    description: "Korean Staika community and updates",
-  },
-  {
-    id: "1082381282144694332",
-    name: "Godot 3.0 - Tutorial Links",
-    members: 2480,
-    icon: "📚",
-    description: "Curated links and help for Godot 3.0 learners",
-  },
-  {
-    id: "1099368008721379399",
-    name: "ALLGUDINDAHUD",
-    members: 1270,
-    icon: "🎮",
-    description: "Gaming and community hangout",
-  },
-  {
-    id: "1246002839621210122",
-    name: "Indzil's server",
-    members: 980,
-    icon: "🧑‍💻",
-    description: "Indzil's developer community",
-  },
-  {
-    id: "1260578187616718879",
-    name: "PlayitForward",
-    members: 5760,
-    icon: "🎯",
-    description: "Play-to-earn guild and gaming community",
-  },
-  {
-    id: "1317782730582265906",
-    name: "BABE Coin server",
-    members: 7540,
-    icon: "🪙",
-    description: "Official community for BABE Coin holders",
-  },
-];
+// const DISCORD_SERVERS = [
+//   {
+//     id: "710813849808273478",
+//     name: "Fłøeт¢ıвøυ's server",
+//     members: 8760,
+//     icon: "👨‍💻",
+//     description: "Personal dev and crypto community run by Fłøeт¢ıвøυ",
+//   },
+//   {
+//     id: "749954850430910534",
+//     name: "Harold's server",
+//     members: 3420,
+//     icon: "👥",
+//     description: "Harold's general community and announcements",
+//   },
+//   {
+//     id: "908568690033844246",
+//     name: "Super Connector",
+//     members: 2950,
+//     icon: "🤖",
+//     description: "Networking hub for intros, partnerships, and collabs",
+//   },
+//   {
+//     id: "989296048356851712",
+//     name: "aki | Cryptopia's server",
+//     members: 4120,
+//     icon: "🪙",
+//     description: "Cryptopia builders, alpha, and crypto discussions",
+//   },
+//   {
+//     id: "1037957827899179009",
+//     name: "스타이카 Staika",
+//     members: 9320,
+//     icon: "🌟",
+//     description: "Korean Staika community and updates",
+//   },
+//   {
+//     id: "1082381282144694332",
+//     name: "Godot 3.0 - Tutorial Links",
+//     members: 2480,
+//     icon: "📚",
+//     description: "Curated links and help for Godot 3.0 learners",
+//   },
+//   {
+//     id: "1099368008721379399",
+//     name: "ALLGUDINDAHUD",
+//     members: 1270,
+//     icon: "🎮",
+//     description: "Gaming and community hangout",
+//   },
+//   {
+//     id: "1246002839621210122",
+//     name: "Indzil's server",
+//     members: 980,
+//     icon: "🧑‍💻",
+//     description: "Indzil's developer community",
+//   },
+//   {
+//     id: "1260578187616718879",
+//     name: "PlayitForward",
+//     members: 5760,
+//     icon: "🎯",
+//     description: "Play-to-earn guild and gaming community",
+//   },
+//   {
+//     id: "1317782730582265906",
+//     name: "BABE Coin server",
+//     members: 7540,
+//     icon: "🪙",
+//     description: "Official community for BABE Coin holders",
+//   },
+// ];
 
 interface MissionTargetingFormProps {
   onTargetingChange?: (targeting: MissionTargetingData) => void;
