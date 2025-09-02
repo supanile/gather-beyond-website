@@ -52,6 +52,8 @@ import {
 import MissionTargetingForm from "./MissionTargetingForm";
 // Import the new Preview Modal component
 import { MissionPreviewModal } from "./MissionPreviewModal";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 // Define the NewMissionForm interface
 interface DraftData {
@@ -524,6 +526,128 @@ const RewardInput = ({
     </div>
   );
 };
+
+
+// // Reward Input Component
+// const RewardInput = ({
+//   value,
+//   onChange,
+//   error,
+// }: {
+//   value?: string;
+//   onChange: (value: string) => void;
+//   error?: boolean;
+// }) => {
+//   const [amount, setAmount] = useState("");
+//   const [token, setToken] = useState("XP");
+
+//   // Token options
+//   const TOKEN_OPTIONS = [
+//     { value: "XP", label: "XP" },
+//     { value: "COINS", label: "Coins" },
+//     { value: "GEMS", label: "Gems" },
+//     { value: "TOKENS", label: "Tokens" },
+//     { value: "POINTS", label: "Points" },
+//     { value: "CREDITS", label: "Credits" },
+//   ];
+
+//   // Parse existing value on component mount
+//   useEffect(() => {
+//     if (value && value.trim()) {
+//       try {
+//         const parsed = JSON.parse(value);
+//         if (parsed.amount !== undefined) setAmount(parsed.amount.toString());
+//         if (parsed.token) setToken(parsed.token);
+//       } catch {
+//         // If parsing fails, keep existing value
+//       }
+//     }
+//   }, [value]);
+
+//   // Update parent component when amount or token changes
+//   const updateReward = (newAmount: string, newToken: string) => {
+//     if (newAmount && newToken) {
+//       const rewardObject = {
+//         amount: parseInt(newAmount) || 0,
+//         token: newToken,
+//       };
+//       onChange(JSON.stringify(rewardObject));
+//     } else {
+//       onChange("");
+//     }
+//   };
+
+//   const handleAmountChange = (newAmount: string) => {
+//     setAmount(newAmount);
+//     updateReward(newAmount, token);
+//   };
+
+//   const handleTokenChange = (newToken: string) => {
+//     setToken(newToken);
+//     updateReward(amount, newToken);
+//   };
+
+//   return (
+//     <div className="space-y-3">
+//       <div className="grid grid-cols-4 gap-3">
+//         {/* Amount Input */}
+//         <div className="space-y-2 col-span-1">
+//           <Label
+//             htmlFor="reward-amount"
+//             className="text-xs text-muted-foreground"
+//           >
+//             Amount
+//           </Label>
+//           <Input
+//             id="reward-amount"
+//             type="number"
+//             value={amount}
+//             onChange={(e) => handleAmountChange(e.target.value)}
+//             placeholder="100"
+//             min="0"
+//             className={cn("w-full", error && "border-red-500")}
+//           />
+//         </div>
+
+//         {/* Token Select */}
+//         <div className="space-y-2 col-span-1">
+//           <Label
+//             htmlFor="reward-token"
+//             className="text-xs text-muted-foreground"
+//           >
+//             Token Type
+//           </Label>
+//           <Select value={token} onValueChange={handleTokenChange}>
+//             <SelectTrigger className={cn("w-full", error && "border-red-500")}>
+//               <SelectValue placeholder="Select token" />
+//             </SelectTrigger>
+//             <SelectContent>
+//               {TOKEN_OPTIONS.map((option) => (
+//                 <SelectItem key={option.value} value={option.value}>
+//                   {option.label}
+//                 </SelectItem>
+//               ))}
+//             </SelectContent>
+//           </Select>
+//         </div>
+
+//         {/* JSON Preview - 2/4 */}
+//         {amount && token && (
+//           <div className="space-y-2 col-span-2">
+//             <Label className="text-xs text-muted-foreground">
+//               JSON Output:
+//             </Label>
+//             <div className="p-2 bg-muted/50 rounded-md border min-h-[40px] flex items-start">
+//               <div className="text-xs font-mono text-foreground whitespace-pre-wrap break-all">
+//                 {`{"amount": ${parseInt(amount) || 0}, "token": "${token}"}`}
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
 
 export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   isOpen,

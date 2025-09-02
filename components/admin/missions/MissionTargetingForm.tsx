@@ -269,11 +269,11 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   const [isLoadingServers, setIsLoadingServers] = useState(false);
   const [serverFetchError, setServerFetchError] = useState<string | null>(null);
 
-  const defaultDiscordFilters: DiscordFilters = {
-    servers: [],
-    roles: [],
-    channels: [],
-  };
+  // const defaultDiscordFilters: DiscordFilters = {
+  //   servers: [],
+  //   roles: [],
+  //   channels: [],
+  // };
 
   // Targeting state
   const [audienceType, setAudienceType] = useState<
