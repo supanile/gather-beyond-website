@@ -218,6 +218,41 @@ const DEGEN_INTEREST_TAGS = [
 //   },
 // ];
 
+// Define default values outside component to prevent re-creation
+const DEFAULT_BEHAVIOR_FILTERS: BehaviorFilters = {
+  xpLevel: { enabled: false, min: 0, max: 100 },
+  missionStreak: { enabled: false, value: 0 },
+  lastActive: { enabled: false, value: "today" },
+  failedMissions: { enabled: false, value: 0 },
+  trustScore: { enabled: false, value: [50] },
+  connectedWallet: { enabled: false, value: false },
+  joinedViaPartner: { enabled: false, value: "" },
+  referredUsers: { enabled: false, value: 0 },
+  agentHealth: { enabled: false, value: [50] },
+  memoryProofSubmitted: { enabled: false, value: false },
+  taggedInterests: { enabled: false, value: [] },
+};
+
+const DEFAULT_DEMOGRAPHIC_FILTERS: DemographicFilters = {
+  location: [],
+  language: [],
+  ageRange: "",
+  gender: "",
+};
+
+const DEFAULT_DELIVERY_OPTIONS: DeliveryOptions = {
+  channel: "discord",
+  scope: "group",
+  schedule: "immediate",
+  scheduledDate: "",
+};
+
+const DEFAULT_DISCORD_FILTERS: DiscordFilters = {
+  servers: [],
+  roles: [],
+  channels: [],
+};
+
 interface MissionTargetingFormProps {
   onTargetingChange?: (targeting: MissionTargetingData) => void;
   initialData?: MissionTargetingData | null;
@@ -234,61 +269,26 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   const [isLoadingServers, setIsLoadingServers] = useState(false);
   const [serverFetchError, setServerFetchError] = useState<string | null>(null);
 
-  // Enhanced default behavior filters
-  const defaultBehaviorFilters: BehaviorFilters = {
-    xpLevel: { enabled: false, min: 0, max: 100 },
-    missionStreak: { enabled: false, value: 0 },
-    lastActive: { enabled: false, value: "today" },
-    failedMissions: { enabled: false, value: 0 },
-    trustScore: { enabled: false, value: [50] },
-    connectedWallet: { enabled: false, value: false },
-    joinedViaPartner: { enabled: false, value: "" },
-    referredUsers: { enabled: false, value: 0 },
-    agentHealth: { enabled: false, value: [50] },
-    memoryProofSubmitted: { enabled: false, value: false },
-    taggedInterests: { enabled: false, value: [] },
-  };
-
-  const defaultDemographicFilters: DemographicFilters = {
-    location: [],
-    language: [],
-    ageRange: "",
-    gender: "",
-  };
-
-  const defaultDeliveryOptions: DeliveryOptions = {
-    channel: "discord",
-    scope: "group",
-    schedule: "immediate",
-    scheduledDate: "",
-  };
-
-  const defaultDiscordFilters: DiscordFilters = {
-    servers: [],
-    roles: [],
-    channels: [],
-  };
-
   // Targeting state
   const [audienceType, setAudienceType] = useState<
     "global" | "custom" | "custom-discord"
   >(initialData?.audienceType || "custom-discord");
 
   const [behaviorFilters, setBehaviorFilters] = useState<BehaviorFilters>(
-    initialData?.behaviorFilters || defaultBehaviorFilters
+    initialData?.behaviorFilters || DEFAULT_BEHAVIOR_FILTERS
   );
 
   const [demographicFilters, setDemographicFilters] =
     useState<DemographicFilters>(
-      initialData?.demographicFilters || defaultDemographicFilters
+      initialData?.demographicFilters || DEFAULT_DEMOGRAPHIC_FILTERS
     );
 
   const [discordFilters, setDiscordFilters] = useState<DiscordFilters>(
-    initialData?.discordFilters || defaultDiscordFilters
+    initialData?.discordFilters || DEFAULT_DISCORD_FILTERS
   );
 
   const [deliveryOptions, setDeliveryOptions] = useState<DeliveryOptions>(
-    initialData?.deliveryOptions || defaultDeliveryOptions
+    initialData?.deliveryOptions || DEFAULT_DELIVERY_OPTIONS
   );
 
   // Fetch Discord servers from API
@@ -349,6 +349,29 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   useEffect(() => {
     fetchDiscordServers();
   }, [fetchDiscordServers]);
+
+  // Reset state when initialData changes (especially when null for new mission)
+  useEffect(() => {
+    console.log("🔄 MissionTargetingForm: initialData changed:", initialData);
+    
+    // Reset to default values if initialData is null (new mission)
+    if (initialData === null) {
+      console.log("🔄 Resetting to default values for new mission");
+      setAudienceType("custom-discord");
+      setBehaviorFilters(DEFAULT_BEHAVIOR_FILTERS);
+      setDemographicFilters(DEFAULT_DEMOGRAPHIC_FILTERS);
+      setDiscordFilters(DEFAULT_DISCORD_FILTERS);
+      setDeliveryOptions(DEFAULT_DELIVERY_OPTIONS);
+    } else if (initialData !== undefined) {
+      // Load from initialData if provided
+      console.log("🔄 Loading from initialData");
+      setAudienceType(initialData.audienceType || "custom-discord");
+      setBehaviorFilters(initialData.behaviorFilters || DEFAULT_BEHAVIOR_FILTERS);
+      setDemographicFilters(initialData.demographicFilters || DEFAULT_DEMOGRAPHIC_FILTERS);
+      setDiscordFilters(initialData.discordFilters || DEFAULT_DISCORD_FILTERS);
+      setDeliveryOptions(initialData.deliveryOptions || DEFAULT_DELIVERY_OPTIONS);
+    }
+  }, [initialData]);
 
   // Enhanced segment classification logic following your requirements
   const classifyUserSegments = useCallback(
