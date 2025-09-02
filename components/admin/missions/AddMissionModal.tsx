@@ -27,12 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,7 +46,11 @@ import {
 import MissionTargetingForm from "./MissionTargetingForm";
 // Import the new Preview Modal component
 import { MissionPreviewModal } from "./MissionPreviewModal";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
 // Define the NewMissionForm interface
@@ -527,7 +525,6 @@ const RewardInput = ({
   );
 };
 
-
 // // Reward Input Component
 // const RewardInput = ({
 //   value,
@@ -749,10 +746,10 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     if (isOpen && !isEditMode) {
       // Reset mission targeting state when opening new mission modal
       setMissionTargeting(null);
-      
+
       // Debug localStorage ก่อนโหลด draft
       debugLocalStorage();
-      
+
       // check if there is a draft
       try {
         const savedDraft = localStorage.getItem(draftKey);
@@ -793,7 +790,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         }));
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isEditMode, draftKey]); // จงใจไม่ใส่ onMissionChange เพื่อป้องกัน infinite loop
 
   // useEffect for edit mode - load existing mission targeting data
@@ -896,7 +893,9 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
             missionTargeting.discordFilters.servers.length > 0;
 
           if (hasTargetingServers) {
-            finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
+            finalServerId = JSON.stringify(
+              missionTargeting.discordFilters.servers
+            );
           }
 
           const currentMissionData = {
@@ -1161,13 +1160,13 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       try {
         const draftString = JSON.stringify(draftData);
         localStorage.setItem(draftKey, draftString);
-        
+
         // Verify the save was successful
         const verifyData = localStorage.getItem(draftKey);
         if (!verifyData || verifyData !== draftString) {
           throw new Error("Failed to verify draft save");
         }
-        
+
         console.log("Draft saved successfully:", draftKey);
         console.log("Saved data:", draftData);
 
@@ -1186,7 +1185,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         if (onSaveDraft) {
           await onSaveDraft();
         }
-
       } catch (saveError) {
         console.error("Error saving to localStorage:", saveError);
         throw new Error("Failed to save draft to localStorage");
@@ -1199,7 +1197,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
           modalContent.scrollTo({ top: 0, behavior: "smooth" });
         }
       }, 100);
-
     } catch (error) {
       console.error("Error saving draft:", error);
       setNotificationAlert({
