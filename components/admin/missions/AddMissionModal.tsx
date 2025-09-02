@@ -593,23 +593,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
   };
 
   // Fixed Functions for draft with localStorage
-  const saveDraft = useCallback(() => {
-    try {
-      const draftData: DraftData = {
-        basicInfo: newMission,
-        targetingData: missionTargeting,
-        savedAt: new Date().toISOString(),
-      };
-
-      // Save to localStorage
-      localStorage.setItem(draftKey, JSON.stringify(draftData));
-      console.log("Draft saved successfully:", draftKey);
-      return true;
-    } catch (error) {
-      console.error("Error saving draft:", error);
-      return false;
-    }
-  }, [draftKey, newMission, missionTargeting]);
 
   const clearDraft = () => {
     try {
@@ -620,9 +603,32 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }
   };
 
+  // Debug function สำหรับตรวจสอบ localStorage
+  const debugLocalStorage = () => {
+    try {
+      const allKeys = Object.keys(localStorage);
+      console.log("All localStorage keys:", allKeys);
+      const savedDraft = localStorage.getItem(draftKey);
+      console.log("Current draft key:", draftKey);
+      console.log("Saved draft data:", savedDraft);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        console.log("Parsed draft data:", parsed);
+      }
+    } catch (error) {
+      console.error("Error debugging localStorage:", error);
+    }
+  };
+
   // useEffect for load draft
   useEffect(() => {
     if (isOpen && !isEditMode) {
+      // Reset mission targeting state when opening new mission modal
+      setMissionTargeting(null);
+      
+      // Debug localStorage ก่อนโหลด draft
+      debugLocalStorage();
+      
       // check if there is a draft
       try {
         const savedDraft = localStorage.getItem(draftKey);
@@ -646,12 +652,25 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
             title: "Draft Loaded",
             description: "Your previously saved draft has been loaded.",
           });
+        } else {
+          // No draft found, ensure parent mission state is also reset
+          console.log("No draft found, resetting mission targeting");
+          onMissionChange((prev) => ({
+            ...prev,
+            missionTargeting: null,
+          }));
         }
       } catch (error) {
         console.error("Error loading draft:", error);
+        // On error, still reset the targeting state
+        onMissionChange((prev) => ({
+          ...prev,
+          missionTargeting: null,
+        }));
       }
     }
-  }, [isOpen, isEditMode, draftKey, onMissionChange]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isEditMode, draftKey]); // จงใจไม่ใส่ onMissionChange เพื่อป้องกัน infinite loop
 
   // useEffect for edit mode - load existing mission targeting data
   useEffect(() => {
@@ -723,7 +742,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isEditMode]);
 
-  // auto-save useEffect
+  // auto-save useEffect - ปรับปรุงให้บันทึกข้อมูลปัจจุบันได้ดีขึ้น
   useEffect(() => {
     if (!isOpen || isEditMode) return;
 
@@ -745,8 +764,25 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
 
       if (hasData) {
         try {
+          // Calculate server ID for auto-save
+          let finalServerId = "[]";
+          const hasTargetingServers =
+            missionTargeting?.discordFilters?.servers &&
+            Array.isArray(missionTargeting.discordFilters.servers) &&
+            missionTargeting.discordFilters.servers.length > 0;
+
+          if (hasTargetingServers) {
+            finalServerId = JSON.stringify(missionTargeting.discordFilters.servers);
+          }
+
+          const currentMissionData = {
+            ...newMission,
+            missionTargeting: missionTargeting,
+            serverId: finalServerId,
+          };
+
           const draftData: DraftData = {
-            basicInfo: newMission,
+            basicInfo: currentMissionData,
             targetingData: missionTargeting,
             savedAt: new Date().toISOString(),
           };
@@ -761,8 +797,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     }, 10000); // Auto-save every 10 seconds
 
     return () => clearInterval(autoSaveInterval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, isEditMode]);
+  }, [isOpen, isEditMode, newMission, missionTargeting, draftKey]);
 
   // Auto-hide notification alert after 5 seconds
   useEffect(() => {
@@ -965,7 +1000,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     try {
       setInternalLoading(true);
 
-      // Calculate server ID from targeting data (similar to handleFormSubmit)
+      // Calculate server ID from targeting data
       let finalServerId = "[]";
 
       const hasTargetingServers =
@@ -984,34 +1019,53 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         finalServerId = newMission.serverId;
       }
 
-      // Save targeting data before saving draft
-      const missionWithTargeting = {
+      // Prepare mission data with targeting for saving - ใช้ข้อมูลปัจจุบันทั้งหมด
+      const currentMissionData = {
         ...newMission,
         missionTargeting: missionTargeting,
         serverId: finalServerId,
       };
 
-      // Update mission state
-      onMissionChange(missionWithTargeting);
+      // Create draft data directly without relying on state update
+      const draftData: DraftData = {
+        basicInfo: currentMissionData,
+        targetingData: missionTargeting,
+        savedAt: new Date().toISOString(),
+      };
 
-      // Save to localStorage
-      const success = saveDraft();
+      // Save directly to localStorage with better error handling
+      try {
+        const draftString = JSON.stringify(draftData);
+        localStorage.setItem(draftKey, draftString);
+        
+        // Verify the save was successful
+        const verifyData = localStorage.getItem(draftKey);
+        if (!verifyData || verifyData !== draftString) {
+          throw new Error("Failed to verify draft save");
+        }
+        
+        console.log("Draft saved successfully:", draftKey);
+        console.log("Saved data:", draftData);
 
-      if (success) {
+        // Update mission state after successful save
+        onMissionChange(currentMissionData);
+
+        // Show success notification
         setNotificationAlert({
           show: true,
           type: "success",
           title: "Draft Saved Successfully",
           description: "You can close and come back later to continue editing.",
         });
-      } else {
-        setNotificationAlert({
-          show: true,
-          type: "error",
-          title: "Failed to Save Draft",
-          description:
-            "Please try again or contact support if the issue persists.",
-        });
+
+        // call onSaveDraft callback if provided
+        if (onSaveDraft) {
+          await onSaveDraft();
+        }
+
+      } catch (saveError) {
+        console.error("Error saving to localStorage:", saveError);
+        throw new Error("Failed to save draft to localStorage");
       }
 
       // Scroll to top after saving draft
@@ -1022,10 +1076,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         }
       }, 100);
 
-      // call onSaveDraft if provided
-      if (onSaveDraft) {
-        await onSaveDraft();
-      }
     } catch (error) {
       console.error("Error saving draft:", error);
       setNotificationAlert({
