@@ -12,10 +12,12 @@ import {
 } from "lucide-react";
 import { useMissionsTable } from "@/hooks/useMissionsTable";
 import { getStatusCardConfig } from "@/lib/admin/missions/missionTableUtils";
+import { convertToDatetimeLocal, getUserTimezone } from "@/lib/admin/missions/timezoneUtils";
 import { StatusCard } from "@/components/admin/missions/StatusCard";
 import { AddMissionModal } from "@/components/admin/missions/AddMissionModal";
 import { ViewMissionModal } from "@/components/admin/missions/ViewMissionModal";
 import { Pagination } from "@/components/admin/missions/Pagination";
+import { TimezoneSelect } from "@/components/admin/missions/TimezoneSelect";
 import { MissionsTable } from "./missions/MissionsTable";
 import {
   Dialog,
@@ -217,38 +219,8 @@ const AdminMissionsTable = () => {
     const missionType = mission.type || "";
     const missionPlatform = mission.platform || "";
 
-    // แปลงวันที่อย่างถูกต้องสำหรับ edit form
-    const convertToDatetimeLocal = (
-      dateValue: string | number | null | undefined
-    ): string | undefined => {
-      if (!dateValue) return undefined;
-
-      try {
-        let date: Date;
-
-        if (typeof dateValue === "number") {
-          // Unix timestamp
-          date = new Date(dateValue * 1000);
-        } else if (typeof dateValue === "string") {
-          date = new Date(dateValue);
-        } else {
-          return undefined;
-        }
-
-        if (isNaN(date.getTime())) return undefined;
-
-        // แปลงเป็น format YYYY-MM-DDTHH:mm สำหรับ datetime-local input
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-      } catch {
-        return undefined;
-      }
-    };
+    // แปลงวันที่อย่างถูกต้องสำหรับ edit form โดยใช้ timezone ที่ user เลือก
+    const userTimezone = getUserTimezone();
 
     // Since targeting properties don't exist in Mission type, set to null for now
     const missionTargeting = null;
@@ -267,8 +239,8 @@ const AdminMissionsTable = () => {
       partner: partnerName,
       requirements: mission.requirements || "",
       repeatable: mission.repeatable || 0,
-      startDate: convertToDatetimeLocal(mission.startDate),
-      endDate: convertToDatetimeLocal(mission.endDate),
+      startDate: convertToDatetimeLocal(mission.startDate, userTimezone),
+      endDate: convertToDatetimeLocal(mission.endDate, userTimezone),
       regex: mission.regex || "",
       duration: mission.duration || "",
       missionTargeting: missionTargeting,
@@ -359,9 +331,16 @@ const AdminMissionsTable = () => {
         ))}
       </div>
 
-      {/* Controls Layout - 2 Rows */}
+      {/* Controls Layout - 3 Rows */}
       <div className="space-y-4">
-        {/* Row 1: Add Mission Button Only */}
+        {/* Row 1: Timezone Selector */}
+        <div className="flex justify-end">
+          <TimezoneSelect onTimezoneChange={() => {
+            // Page will reload automatically to apply timezone changes
+          }} />
+        </div>
+
+        {/* Row 2: Add Mission Button Only */}
         <div className="flex justify-start">
           <AddMissionModal
             isOpen={isAddModalOpen}
@@ -372,7 +351,7 @@ const AdminMissionsTable = () => {
           />
         </div>
 
-        {/* Row 2: Search + Filters + Controls */}
+        {/* Row 3: Search + Filters + Controls */}
         <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
           {/* Left Side: Search + Active Filters + Reset */}
           <div className="flex flex-col sm:flex-row gap-4 flex-1">

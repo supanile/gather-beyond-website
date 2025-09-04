@@ -33,6 +33,7 @@ import {
   getStatusColor,
   parseReward,
 } from "@/lib/admin/missions/missionTableUtils";
+import { formatDateWithTime } from "@/lib/admin/missions/timezoneUtils";
 
 interface MissionsTableProps {
   missions: Mission[];
@@ -46,47 +47,7 @@ interface MissionsTableProps {
   totalVisibleColumns: number;
 }
 
-// Function to display date and time (uses the same format as formatDate but adds time)
-// Modified function to display date and time
-const formatDateWithTime = (
-  dateValue: string | number | null | undefined
-): string => {
-  if (!dateValue) return "N/A";
-
-  try {
-    let date: Date;
-
-    // ตรวจสอบว่าเป็น Unix timestamp (number) or ISO string
-    if (typeof dateValue === "number") {
-      // Unix timestamp - แปลงเป็น milliseconds
-      date = new Date(dateValue * 1000);
-    } else if (typeof dateValue === "string") {
-      // ISO string or date string
-      date = new Date(dateValue);
-    } else {
-      return "N/A";
-    }
-
-    if (isNaN(date.getTime())) return "N/A";
-
-    // ใช้ local timezone (Bangkok) โดยตรง
-    const options: Intl.DateTimeFormatOptions = {
-      timeZone: "Asia/Bangkok",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    };
-
-    const formatter = new Intl.DateTimeFormat("en-GB", options);
-    return formatter.format(date);
-  } catch (error) {
-    console.error("Error formatting date with time:", error);
-    return "N/A";
-  }
-};
+// Function moved to timezoneUtils.ts for better reusability
 
 export const MissionsTable: React.FC<MissionsTableProps> = ({
   missions,
@@ -302,7 +263,10 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
                   )}
                   {columnVisibility.reward && (
                     <TableCell className="px-3">
-                      <div className="font-medium text-xs">
+                      <div
+                        className="font-medium text-xs truncate w-full"
+                        title={`${reward.amount} ${reward.token}`}
+                      >
                         {reward.amount} {reward.token}
                       </div>
                     </TableCell>
