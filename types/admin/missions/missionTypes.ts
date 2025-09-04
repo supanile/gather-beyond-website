@@ -23,6 +23,7 @@ export interface Mission {
   status: string;
   gristHelper_Display2: string;
   serverId: string;
+  missionTargeting?: string | MissionTargetingData | null;
 }
 
 export interface ColumnVisibility {
