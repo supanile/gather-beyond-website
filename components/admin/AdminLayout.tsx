@@ -265,14 +265,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                               day: "numeric",
                             })}
                           </span>
-                          <span className="w-1 h-1 bg-muted-foreground/50 rounded-full"></span>
-                          <span>
-                            {currentTime.toLocaleTimeString("en-US", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              second: "2-digit",
-                            })}
-                          </span>
                         </>
                       ) : (
                         <span>Loading...</span>
