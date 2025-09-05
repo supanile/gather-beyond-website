@@ -1695,7 +1695,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                   </div>
 
                   {/* Requirements */}
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label
                       htmlFor="requirements"
                       className="text-sm font-medium"
@@ -1722,7 +1722,7 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
                         {validationErrors.requirements}
                       </p>
                     )}
-                  </div>
+                  </div> */}
                 </div>
               </TabsContent>
 
