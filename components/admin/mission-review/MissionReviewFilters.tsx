@@ -66,7 +66,7 @@ export function MissionReviewFiltersComponent({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
               <Input
                 type="text"
-                placeholder="Search by Mission Name, User ID, Status, or Link/Email..."
+                placeholder="Search by Username, User ID, Mission Name, Status, or Link/Email..."
                 value={filters.searchQuery}
                 onChange={(e) => updateFilter("searchQuery", e.target.value)}
                 className="pl-10"

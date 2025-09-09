@@ -3,15 +3,14 @@ export interface UserMission {
   mission_id: number;
   mission_name: string;
   user_id: string;
-  status: "submitted" | "completed" | "rejected";
+  status: "accepted" | "submitted" | "completed" | "rejected";
   accepted_at: number | null;
   submitted_at: number | null;
   completed_at: number | null;
+  rejected_at?: number | null;
   submission_link: string;
   notes: string;
-  // Discord user data (optional, for future use)
-  discord_username?: string;
-  discord_avatar_url?: string;
+  discord_user?: DiscordUserData;
 }
 
 export interface DiscordUserData {
@@ -26,6 +25,7 @@ export interface MissionReviewSortState {
 
 export interface MissionReviewColumnVisibility {
   id: boolean;
+  user_avatar: boolean;
   mission_name: boolean;
   mission_id: boolean;
   user_id: boolean;
@@ -81,4 +81,11 @@ export interface MissionReviewStats {
   submitted: number;
   completed: number;
   rejected: number;
+}
+
+export interface MissionReviewPaginationState {
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
+  totalPages: number;
 }

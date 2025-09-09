@@ -5,7 +5,15 @@ import { MissionReviewTable } from "./MissionReviewTable";
 import { MissionReviewFiltersComponent } from "./MissionReviewFilters";
 import { MissionReviewStatsComponent } from "./MissionReviewStats";
 import { MissionDetailsModal } from "./MissionDetailsModal";
+import { MissionReviewPagination } from "./MissionReviewPagination";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,21 +25,26 @@ import {
 import { useMissionReview } from "@/hooks/useMissionReview";
 import {
   UserMission,
-  MissionReviewSortState,
   MissionReviewColumnVisibility,
 } from "@/types/admin/missionReview";
 import { Settings2 } from "lucide-react";
+import { MissionReviewPageSkeleton } from "./MissionReviewSkeleton";
 
 export function MissionReviewPage() {
   const {
     missions,
     stats,
     filters,
+    pagination,
     loading,
+    sortState,
     setFilters,
     clearFilters,
     approveMission,
     rejectMission,
+    handlePageChange,
+    handleItemsPerPageChange,
+    handleSort,
   } = useMissionReview();
 
   const [selectedMission, setSelectedMission] = useState<UserMission | null>(
@@ -39,16 +52,11 @@ export function MissionReviewPage() {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Sort state
-  const [sortState, setSortState] = useState<MissionReviewSortState>({
-    field: "_id",
-    direction: "desc",
-  });
-
   // Column visibility state - Updated to include user_avatar
   const [columnVisibility, setColumnVisibility] =
     useState<MissionReviewColumnVisibility>({
       id: true,
+      user_avatar: true,
       mission_name: true,
       mission_id: true,
       user_id: true,
@@ -75,14 +83,6 @@ export function MissionReviewPage() {
     await rejectMission(missionId);
   };
 
-  const handleSort = (field: keyof UserMission) => {
-    setSortState((prev) => ({
-      field,
-      direction:
-        prev.field === field && prev.direction === "asc" ? "desc" : "asc",
-    }));
-  };
-
   const handleToggleColumnVisibility = (
     column: keyof MissionReviewColumnVisibility
   ) => {
@@ -91,27 +91,6 @@ export function MissionReviewPage() {
       [column]: !prev[column],
     }));
   };
-
-  // Sort missions
-  const sortedMissions = [...missions].sort((a, b) => {
-    const { field, direction } = sortState;
-    let aValue = a[field];
-    let bValue = b[field];
-
-    // Handle null/undefined values
-    if ((aValue === null || aValue === undefined) && (bValue === null || bValue === undefined)) return 0;
-    if (aValue === null || aValue === undefined) return direction === "asc" ? -1 : 1;
-    if (bValue === null || bValue === undefined) return direction === "asc" ? 1 : -1;
-
-    if (typeof aValue === "string" && typeof bValue === "string") {
-      aValue = aValue.toLowerCase();
-      bValue = bValue.toLowerCase();
-    }
-
-    if (aValue < bValue) return direction === "asc" ? -1 : 1;
-    if (aValue > bValue) return direction === "asc" ? 1 : -1;
-    return 0;
-  });
 
   // Determine empty message based on filters
   const getEmptyMessage = () => {
@@ -132,7 +111,7 @@ export function MissionReviewPage() {
   const getColumnLabel = (key: string): string => {
     const labelMap: Record<string, string> = {
       id: "ID",
-      user_avatar: "Avatar",
+      user_avatar: "User",
       mission_name: "Mission",
       mission_id: "Mission ID",
       user_id: "User ID",
@@ -143,6 +122,10 @@ export function MissionReviewPage() {
 
     return labelMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
   };
+
+  if (loading) {
+    return <MissionReviewPageSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
@@ -160,8 +143,49 @@ export function MissionReviewPage() {
       <div className="space-y-4">
         {/* Table Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div></div> {/* Empty div for spacing */}
+          {/* Left side - Showing info */}
+          <div className="text-xs sm:text-sm text-muted-foreground">
+            <span>
+              Showing{" "}
+              {missions.length > 0
+                ? `${(pagination.currentPage - 1) * pagination.itemsPerPage + 1}-${Math.min(
+                    pagination.currentPage * pagination.itemsPerPage,
+                    pagination.totalItems
+                  )} of ${pagination.totalItems}`
+                : "0"}{" "}
+              missions
+            </span>
+          </div>
+          
+          {/* Right side - Controls */}
           <div className="flex items-center gap-2">
+            {/* Items per page selector */}
+            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+              Show:
+            </span>
+            <Select
+              value={pagination.itemsPerPage.toString()}
+              onValueChange={(value) => handleItemsPerPageChange(parseInt(value))}
+            >
+              <SelectTrigger className="w-16 sm:w-20 h-7 sm:h-8 text-xs sm:text-sm cursor-pointer">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10" className="text-xs sm:text-sm">
+                  10
+                </SelectItem>
+                <SelectItem value="20" className="text-xs sm:text-sm">
+                  20
+                </SelectItem>
+                <SelectItem value="50" className="text-xs sm:text-sm">
+                  50
+                </SelectItem>
+                <SelectItem value="100" className="text-xs sm:text-sm">
+                  100
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            
             {/* Column Visibility Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -205,7 +229,7 @@ export function MissionReviewPage() {
         <div className="overflow-x-auto">
           <div className="rounded-md border border-border">
             <MissionReviewTable
-              missions={sortedMissions}
+              missions={missions}
               sortState={sortState}
               columnVisibility={columnVisibility}
               onSort={handleSort}
@@ -216,6 +240,12 @@ export function MissionReviewPage() {
               isLoading={loading}
               totalVisibleColumns={totalVisibleColumns}
               emptyMessage={getEmptyMessage()}
+            />
+            
+            {/* Pagination at bottom of table */}
+            <MissionReviewPagination
+              pagination={pagination}
+              onPageChange={handlePageChange}
             />
           </div>
         </div>

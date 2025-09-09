@@ -5,8 +5,9 @@ import {
   UserMission,
   MissionReviewFilters,
   MissionReviewStats,
+  MissionReviewPaginationState,
+  MissionReviewSortState,
 } from "@/types/admin/missionReview";
-import { mockUserMissions } from "@/data/admin/missionReviewMockData";
 
 export function useMissionReview() {
   const [missions, setMissions] = useState<UserMission[]>([]);
@@ -20,15 +21,37 @@ export function useMissionReview() {
     },
   });
 
+  // Sort state - เริ่มต้นด้วย _id desc เพื่อแสดงล่าสุดก่อน
+  const [sortState, setSortState] = useState<MissionReviewSortState>({
+    field: "_id",
+    direction: "desc",
+  });
+
+  // Pagination state
+  const [pagination, setPagination] = useState<MissionReviewPaginationState>({
+    currentPage: 1,
+    itemsPerPage: 10,
+    totalItems: 0,
+    totalPages: 0,
+  });
+
   // Load initial data
   useEffect(() => {
-    const loadMissions = () => {
+    const loadMissions = async () => {
       setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setMissions(mockUserMissions);
+      try {
+        const response = await fetch("/api/user-missions");
+        if (!response.ok) {
+          throw new Error("Failed to fetch missions");
+        }
+        const data = await response.json();
+        setMissions(data);
+      } catch (error) {
+        console.error("Error loading missions:", error);
+        setMissions([]);
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
     loadMissions();
@@ -69,13 +92,19 @@ export function useMissionReview() {
           mission.mission_id.toString().includes(searchTerm) ||
           mission.mission_id.toString().startsWith(searchTerm);
 
+        // Search in Discord username
+        const usernameMatch = mission.discord_user?.username
+          ? mission.discord_user.username.toLowerCase().includes(searchTerm)
+          : false;
+
         // Return true if any field matches
         if (
           !missionNameMatch &&
           !userIdMatch &&
           !statusMatch &&
           !linkMatch &&
-          !missionIdMatch
+          !missionIdMatch &&
+          !usernameMatch
         ) {
           return false;
         }
@@ -84,6 +113,77 @@ export function useMissionReview() {
       return true;
     });
   }, [missions, filters]);
+
+  // Sort missions ก่อน pagination
+  const sortedMissions = useMemo(() => {
+    return [...filteredMissions].sort((a, b) => {
+      const { field, direction } = sortState;
+      let aValue = a[field];
+      let bValue = b[field];
+
+      // Handle null/undefined values
+      if (
+        (aValue === null || aValue === undefined) &&
+        (bValue === null || bValue === undefined)
+      )
+        return 0;
+      if (aValue === null || aValue === undefined)
+        return direction === "asc" ? -1 : 1;
+      if (bValue === null || bValue === undefined)
+        return direction === "asc" ? 1 : -1;
+
+      // Special handling for _id field to ensure numeric sorting
+      if (field === "_id") {
+        const numA = Number(aValue);
+        const numB = Number(bValue);
+        return direction === "asc" ? numA - numB : numB - numA;
+      }
+
+      // Special handling for numeric fields
+      if (field === "mission_id" || field === "submitted_at" || field === "completed_at" || field === "accepted_at") {
+        const numA = Number(aValue) || 0;
+        const numB = Number(bValue) || 0;
+        return direction === "asc" ? numA - numB : numB - numA;
+      }
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredMissions, sortState]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  }, [filters.status, filters.searchQuery]);
+
+  // Reset to first page when sort changes
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  }, [sortState]);
+
+  // Paginated missions - ใช้ sortedMissions แทน filteredMissions
+  const paginatedMissions = useMemo(() => {
+    const totalItems = sortedMissions.length;
+    const totalPages = Math.ceil(totalItems / pagination.itemsPerPage);
+    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+    const endIndex = startIndex + pagination.itemsPerPage;
+    const currentMissions = sortedMissions.slice(startIndex, endIndex);
+
+    // Update pagination state
+    setPagination((prev) => ({
+      ...prev,
+      totalItems,
+      totalPages,
+    }));
+
+    return currentMissions;
+  }, [sortedMissions, pagination.currentPage, pagination.itemsPerPage]);
 
   // Calculate stats based on filtered missions
   const stats: MissionReviewStats = useMemo(() => {
@@ -109,6 +209,7 @@ export function useMissionReview() {
   // Actions
   const approveMission = async (missionId: number) => {
     try {
+      // Optimistically update the UI
       setMissions((prev) =>
         prev.map((mission) =>
           mission._id === missionId
@@ -121,30 +222,66 @@ export function useMissionReview() {
         )
       );
 
-      // TODO: Replace with actual API call
+      // Send update to API
+      const response = await fetch(`/api/user-missions/${missionId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "completed",
+          completed_at: Math.floor(Date.now() / 1000),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to approve mission");
+      }
+
       console.log(`Approved mission ${missionId}`);
     } catch (error) {
       console.error("Failed to approve mission:", error);
+      // Revert the optimistic update
+      refreshMissions();
     }
   };
 
   const rejectMission = async (missionId: number) => {
     try {
+      // Optimistically update the UI
       setMissions((prev) =>
         prev.map((mission) =>
           mission._id === missionId
             ? {
                 ...mission,
                 status: "rejected" as const,
+                rejected_at: Math.floor(Date.now() / 1000),
               }
             : mission
         )
       );
 
-      // TODO: Replace with actual API call
+      // Send update to API
+      const response = await fetch(`/api/user-missions/${missionId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "rejected",
+          rejected_at: Math.floor(Date.now() / 1000),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to reject mission");
+      }
+
       console.log(`Rejected mission ${missionId}`);
     } catch (error) {
       console.error("Failed to reject mission:", error);
+      // Revert the optimistic update
+      refreshMissions();
     }
   };
 
@@ -159,25 +296,60 @@ export function useMissionReview() {
     });
   };
 
-  const refreshMissions = () => {
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setPagination((prev) => ({ ...prev, currentPage: page }));
+  };
+
+  const handleItemsPerPageChange = (itemsPerPage: number) => {
+    setPagination((prev) => ({
+      ...prev,
+      itemsPerPage,
+      currentPage: 1, // Reset to first page when changing items per page
+    }));
+  };
+
+  // Sort handler
+  const handleSort = (field: keyof UserMission) => {
+    setSortState((prev) => ({
+      field,
+      direction:
+        prev.field === field && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const refreshMissions = async () => {
     setLoading(true);
-    // Simulate API refresh
-    setTimeout(() => {
-      setMissions([...mockUserMissions]);
+    try {
+      const response = await fetch("/api/user-missions");
+      if (!response.ok) {
+        throw new Error("Failed to refresh missions");
+      }
+      const data = await response.json();
+      setMissions(data);
+    } catch (error) {
+      console.error("Error refreshing missions:", error);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return {
-    missions: filteredMissions,
+    missions: paginatedMissions,
     allMissions: missions,
+    filteredMissions,
     stats,
     filters,
+    pagination,
     loading,
+    sortState,
     setFilters,
     clearFilters,
     approveMission,
     rejectMission,
     refreshMissions,
+    handlePageChange,
+    handleItemsPerPageChange,
+    handleSort,
   };
 }

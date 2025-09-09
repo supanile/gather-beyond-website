@@ -32,7 +32,7 @@ import {
 } from "@/types/admin/missionReview";
 import { MissionStatusBadge } from "./MissionStatusBadge";
 import { MissionActionConfirmDialog } from "./MissionActionConfirmDialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { UserAvatar } from "./UserAvatar";
 
 export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
   missions,
@@ -43,7 +43,6 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
   onApprove,
   onReject,
   onViewDetails,
-  isLoading = false,
   totalVisibleColumns,
   emptyMessage = "No mission reviews found.",
 }) => {
@@ -106,15 +105,6 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
         missionName: "",
       });
     }
-  };
-
-  const formatTimestamp = (timestamp: number | null) => {
-    if (!timestamp) return "-";
-    return new Date(timestamp * 1000).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
   };
 
   const truncateText = (text: string, maxLength: number = 40) => {
@@ -198,77 +188,55 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
     </TableHead>
   );
 
-  if (isLoading) {
-    return (
-      <Table className="table-fixed w-full">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-10 font-medium px-4 text-xs">No</TableHead>
-            <TableHead className="w-48 font-medium px-3 text-xs">Mission</TableHead>
-            <TableHead className="w-26 font-medium px-3 text-xs">User ID</TableHead>
-            <TableHead className="w-24 font-medium px-5 text-xs">Status</TableHead>
-            <TableHead className="w-20 font-medium px-3 text-xs">Submitted</TableHead>
-            <TableHead className="w-48 font-medium px-3 text-xs">Submission</TableHead>
-            <TableHead className="w-28 font-medium px-0 text-xs">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <TableRow key={i}>
-              <TableCell className="px-4">
-                <Skeleton className="h-4 w-12" />
-              </TableCell>
-              <TableCell className="px-3">
-                <div className="space-y-2">
-                  <Skeleton className="h-3 w-32" />
-                  <Skeleton className="h-3 w-24" />
-                </div>
-              </TableCell>
-              <TableCell className="px-3">
-                <Skeleton className="h-4 w-20" />
-              </TableCell>
-              <TableCell className="px-5">
-                <Skeleton className="h-5 w-16 rounded-full" />
-              </TableCell>
-              <TableCell className="px-3">
-                <div className="space-y-1">
-                  <Skeleton className="h-3 w-16" />
-                  <Skeleton className="h-3 w-12" />
-                </div>
-              </TableCell>
-              <TableCell className="px-3">
-                <Skeleton className="h-3 w-28" />
-              </TableCell>
-              <TableCell className="px-0">
-                <div className="flex items-center space-x-1">
-                  <Skeleton className="h-6 w-6 rounded" />
-                  <Skeleton className="h-6 w-6 rounded" />
-                  <Skeleton className="h-6 w-6 rounded" />
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    );
-  }
+  // Create non-sortable header for Avatar column
+  const createNonSortableHeader = (
+    label: string,
+    className: string,
+    column: keyof MissionReviewColumnVisibility
+  ) => (
+    <TableHead className={className}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+          >
+            {label}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onClick={() => onToggleColumnVisibility(column)}>
+            <div className="flex items-center">
+              <EyeOff className="w-4 h-4 mr-2" />
+              Hide
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </TableHead>
+  );
 
   return (
     <>
       <Table className="table-fixed w-full">
         <TableHeader>
           <TableRow>
-            {columnVisibility.id && createColumnHeader("_id", "No", "w-10 px-1")}
-            {columnVisibility.mission_name &&
-              createColumnHeader("mission_name", "Mission", "w-48 px-0")}
+            {columnVisibility.id &&
+              createColumnHeader("_id", "No", "w-10 px-1")}
+            {columnVisibility.user_avatar &&
+              createNonSortableHeader("User", "w-36 px-3", "user_avatar")}
             {columnVisibility.user_id &&
               createColumnHeader("user_id", "User ID", "w-26 px-0")}
+            {columnVisibility.mission_name &&
+              createColumnHeader("mission_name", "Mission", "w-48 px-0")}
             {columnVisibility.status &&
               createColumnHeader("status", "Status", "w-24 px-2")}
-            {columnVisibility.submitted_at &&
-              createColumnHeader("submitted_at", "Submitted", "w-20 px-0")}
             {columnVisibility.submission_link &&
-              createColumnHeader("submission_link", "Submission", "w-48 px-0")}
+              createColumnHeader(
+                "submission_link",
+                "Submission Link",
+                "w-48 px-0"
+              )}
             <TableHead className="w-28 px-0 text-xs">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -283,14 +251,20 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                     {mission._id}
                   </TableCell>
                 )}
-                {columnVisibility.mission_name && (
+                {columnVisibility.user_avatar && (
                   <TableCell className="px-3">
-                    <div className="w-full">
-                      <div
-                        className="truncate font-medium text-xs"
-                        title={mission.mission_name}
-                      >
-                        {truncateText(mission.mission_name)}
+                    <div className="flex items-center gap-2">
+                      <UserAvatar
+                        discordId={mission.user_id}
+                        username={mission.discord_user?.username}
+                        avatarUrl={mission.discord_user?.avatarUrl}
+                        size="md"
+                        className="flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-xs text-slate-900 dark:text-slate-100 truncate">
+                          {mission.discord_user?.username || "Unknown User"}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
@@ -305,18 +279,21 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                     </div>
                   </TableCell>
                 )}
+                {columnVisibility.mission_name && (
+                  <TableCell className="px-3">
+                    <div className="w-full">
+                      <div
+                        className="truncate font-medium text-xs"
+                        title={mission.mission_name}
+                      >
+                        {truncateText(mission.mission_name)}
+                      </div>
+                    </div>
+                  </TableCell>
+                )}
                 {columnVisibility.status && (
                   <TableCell className="px-5">
                     <MissionStatusBadge status={mission.status} />
-                  </TableCell>
-                )}
-                {columnVisibility.submitted_at && (
-                  <TableCell className="px-3 text-xs">
-                    <div className="flex flex-col">
-                      <span className="font-medium">
-                        {formatTimestamp(mission.submitted_at)}
-                      </span>
-                    </div>
                   </TableCell>
                 )}
                 {columnVisibility.submission_link && (
@@ -350,24 +327,29 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleApproveClick(mission)}
-                      className="h-7 w-7 p-0 border-green-500 text-green-600 hover:text-green-700 hover:bg-green-50 cursor-pointer"
-                      title="Approve Mission"
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRejectClick(mission)}
-                      className="h-7 w-7 p-0 border-red-500 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
-                      title="Reject Mission"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    {/* Show Approve and Reject buttons only for Submitted, Completed, and Rejected status */}
+                    {mission.status !== "accepted" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleApproveClick(mission)}
+                          className="h-7 w-7 p-0 border-green-500 text-green-600 hover:text-green-700 hover:bg-green-50 cursor-pointer"
+                          title="Approve Mission"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRejectClick(mission)}
+                          className="h-7 w-7 p-0 border-red-500 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                          title="Reject Mission"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

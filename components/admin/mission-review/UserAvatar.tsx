@@ -3,6 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { User } from "lucide-react";
+import { AvatarModal } from "./AvatarModal";
 
 interface UserAvatarProps {
   discordId?: string;
@@ -10,6 +11,7 @@ interface UserAvatarProps {
   avatarUrl?: string;
   size?: "sm" | "md" | "lg";
   className?: string;
+  clickable?: boolean; // เพิ่ม prop นี้
 }
 
 export function UserAvatar({ 
@@ -17,7 +19,8 @@ export function UserAvatar({
   username, 
   avatarUrl: providedAvatarUrl, 
   size = "md", 
-  className = "" 
+  className = "",
+  clickable = true // default เป็น true
 }: UserAvatarProps) {
   const [discordData, setDiscordData] = useState<{
     username: string;
@@ -25,6 +28,7 @@ export function UserAvatar({
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // เพิ่ม state สำหรับ modal
 
   // Size classes
   const sizeClasses = {
@@ -64,6 +68,13 @@ export function UserAvatar({
     return name.slice(0, 2).toUpperCase();
   };
 
+  // Handle avatar click
+  const handleClick = () => {
+    if (clickable) {
+      setIsModalOpen(true);
+    }
+  };
+
   if (loading) {
     return (
       <Avatar className={`${sizeClasses[size]} ${className}`}>
@@ -75,21 +86,35 @@ export function UserAvatar({
   }
 
   return (
-    <Avatar className={`${sizeClasses[size]} ${className}`}>
-      {displayAvatarUrl && !error && (
-        <AvatarImage 
-          src={displayAvatarUrl} 
-          alt={`${displayUsername}'s avatar`}
-          onError={() => setError(true)}
-        />
-      )}
-      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
-        {error ? (
-          <User className={size === "sm" ? "w-3 h-3" : size === "lg" ? "w-5 h-5" : "w-4 h-4"} />
-        ) : (
-          getInitials(displayUsername)
+    <>
+      <Avatar 
+        className={`${sizeClasses[size]} ${className} ${clickable ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all duration-200' : ''}`}
+        onClick={handleClick} // เพิ่ม onClick handler
+      >
+        {displayAvatarUrl && !error && (
+          <AvatarImage 
+            src={displayAvatarUrl} 
+            alt={`${displayUsername}'s avatar`}
+            onError={() => setError(true)}
+          />
         )}
-      </AvatarFallback>
-    </Avatar>
+        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+          {error ? (
+            <User className={size === "sm" ? "w-3 h-3" : size === "lg" ? "w-5 h-5" : "w-4 h-4"} />
+          ) : (
+            getInitials(displayUsername)
+          )}
+        </AvatarFallback>
+      </Avatar>
+      
+      {/* เพิ่ม AvatarModal */}
+      <AvatarModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        username={displayUsername}
+        avatarUrl={displayAvatarUrl}
+        discordId={discordId}
+      />
+    </>
   );
 }

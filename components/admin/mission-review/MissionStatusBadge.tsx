@@ -31,6 +31,14 @@ export function MissionStatusBadge({ status }: MissionStatusBadgeProps) {
           icon: XCircle,
           label: "Rejected",
         };
+      case "accepted":
+        return {
+          variant: "default" as const,
+          className:
+            "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
+          icon: CheckCircle,
+          label: "Accepted",
+        };
       default:
         return {
           variant: "outline" as const,
