@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Crosshair, Home, Menu } from "lucide-react";
+import { BarChart3, Crosshair, Home, Menu, FileText, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/LandingDashboard/Header/Darkmode";
+import { Button } from "@/components/ui/button";
 
 import {
   Sidebar,
@@ -62,6 +63,11 @@ const items = [
     title: "Missions Management",
     url: "/admin/missions",
     icon: Crosshair,
+  },
+  {
+    title: "Mission Reviews",
+    url: "/admin/mission-review",
+    icon: FileText,
   },
 ];
 
@@ -198,6 +204,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [currentTime, setCurrentTime] = React.useState(new Date());
   const [isClient, setIsClient] = React.useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   // Set client flag after component mounts
   React.useEffect(() => {
@@ -214,12 +221,41 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     return () => clearInterval(timer);
   }, []);
 
+  // Refresh function for different pages
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    
+    try {
+      // Add a delay to show the spinning animation before reload
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Force reload the current page
+      window.location.reload();
+    } catch (error) {
+      console.error("Error refreshing:", error);
+      setIsRefreshing(false);
+    }
+  };
+
   // Dynamic title based on current path
   const getPageTitle = () => {
     if (pathname === "/admin/missions") return "Missions Management";
     if (pathname === "/admin/userdashboard") return "Users Dashboard";
+    if (pathname === "/admin/mission-review") return "Mission Reviews";
     if (pathname === "/") return "Home";
     return "Admin Panel";
+  };
+
+  // Dynamic description based on current path
+  const getDescription = () => {
+    if (pathname === "/admin/missions")
+      return "Create, edit, and manage missions";
+    if (pathname === "/admin/userdashboard")
+      return "Monitor user activity and statistics";
+    if (pathname === "/admin/mission-review")
+      return "Review and manage user mission submissions";
+    if (pathname === "/") return "Welcome to the main dashboard";
+    return "Administrative control center";
   };
 
   // Prevent blur effect issues during initial load
@@ -244,11 +280,17 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 </SidebarTrigger>
                 <div className="flex items-center space-x-2 lg:space-x-3">
                   <div className="h-6 lg:h-8 w-1 bg-gray-800 dark:bg-gray-200 rounded-full"></div>
-                  <div>
-                    <h1 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      {getPageTitle()}
-                    </h1>
-                    <p className="text-xs lg:text-sm text-muted-foreground flex items-center space-x-1 lg:space-x-2">
+                  <div className="flex flex-col">
+                    {/* แก้ไขส่วนนี้ - Title และ Description ในบรรทัดเดียวกัน */}
+                    <div className="flex items-baseline space-x-2 lg:space-x-3">
+                      <h1 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        {getPageTitle()}
+                      </h1>
+                      <span className="text-xs lg:text-sm text-muted-foreground hidden sm:inline">
+                        {getDescription()}
+                      </span>
+                    </div>
+                    <p className="text-xs lg:text-sm text-muted-foreground flex items-center space-x-1 lg:space-x-2 mt-0.5">
                       {isClient ? (
                         <>
                           <span className="hidden sm:inline">
@@ -256,12 +298,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                               weekday: "long",
                               year: "numeric",
                               month: "long",
-                              day: "numeric",
-                            })}
-                          </span>
-                          <span className="sm:hidden">
-                            {currentTime.toLocaleDateString("en-US", {
-                              month: "short",
                               day: "numeric",
                             })}
                           </span>
@@ -274,6 +310,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 </div>
               </div>
               <div className="flex items-center space-x-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2 h-9"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
                 <ModeToggle />
               </div>
             </div>
