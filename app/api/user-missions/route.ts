@@ -4,7 +4,7 @@ import type { DiscordUserData } from "@/types/admin/missionReview";
 
 async function fetchDiscordUserData(discordId: string): Promise<DiscordUserData | null> {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/discord/${discordId}`, {
+    const response = await fetch(`${process.env.PUBLIC_URL}/api/discord/${discordId}`, {
       next: { revalidate: 3600 }
     });
     
