@@ -148,6 +148,7 @@ const AdminUserTable = ({
             onSort={handleSort}
             onToggleColumnVisibility={toggleColumnVisibility}
             onOpenModal={openModal}
+            showUsername={true}
           />
 
           {/* Pagination Controls */}

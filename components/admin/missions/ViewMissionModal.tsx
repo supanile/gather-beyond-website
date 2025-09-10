@@ -157,17 +157,40 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
     selectedServerIds = missionTargeting.discordFilters.servers;
     console.log("Server IDs from missionTargeting:", selectedServerIds);
   }
-  // Priority 2: Try to get from serverId (comma-separated string)
+  // Priority 2: Try to get from serverId
   else if (
     mission.serverId &&
     mission.serverId.trim() !== "" &&
     mission.serverId !== "0"
   ) {
-    selectedServerIds = mission.serverId
-      .split(",")
-      .map((id) => id.trim())
-      .filter((id) => id !== "" && id !== "0");
-    console.log("Server IDs from mission.serverId:", selectedServerIds);
+    try {
+      // Check if serverId is a JSON string array
+      if (mission.serverId.startsWith("[") && mission.serverId.endsWith("]")) {
+        // Parse as JSON array
+        const parsedIds = JSON.parse(mission.serverId);
+        if (Array.isArray(parsedIds)) {
+          selectedServerIds = parsedIds.filter((id) => id && id !== "0");
+        }
+      } else {
+        // Parse as comma-separated string
+        selectedServerIds = mission.serverId
+          .split(",")
+          .map((id) => id.trim().replace(/^["']|["']$/g, "")) // Remove quotes
+          .filter((id) => id !== "" && id !== "0");
+      }
+      console.log("Server IDs from mission.serverId:", selectedServerIds);
+    } catch (error) {
+      console.error("Error parsing serverId:", error);
+      // Fallback to comma-separated parsing
+      selectedServerIds = mission.serverId
+        .split(",")
+        .map((id) => id.trim().replace(/^["']|["']$/g, ""))
+        .filter((id) => id !== "" && id !== "0");
+      console.log(
+        "Fallback Server IDs from mission.serverId:",
+        selectedServerIds
+      );
+    }
   }
 
   const selectedServers = discordServers.filter((server) =>
@@ -189,11 +212,31 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
   console.log("Matched Selected Servers:", selectedServers);
   console.log("IsLoadingServers:", isLoadingServers);
   console.log("ServerFetchError:", serverFetchError);
+
+  // Additional debug - check exact server ID format
+  console.log("Server ID comparisons:");
+  selectedServerIds.forEach((selectedId, index) => {
+    const match = discordServers.find((s) => s.serverId === selectedId);
+    console.log(
+      `${index + 1}. Selected: "${selectedId}" | Match: ${
+        match ? `"${match.name}"` : "NOT FOUND"
+      }`
+    );
+    if (!match) {
+      // Show similar IDs for debugging
+      const similar = discordServers.filter((s) =>
+        s.serverId.includes(selectedId.slice(-6))
+      );
+      console.log(
+        `   Similar IDs: ${similar.map((s) => s.serverId).join(", ")}`
+      );
+    }
+  });
   console.log("==============================");
 
   // Calculate total member count from available data
   const totalMembers = selectedServerIds.reduce((total, serverId) => {
-    const server = discordServers.find(s => s.serverId === serverId);
+    const server = discordServers.find((s) => s.serverId === serverId);
     return total + (server?.memberCount || 0);
   }, 0);
 
@@ -232,7 +275,6 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                     {mission.description}
                   </p>
                 </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
@@ -251,7 +293,6 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                     </p>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
@@ -269,8 +310,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                       {reward.amount} {reward.token}
                     </p>
                   </div>
-                </div>
-
+                </div>{" "}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
@@ -289,7 +329,6 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                     </p>
                   </div>
                 </div>
-
                 <div>
                   <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
                     Action Request
@@ -298,7 +337,6 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                     {mission.action_request}
                   </p>
                 </div>
-
                 <div>
                   <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
                     Partner
@@ -307,7 +345,6 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                     {mission.partnerName || "N/A"}
                   </p>
                 </div>
-
                 {mission.useful_link && (
                   <div>
                     <Label className="text-xs sm:text-sm font-medium text-muted-foreground">
@@ -429,8 +466,10 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                   </p>
                                   {selectedServerIds.map((serverId) => {
                                     // Try to find any cached data even during error
-                                    const cachedServer = discordServers.find(s => s.serverId === serverId);
-                                    
+                                    const cachedServer = discordServers.find(
+                                      (s) => s.serverId === serverId
+                                    );
+
                                     return (
                                       <div
                                         key={serverId}
@@ -441,7 +480,10 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                             {cachedServer?.icon ? (
                                               <Image
                                                 src={cachedServer.icon}
-                                                alt={cachedServer.name || "Discord Server"}
+                                                alt={
+                                                  cachedServer.name ||
+                                                  "Discord Server"
+                                                }
                                                 width={32}
                                                 height={32}
                                                 className="w-8 h-8 rounded object-cover"
@@ -449,14 +491,17 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                             ) : (
                                               <div className="w-8 h-8 rounded bg-gray-600 flex items-center justify-center">
                                                 <span className="text-white text-sm">
-                                                  {cachedServer?.name?.charAt(0)?.toUpperCase() || "🌐"}
+                                                  {cachedServer?.name
+                                                    ?.charAt(0)
+                                                    ?.toUpperCase() || "🌐"}
                                                 </span>
                                               </div>
                                             )}
                                           </div>
                                           <div className="flex-1 min-w-0">
                                             <div className="text-white font-medium text-sm truncate">
-                                              {cachedServer?.name || "Discord Server"}
+                                              {cachedServer?.name ||
+                                                "Discord Server"}
                                             </div>
                                             <div className="text-gray-400 text-xs font-mono break-all">
                                               ID: {serverId}
@@ -540,8 +585,10 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                               </p>
                               {selectedServerIds.map((serverId) => {
                                 // Try to find any partial match or cached data
-                                const cachedServer = discordServers.find(s => s.serverId === serverId);
-                                
+                                const cachedServer = discordServers.find(
+                                  (s) => s.serverId === serverId
+                                );
+
                                 return (
                                   <div
                                     key={serverId}
@@ -552,7 +599,10 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                         {cachedServer?.icon ? (
                                           <Image
                                             src={cachedServer.icon}
-                                            alt={cachedServer.name || "Discord Server"}
+                                            alt={
+                                              cachedServer.name ||
+                                              "Discord Server"
+                                            }
                                             width={32}
                                             height={32}
                                             className="w-8 h-8 rounded object-cover"
@@ -560,14 +610,17 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                         ) : (
                                           <div className="w-8 h-8 rounded bg-gray-600 flex items-center justify-center">
                                             <span className="text-white text-sm">
-                                              {cachedServer?.name?.charAt(0)?.toUpperCase() || "🌐"}
+                                              {cachedServer?.name
+                                                ?.charAt(0)
+                                                ?.toUpperCase() || "🌐"}
                                             </span>
                                           </div>
                                         )}
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="text-white font-medium text-sm truncate">
-                                          {cachedServer?.name || "Discord Server"}
+                                          {cachedServer?.name ||
+                                            "Discord Server"}
                                         </div>
                                         <div className="text-gray-400 text-xs font-mono break-all">
                                           ID: {serverId}
@@ -618,7 +671,8 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                           No Discord servers targeted
                         </div>
                         <div className="text-xs text-gray-500">
-                          This mission doesn&apos;t target specific Discord servers
+                          This mission doesn&apos;t target specific Discord
+                          servers
                         </div>
                       </div>
                     </div>
@@ -698,25 +752,37 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                 min?: number;
                                 max?: number;
                               };
-                              
+
                               let displayValue = "";
-                              if (key === "xpLevel" && filterValue.min !== undefined && filterValue.max !== undefined) {
+                              if (
+                                key === "xpLevel" &&
+                                filterValue.min !== undefined &&
+                                filterValue.max !== undefined
+                              ) {
                                 displayValue = `${filterValue.min}-${filterValue.max}`;
-                              } else if (typeof filterValue.value === "boolean") {
+                              } else if (
+                                typeof filterValue.value === "boolean"
+                              ) {
                                 displayValue = filterValue.value ? "Yes" : "No";
                               } else if (Array.isArray(filterValue.value)) {
-                                displayValue = filterValue.value.join(", ") || "None";
+                                displayValue =
+                                  filterValue.value.join(", ") || "None";
                               } else {
-                                displayValue = String(filterValue.value || "N/A");
+                                displayValue = String(
+                                  filterValue.value || "N/A"
+                                );
                               }
-                              
+
                               return (
                                 <div
                                   key={key}
                                   className="flex justify-between items-center text-xs"
                                 >
                                   <span className="text-muted-foreground capitalize">
-                                    {key.replace(/([A-Z])/g, " $1").toLowerCase()}:
+                                    {key
+                                      .replace(/([A-Z])/g, " $1")
+                                      .toLowerCase()}
+                                    :
                                   </span>
                                   <Badge variant="outline" className="text-xs">
                                     {displayValue}
@@ -731,7 +797,9 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                     {missionTargeting.demographicFilters &&
                       Object.entries(missionTargeting.demographicFilters).some(
                         ([, value]) => {
-                          return Array.isArray(value) ? value.length > 0 : value;
+                          return Array.isArray(value)
+                            ? value.length > 0
+                            : value;
                         }
                       ) && (
                         <div className="space-y-2">
@@ -740,7 +808,9 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                           </div>
                           {Object.entries(missionTargeting.demographicFilters)
                             .filter(([, value]) => {
-                              return Array.isArray(value) ? value.length > 0 : value;
+                              return Array.isArray(value)
+                                ? value.length > 0
+                                : value;
                             })
                             .map(([key, value]) => (
                               <div
@@ -748,10 +818,11 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                 className="flex justify-between items-center text-xs"
                               >
                                 <span className="text-muted-foreground capitalize">
-                                  {key.replace(/([A-Z])/g, " $1").toLowerCase()}:
+                                  {key.replace(/([A-Z])/g, " $1").toLowerCase()}
+                                  :
                                 </span>
                                 <Badge variant="outline" className="text-xs">
-                                  {Array.isArray(value) 
+                                  {Array.isArray(value)
                                     ? value.join(", ") || "None"
                                     : String(value)}
                                 </Badge>

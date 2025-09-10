@@ -3,7 +3,7 @@ import { UserAgent } from "@/types/admin/userTableTypes";
 
 export interface SortConfig {
   field:
-    | "user.email"
+    | "user.username"
     | "agent.highest_level"
     | "agent.lowest_level"
     | "agent.last_active"
@@ -13,7 +13,7 @@ export interface SortConfig {
 
 // Shared interfaces for UserDataTable components
 export interface ColumnVisibility {
-  email: boolean;
+  username: boolean;
   xp: boolean;
   level: boolean;
   credits: boolean;
@@ -178,9 +178,9 @@ export const sortMissions = (
     let bValue: string | number | null | undefined;
 
     switch (sortConfig.field) {
-      case "user.email":
-        aValue = (a as Mission & { user?: { email?: string } }).user?.email || "";
-        bValue = (b as Mission & { user?: { email?: string } }).user?.email || "";
+      case "user.username":
+        aValue = (a as Mission & { user?: { username?: string } }).user?.username || "";
+        bValue = (b as Mission & { user?: { username?: string } }).user?.username || "";
         break;
 
       case "agent.highest_level":
@@ -242,8 +242,8 @@ export const sortMissions = (
     )
       return -1;
 
-    // Handle email sorting (case-insensitive)
-    if (sortConfig.field === "user.email") {
+    // Handle username sorting (case-insensitive)
+    if (sortConfig.field === "user.username") {
       const comparison = String(aValue)
         .toLowerCase()
         .localeCompare(String(bValue).toLowerCase());
@@ -308,8 +308,8 @@ export const getDefaultUserAgent = (userId: string): UserAgent => {
 // Helper function to get sort field display names
 export const getSortFieldDisplayName = (field: SortConfig["field"]): string => {
   switch (field) {
-    case "user.email":
-      return "Email";
+    case "user.username":
+      return "Username";
     case "agent.highest_level":
       return "Agent Highest Level";
     case "agent.lowest_level":
@@ -324,7 +324,7 @@ export const getSortFieldDisplayName = (field: SortConfig["field"]): string => {
 // Helper function to get available sort options
 export const getSortOptions = () => {
   return {
-    email: [{ field: "user.email" as const, label: "Email" }],
+    username: [{ field: "user.username" as const, label: "Username" }],
     performance: [
       { field: "agent.highest_level" as const, label: "Agent Highest Level" },
       { field: "agent.lowest_level" as const, label: "Agent Lowest Level" },
@@ -346,7 +346,7 @@ interface StatusStats {
 // Helper function to format column labels
 export const getColumnLabel = (key: string): string => {
   const labelMap: Record<string, string> = {
-    email: "User Email",
+    username: "Username",
     xp: "XP",
     level: "Level",
     credits: "Credits",
@@ -363,7 +363,7 @@ export const getColumnLabel = (key: string): string => {
 // Define the order of columns for toggle display
 export const getColumnOrder = (): (keyof ColumnVisibility)[] => {
   return [
-    "email",
+    "username",
     "xp", 
     "level",
     "credits",

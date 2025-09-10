@@ -109,29 +109,21 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
             {getSortIcon(field)}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => handleSort(field, "asc")}>
-            <div className="flex items-center">
-              <ChevronUp className="w-4 h-4 mr-2" />
-              Asc
-            </div>
+        <DropdownMenuContent align="start" className="w-auto min-w-0">
+          <DropdownMenuItem onClick={() => handleSort(field, "asc")} className="p-2 justify-center">
+            <ChevronUp className="w-4 h-4" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleSort(field, "desc")}>
-            <div className="flex items-center">
-              <ChevronDown className="w-4 h-4 mr-2" />
-              Desc
-            </div>
+          <DropdownMenuItem onClick={() => handleSort(field, "desc")} className="p-2 justify-center">
+            <ChevronDown className="w-4 h-4" />
           </DropdownMenuItem>
           <div className="bg-border -mx-1 my-1 h-px"></div>
           <DropdownMenuItem
             onClick={() =>
               onToggleColumnVisibility(field as keyof ColumnVisibility)
             }
+            className="p-2 justify-center"
           >
-            <div className="flex items-center">
-              <EyeOff className="w-4 h-4 mr-2" />
-              Hide
-            </div>
+            <EyeOff className="w-4 h-4" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -166,31 +158,25 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
                       {getSortIcon("partnerName")}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
+                  <DropdownMenuContent align="start" className="w-auto min-w-0">
                     <DropdownMenuItem
                       onClick={() => handleSort("partnerName", "asc")}
+                      className="p-2 justify-center"
                     >
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
+                      <ChevronUp className="w-4 h-4" />
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleSort("partnerName", "desc")}
+                      className="p-2 justify-center"
                     >
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
+                      <ChevronDown className="w-4 h-4" />
                     </DropdownMenuItem>
                     <div className="bg-border -mx-1 my-1 h-px"></div>
                     <DropdownMenuItem
                       onClick={() => onToggleColumnVisibility("partner")}
+                      className="p-2 justify-center"
                     >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
+                      <EyeOff className="w-4 h-4" />
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

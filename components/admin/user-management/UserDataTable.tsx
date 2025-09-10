@@ -26,12 +26,14 @@ import {
   ChevronUp,
   ChevronDown,
   EyeOff,
+  Send,
 } from "lucide-react";
 import { UserWithAgent, SortConfig } from "@/types/admin/userManagement";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { ViewUserModal } from "./ViewUserModal";
 import UserDataPagination from "./UserDataPagination";
 import { UserDataTableControls } from "./UserDataTableControl";
+import { DiscordUsername } from "./DiscordUsername";
 import {
   ColumnVisibility,
   getMoodEmoji,
@@ -44,6 +46,7 @@ import {
   formatUserTableDate,
   formatLastActive,
 } from "@/lib/admin/user/userTableUtils";
+import XIcon from "@/components/ui/icons/XIcon";
 
 interface UserDataTableProps {
   users: UserWithAgent[];
@@ -62,7 +65,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
   } = useUserManagement({ users });
 
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
-    email: true,
+    username: true,
     xp: true,
     level: true,
     mood: true,
@@ -169,17 +172,25 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                 key={user.discord_id}
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3"
               >
-                {/* User Email Section */}
-                {columnVisibility.email && (
+                {/* Username Section */}
+                {columnVisibility.username && (
                   <div className="flex justify-between items-start">
                     <div>
-                      <div className="font-medium text-sm">{user.email}</div>
+                      <div className="font-medium text-sm">
+                        <DiscordUsername discordId={user.discord_id} fallback={user.discord_id} />
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {user.twitter_handle && (
-                          <span className="mr-2">{user.twitter_handle}</span>
+                          <span className="mr-2 flex items-center gap-1">
+                            <XIcon className="h-3 w-3" />
+                            {user.twitter_handle}
+                          </span>
                         )}
                         {user.telegram_handle && (
-                          <span>{user.telegram_handle}</span>
+                          <span className="flex items-center gap-1">
+                            <Send className="h-3 w-3" />
+                            {user.telegram_handle}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -192,9 +203,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                       <Eye className="h-4 w-4" />
                     </Button>
                   </div>
-                )}
-
-                {/* Stats Row */}
+                )}                {/* Stats Row */}
                 <div className="flex flex-wrap gap-2">
                   {columnVisibility.xp && (
                     <Badge
@@ -344,7 +353,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
         <Table>
           <TableHeader>
             <TableRow className="dark:border-gray-700">
-              {columnVisibility.email && (
+              {columnVisibility.username && (
                 <TableHead className="w-[250px]">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -352,31 +361,23 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         variant="ghost"
                         className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
                       >
-                        User Email
-                        {getSortIcon("email")}
+                        Username
+                        {getSortIcon("username")}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuItem onClick={() => handleSort("email")}>
-                        <div className="flex items-center">
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Asc
-                        </div>
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
+                      <DropdownMenuItem onClick={() => handleSort("username")} className="p-2 justify-center">
+                        <ChevronUp className="w-4 h-4" />
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleSort("email")}>
-                        <div className="flex items-center">
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          Desc
-                        </div>
+                      <DropdownMenuItem onClick={() => handleSort("username")} className="p-2 justify-center">
+                        <ChevronDown className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => onToggleColumnVisibility("email")}
+                        onClick={() => onToggleColumnVisibility("username")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -394,27 +395,19 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         {getSortIcon("agent.xp")}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuItem onClick={() => handleSort("agent.xp")}>
-                        <div className="flex items-center">
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Asc
-                        </div>
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
+                      <DropdownMenuItem onClick={() => handleSort("agent.xp")} className="p-2 justify-center">
+                        <ChevronUp className="w-4 h-4" />
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleSort("agent.xp")}>
-                        <div className="flex items-center">
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          Desc
-                        </div>
+                      <DropdownMenuItem onClick={() => handleSort("agent.xp")} className="p-2 justify-center">
+                        <ChevronDown className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("xp")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -432,31 +425,25 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         {getSortIcon("agent.level")}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.level")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Asc
-                        </div>
+                        <ChevronUp className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.level")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          Desc
-                        </div>
+                        <ChevronDown className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("level")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -474,31 +461,25 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         {getSortIcon("agent.credits")}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.credits")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Asc
-                        </div>
+                        <ChevronUp className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.credits")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          Desc
-                        </div>
+                        <ChevronDown className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("credits")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -516,31 +497,25 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         {getSortIcon("agent.mood")}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.mood")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Asc
-                        </div>
+                        <ChevronUp className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.mood")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          Desc
-                        </div>
+                        <ChevronDown className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("mood")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -558,31 +533,25 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         {getSortIcon("agent.health")}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.health")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Asc
-                        </div>
+                        <ChevronUp className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.health")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          Desc
-                        </div>
+                        <ChevronDown className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("health")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -599,14 +568,12 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         Interests
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("interests")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -624,31 +591,25 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         {getSortIcon("agent.last_active")}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.last_active")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Asc
-                        </div>
+                        <ChevronUp className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.last_active")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          Desc
-                        </div>
+                        <ChevronDown className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("lastActive")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -666,31 +627,25 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         {getSortIcon("agent.created_at")}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.created_at")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronUp className="w-4 h-4 mr-2" />
-                          Asc
-                        </div>
+                        <ChevronUp className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleSort("agent.created_at")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <ChevronDown className="w-4 h-4 mr-2" />
-                          Desc
-                        </div>
+                        <ChevronDown className="w-4 h-4" />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleColumnVisibility("joinedDate")}
+                        className="p-2 justify-center"
                       >
-                        <div className="flex items-center">
-                          <EyeOff className="w-4 h-4 mr-2" />
-                          Hide
-                        </div>
+                        <EyeOff className="w-4 h-4" />
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -706,16 +661,24 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   key={user.discord_id}
                   className="dark:border-gray-700"
                 >
-                  {columnVisibility.email && (
+                  {columnVisibility.username && (
                     <TableCell className="font-medium">
                       <div>
-                        <div className="font-medium">{user.email}</div>
+                        <div className="font-medium">
+                          <DiscordUsername discordId={user.discord_id} fallback={user.discord_id} />
+                        </div>
                         <div className="text-sm text-muted-foreground">
                           {user.twitter_handle && (
-                            <span className="mr-2">{user.twitter_handle}</span>
+                            <span className="mr-2 flex items-center gap-1">
+                              <XIcon className="h-3 w-3" />
+                              {user.twitter_handle}
+                            </span>
                           )}
                           {user.telegram_handle && (
-                            <span>{user.telegram_handle}</span>
+                            <span className="flex items-center gap-1">
+                              <Send className="h-3 w-3" />
+                              {user.telegram_handle}
+                            </span>
                           )}
                         </div>
                       </div>
