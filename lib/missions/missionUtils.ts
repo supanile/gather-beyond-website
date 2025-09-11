@@ -1,5 +1,4 @@
 import { grist } from "@/lib/grist";
-import { CellValue, IRecord } from "grist-api";
 
 // Interface definitions
 export interface Mission {
@@ -297,7 +296,6 @@ export async function updateUserStats(userId: string, xpGain: number, creditsGai
     if (user) {
       await grist.updateRecords("Users", [{
         id: ensureNumber(user.id),
-        missions_completed: ensureNumber(user.missions_completed) + 1,
         total_points: ensureNumber(user.total_points) + xpGain,
         credits: ensureNumber(user.credits) + creditsGain
       }]);
