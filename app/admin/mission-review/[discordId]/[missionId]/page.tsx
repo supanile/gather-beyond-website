@@ -73,7 +73,8 @@ export default function MissionDetailsPage() {
       } else {
         await rejectMission(confirmDialog.missionId);
       }
-      router.back(); // Go back to mission review list
+      // Stay on the current page to see the updated status
+      // The mission data will be updated automatically by the hooks
     } catch (error) {
       console.error("Action failed:", error);
       // You might want to show an error message to the user here
@@ -341,10 +342,10 @@ export default function MissionDetailsPage() {
 
                   {/* Accepted */}
                   <div className="flex-1 text-center relative z-10">
-                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-yellow-500/25">
+                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-yellow-500/25">
                       <Calendar className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 block mb-1">
+                    <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 block mb-2">
                       Accepted
                     </span>
                     <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
@@ -357,7 +358,7 @@ export default function MissionDetailsPage() {
                   {/* Submitted */}
                   <div className="flex-1 text-center relative z-10">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg transition-all duration-300 ${
+                      className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg transition-all duration-300 ${
                         mission.submitted_at
                           ? "bg-gradient-to-br from-orange-400 to-red-500 shadow-orange-500/25"
                           : "bg-gradient-to-br from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 shadow-slate-500/25"
@@ -407,7 +408,7 @@ export default function MissionDetailsPage() {
                       )}
                     </div>
                     <span
-                      className={`text-sm font-semibold block mb-1 ${
+                      className={`text-sm font-semibold block mb-2 ${
                         mission.status === "completed"
                           ? "text-green-700 dark:text-green-300"
                           : mission.status === "rejected"
@@ -421,27 +422,99 @@ export default function MissionDetailsPage() {
                         ? "Rejected"
                         : "Review"}
                     </span>
-                    <span
-                      className={`text-xs font-medium ${
-                        mission.status === "completed"
-                          ? "text-green-600 dark:text-green-400"
+                    <div className="flex flex-col items-center gap-1">
+                      <span
+                        className={`text-xs font-medium ${
+                          mission.status === "completed"
+                            ? "text-green-600 dark:text-green-400"
+                            : mission.status === "rejected"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-slate-500 dark:text-slate-400"
+                        }`}
+                      >
+                        {mission.status === "completed" && mission.completed_at
+                          ? new Date(
+                              mission.completed_at * 1000
+                            ).toLocaleString()
+                          : mission.status === "rejected" && mission.rejected_at
+                          ? new Date(
+                              mission.rejected_at * 1000
+                            ).toLocaleString()
+                          : mission.status === "completed"
+                          ? "Today"
                           : mission.status === "rejected"
-                          ? "text-red-600 dark:text-red-400"
-                          : "text-slate-500 dark:text-slate-400"
-                      }`}
-                    >
-                      {mission.status === "completed" && mission.completed_at
-                        ? new Date(mission.completed_at * 1000).toLocaleString()
-                        : mission.status === "rejected"
-                        ? "Today"
-                        : mission.status === "completed"
-                        ? "Today"
-                        : "Pending"}
-                    </span>
+                          ? ""
+                          : "Pending"}
+                      </span>
+                      {/* Verified by information */}
+                      {mission.verified_by &&
+                        (mission.status === "completed" ||
+                          mission.status === "rejected") && (
+                          <div className="flex items-center justify-center gap-1">
+                            <Shield className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                            <span className="text-xs text-slate-600 dark:text-slate-400">
+                              by {mission.verified_by}
+                            </span>
+                          </div>
+                        )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Verification Information Card */}
+            {mission.verified_by &&
+              (mission.status === "completed" ||
+                mission.status === "rejected") && (
+                <div className="group relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 dark:from-indigo-400/10 dark:to-purple-400/10 rounded-2xl transition-all duration-300 group-hover:from-indigo-500/10 group-hover:to-purple-500/10 dark:group-hover:from-indigo-400/20 dark:group-hover:to-purple-400/20"></div>
+                  <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/20">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg">
+                        <Shield className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        Verification Information
+                      </h3>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-xl p-4 border border-slate-200/50 dark:border-slate-700/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-3 h-3 rounded-full ${
+                              mission.status === "completed"
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }`}
+                          ></div>
+                          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {mission.status === "completed"
+                              ? "Approved"
+                              : "Rejected"}{" "}
+                            by
+                          </span>
+                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                            {mission.verified_by}
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                          {(mission.status === "completed" &&
+                            mission.completed_at) ||
+                          (mission.status === "rejected" && mission.rejected_at)
+                            ? new Date(
+                                ((mission.status === "completed"
+                                  ? mission.completed_at
+                                  : mission.rejected_at) || 0) * 1000
+                              ).toLocaleString()
+                            : "-"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
             {/* Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

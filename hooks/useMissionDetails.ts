@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import { UserMission } from "@/types/admin/missionReview";
 
 export function useMissionDetails(missionId: string) {
   const [mission, setMission] = useState<UserMission | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchMissionDetails = async () => {
@@ -39,6 +41,9 @@ export function useMissionDetails(missionId: string) {
         throw new Error("Mission not found");
       }
 
+      // Get the current admin's username
+      const verifiedBy = user?.username || user?.firstName || "Admin";
+
       const response = await fetch(`/api/missions/review`, {
         method: "POST",
         headers: {
@@ -48,7 +53,7 @@ export function useMissionDetails(missionId: string) {
           action: "approve",
           userId: mission.user_id,
           missionId: mission.mission_id,
-          approvedBy: "admin" // You might want to get this from auth context
+          approvedBy: verifiedBy
         }),
       });
 
@@ -64,6 +69,7 @@ export function useMissionDetails(missionId: string) {
         ...prev,
         status: "completed" as const,
         completed_at: Math.floor(Date.now() / 1000),
+        verified_by: verifiedBy,
       } : null);
       
       return responseData;
@@ -79,6 +85,9 @@ export function useMissionDetails(missionId: string) {
         throw new Error("Mission not found");
       }
 
+      // Get the current admin's username
+      const verifiedBy = user?.username || user?.firstName || "Admin";
+
       const response = await fetch(`/api/missions/review`, {
         method: "POST",
         headers: {
@@ -88,7 +97,7 @@ export function useMissionDetails(missionId: string) {
           action: "reject",
           userId: mission.user_id,
           missionId: mission.mission_id,
-          approvedBy: "admin" // You might want to get this from auth context
+          approvedBy: verifiedBy
         }),
       });
 
@@ -103,7 +112,8 @@ export function useMissionDetails(missionId: string) {
       setMission(prev => prev ? {
         ...prev,
         status: "rejected" as const,
-        rejected_at: Math.floor(Date.now() / 1000),
+        completed_at: Math.floor(Date.now() / 1000),
+        verified_by: verifiedBy,
       } : null);
       
       return responseData;

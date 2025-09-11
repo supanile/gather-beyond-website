@@ -345,7 +345,7 @@ export async function updateUserStats(userId: string, xpGain: number, creditsGai
 }
 
 // Complete mission function
-export async function completeMission(userId: string, missionId: number) {
+export async function completeMission(userId: string, missionId: number, verifiedBy?: string) {
   try {
     const userMission = await getUserMission(userId, missionId);
     if (!userMission) {
@@ -366,12 +366,24 @@ export async function completeMission(userId: string, missionId: number) {
       return { success: false, message: 'Mission details not found!' };
     }
 
-    // Update mission status to completed
-    await grist.updateRecords("User_missions", [{
+    // Update mission status to completed with verification info
+    const updateData: {
+      id: number;
+      status: string;
+      completed_at: string;
+      verified_by?: string;
+    } = {
       id: userMission.id,
       status: 'completed',
       completed_at: new Date().toISOString()
-    }]);
+    };
+
+    // Add verification information if provided
+    if (verifiedBy) {
+      updateData.verified_by = verifiedBy;
+    }
+
+    await grist.updateRecords("User_missions", [updateData]);
 
     // Parse reward
     const reward = mission.reward;

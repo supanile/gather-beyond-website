@@ -233,15 +233,19 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
             {columnVisibility.user_id &&
               createColumnHeader("user_id", "User ID", "w-26 px-0")}
             {columnVisibility.mission_name &&
-              createColumnHeader("mission_name", "Mission", "w-48 px-0")}
+              createColumnHeader("mission_name", "Mission", "w-60 px-6")}
             {columnVisibility.status &&
               createColumnHeader("status", "Status", "w-24 px-2")}
             {columnVisibility.submission_link &&
               createColumnHeader(
                 "submission_link",
                 "Submission Link",
-                "w-48 px-0"
+                "w-48 px-4"
               )}
+            {columnVisibility.verified_by &&
+              createNonSortableHeader("Verified By", "w-32 px-22", "verified_by")}
+            {columnVisibility.completed_at &&
+              createColumnHeader("completed_at", "Verified At", "w-48 px-6")}
             <TableHead className="w-28 px-0 text-xs">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -285,7 +289,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {columnVisibility.mission_name && (
-                  <TableCell className="px-3">
+                  <TableCell className="px-9">
                     <div className="w-full">
                       <div
                         className="truncate font-medium text-xs"
@@ -297,12 +301,12 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {columnVisibility.status && (
-                  <TableCell className="px-5">
+                  <TableCell className="px-0">
                     <MissionStatusBadge status={mission.status} />
                   </TableCell>
                 )}
                 {columnVisibility.submission_link && (
-                  <TableCell className="px-3">
+                  <TableCell className="px-7">
                     {mission.submission_link ? (
                       <a
                         href={mission.submission_link}
@@ -320,8 +324,46 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                     )}
                   </TableCell>
                 )}
+                {columnVisibility.verified_by && (
+                  <TableCell className="px-23">
+                    {mission.verified_by ? (
+                      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        {mission.verified_by}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">
+                        -
+                      </span>
+                    )}
+                  </TableCell>
+                )}
+                {columnVisibility.completed_at && (
+                  <TableCell className="px-10">
+                    {mission.completed_at ? (
+                      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        {new Date(mission.completed_at * 1000).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}{' '}
+                        <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">
+                          {new Date(mission.completed_at * 1000).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false,
+                          })}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">
+                        -
+                      </span>
+                    )}
+                  </TableCell>
+                )}
                 {/* Actions column - always visible */}
-                <TableCell className="px-0">
+                <TableCell className="px-2">
                   <div className="flex items-center space-x-1">
                     <Button
                       variant="ghost"

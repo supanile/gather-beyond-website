@@ -11,6 +11,7 @@ export interface UserMission {
   submission_link: string;
   notes: string;
   discord_user?: DiscordUserData;
+  verified_by?: string; // Username of the admin who approved/rejected
 }
 
 export interface DiscordUserData {
@@ -32,6 +33,8 @@ export interface MissionReviewColumnVisibility {
   status: boolean;
   submitted_at: boolean;
   submission_link: boolean;
+  verified_by: boolean;
+  completed_at: boolean;
 }
 
 export interface MissionReviewTableProps {

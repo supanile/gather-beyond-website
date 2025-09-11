@@ -47,7 +47,7 @@ export async function POST(
     await grist.updateRecords("User_missions", [{
       id: missionId,
       status: 'rejected',
-      rejected_at: Math.floor(Date.now() / 1000)
+      completed_at: new Date().toISOString()
     }]);
 
     // Get mission details for response

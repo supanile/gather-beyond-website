@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useUser } from "@clerk/nextjs";
 import {
   UserMission,
   MissionReviewFilters,
@@ -12,6 +13,7 @@ import {
 export function useMissionReview() {
   const [missions, setMissions] = useState<UserMission[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useUser();
   const [filters, setFilters] = useState<MissionReviewFilters>({
     status: "all",
     searchQuery: "",
@@ -215,6 +217,9 @@ export function useMissionReview() {
         throw new Error("Mission not found");
       }
 
+      // Get the current admin's username
+      const verifiedBy = user?.username || user?.firstName || "Admin";
+
       // Optimistically update the UI
       setMissions((prev) =>
         prev.map((mission) =>
@@ -223,6 +228,7 @@ export function useMissionReview() {
                 ...mission,
                 status: "completed" as const,
                 completed_at: Math.floor(Date.now() / 1000),
+                verified_by: verifiedBy,
               }
             : mission
         )
@@ -238,7 +244,7 @@ export function useMissionReview() {
           action: "approve",
           userId: mission.user_id,
           missionId: mission.mission_id,
-          approvedBy: "admin" // You might want to get this from auth context
+          approvedBy: verifiedBy
         }),
       });
 
@@ -264,6 +270,9 @@ export function useMissionReview() {
         throw new Error("Mission not found");
       }
 
+      // Get the current admin's username
+      const verifiedBy = user?.username || user?.firstName || "Admin";
+
       // Optimistically update the UI
       setMissions((prev) =>
         prev.map((mission) =>
@@ -271,7 +280,8 @@ export function useMissionReview() {
             ? {
                 ...mission,
                 status: "rejected" as const,
-                rejected_at: Math.floor(Date.now() / 1000),
+                completed_at: Math.floor(Date.now() / 1000),
+                verified_by: verifiedBy,
               }
             : mission
         )
@@ -287,7 +297,7 @@ export function useMissionReview() {
           action: "reject",
           userId: mission.user_id,
           missionId: mission.mission_id,
-          approvedBy: "admin" // You might want to get this from auth context
+          approvedBy: verifiedBy
         }),
       });
 

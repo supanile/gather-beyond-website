@@ -11,8 +11,10 @@ interface GristMissionRecord {
   accepted_at?: number;
   submitted_at?: number;
   completed_at?: number;
+  rejected_at?: number;
   submission_link?: string;
   notes?: string;
+  verified_by?: string;
   discord_username?: string;
   discord_avatar_url?: string;
 }
@@ -79,8 +81,10 @@ export async function GET(
       accepted_at: mission.accepted_at || null,
       submitted_at: mission.submitted_at || null,
       completed_at: mission.completed_at || null,
+      rejected_at: mission.rejected_at || null,
       submission_link: mission.submission_link || "",
       notes: mission.notes || "",
+      verified_by: mission.verified_by || null,
       discord_user: discordData
     };
 

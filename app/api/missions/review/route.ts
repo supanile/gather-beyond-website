@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     if (action === "approve") {
       // Approve mission and give rewards
-      const result = await completeMission(userId, missionIdNum);
+      const result = await completeMission(userId, missionIdNum, approvedBy);
 
       if (!result.success) {
         return NextResponse.json(
@@ -83,10 +83,24 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      await grist.updateRecords("User_missions", [{
+      // Update mission with rejection info and verification data
+      const updateData: {
+        id: number;
+        status: string;
+        completed_at?: string;
+        verified_by?: string;
+      } = {
         id: ensureNumber(userMission.id),
         status: 'rejected'
-      }]);
+      };
+
+      // Add rejection timestamp and verification info to completed_at field
+      updateData.completed_at = new Date().toISOString();
+      if (approvedBy) {
+        updateData.verified_by = approvedBy;
+      }
+
+      await grist.updateRecords("User_missions", [updateData]);
 
       // Get mission details for response
       const mission = await getMissionById(missionIdNum);

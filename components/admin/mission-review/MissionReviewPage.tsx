@@ -45,7 +45,7 @@ export function MissionReviewPage() {
     handleSort,
   } = useMissionReview();
 
-  // Column visibility state - Updated to include user_avatar
+  // Column visibility state - Updated to include user_avatar and verified_by
   const [columnVisibility, setColumnVisibility] =
     useState<MissionReviewColumnVisibility>({
       id: true,
@@ -56,6 +56,8 @@ export function MissionReviewPage() {
       status: true,
       submitted_at: true,
       submission_link: true,
+      verified_by: true,
+      completed_at: true,
     });
 
   const handleApprove = async (missionId: number) => {
@@ -101,6 +103,8 @@ export function MissionReviewPage() {
       status: "Status",
       submitted_at: "Submitted",
       submission_link: "Submission Link",
+      verified_by: "Verified By",
+      completed_at: "Completed At",
     };
 
     return labelMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
