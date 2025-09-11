@@ -4,7 +4,6 @@ import { useState } from "react";
 import { MissionReviewTable } from "./MissionReviewTable";
 import { MissionReviewFiltersComponent } from "./MissionReviewFilters";
 import { MissionReviewStatsComponent } from "./MissionReviewStats";
-import { MissionDetailsModal } from "./MissionDetailsModal";
 import { MissionReviewPagination } from "./MissionReviewPagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +23,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMissionReview } from "@/hooks/useMissionReview";
 import {
-  UserMission,
   MissionReviewColumnVisibility,
 } from "@/types/admin/missionReview";
 import { Settings2 } from "lucide-react";
@@ -47,11 +45,6 @@ export function MissionReviewPage() {
     handleSort,
   } = useMissionReview();
 
-  const [selectedMission, setSelectedMission] = useState<UserMission | null>(
-    null
-  );
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   // Column visibility state - Updated to include user_avatar
   const [columnVisibility, setColumnVisibility] =
     useState<MissionReviewColumnVisibility>({
@@ -64,16 +57,6 @@ export function MissionReviewPage() {
       submitted_at: true,
       submission_link: true,
     });
-
-  const handleViewDetails = (mission: UserMission) => {
-    setSelectedMission(mission);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedMission(null);
-  };
 
   const handleApprove = async (missionId: number) => {
     await approveMission(missionId);
@@ -236,7 +219,6 @@ export function MissionReviewPage() {
               onToggleColumnVisibility={handleToggleColumnVisibility}
               onApprove={handleApprove}
               onReject={handleReject}
-              onViewDetails={handleViewDetails}
               isLoading={loading}
               totalVisibleColumns={totalVisibleColumns}
               emptyMessage={getEmptyMessage()}
@@ -250,15 +232,6 @@ export function MissionReviewPage() {
           </div>
         </div>
       </div>
-
-      {/* Details Modal */}
-      <MissionDetailsModal
-        mission={selectedMission}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onApprove={handleApprove}
-        onReject={handleReject}
-      />
     </div>
   );
 }

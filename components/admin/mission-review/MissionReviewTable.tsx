@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Eye,
   ChevronsUpDown,
@@ -42,10 +43,10 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
   onToggleColumnVisibility,
   onApprove,
   onReject,
-  onViewDetails,
   totalVisibleColumns,
   emptyMessage = "No mission reviews found.",
 }) => {
+  const router = useRouter();
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     action: "approve" | "reject";
@@ -58,6 +59,10 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
     missionName: "",
   });
   const [isActionLoading, setIsActionLoading] = useState(false);
+
+  const handleViewDetails = (mission: UserMission) => {
+    router.push(`/admin/mission-review/${mission.user_id}/${mission._id}`);
+  };
 
   const handleApproveClick = (mission: UserMission) => {
     setConfirmDialog({
@@ -321,14 +326,14 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onViewDetails(mission)}
+                      onClick={() => handleViewDetails(mission)}
                       className="h-7 w-7 p-0 cursor-pointer"
                       title="View Details"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    {/* Show Approve and Reject buttons only for Submitted, Completed, and Rejected status */}
-                    {mission.status !== "accepted" && (
+                    {/* Show Approve and Reject buttons only for Submitted status */}
+                    {mission.status === "submitted" && (
                       <>
                         <Button
                           variant="outline"

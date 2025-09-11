@@ -97,7 +97,7 @@ if (interaction.customId.startsWith('approve_mission_') ||
 ## Grist Database Structure
 
 ### Tables ที่ต้องมี:
-1. **Users**: `discord_id`, `missions_completed`, `total_points`, `credits`
+1. **Users**: `discord_id`, `missions_completed`, `total_points`, `credit` (ไม่มี s)
 2. **Missions**: `title`, `description`, `reward` (JSON)
 3. **User_missions**: `user_id`, `mission_id`, `status`, `completed_at`
 4. **User_agents**: `user_id`, `xp`, `level`, `health`, `mood`, `total_xp`, etc.
@@ -106,20 +106,26 @@ if (interaction.customId.startsWith('approve_mission_') ||
 
 ### เมื่อ Approve Mission:
 1. เรียก API `/api/missions/review` ด้วย action: "approve"
-2. ตรวจสอบ mission status = "submitted"
+2. ตรวจสอบ mission status = "submitted" (เฉพาะ submitted missions เท่านั้นที่สามารถ approve ได้)
 3. อัปเดต status เป็น "completed"
 4. คำนวณและให้ rewards:
    - XP (default 50 หรือตาม mission reward)
    - Health (+10)
    - Credits (เท่ากับ XP)
    - ตรวจสอบ level up
-5. อัปเดต user stats
+5. อัปเดต user stats (missions_completed +1, total_points, credit)
 6. ส่ง notification กลับไปที่ Discord
 
 ### เมื่อ Reject Mission:
 1. เรียก API `/api/missions/review` ด้วย action: "reject"
-2. อัปเดต status เป็น "rejected"
-3. ส่ง notification กลับไปที่ Discord
+2. ตรวจสอบ mission status = "submitted" (เฉพาะ submitted missions เท่านั้นที่สามารถ reject ได้)
+3. อัปเดต status เป็น "rejected"
+4. ส่ง notification กลับไปที่ Discord
+
+### ⚠️ Status Requirements:
+- **Approve/Reject ได้เฉพาะ**: missions ที่มี status เป็น "submitted"
+- **UI จะแสดงปุ่ม**: เฉพาะ missions ที่ status เป็น "submitted"
+- **Completed/Rejected missions**: ไม่สามารถเปลี่ยน status ซ้ำได้
 
 ## การ Migrate จาก SQLite
 
@@ -160,6 +166,36 @@ curl -X POST http://localhost:3000/api/missions/review \
 2. เพิ่ม event handlers ตาม exampleBotIntegration.ts
 3. ทดสอบส่ง mission review message
 4. ทดสอบกดปุ่ม approve/reject
+
+## Troubleshooting
+
+### Common Errors:
+
+#### 1. "Mission must be submitted to be rejected/approved"
+**สาเหตุ**: พยายาม approve/reject mission ที่มี status ไม่ใช่ "submitted"
+**แก้ไข**: ตรวจสอบ mission status ก่อน หรือ refresh ข้อมูล
+
+#### 2. "Mission not found"
+**สาเหตุ**: missionId หรือ userId ไม่ถูกต้อง
+**แก้ไข**: ตรวจสอบ ID และตรวจสอบ mapping ระหว่าง UI และ database
+
+#### 3. "User not found" 
+**สาเหตุ**: discord_id ไม่มีในตาราง Users
+**แก้ไข**: สร้าง user record ก่อนหรือตรวจสอบ discord_id mapping
+
+#### 4. "Invalid column 'credits'" 
+**สาเหตุ**: Column name ผิด ใน Grist เป็น `credit` ไม่ใช่ `credits`
+**แก้ไข**: ตรวจสอบ column names ใน Grist table
+
+#### 5. "Agent not found" หรือ User_agents ไม่อัปเดต
+**สาเหตุ**: User_agents record ไม่มีหรือ permissions ไม่เพียงพอ
+**แก้ไข**: ตรวจสอบว่ามี user_agents record และ Grist permissions
+
+### Debug Steps:
+1. ตรวจสอบ mission status ในฐานข้อมูล
+2. ตรวจสอบ console logs ใน browser และ server
+3. ตรวจสอบ API response ใน Network tab
+4. ตรวจสอบ Grist table structure และ permissions
 
 ## Next Steps
 

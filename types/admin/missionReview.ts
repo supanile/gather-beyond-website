@@ -42,7 +42,6 @@ export interface MissionReviewTableProps {
   onToggleColumnVisibility: (column: keyof MissionReviewColumnVisibility) => void;
   onApprove: (missionId: number) => void;
   onReject: (missionId: number) => void;
-  onViewDetails: (mission: UserMission) => void;
   isLoading?: boolean;
   totalVisibleColumns: number;
   emptyMessage?: string;

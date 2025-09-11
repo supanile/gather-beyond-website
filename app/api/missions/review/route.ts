@@ -72,8 +72,13 @@ export async function POST(req: NextRequest) {
       }
 
       if (ensureString(userMission.status) !== 'submitted') {
+        const currentStatus = ensureString(userMission.status);
         return NextResponse.json(
-          { error: "Mission must be submitted to be rejected" },
+          { 
+            error: `Cannot reject mission with status "${currentStatus}". Only missions with status "submitted" can be rejected.`,
+            currentStatus: currentStatus,
+            allowedStatus: 'submitted'
+          },
           { status: 400 }
         );
       }

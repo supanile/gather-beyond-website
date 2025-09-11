@@ -37,9 +37,9 @@ export interface UserAgent {
 export interface User {
   id: number;
   discord_id: string;
-  missions_completed: number;
+  // missions_completed: number;
   total_points: number;
-  credits: number;
+  credit: number; // Changed from credits to credit
 }
 
 // Level up data configuration
@@ -219,10 +219,15 @@ export async function createOrGetUserAgent(userId: string): Promise<UserAgent | 
 // Add XP to user
 export async function addXPToUser(userId: string, xpAmount: number) {
   try {
+    console.log(`Adding XP to user ${userId}: +${xpAmount}`);
+    
     const agent = await createOrGetUserAgent(userId);
     if (!agent) {
+      console.log('Agent not found, cannot add XP');
       return { success: false, error: 'Agent not found' };
     }
+
+    console.log(`Current agent:`, agent);
 
     const oldTotalXP = agent.total_xp || 0;
     const newTotalXP = oldTotalXP + xpAmount;
@@ -230,6 +235,8 @@ export async function addXPToUser(userId: string, xpAmount: number) {
     // Calculate old and new level data
     const oldLevelData = calculateLevelProgress(oldTotalXP);
     const newLevelData = calculateLevelProgress(newTotalXP);
+
+    console.log(`XP update: ${oldTotalXP} -> ${newTotalXP}, Level: ${oldLevelData.level} -> ${newLevelData.level}`);
 
     // Update user agent with new XP data
     await grist.updateRecords("User_agents", [{
@@ -240,6 +247,8 @@ export async function addXPToUser(userId: string, xpAmount: number) {
       xp_required: newLevelData.xp_required,
       xp: newLevelData.total_xp // Keep legacy xp field in sync
     }]);
+
+    console.log(`Successfully updated XP for ${userId}`);
 
     return {
       success: true,
@@ -259,19 +268,30 @@ export async function addXPToUser(userId: string, xpAmount: number) {
 // Update agent health
 export async function updateAgentHealth(userId: string, healthChange: number) {
   try {
+    console.log(`Updating agent health for ${userId}: +${healthChange}`);
+    
     const agent = await createOrGetUserAgent(userId);
-    if (!agent) return { success: false, message: 'Agent not found' };
+    if (!agent) {
+      console.log('Agent not found, cannot update health');
+      return { success: false, message: 'Agent not found' };
+    }
+
+    console.log(`Current agent:`, agent);
 
     const newHealth = Math.max(0, Math.min(100, agent.health + healthChange));
     const oldMood = calculateMood(agent.health);
     const newMood = calculateMood(newHealth);
 
+    console.log(`Health update: ${agent.health} -> ${newHealth}, Mood: ${oldMood} -> ${newMood}`);
+
     await grist.updateRecords("User_agents", [{
       id: agent.id,
       health: newHealth,
-      mood: newMood,
+      // mood: newMood,
       last_active: new Date().toISOString()
     }]);
+
+    console.log(`Successfully updated agent health for ${userId}`);
 
     return {
       success: true,
@@ -290,18 +310,33 @@ export async function updateAgentHealth(userId: string, healthChange: number) {
 // Update user stats
 export async function updateUserStats(userId: string, xpGain: number, creditsGain: number) {
   try {
+    console.log(`Updating user stats for ${userId}: +${xpGain} XP, +${creditsGain} credits`);
+    
     const users = await grist.fetchTable("Users");
     const user = users.find(u => ensureString(u.discord_id) === userId);
 
     if (user) {
+      console.log(`Found user:`, user);
+      
+      const currentMissions = ensureNumber(user.missions_completed);
+      const currentPoints = ensureNumber(user.total_points);
+      const currentCredit = ensureNumber(user.credit); // Changed from credits to credit
+      
+      console.log(`Current stats - Missions: ${currentMissions}, Points: ${currentPoints}, Credits: ${currentCredit}`);
+      console.log(`Adding - Missions: +1, Points: +${xpGain}, Credits: +${creditsGain}`);
+
       await grist.updateRecords("Users", [{
         id: ensureNumber(user.id),
-        total_points: ensureNumber(user.total_points) + xpGain,
-        credits: ensureNumber(user.credits) + creditsGain
+        // missions_completed: currentMissions + 1,
+        total_points: currentPoints + xpGain,
+        credit: currentCredit + creditsGain // Changed from credits to credit
       }]);
+      
+      console.log(`Successfully updated user stats for ${userId}`);
       return { success: true };
     }
     
+    console.log(`User not found for discord_id: ${userId}`);
     return { success: false, message: 'User not found' };
   } catch (error) {
     console.error('Error updating user stats:', error);
@@ -318,7 +353,12 @@ export async function completeMission(userId: string, missionId: number) {
     }
 
     if (userMission.status !== 'submitted') {
-      return { success: false, message: 'Mission must be submitted first!' };
+      return { 
+        success: false, 
+        message: `Cannot approve mission with status "${userMission.status}". Only missions with status "submitted" can be approved.`,
+        currentStatus: userMission.status,
+        allowedStatus: 'submitted'
+      };
     }
 
     const mission = await getMissionById(missionId);
@@ -343,12 +383,15 @@ export async function completeMission(userId: string, missionId: number) {
 
     // Update agent XP using new progressive system
     const xpResult = await addXPToUser(userId, xpGain);
+    console.log('XP update result:', xpResult);
 
     // Update agent health
     const healthResult = await updateAgentHealth(userId, healthGain);
+    console.log('Health update result:', healthResult);
 
     // Update user's total missions completed and points
-    await updateUserStats(userId, xpGain, creditsGain);
+    const statsResult = await updateUserStats(userId, xpGain, creditsGain);
+    console.log('Stats update result:', statsResult);
 
     return {
       success: true,
