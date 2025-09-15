@@ -50,7 +50,7 @@ import { useDiscordServers } from "@/hooks/useDiscordServers";
 
 type SortOption = {
   field:
-    | "user.email"
+    | "user.username"
     | "agent.highest_level"
     | "agent.lowest_level"
     | "agent.last_active";
@@ -64,10 +64,11 @@ const DashboardPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState<SortOption>({
-    field: "user.email",
+    field: "user.username",
     direction: "asc",
-    label: "Email A-Z",
+    label: "Username A-Z",
   });
+  const [discordUsernames, setDiscordUsernames] = useState<Record<string, string>>({});
 
   const { totalGuilds } = useDiscordServers();
   const {
@@ -82,11 +83,43 @@ const DashboardPage = () => {
     error: dataError,
   } = useAdminData();
 
+  // Fetch Discord usernames for users
+  useEffect(() => {
+    const fetchDiscordUsernames = async () => {
+      const usernameMap: Record<string, string> = {};
+      
+      for (const user of users) {
+        if (user.discord_id && !discordUsernames[user.discord_id]) {
+          try {
+            const response = await fetch(`/api/discord/${user.discord_id}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (data.username) {
+                usernameMap[user.discord_id] = data.username;
+              }
+            }
+          } catch (error) {
+            console.error(`Failed to fetch Discord data for ${user.discord_id}:`, error);
+          }
+        }
+      }
+      
+      if (Object.keys(usernameMap).length > 0) {
+        setDiscordUsernames(prev => ({ ...prev, ...usernameMap }));
+      }
+    };
+
+    if (users.length > 0) {
+      fetchDiscordUsernames();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users]); // Removed discordUsernames from dependencies to prevent infinite loop
+
   // Sort options - added last_active options
   const sortOptions: SortOption[] = [
-    // Email sorting
-    { field: "user.email", direction: "asc", label: "Email A-Z" },
-    { field: "user.email", direction: "desc", label: "Email Z-A" },
+    // Username sorting
+    { field: "user.username", direction: "asc", label: "Username A-Z" },
+    { field: "user.username", direction: "desc", label: "Username Z-A" },
     // Performance sorting
     {
       field: "agent.highest_level",
@@ -116,6 +149,9 @@ const DashboardPage = () => {
     .filter(
       (user) =>
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (discordUsernames[user.discord_id] || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         (user.interests || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
@@ -129,9 +165,10 @@ const DashboardPage = () => {
       let bValue: string | number | null | undefined;
 
       switch (sortConfig.field) {
-        case "user.email":
-          aValue = a.email?.toLowerCase() || "";
-          bValue = b.email?.toLowerCase() || "";
+        case "user.username":
+          // Get Discord username or fallback to email
+          aValue = discordUsernames[a.discord_id]?.toLowerCase() || a.email?.toLowerCase() || "";
+          bValue = discordUsernames[b.discord_id]?.toLowerCase() || b.email?.toLowerCase() || "";
           break;
 
         case "agent.highest_level":
@@ -155,8 +192,8 @@ const DashboardPage = () => {
       if (aValue == null || aValue === 0) return 1; // null values go to end
       if (bValue == null || bValue === 0) return -1; // null values go to end
 
-      // Handle email sorting (case-insensitive)
-      if (sortConfig.field === "user.email") {
+      // Handle username sorting (case-insensitive)
+      if (sortConfig.field === "user.username") {
         const comparison = (aValue as string).localeCompare(bValue as string);
         return sortConfig.direction === "asc" ? comparison : -comparison;
       }
@@ -558,16 +595,16 @@ const DashboardPage = () => {
                     <DropdownMenuContent align="start" className="w-54">
                       <DropdownMenuLabel>Sort by</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      {/* Email Sorting */}
+                      {/* Username Sorting */}
                       <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                        Email
+                        Username
                       </DropdownMenuLabel>
                       <DropdownMenuItem
                         onClick={() => handleSortChange(sortOptions[0])}
                         className="flex items-center justify-between"
                       >
-                        <span>Email A-Z</span>
-                        {sortConfig.field === "user.email" &&
+                        <span>Username A-Z</span>
+                        {sortConfig.field === "user.username" &&
                           sortConfig.direction === "asc" && (
                             <CheckIcon
                               className="h-4 w-4 text-green-500"
@@ -579,8 +616,8 @@ const DashboardPage = () => {
                         onClick={() => handleSortChange(sortOptions[1])}
                         className="flex items-center justify-between"
                       >
-                        <span>Email Z-A</span>
-                        {sortConfig.field === "user.email" &&
+                        <span>Username Z-A</span>
+                        {sortConfig.field === "user.username" &&
                           sortConfig.direction === "desc" && (
                             <CheckIcon
                               className="h-4 w-4 text-green-500"
@@ -688,7 +725,7 @@ const DashboardPage = () => {
                 <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search users by Discord ID, Email, Interests, or X handle..."
+                  placeholder="Search users by Discord Username, Email, Interests, or X handle..."
                   className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-xs sm:placeholder:text-sm md:placeholder:text-base placeholder:text-muted-foreground"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}

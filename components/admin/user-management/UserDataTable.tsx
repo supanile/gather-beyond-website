@@ -177,7 +177,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="font-medium text-sm">
-                        <DiscordUsername discordId={user.discord_id} fallback={user.discord_id} />
+                        <DiscordUsername discordId={user.discord_id} fallback="Unknown User" />
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {user.twitter_handle && (
@@ -665,7 +665,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     <TableCell className="font-medium">
                       <div>
                         <div className="font-medium">
-                          <DiscordUsername discordId={user.discord_id} fallback={user.discord_id} />
+                          <DiscordUsername discordId={user.discord_id} fallback="Unknown User" />
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {user.twitter_handle && (

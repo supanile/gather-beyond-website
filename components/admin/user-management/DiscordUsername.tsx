@@ -15,22 +15,19 @@ interface DiscordUserData {
 
 export const DiscordUsername: React.FC<DiscordUsernameProps> = ({
   discordId,
-  fallback = "Loading...",
+  fallback = "Unknown User",
   className = "",
 }) => {
   const [username, setUsername] = useState<string>(fallback);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchDiscordUsername() {
       if (!discordId) {
         setUsername(fallback);
-        setIsLoading(false);
         return;
       }
 
       try {
-        setIsLoading(true);
         const response = await fetch(`/api/discord/${discordId}`);
         
         if (!response.ok) {
@@ -38,21 +35,15 @@ export const DiscordUsername: React.FC<DiscordUsernameProps> = ({
         }
 
         const data: DiscordUserData = await response.json();
-        setUsername(data.username || discordId);
+        setUsername(data.username || "Unknown User");
       } catch (error) {
         console.error("Error fetching Discord username:", error);
-        setUsername(discordId); // Fallback to discord ID
-      } finally {
-        setIsLoading(false);
+        setUsername("Unknown User");
       }
     }
 
     fetchDiscordUsername();
   }, [discordId, fallback]);
-
-  if (isLoading) {
-    return <span className={className}>{fallback}</span>;
-  }
 
   return <span className={className}>{username}</span>;
 };
