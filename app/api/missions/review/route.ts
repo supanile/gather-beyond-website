@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { completeMission, getMissionById, ensureString, ensureNumber } from "@/lib/missions/missionUtils";
 import { grist } from "@/lib/grist";
+import { sendMissionApprovalDM, sendMissionRejectionDM } from "@/lib/discord/missionReviewHandlers";
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,6 +44,49 @@ export async function POST(req: NextRequest) {
 
       // Get mission details for response
       const mission = await getMissionById(missionIdNum);
+
+      // Send Discord DM notification to user for approval
+      try {
+        // Prepare xpResult data
+        const xpResultData = result.xpResult && result.xpResult.success && result.xpResult.leveledUp ? {
+          leveledUp: result.xpResult.leveledUp,
+          newLevel: result.xpResult.newLevel,
+          oldLevel: result.xpResult.oldLevel
+        } : undefined;
+
+        // Prepare healthResult data
+        const healthResultData = result.healthResult && result.healthResult.success && result.healthResult.newMood ? {
+          newMood: result.healthResult.newMood,
+          newHealth: result.healthResult.newHealth
+        } : undefined;
+
+        const dmResult = await sendMissionApprovalDM({
+          userId,
+          missionId: missionIdNum,
+          mission: {
+            title: mission?.title || 'Unknown Mission',
+            reward: {
+              amount: mission?.reward?.amount || 0,
+              token: mission?.reward?.token || 'TOKENS'
+            }
+          },
+          rewards: {
+            xp: result.rewards?.xp || 0,
+            health: result.rewards?.health || 0,
+            credits: result.rewards?.credits || 0,
+            levelUp: result.rewards?.levelUp || false,
+            newLevel: result.rewards?.newLevel || null
+          },
+          xpResult: xpResultData,
+          healthResult: healthResultData
+        });
+
+        if (!dmResult.success) {
+          console.warn('Failed to send Discord approval DM:', dmResult.error);
+        }
+      } catch (dmError) {
+        console.error('Error sending Discord approval DM:', dmError);
+      }
 
       return NextResponse.json({
         success: true,
@@ -105,6 +149,17 @@ export async function POST(req: NextRequest) {
       // Get mission details for response
       const mission = await getMissionById(missionIdNum);
 
+      // Send Discord DM notification to user for rejection
+      try {
+        const dmResult = await sendMissionRejectionDM(userId, mission?.title || 'Unknown Mission');
+
+        if (!dmResult.success) {
+          console.warn('Failed to send Discord rejection DM:', dmResult.error);
+        }
+      } catch (dmError) {
+        console.error('Error sending Discord rejection DM:', dmError);
+      }
+
       return NextResponse.json({
         success: true,
         message: "Mission rejected successfully",
@@ -126,3 +181,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

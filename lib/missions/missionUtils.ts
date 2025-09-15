@@ -95,13 +95,16 @@ export async function getMissionById(missionId: number): Promise<Mission | null>
 // Helper function to get user mission
 export async function getUserMission(userId: string, missionId: number): Promise<UserMission | null> {
   try {
-    const userMissions = await grist.fetchTable("User_missions");
+    const userMissions = await grist.fetchTable("User_missions", { user_id: [userId], mission_id: [missionId]});
+    
     const userMission = userMissions.find(um => 
-      ensureString(um.user_id) === userId && ensureNumber(um.mission_id) === missionId
+      um.status === 'submitted'
     );
+
+    console.log(userMission);
     
     if (!userMission) return null;
-
+    
     return {
       id: ensureNumber(userMission.id),
       user_id: ensureString(userMission.user_id),

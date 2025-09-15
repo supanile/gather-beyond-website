@@ -179,6 +179,132 @@ export function createMissionReviewButtons(userId: string, missionId: number): D
   ];
 }
 
+// Send DM notification for mission approval directly via Discord API
+export async function sendMissionApprovalDM(data: MissionReviewData): Promise<{ success: boolean; error?: string }> {
+  try {
+    const discordBotToken = process.env.DISCORD_BOT_TOKEN;
+    if (!discordBotToken) {
+      console.warn('Discord bot token not configured');
+      return { success: false, error: 'Discord bot token not configured' };
+    }
+
+    // Create the reward notification embed
+    const embedData = createRewardNotificationEmbed(data);
+    
+    // Convert our embed format to Discord API format
+    const discordEmbed = {
+      color: embedData.color,
+      title: embedData.title,
+      description: embedData.description,
+      fields: embedData.fields,
+      timestamp: new Date().toISOString()
+    };
+
+    // Send DM via Discord API
+    const response = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${discordBotToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        recipient_id: data.userId
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create DM channel: ${response.status}`);
+    }
+
+    const dmChannel = await response.json();
+    
+    // Send the message to the DM channel
+    const messageResponse = await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${discordBotToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        embeds: [discordEmbed]
+      })
+    });
+
+    if (!messageResponse.ok) {
+      const errorData = await messageResponse.json();
+      throw new Error(`Failed to send DM: ${messageResponse.status} - ${JSON.stringify(errorData)}`);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending mission approval DM:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Send DM notification for mission rejection directly via Discord API
+export async function sendMissionRejectionDM(userId: string, missionTitle: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const discordBotToken = process.env.DISCORD_BOT_TOKEN;
+    if (!discordBotToken) {
+      console.warn('Discord bot token not configured');
+      return { success: false, error: 'Discord bot token not configured' };
+    }
+
+    // Create the rejection notification embed
+    const embedData = createRejectionNotificationEmbed(missionTitle);
+    
+    // Convert our embed format to Discord API format
+    const discordEmbed = {
+      color: embedData.color,
+      title: embedData.title,
+      description: embedData.description,
+      fields: embedData.fields,
+      timestamp: new Date().toISOString()
+    };
+
+    // Send DM via Discord API
+    const response = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${discordBotToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        recipient_id: userId
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create DM channel: ${response.status}`);
+    }
+
+    const dmChannel = await response.json();
+    
+    // Send the message to the DM channel
+    const messageResponse = await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${discordBotToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        embeds: [discordEmbed]
+      })
+    });
+
+    if (!messageResponse.ok) {
+      const errorData = await messageResponse.json();
+      throw new Error(`Failed to send DM: ${messageResponse.status} - ${JSON.stringify(errorData)}`);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending mission rejection DM:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 // Generate mission review embed data
 export function createMissionReviewEmbed(
   userId: string, 
