@@ -295,7 +295,7 @@ export async function POST(request: Request) {
       repeatable: body.repeatable || 0,
       regex: body.regex || "",
       serverId: finalServerId,
-      id2: nextMissionId2, // Add the auto-incremented id2
+      id2: nextMissionId2,
     };
 
     console.log("Prepared mission data for Grist:", missionData);
