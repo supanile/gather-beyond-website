@@ -244,7 +244,7 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
               createDateColumnHeader("startDate", "Start Date", "w-32 px-0", startDateFilter, onStartDateFilterChange)}
             {columnVisibility.endDate &&
               createDateColumnHeader("endDate", "End Date", "w-32 px-0", endDateFilter, onEndDateFilterChange)}
-            <TableHead className="w-28 px-0 text-xs">Actions</TableHead>
+            <TableHead className="w-28 px-4 text-xs">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
