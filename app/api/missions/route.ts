@@ -251,6 +251,31 @@ export async function POST(request: Request) {
 
     console.log("🔥 POST Final serverId:", finalServerId);
 
+    // Get the next id2 for Missions table
+    let nextMissionId2;
+    try {
+      const response = await fetch('http://103.245.164.53:8484/api/docs/jRo2uDUxFNwdN9hjY7xTF2/tables/Missions/records?sort=-id2&limit=1',
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${process.env.GRIST_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      const data = await response.json();
+
+      if (data.records && data.records.length > 0) {
+        nextMissionId2 = data.records[0].fields.id2 + 1;
+      } else {
+        nextMissionId2 = 1;
+      }
+      console.log("Next mission id2:", nextMissionId2);
+    } catch (error) {
+      console.error('Error getting last mission id2:', error);
+      nextMissionId2 = 1;
+    }
+
     // Prepare data for Grist
     const missionData = {
       title: body.title,
@@ -270,6 +295,7 @@ export async function POST(request: Request) {
       repeatable: body.repeatable || 0,
       regex: body.regex || "",
       serverId: finalServerId,
+      id2: nextMissionId2,
     };
 
     console.log("Prepared mission data for Grist:", missionData);
