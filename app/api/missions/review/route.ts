@@ -3,10 +3,14 @@ import { completeMission, getMissionById, ensureString, ensureNumber } from "@/l
 import { grist } from "@/lib/grist";
 import { sendMissionApprovalDM, sendMissionRejectionDM } from "@/lib/discord/missionReviewHandlers";
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
-    const { action, userId, missionId, approvedBy } = body;
+    // Parse request body
+    const body = await request.json();
+    const { action, userId, missionId, approvedBy, rejectionReason } = body;
+    
+    console.log("Received request body:", body);
+    console.log("Extracted rejectionReason:", rejectionReason, "Type:", typeof rejectionReason);
 
     // Validate required fields
     if (!action || !userId || !missionId) {
@@ -133,6 +137,7 @@ export async function POST(req: NextRequest) {
         status: string;
         completed_at?: string;
         verified_by?: string;
+        notes?: string;
       } = {
         id: ensureNumber(userMission.id),
         status: 'rejected'
@@ -143,15 +148,28 @@ export async function POST(req: NextRequest) {
       if (approvedBy) {
         updateData.verified_by = approvedBy;
       }
+      
+      // Add rejection reason to notes field
+      if (rejectionReason) {
+        updateData.notes = rejectionReason;
+        console.log("Setting rejection reason in notes:", rejectionReason);
+      }
 
-      await grist.updateRecords("User_missions", [updateData]);
+      console.log("Updating mission with data:", updateData);
+      console.log("Grist table name: User_missions");
+      const updateResult = await grist.updateRecords("User_missions", [updateData]);
+      console.log("Grist update result:", updateResult);
 
       // Get mission details for response
       const mission = await getMissionById(missionIdNum);
 
       // Send Discord DM notification to user for rejection
       try {
-        const dmResult = await sendMissionRejectionDM(userId, mission?.title || 'Unknown Mission');
+        const dmResult = await sendMissionRejectionDM(
+          userId, 
+          mission?.title || 'Unknown Mission', 
+          rejectionReason || 'No reason provided'
+        );
 
         if (!dmResult.success) {
           console.warn('Failed to send Discord rejection DM:', dmResult.error);

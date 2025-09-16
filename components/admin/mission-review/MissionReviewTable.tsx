@@ -82,13 +82,13 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
     });
   };
 
-  const handleConfirmAction = async () => {
+  const handleConfirmAction = async (rejectionReason?: string) => {
     setIsActionLoading(true);
     try {
       if (confirmDialog.action === "approve") {
         await onApprove(confirmDialog.missionId);
       } else {
-        await onReject(confirmDialog.missionId);
+        await onReject(confirmDialog.missionId, rejectionReason);
       }
     } finally {
       setIsActionLoading(false);
@@ -278,7 +278,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {columnVisibility.mission_name && (
-                  <TableCell className="px-3">
+                  <TableCell className="px-9">
                     <div className="w-full">
                       <div
                         className="truncate font-medium text-xs"
@@ -290,12 +290,12 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {columnVisibility.status && (
-                  <TableCell className="px-5">
+                  <TableCell className="px-0">
                     <MissionStatusBadge status={mission.status} />
                   </TableCell>
                 )}
                 {columnVisibility.submission_link && (
-                  <TableCell className="px-3">
+                  <TableCell className="px-7">
                     {mission.submission_link ? (
                       <a
                         href={mission.submission_link}

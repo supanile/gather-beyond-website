@@ -52,8 +52,8 @@ interface DiscordButton {
 // API call to approve/reject mission
 export async function handleMissionReviewAction(
   action: 'approve' | 'reject',
-  userId: string, 
-  missionId: number, 
+  userId: string,
+  missionId: number,
   approvedBy: string
 ) {
   try {
@@ -151,13 +151,14 @@ export function createRewardNotificationEmbed(data: MissionReviewData): DiscordE
 }
 
 // Generate rejection notification embed data
-export function createRejectionNotificationEmbed(missionTitle: string): DiscordEmbed {
+export function createRejectionNotificationEmbed(missionTitle: string, reason: string): DiscordEmbed {
   return {
     color: 0xff0000, // Red
     title: '❌ Mission Rejected',
     description: `Your submission for **${missionTitle}** has been rejected.`,
     fields: [
-      { name: '📝 What to do next?', value: 'You can resubmit the mission with the required improvements.', inline: false }
+      { name: '📝 Reason', value: reason, inline: false },
+      { name: '🔄 Next Steps', value: `Go to \`/my_missions\` to reset your mission so you can submit again.`, inline: false }
     ],
     timestamp: true
   };
@@ -190,7 +191,6 @@ export async function sendMissionApprovalDM(data: MissionReviewData): Promise<{ 
 
     // Create the reward notification embed
     const embedData = createRewardNotificationEmbed(data);
-    
     // Convert our embed format to Discord API format
     const discordEmbed = {
       color: embedData.color,
@@ -217,7 +217,6 @@ export async function sendMissionApprovalDM(data: MissionReviewData): Promise<{ 
     }
 
     const dmChannel = await response.json();
-    
     // Send the message to the DM channel
     const messageResponse = await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
       method: 'POST',
@@ -243,7 +242,7 @@ export async function sendMissionApprovalDM(data: MissionReviewData): Promise<{ 
 }
 
 // Send DM notification for mission rejection directly via Discord API
-export async function sendMissionRejectionDM(userId: string, missionTitle: string): Promise<{ success: boolean; error?: string }> {
+export async function sendMissionRejectionDM(userId: string, missionTitle: string, reason: string): Promise<{ success: boolean; error?: string }> {
   try {
     const discordBotToken = process.env.DISCORD_BOT_TOKEN;
     if (!discordBotToken) {
@@ -252,8 +251,8 @@ export async function sendMissionRejectionDM(userId: string, missionTitle: strin
     }
 
     // Create the rejection notification embed
-    const embedData = createRejectionNotificationEmbed(missionTitle);
-    
+    const embedData = createRejectionNotificationEmbed(missionTitle, reason);
+
     // Convert our embed format to Discord API format
     const discordEmbed = {
       color: embedData.color,
@@ -280,7 +279,6 @@ export async function sendMissionRejectionDM(userId: string, missionTitle: strin
     }
 
     const dmChannel = await response.json();
-    
     // Send the message to the DM channel
     const messageResponse = await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
       method: 'POST',
@@ -307,8 +305,8 @@ export async function sendMissionRejectionDM(userId: string, missionTitle: strin
 
 // Generate mission review embed data
 export function createMissionReviewEmbed(
-  userId: string, 
-  mission: { title: string; reward: { amount: number; token: string } }, 
+  userId: string,
+  mission: { title: string; reward: { amount: number; token: string } },
   submissionData?: { description?: string; attachments?: string[] }
 ): DiscordEmbed {
   const fields: DiscordEmbedField[] = [

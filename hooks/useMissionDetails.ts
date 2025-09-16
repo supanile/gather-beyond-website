@@ -18,12 +18,33 @@ export function useMissionDetails(missionId: string) {
       setError(null);
 
       try {
-        const response = await fetch(`/api/user-missions/${missionId}`);
-        if (!response.ok) {
+        // Fetch user mission details
+        const userMissionResponse = await fetch(`/api/user-missions/${missionId}`);
+        if (!userMissionResponse.ok) {
           throw new Error("Failed to fetch mission details");
         }
-        const data = await response.json();
-        setMission(data);
+        const userMissionData = await userMissionResponse.json();
+
+        // Fetch mission reward details
+        const missionResponse = await fetch(`/api/missions/${userMissionData.mission_id}`);
+        if (!missionResponse.ok) {
+          console.warn("Failed to fetch mission reward details");
+        }
+        
+        let missionData = null;
+        try {
+          missionData = await missionResponse.json();
+        } catch (e) {
+          console.warn("Error parsing mission reward data:", e);
+        }
+
+        // Combine user mission data with reward information
+        const combinedData = {
+          ...userMissionData,
+          reward: missionData?.reward || null
+        };
+
+        setMission(combinedData);
       } catch (err) {
         console.error("Error fetching mission details:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -35,7 +56,8 @@ export function useMissionDetails(missionId: string) {
     fetchMissionDetails();
   }, [missionId]);
 
-  const approveMission = async (missionId: number) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const approveMission = async (_missionId: number) => {
     try {
       if (!mission) {
         throw new Error("Mission not found");
@@ -79,7 +101,7 @@ export function useMissionDetails(missionId: string) {
     }
   };
 
-  const rejectMission = async (missionId: number) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+  const rejectMission = async (_missionId: number, rejectionReason?: string) => {
     try {
       if (!mission) {
         throw new Error("Mission not found");
@@ -88,17 +110,24 @@ export function useMissionDetails(missionId: string) {
       // Get the current admin's username
       const verifiedBy = user?.username || user?.firstName || "Admin";
 
+      console.log("Rejecting mission with reason:", rejectionReason);
+
+      const requestBody = {
+        action: "reject",
+        userId: mission.user_id,
+        missionId: mission.mission_id,
+        approvedBy: verifiedBy,
+        rejectionReason: rejectionReason
+      };
+      
+      console.log("Request body to send:", requestBody);
+
       const response = await fetch(`/api/missions/review`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          action: "reject",
-          userId: mission.user_id,
-          missionId: mission.mission_id,
-          approvedBy: verifiedBy
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -114,6 +143,7 @@ export function useMissionDetails(missionId: string) {
         status: "rejected" as const,
         completed_at: Math.floor(Date.now() / 1000),
         verified_by: verifiedBy,
+        notes: rejectionReason || prev.notes, // Add rejection reason to notes
       } : null);
       
       return responseData;
@@ -136,12 +166,33 @@ export function useMissionDetails(missionId: string) {
           setError(null);
 
           try {
-            const response = await fetch(`/api/user-missions/${missionId}`);
-            if (!response.ok) {
+            // Fetch user mission details
+            const userMissionResponse = await fetch(`/api/user-missions/${missionId}`);
+            if (!userMissionResponse.ok) {
               throw new Error("Failed to fetch mission details");
             }
-            const data = await response.json();
-            setMission(data);
+            const userMissionData = await userMissionResponse.json();
+
+            // Fetch mission reward details
+            const missionResponse = await fetch(`/api/missions/${userMissionData.mission_id}`);
+            if (!missionResponse.ok) {
+              console.warn("Failed to fetch mission reward details");
+            }
+            
+            let missionData = null;
+            try {
+              missionData = await missionResponse.json();
+            } catch (e) {
+              console.warn("Error parsing mission reward data:", e);
+            }
+
+            // Combine user mission data with reward information
+            const combinedData = {
+              ...userMissionData,
+              reward: missionData?.reward || null
+            };
+
+            setMission(combinedData);
           } catch (err) {
             console.error("Error fetching mission details:", err);
             setError(err instanceof Error ? err.message : "An error occurred");

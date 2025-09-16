@@ -12,6 +12,11 @@ export interface UserMission {
   notes: string;
   discord_user?: DiscordUserData;
   verified_by?: string; // Username of the admin who approved/rejected
+  reward?: {
+    xp: number;
+    credits: number;
+    health: number;
+  } | null;
 }
 
 export interface DiscordUserData {
@@ -44,7 +49,7 @@ export interface MissionReviewTableProps {
   onSort: (field: keyof UserMission) => void;
   onToggleColumnVisibility: (column: keyof MissionReviewColumnVisibility) => void;
   onApprove: (missionId: number) => void;
-  onReject: (missionId: number) => void;
+  onReject: (missionId: number, rejectionReason?: string) => void;
   isLoading?: boolean;
   totalVisibleColumns: number;
   emptyMessage?: string;
