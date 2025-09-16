@@ -65,13 +65,15 @@ export default function MissionDetailsPage() {
     });
   };
 
-  const handleConfirmAction = async () => {
+  const handleConfirmAction = async (rejectionReason?: string) => {
+    console.log("handleConfirmAction called with rejectionReason:", rejectionReason);
     setIsActionLoading(true);
     try {
       if (confirmDialog.action === "approve") {
         await approveMission(confirmDialog.missionId);
       } else {
-        await rejectMission(confirmDialog.missionId);
+        console.log("Calling rejectMission with reason:", rejectionReason);
+        await rejectMission(confirmDialog.missionId, rejectionReason);
       }
       // Stay on the current page to see the updated status
       // The mission data will be updated automatically by the hooks
@@ -575,8 +577,8 @@ export default function MissionDetailsPage() {
                     <div className="p-2 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-lg">
                       <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                      Notes
+                                        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                      {mission.status === "rejected" ? "Rejection Reason" : "Notes"}
                     </h3>
                   </div>
 
@@ -592,7 +594,11 @@ export default function MissionDetailsPage() {
                         <MessageSquare className="w-8 h-8 text-slate-400 dark:text-slate-500" />
                       </div>
                       <span className="text-sm text-slate-500 dark:text-slate-400 italic text-center">
-                        Waiting for verification
+                        {mission.status === "rejected" 
+                          ? "No rejection reason provided" 
+                          : mission.status === "completed"
+                          ? "No additional notes"
+                          : "Awaiting review"}
                       </span>
                     </div>
                   )}

@@ -44,7 +44,7 @@ export interface MissionReviewTableProps {
   onSort: (field: keyof UserMission) => void;
   onToggleColumnVisibility: (column: keyof MissionReviewColumnVisibility) => void;
   onApprove: (missionId: number) => void;
-  onReject: (missionId: number) => void;
+  onReject: (missionId: number, rejectionReason?: string) => void;
   isLoading?: boolean;
   totalVisibleColumns: number;
   emptyMessage?: string;

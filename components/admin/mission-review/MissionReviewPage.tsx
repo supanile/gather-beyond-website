@@ -64,8 +64,8 @@ export function MissionReviewPage() {
     await approveMission(missionId);
   };
 
-  const handleReject = async (missionId: number) => {
-    await rejectMission(missionId);
+  const handleReject = async (missionId: number, rejectionReason?: string) => {
+    await rejectMission(missionId, rejectionReason);
   };
 
   const handleToggleColumnVisibility = (

@@ -82,13 +82,13 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
     });
   };
 
-  const handleConfirmAction = async () => {
+  const handleConfirmAction = async (rejectionReason?: string) => {
     setIsActionLoading(true);
     try {
       if (confirmDialog.action === "approve") {
         await onApprove(confirmDialog.missionId);
       } else {
-        await onReject(confirmDialog.missionId);
+        await onReject(confirmDialog.missionId, rejectionReason);
       }
     } finally {
       setIsActionLoading(false);

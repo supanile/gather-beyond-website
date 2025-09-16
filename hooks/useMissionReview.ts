@@ -262,7 +262,7 @@ export function useMissionReview() {
     }
   };
 
-  const rejectMission = async (missionId: number) => {
+  const rejectMission = async (missionId: number, rejectionReason?: string) => {
     try {
       // Find the mission to get user_id
       const mission = missions.find(m => m._id === missionId);
@@ -297,7 +297,8 @@ export function useMissionReview() {
           action: "reject",
           userId: mission.user_id,
           missionId: mission.mission_id,
-          approvedBy: verifiedBy
+          approvedBy: verifiedBy,
+          rejectionReason: rejectionReason
         }),
       });
 
