@@ -12,6 +12,11 @@ export interface UserMission {
   notes: string;
   discord_user?: DiscordUserData;
   verified_by?: string; // Username of the admin who approved/rejected
+  reward?: {
+    xp: number;
+    credits: number;
+    health: number;
+  } | null;
 }
 
 export interface DiscordUserData {

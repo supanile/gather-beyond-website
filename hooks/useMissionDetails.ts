@@ -18,12 +18,33 @@ export function useMissionDetails(missionId: string) {
       setError(null);
 
       try {
-        const response = await fetch(`/api/user-missions/${missionId}`);
-        if (!response.ok) {
+        // Fetch user mission details
+        const userMissionResponse = await fetch(`/api/user-missions/${missionId}`);
+        if (!userMissionResponse.ok) {
           throw new Error("Failed to fetch mission details");
         }
-        const data = await response.json();
-        setMission(data);
+        const userMissionData = await userMissionResponse.json();
+
+        // Fetch mission reward details
+        const missionResponse = await fetch(`/api/missions/${userMissionData.mission_id}`);
+        if (!missionResponse.ok) {
+          console.warn("Failed to fetch mission reward details");
+        }
+        
+        let missionData = null;
+        try {
+          missionData = await missionResponse.json();
+        } catch (e) {
+          console.warn("Error parsing mission reward data:", e);
+        }
+
+        // Combine user mission data with reward information
+        const combinedData = {
+          ...userMissionData,
+          reward: missionData?.reward || null
+        };
+
+        setMission(combinedData);
       } catch (err) {
         console.error("Error fetching mission details:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -145,12 +166,33 @@ export function useMissionDetails(missionId: string) {
           setError(null);
 
           try {
-            const response = await fetch(`/api/user-missions/${missionId}`);
-            if (!response.ok) {
+            // Fetch user mission details
+            const userMissionResponse = await fetch(`/api/user-missions/${missionId}`);
+            if (!userMissionResponse.ok) {
               throw new Error("Failed to fetch mission details");
             }
-            const data = await response.json();
-            setMission(data);
+            const userMissionData = await userMissionResponse.json();
+
+            // Fetch mission reward details
+            const missionResponse = await fetch(`/api/missions/${userMissionData.mission_id}`);
+            if (!missionResponse.ok) {
+              console.warn("Failed to fetch mission reward details");
+            }
+            
+            let missionData = null;
+            try {
+              missionData = await missionResponse.json();
+            } catch (e) {
+              console.warn("Error parsing mission reward data:", e);
+            }
+
+            // Combine user mission data with reward information
+            const combinedData = {
+              ...userMissionData,
+              reward: missionData?.reward || null
+            };
+
+            setMission(combinedData);
           } catch (err) {
             console.error("Error fetching mission details:", err);
             setError(err instanceof Error ? err.message : "An error occurred");

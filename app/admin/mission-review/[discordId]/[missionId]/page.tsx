@@ -22,6 +22,9 @@ import {
   ArrowLeft,
   Shield,
   Sparkles,
+  Sparkle,
+  Coins,
+  Heart,
 } from "lucide-react";
 
 export default function MissionDetailsPage() {
@@ -321,6 +324,73 @@ export default function MissionDetailsPage() {
                 </div>
               </div>
             </div>
+
+            {/* Mission Rewards Card */}
+            {mission.reward && (
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-orange-500/5 dark:from-yellow-400/10 dark:to-orange-400/10 rounded-2xl"></div>
+                <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 dark:border-slate-700/60 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/20">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg">
+                      <Sparkles className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                      Mission Rewards
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* XP Reward */}
+                    <div className="relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 dark:from-blue-400/20 dark:to-indigo-400/20 rounded-xl"></div>
+                      <div className="relative p-4 text-center">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/30">
+                          <Sparkle className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                          XP
+                        </p>
+                        <p className="text-xl font-black text-blue-600 dark:text-blue-400">
+                          +{mission.reward.xp?.toLocaleString() || 0}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Credits Reward */}
+                    <div className="relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-green-500/10 dark:from-emerald-400/20 dark:to-green-400/20 rounded-xl"></div>
+                      <div className="relative p-4 text-center">
+                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-emerald-500/30">
+                          <Coins className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                          Credits
+                        </p>
+                        <p className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                          +{mission.reward.credits?.toLocaleString() || 0}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Health Reward */}
+                    <div className="relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-red-500/10 dark:from-rose-400/20 dark:to-red-400/20 rounded-xl"></div>
+                      <div className="relative p-4 text-center">
+                        <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-rose-500/30">
+                          <Heart className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                          Health
+                        </p>
+                        <p className="text-xl font-black text-rose-600 dark:text-rose-400">
+                          +{mission.reward.health || 0}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Timeline & Content */}
