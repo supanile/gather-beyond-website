@@ -191,7 +191,6 @@ export async function sendMissionApprovalDM(data: MissionReviewData): Promise<{ 
 
     // Create the reward notification embed
     const embedData = createRewardNotificationEmbed(data);
-
     // Convert our embed format to Discord API format
     const discordEmbed = {
       color: embedData.color,
@@ -218,7 +217,6 @@ export async function sendMissionApprovalDM(data: MissionReviewData): Promise<{ 
     }
 
     const dmChannel = await response.json();
-
     // Send the message to the DM channel
     const messageResponse = await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
       method: 'POST',
@@ -281,7 +279,6 @@ export async function sendMissionRejectionDM(userId: string, missionTitle: strin
     }
 
     const dmChannel = await response.json();
-
     // Send the message to the DM channel
     const messageResponse = await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
       method: 'POST',

@@ -24,7 +24,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ missionI
     };
 
     return NextResponse.json(response);
-  } catch (error) {
+  } catch  {
     return NextResponse.json({ error: "Failed to fetch mission" }, { status: 500 });
   }
 }

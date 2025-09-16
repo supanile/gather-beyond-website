@@ -8,7 +8,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Send } from "lucide-react";
 import { UserWithAgent } from "@/types/admin/userManagement";
+import { DiscordUsername } from "./DiscordUsername";
+import XIcon from "@/components/ui/icons/XIcon";
 
 interface ViewUserModalProps {
   isOpen: boolean;
@@ -180,13 +183,21 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
             <CardHeader className="p-3 sm:p-6 -mb-2 sm:-mb-2">
               <CardTitle className="flex flex-col gap-2">
                 <span className="text-sm sm:text-lg break-words font-medium">
-                  {user.email}
+                  <DiscordUsername discordId={user.discord_id} fallback={user.discord_id} />
                 </span>
                 <div className="text-sm text-muted-foreground">
                   {user.twitter_handle && (
-                    <span className="mr-2">{user.twitter_handle}</span>
+                    <span className="mr-2 flex items-center gap-1">
+                      <XIcon className="h-3 w-3" />
+                      {user.twitter_handle}
+                    </span>
                   )}
-                  {user.telegram_handle && <span>{user.telegram_handle}</span>}
+                  {user.telegram_handle && (
+                    <span className="flex items-center gap-1">
+                      <Send className="h-3 w-3" />
+                      {user.telegram_handle}
+                    </span>
+                  )}
                   {!user.twitter_handle && !user.telegram_handle && (
                     <span>No social handles</span>
                   )}
