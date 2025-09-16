@@ -49,43 +49,6 @@ const toastStyles = {
   }
 };
 
-// Toast styling utility for light/dark mode compatibility with very soft colors
-const toastStyles = {
-  success: {
-    style: {
-      background: 'hsl(142 45% 75%)', // very soft green - much lighter
-      color: 'hsl(142 40% 20%)', // dark green text for contrast
-      border: '1px solid hsl(142 35% 65%)', // subtle green border
-      '--tw-shadow': '0 2px 4px -1px rgba(34, 197, 94, 0.1)',
-      boxShadow: 'var(--tw-shadow)',
-      borderRadius: '8px',
-      backdropFilter: 'blur(4px)',
-    }
-  },
-  error: {
-    style: {
-      background: 'hsl(0 45% 85%)', // very soft pink/red - much lighter
-      color: 'hsl(0 60% 30%)', // dark red text for contrast
-      border: '1px solid hsl(0 35% 75%)', // subtle red border
-      '--tw-shadow': '0 2px 4px -1px rgba(248, 113, 113, 0.1)',
-      boxShadow: 'var(--tw-shadow)',
-      borderRadius: '8px',
-      backdropFilter: 'blur(4px)',
-    }
-  },
-  delete: {
-    style: {
-      background: 'hsl(15 45% 80%)', // very soft orange-red for delete
-      color: 'hsl(15 60% 25%)', // dark orange-red text
-      border: '1px solid hsl(15 35% 70%)', // subtle orange-red border
-      '--tw-shadow': '0 2px 4px -1px rgba(239, 68, 68, 0.1)',
-      boxShadow: 'var(--tw-shadow)',
-      borderRadius: '8px',
-      backdropFilter: 'blur(4px)',
-    }
-  }
-};
-
 export const useMissionsTable = () => {
   // State management
   const [missions, setMissions] = useState<Mission[]>([]);
