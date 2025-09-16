@@ -405,9 +405,9 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                   {selectedServerIds.length > 0 ? (
                     <>
                       {/* Total Discord Reach */}
-                      <div className="bg-gray-900 rounded-2xl p-6 text-white">
+                      <div className="bg-gray-100 dark:bg-gray-900 rounded-2xl p-6 text-gray-900 dark:text-white">
                         <div className="text-center space-y-2">
-                          <div className="text-4xl font-bold text-blue-400">
+                          <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
                             {isLoadingServers
                               ? "Loading..."
                               : totalMembers > 0
@@ -416,14 +416,14 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                               ? "Unknown"
                               : "0"}
                           </div>
-                          <div className="text-gray-400 text-sm font-medium">
+                          <div className="text-gray-600 dark:text-gray-400 text-sm font-medium">
                             Discord members
                           </div>
                         </div>
 
                         {/* Server Breakdown Label */}
                         <div className="mt-6 mb-4">
-                          <div className="text-white font-semibold">
+                          <div className="text-gray-900 dark:text-white font-semibold">
                             Server Breakdown:
                           </div>
                         </div>
@@ -440,28 +440,28 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                           {isLoadingServers ? (
                             <div className="text-center py-8">
                               <div className="relative mx-auto w-8 h-8 mb-3">
-                                <div className="absolute inset-0 rounded-full border-2 border-gray-600"></div>
-                                <div className="absolute inset-0 rounded-full border-2 border-blue-400 border-t-transparent animate-spin"></div>
+                                <div className="absolute inset-0 rounded-full border-2 border-gray-400 dark:border-gray-600"></div>
+                                <div className="absolute inset-0 rounded-full border-2 border-blue-600 dark:border-blue-400 border-t-transparent animate-spin"></div>
                               </div>
-                              <p className="text-sm text-gray-400">
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Loading server details...
                               </p>
                             </div>
                           ) : serverFetchError ? (
                             <div className="text-center py-6 space-y-2">
-                              <div className="p-3 rounded-full bg-red-900/20 w-fit mx-auto">
-                                <AlertCircle className="h-6 w-6 text-red-400" />
+                              <div className="p-3 rounded-full bg-red-100 dark:bg-red-900/20 w-fit mx-auto">
+                                <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
                               </div>
-                              <p className="text-sm font-medium text-red-400">
+                              <p className="text-sm font-medium text-red-600 dark:text-red-400">
                                 Failed to load server details
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
                                 {serverFetchError}
                               </p>
                               {/* Show server IDs when there's an error */}
                               {selectedServerIds.length > 0 && (
                                 <div className="mt-4 space-y-2">
-                                  <p className="text-xs text-gray-400 mb-2">
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                                     Selected Server IDs:
                                   </p>
                                   {selectedServerIds.map((serverId) => {
@@ -473,7 +473,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                     return (
                                       <div
                                         key={serverId}
-                                        className="bg-gray-800 rounded-lg p-4 flex items-center justify-between"
+                                        className="bg-gray-200 dark:bg-gray-800 rounded-lg p-4 flex items-center justify-between"
                                       >
                                         <div className="flex items-center gap-3">
                                           <div className="relative">
@@ -489,8 +489,8 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                                 className="w-8 h-8 rounded object-cover"
                                               />
                                             ) : (
-                                              <div className="w-8 h-8 rounded bg-gray-600 flex items-center justify-center">
-                                                <span className="text-white text-sm">
+                                              <div className="w-8 h-8 rounded bg-gray-400 dark:bg-gray-600 flex items-center justify-center">
+                                                <span className="text-gray-800 dark:text-white text-sm">
                                                   {cachedServer?.name
                                                     ?.charAt(0)
                                                     ?.toUpperCase() || "🌐"}
@@ -499,11 +499,11 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                             )}
                                           </div>
                                           <div className="flex-1 min-w-0">
-                                            <div className="text-white font-medium text-sm truncate">
+                                            <div className="text-gray-900 dark:text-white font-medium text-sm truncate">
                                               {cachedServer?.name ||
                                                 "Discord Server"}
                                             </div>
-                                            <div className="text-gray-400 text-xs font-mono break-all">
+                                            <div className="text-gray-600 dark:text-gray-400 text-xs font-mono break-all">
                                               ID: {serverId}
                                             </div>
                                           </div>
@@ -511,10 +511,10 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                         <div className="text-right">
                                           {cachedServer?.memberCount ? (
                                             <div>
-                                              <div className="text-white font-semibold">
+                                              <div className="text-gray-900 dark:text-white font-semibold">
                                                 {cachedServer.memberCount.toLocaleString()}
                                               </div>
-                                              <div className="text-gray-400 text-xs">
+                                              <div className="text-gray-600 dark:text-gray-400 text-xs">
                                                 members
                                               </div>
                                             </div>
@@ -538,7 +538,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                             selectedServers.map((server) => (
                               <div
                                 key={server.serverId}
-                                className="bg-gray-800 rounded-lg p-4 flex items-center justify-between hover:bg-gray-700 transition-colors"
+                                className="bg-gray-200 dark:bg-gray-800 rounded-lg p-4 flex items-center justify-between hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
                               >
                                 <div className="flex items-center gap-3">
                                   <div className="relative">
@@ -551,27 +551,27 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                         className="w-8 h-8 rounded object-cover"
                                       />
                                     ) : (
-                                      <div className="w-8 h-8 rounded bg-gray-600 flex items-center justify-center">
-                                        <span className="text-white text-sm font-bold">
+                                      <div className="w-8 h-8 rounded bg-gray-400 dark:bg-gray-600 flex items-center justify-center">
+                                        <span className="text-gray-800 dark:text-white text-sm font-bold">
                                           {server.name.charAt(0).toUpperCase()}
                                         </span>
                                       </div>
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="text-white font-medium text-sm truncate">
+                                    <div className="text-gray-900 dark:text-white font-medium text-sm truncate">
                                       {server.name}
                                     </div>
-                                    <div className="text-gray-400 text-xs font-mono break-all">
+                                    <div className="text-gray-600 dark:text-gray-400 text-xs font-mono break-all">
                                       ID: {server.serverId}
                                     </div>
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <div className="text-white font-semibold">
+                                  <div className="text-gray-900 dark:text-white font-semibold">
                                     {server.memberCount.toLocaleString()}
                                   </div>
-                                  <div className="text-gray-400 text-xs">
+                                  <div className="text-gray-600 dark:text-gray-400 text-xs">
                                     members
                                   </div>
                                 </div>
@@ -580,7 +580,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                           ) : selectedServerIds.length > 0 ? (
                             // Show server IDs when we have selected servers but can't match them
                             <div className="space-y-2">
-                              <p className="text-xs text-gray-400 mb-2">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                                 Selected servers ({selectedServerIds.length}):
                               </p>
                               {selectedServerIds.map((serverId) => {
@@ -592,7 +592,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                 return (
                                   <div
                                     key={serverId}
-                                    className="bg-gray-800 rounded-lg p-4 flex items-center justify-between"
+                                    className="bg-gray-200 dark:bg-gray-800 rounded-lg p-4 flex items-center justify-between"
                                   >
                                     <div className="flex items-center gap-3">
                                       <div className="relative">
@@ -608,8 +608,8 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                             className="w-8 h-8 rounded object-cover"
                                           />
                                         ) : (
-                                          <div className="w-8 h-8 rounded bg-gray-600 flex items-center justify-center">
-                                            <span className="text-white text-sm">
+                                          <div className="w-8 h-8 rounded bg-gray-400 dark:bg-gray-600 flex items-center justify-center">
+                                            <span className="text-gray-800 dark:text-white text-sm">
                                               {cachedServer?.name
                                                 ?.charAt(0)
                                                 ?.toUpperCase() || "🌐"}
@@ -618,11 +618,11 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                         )}
                                       </div>
                                       <div className="flex-1 min-w-0">
-                                        <div className="text-white font-medium text-sm truncate">
+                                        <div className="text-gray-900 dark:text-white font-medium text-sm truncate">
                                           {cachedServer?.name ||
                                             "Discord Server"}
                                         </div>
-                                        <div className="text-gray-400 text-xs font-mono break-all">
+                                        <div className="text-gray-600 dark:text-gray-400 text-xs font-mono break-all">
                                           ID: {serverId}
                                         </div>
                                       </div>
@@ -630,17 +630,17 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                                     <div className="text-right">
                                       {cachedServer?.memberCount ? (
                                         <div>
-                                          <div className="text-white font-semibold">
+                                          <div className="text-gray-900 dark:text-white font-semibold">
                                             {cachedServer.memberCount.toLocaleString()}
                                           </div>
-                                          <div className="text-gray-400 text-xs">
+                                          <div className="text-gray-600 dark:text-gray-400 text-xs">
                                             members
                                           </div>
                                         </div>
                                       ) : (
                                         <Badge
                                           variant="outline"
-                                          className="text-xs border-yellow-400 text-yellow-400"
+                                          className="text-xs border-yellow-500 dark:border-yellow-400 text-yellow-600 dark:text-yellow-400"
                                         >
                                           {discordServers.length === 0
                                             ? "Loading..."
@@ -653,7 +653,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                               })}
                             </div>
                           ) : (
-                            <div className="text-center py-4 text-gray-400">
+                            <div className="text-center py-4 text-gray-600 dark:text-gray-400">
                               <p className="text-sm">
                                 No servers found for this mission
                               </p>
@@ -670,7 +670,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                         <div className="text-sm font-medium mb-1">
                           No Discord servers targeted
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-500">
                           This mission doesn&apos;t target specific Discord
                           servers
                         </div>
