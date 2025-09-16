@@ -41,7 +41,7 @@ const MissionsPageSkeleton = () => (
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
                   <Skeleton className="w-4 h-4" />
                 </div>
-                
+
                 {/* Click to filter text skeleton */}
                 <div className="flex items-center space-x-1 opacity-60">
                   <Skeleton className="h-3 w-16" />
@@ -49,9 +49,6 @@ const MissionsPageSkeleton = () => (
                 </div>
               </div>
             </div>
-
-            {/* Bottom subtle line indicator skeleton */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0" />
           </div>
         </div>
       ))}
@@ -134,7 +131,7 @@ const MissionsPageSkeleton = () => (
                 </th>
               </tr>
             </thead>
-            
+
             {/* Table Body */}
             <tbody className="divide-y divide-border">
               {Array.from({ length: 10 }).map((_, rowIndex) => (
@@ -143,7 +140,7 @@ const MissionsPageSkeleton = () => (
                   <td className="font-medium px-4 py-3">
                     <Skeleton className="h-4 w-6" />
                   </td>
-                  
+
                   {/* Title */}
                   <td className="px-3 py-3">
                     <div className="space-y-1">
@@ -151,32 +148,32 @@ const MissionsPageSkeleton = () => (
                       <Skeleton className="h-3 w-24" />
                     </div>
                   </td>
-                  
+
                   {/* Type */}
                   <td className="px-3 py-3">
                     <Skeleton className="h-6 w-16 rounded-full" />
                   </td>
-                  
+
                   {/* Platform */}
                   <td className="px-3 py-3">
                     <Skeleton className="h-4 w-16" />
                   </td>
-                  
+
                   {/* Status */}
                   <td className="px-2 py-3">
                     <Skeleton className="h-6 w-16 rounded-full" />
                   </td>
-                  
+
                   {/* Reward */}
                   <td className="px-3 py-3">
                     <Skeleton className="h-4 w-12" />
                   </td>
-                  
+
                   {/* Partner */}
                   <td className="px-3 py-3">
                     <Skeleton className="h-4 w-20" />
                   </td>
-                  
+
                   {/* Start Date */}
                   <td className="px-3 py-3">
                     <div className="space-y-1">
@@ -184,7 +181,7 @@ const MissionsPageSkeleton = () => (
                       <Skeleton className="h-3 w-16" />
                     </div>
                   </td>
-                  
+
                   {/* End Date */}
                   <td className="px-3 py-3">
                     <div className="space-y-1">
@@ -192,7 +189,7 @@ const MissionsPageSkeleton = () => (
                       <Skeleton className="h-3 w-16" />
                     </div>
                   </td>
-                  
+
                   {/* Actions */}
                   <td className="px-3 py-3">
                     <div className="flex items-center space-x-1">

@@ -23,6 +23,7 @@ export interface Mission {
   status: string;
   gristHelper_Display2: string;
   serverId: string;
+  missionTargeting?: string | MissionTargetingData | null;
 }
 
 export interface ColumnVisibility {
@@ -168,9 +169,16 @@ export interface SortState {
   direction: "asc" | "desc";
 }
 
+export interface DateFilter {
+  type: 'all' | 'date';
+  date?: string; // YYYY-MM-DD format
+}
+
 export interface MissionTableFilters {
   selectedStatus: string | null;
   searchTerm?: string;
+  startDateFilter?: DateFilter;
+  endDateFilter?: DateFilter;
 }
 
 export interface StatusCardProps {

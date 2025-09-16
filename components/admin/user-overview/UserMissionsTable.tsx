@@ -36,11 +36,12 @@ import {
   getStatusColor,
   getLinkType,
 } from "@/lib/admin/user/userTableUtils";
+import { DiscordUsername } from "../user-management/DiscordUsername";
 
 interface ColumnVisibility {
   missionId: boolean;
   missionName: boolean;
-  userEmail: boolean;
+  userUsername: boolean;
   status: boolean;
   acceptedAt: boolean;
   submittedAt: boolean;
@@ -61,11 +62,11 @@ interface UserMissionsTableProps {
     direction: "asc" | "desc";
   };
   onSort: (
-    field: keyof ExtendedMission | "user.email" | "mission_name"
+    field: keyof ExtendedMission | "user.username" | "mission_name"
   ) => void;
   onToggleColumnVisibility: (column: keyof ColumnVisibility) => void;
   onOpenModal: (mission: ExtendedMission) => void;
-  showUserEmail?: boolean; // Option to show/hide email column
+  showUsername?: boolean; // Option to show/hide username column
 }
 
 const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
@@ -76,7 +77,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
   onSort,
   onToggleColumnVisibility,
   onOpenModal,
-  showUserEmail = false,
+  showUsername = false,
 }) => {
   const getSortIcon = (field: string) => {
     if (sortConfig.field === field) {
@@ -123,13 +124,13 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
             >
               Mission Name
             </DropdownMenuCheckboxItem>
-            {showUserEmail && (
+            {showUsername && (
               <DropdownMenuCheckboxItem
-                checked={columnVisibility.userEmail}
-                onCheckedChange={() => onToggleColumnVisibility("userEmail")}
+                checked={columnVisibility.userUsername}
+                onCheckedChange={() => onToggleColumnVisibility("userUsername")}
                 className="text-xs sm:text-sm"
               >
-                User Email
+                Username
               </DropdownMenuCheckboxItem>
             )}
             <DropdownMenuCheckboxItem
@@ -189,34 +190,25 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                           {getSortIcon("mission_id")}
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
+                      <DropdownMenuContent align="start" className="w-auto min-w-0">
                         <DropdownMenuItem
                           onClick={() => onSort("mission_id")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Asc
-                          </div>
+                          <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onSort("mission_id")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Desc
-                          </div>
+                          <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <div className="bg-border -mx-1 my-1 h-px"></div>
                         <DropdownMenuItem
                           onClick={() => onToggleColumnVisibility("missionId")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Hide
-                          </div>
+                          <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -236,44 +228,35 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                           {getSortIcon("mission_name")}
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
+                      <DropdownMenuContent align="start" className="w-auto min-w-0">
                         <DropdownMenuItem
                           onClick={() => onSort("mission_name")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            A-Z
-                          </div>
+                          <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onSort("mission_name")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Z-A
-                          </div>
+                          <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <div className="bg-border -mx-1 my-1 h-px"></div>
                         <DropdownMenuItem
                           onClick={() =>
                             onToggleColumnVisibility("missionName")
                           }
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Hide
-                          </div>
+                          <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableHead>
                 )}
 
-                {/* User Email Column */}
-                {showUserEmail && columnVisibility.userEmail && (
+                                {/* Username Column */}
+                {showUsername && columnVisibility.userUsername && (
                   <TableHead className="w-[120px] sm:w-[180px] min-w-[120px] sm:min-w-[180px]">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -281,39 +264,29 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                           variant="ghost"
                           className="h-auto p-1 sm:p-2 font-medium text-foreground hover:text-foreground text-xs sm:text-sm"
                         >
-                          <Mail className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                          <span className="sm:inline">User Email</span>
-                          {getSortIcon("user.email")}
+                          Username
+                          {getSortIcon("user.username")}
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
+                      <DropdownMenuContent align="start" className="w-auto min-w-0">
                         <DropdownMenuItem
-                          onClick={() => onSort("user.email")}
-                          className="text-xs sm:text-sm"
+                          onClick={() => onSort("user.username")}
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            A-Z
-                          </div>
+                          <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => onSort("user.email")}
-                          className="text-xs sm:text-sm"
+                          onClick={() => onSort("user.username")}
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Z-A
-                          </div>
+                          <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <div className="bg-border -mx-1 my-1 h-px"></div>
                         <DropdownMenuItem
-                          onClick={() => onToggleColumnVisibility("userEmail")}
-                          className="text-xs sm:text-sm"
+                          onClick={() => onToggleColumnVisibility("userUsername")}
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Hide
-                          </div>
+                          <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -332,34 +305,25 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                           {getSortIcon("status")}
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
+                      <DropdownMenuContent align="start" className="w-auto min-w-0">
                         <DropdownMenuItem
                           onClick={() => onSort("status")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Asc
-                          </div>
+                          <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onSort("status")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Desc
-                          </div>
+                          <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <div className="bg-border -mx-1 my-1 h-px"></div>
                         <DropdownMenuItem
                           onClick={() => onToggleColumnVisibility("status")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Hide
-                          </div>
+                          <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -381,31 +345,22 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                       <DropdownMenuContent align="start">
                         <DropdownMenuItem
                           onClick={() => onSort("accepted_at")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Asc
-                          </div>
+                          <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onSort("accepted_at")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Desc
-                          </div>
+                          <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <div className="bg-border -mx-1 my-1 h-px"></div>
                         <DropdownMenuItem
                           onClick={() => onToggleColumnVisibility("acceptedAt")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Hide
-                          </div>
+                          <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -424,36 +379,27 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                           {getSortIcon("submitted_at")}
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
+                      <DropdownMenuContent align="start" className="w-auto min-w-0">
                         <DropdownMenuItem
                           onClick={() => onSort("submitted_at")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Asc
-                          </div>
+                          <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onSort("submitted_at")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Desc
-                          </div>
+                          <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <div className="bg-border -mx-1 my-1 h-px"></div>
                         <DropdownMenuItem
                           onClick={() =>
                             onToggleColumnVisibility("submittedAt")
                           }
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Hide
-                          </div>
+                          <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -472,36 +418,27 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                           {getSortIcon("completed_at")}
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
+                      <DropdownMenuContent align="start" className="w-auto min-w-0">
                         <DropdownMenuItem
                           onClick={() => onSort("completed_at")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Asc
-                          </div>
+                          <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onSort("completed_at")}
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Desc
-                          </div>
+                          <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                         <div className="bg-border -mx-1 my-1 h-px"></div>
                         <DropdownMenuItem
                           onClick={() =>
                             onToggleColumnVisibility("completedAt")
                           }
-                          className="text-xs sm:text-sm"
+                          className="text-xs sm:text-sm p-2 justify-center"
                         >
-                          <div className="flex items-center">
-                            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Hide
-                          </div>
+                          <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -535,7 +472,7 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                             <div className="h-3 sm:h-4 bg-muted rounded animate-pulse"></div>
                           </TableCell>
                         )}
-                        {showUserEmail && columnVisibility.userEmail && (
+                        {showUsername && columnVisibility.userUsername && (
                           <TableCell className="py-2 sm:py-3">
                             <div className="h-3 sm:h-4 bg-muted rounded animate-pulse"></div>
                           </TableCell>
@@ -593,22 +530,24 @@ const UserMissionsTable: React.FC<UserMissionsTableProps> = ({
                       </TableCell>
                     )}
 
-                    {/* User Email Cell */}
-                    {showUserEmail && columnVisibility.userEmail && (
+                    {/* Username Cell */}
+                    {showUsername && columnVisibility.userUsername && (
                       <TableCell className="text-xs sm:text-sm text-foreground py-2 sm:py-3 pl-5 sm:pl-6">
                       <div className="flex items-center space-x-2">
                         <Mail className="w-3 h-3 text-muted-foreground" />
-                        <span
-                        className="truncate max-w-[100px] sm:max-w-[150px]"
-                        title={mission.user?.email}
-                        >
-                        {mission.user?.email || "N/A"}
+                        <span className="truncate max-w-[100px] sm:max-w-[150px]">
+                          {mission.user?.discord_id ? (
+                            <DiscordUsername 
+                              discordId={mission.user.discord_id} 
+                              fallback={mission.user.discord_id}
+                            />
+                          ) : (
+                            "N/A"
+                          )}
                         </span>
                       </div>
                       </TableCell>
-                    )}
-
-                    {columnVisibility.status && (
+                    )}                    {columnVisibility.status && (
                       <TableCell className="py-2 sm:py-3 pl-3 sm:pl-3">
                       <Badge
                         variant={getStatusVariant(mission.status)}

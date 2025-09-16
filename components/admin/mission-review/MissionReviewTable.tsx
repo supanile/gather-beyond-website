@@ -162,18 +162,12 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
             {getSortIcon(field)}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => handleSort(field, "asc")}>
-            <div className="flex items-center">
-              <ChevronUp className="w-4 h-4 mr-2" />
-              Asc
-            </div>
+        <DropdownMenuContent align="start" className="w-auto min-w-0">
+          <DropdownMenuItem onClick={() => handleSort(field, "asc")} className="p-2 justify-center">
+            <ChevronUp className="w-4 h-4" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleSort(field, "desc")}>
-            <div className="flex items-center">
-              <ChevronDown className="w-4 h-4 mr-2" />
-              Desc
-            </div>
+          <DropdownMenuItem onClick={() => handleSort(field, "desc")} className="p-2 justify-center">
+            <ChevronDown className="w-4 h-4" />
           </DropdownMenuItem>
           <div className="bg-border -mx-1 my-1 h-px"></div>
           <DropdownMenuItem
@@ -182,11 +176,9 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                 field as keyof MissionReviewColumnVisibility
               )
             }
+            className="p-2 justify-center"
           >
-            <div className="flex items-center">
-              <EyeOff className="w-4 h-4 mr-2" />
-              Hide
-            </div>
+            <EyeOff className="w-4 h-4" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -209,12 +201,9 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
             {label}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => onToggleColumnVisibility(column)}>
-            <div className="flex items-center">
-              <EyeOff className="w-4 h-4 mr-2" />
-              Hide
-            </div>
+        <DropdownMenuContent align="start" className="w-auto min-w-0">
+          <DropdownMenuItem onClick={() => onToggleColumnVisibility(column)} className="p-2 justify-center">
+            <EyeOff className="w-4 h-4" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -289,7 +278,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {columnVisibility.mission_name && (
-                  <TableCell className="px-9">
+                  <TableCell className="px-3">
                     <div className="w-full">
                       <div
                         className="truncate font-medium text-xs"
@@ -301,12 +290,12 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {columnVisibility.status && (
-                  <TableCell className="px-0">
+                  <TableCell className="px-5">
                     <MissionStatusBadge status={mission.status} />
                   </TableCell>
                 )}
                 {columnVisibility.submission_link && (
-                  <TableCell className="px-7">
+                  <TableCell className="px-3">
                     {mission.submission_link ? (
                       <a
                         href={mission.submission_link}

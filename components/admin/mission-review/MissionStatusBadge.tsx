@@ -2,13 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { MissionStatusBadgeProps } from "@/types/admin/missionReview";
-import {
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Calendar,
-} from "lucide-react";
+import { Clock, CheckCircle, XCircle, AlertCircle, Calendar } from "lucide-react";
 
 export function MissionStatusBadge({ status }: MissionStatusBadgeProps) {
   const getStatusConfig = (status: string) => {

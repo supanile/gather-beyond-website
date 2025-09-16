@@ -61,7 +61,8 @@ export interface SortConfig {
     | "agent.health"
     | "agent.mood"
     | "agent.last_active"
-    | "agent.created_at";
+    | "agent.created_at"
+    | "username";
   direction: "asc" | "desc";
 }
 
