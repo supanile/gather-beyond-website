@@ -70,6 +70,8 @@ const AdminMissionsTable = () => {
     isAddModalOpen,
     isViewModalOpen,
     searchQuery,
+    startDateFilter,
+    endDateFilter,
 
     // Handlers
     handleSort,
@@ -86,6 +88,8 @@ const AdminMissionsTable = () => {
     setIsAddModalOpen,
     setIsViewModalOpen,
     handleSearchChange,
+    setStartDateFilter,
+    setEndDateFilter,
   } = useMissionsTable();
 
   // Edit and Delete state
@@ -518,6 +522,10 @@ const AdminMissionsTable = () => {
             totalVisibleColumns={
               Object.values(columnVisibility).filter(Boolean).length + 1 // +1 for Actions column
             }
+            startDateFilter={startDateFilter}
+            endDateFilter={endDateFilter}
+            onStartDateFilterChange={setStartDateFilter}
+            onEndDateFilterChange={setEndDateFilter}
           />
 
           {/* Use updated pagination info */}

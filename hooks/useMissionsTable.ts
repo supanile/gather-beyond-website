@@ -7,8 +7,47 @@ import {
   PaginationState,
   SortState,
   MissionTableFilters,
+  DateFilter,
 } from "@/types/admin/missions/missionTypes";
 import { toast } from "sonner";
+import { matchesDateFilter } from "@/lib/admin/missions/timezoneUtils";
+
+// Toast styling utility for light/dark mode compatibility with very soft colors
+const toastStyles = {
+  success: {
+    style: {
+      background: 'hsl(142 45% 75%)', // very soft green - much lighter
+      color: 'hsl(142 40% 20%)', // dark green text for contrast
+      border: '1px solid hsl(142 35% 65%)', // subtle green border
+      '--tw-shadow': '0 2px 4px -1px rgba(34, 197, 94, 0.1)',
+      boxShadow: 'var(--tw-shadow)',
+      borderRadius: '8px',
+      backdropFilter: 'blur(4px)',
+    }
+  },
+  error: {
+    style: {
+      background: 'hsl(0 45% 85%)', // very soft pink/red - much lighter
+      color: 'hsl(0 60% 30%)', // dark red text for contrast
+      border: '1px solid hsl(0 35% 75%)', // subtle red border
+      '--tw-shadow': '0 2px 4px -1px rgba(248, 113, 113, 0.1)',
+      boxShadow: 'var(--tw-shadow)',
+      borderRadius: '8px',
+      backdropFilter: 'blur(4px)',
+    }
+  },
+  delete: {
+    style: {
+      background: 'hsl(15 45% 80%)', // very soft orange-red for delete
+      color: 'hsl(15 60% 25%)', // dark orange-red text
+      border: '1px solid hsl(15 35% 70%)', // subtle orange-red border
+      '--tw-shadow': '0 2px 4px -1px rgba(239, 68, 68, 0.1)',
+      boxShadow: 'var(--tw-shadow)',
+      borderRadius: '8px',
+      backdropFilter: 'blur(4px)',
+    }
+  }
+};
 
 // Toast styling utility for light/dark mode compatibility with very soft colors
 const toastStyles = {
@@ -59,6 +98,10 @@ export const useMissionsTable = () => {
   const [filters, setFilters] = useState<MissionTableFilters>({
     selectedStatus: null,
   });
+  
+  // Date filter states
+  const [startDateFilter, setStartDateFilter] = useState<DateFilter>({ type: 'all' });
+  const [endDateFilter, setEndDateFilter] = useState<DateFilter>({ type: 'all' });
   
   // Search query state
   const [searchQuery, setSearchQuery] = useState("");
@@ -143,7 +186,7 @@ export const useMissionsTable = () => {
   // Reset to first page when filters or search change
   useEffect(() => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
-  }, [filters.selectedStatus, searchQuery, pagination.itemsPerPage]);
+  }, [filters.selectedStatus, searchQuery, pagination.itemsPerPage, startDateFilter, endDateFilter]);
 
   // Filtered missions with search functionality
   const filteredMissions = useMemo(() => {
@@ -152,6 +195,20 @@ export const useMissionsTable = () => {
     // Filter by status
     if (filters.selectedStatus) {
       filtered = filtered.filter((mission) => mission.status === filters.selectedStatus);
+    }
+
+    // Filter by start date
+    if (startDateFilter.type !== 'all') {
+      filtered = filtered.filter((mission) => 
+        matchesDateFilter(mission.startDate, startDateFilter)
+      );
+    }
+
+    // Filter by end date
+    if (endDateFilter.type !== 'all') {
+      filtered = filtered.filter((mission) => 
+        matchesDateFilter(mission.endDate, endDateFilter)
+      );
     }
 
     // Filter by search query
@@ -176,7 +233,7 @@ export const useMissionsTable = () => {
     }
 
     return filtered;
-  }, [missions, filters.selectedStatus, searchQuery]);
+  }, [missions, filters.selectedStatus, searchQuery, startDateFilter, endDateFilter]);
 
   // Sorted missions
   const sortedMissions = useMemo(() => {
@@ -265,10 +322,12 @@ export const useMissionsTable = () => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
 
-  // Reset filter function to include search
+  // Reset filter function to include search and date filters
   const handleResetFilter = () => {
     setFilters((prev) => ({ ...prev, selectedStatus: null }));
     setSearchQuery("");
+    setStartDateFilter({ type: 'all' });
+    setEndDateFilter({ type: 'all' });
   };
 
   // Add Mission Handler
@@ -600,6 +659,8 @@ export const useMissionsTable = () => {
     isAddModalOpen,
     isViewModalOpen,
     searchQuery,
+    startDateFilter,
+    endDateFilter,
 
     // Handlers
     handleSort,
@@ -617,6 +678,8 @@ export const useMissionsTable = () => {
     setIsViewModalOpen,
     fetchMissions,
     handleSearchChange,
-    handleResetFilter, 
+    handleResetFilter,
+    setStartDateFilter,
+    setEndDateFilter,
   };
 };

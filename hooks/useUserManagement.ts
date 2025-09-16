@@ -12,7 +12,7 @@ interface UseUserManagementProps {
 
 export const useUserManagement = ({ users }: UseUserManagementProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    field: "email",
+    field: "username",
     direction: "asc",
   });
 
@@ -30,23 +30,73 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
     total: 0,
   });
 
+  // Cache for Discord usernames
+  const [discordUsernamesCache, setDiscordUsernamesCache] = useState<Record<string, string>>({});
+
+  // Fetch Discord usernames for sorting
+  useEffect(() => {
+    const fetchDiscordUsernames = async () => {
+      const uncachedUsers = users.filter(user => !discordUsernamesCache[user.discord_id]);
+      
+      if (uncachedUsers.length === 0) return;
+
+      const fetchPromises = uncachedUsers.map(async (user) => {
+        try {
+          const response = await fetch(`/api/discord/${user.discord_id}`);
+          if (response.ok) {
+            const data = await response.json();
+            return { discordId: user.discord_id, username: data.username || user.discord_id };
+          }
+        } catch (error) {
+          console.error(`Error fetching username for ${user.discord_id}:`, error);
+        }
+        return { discordId: user.discord_id, username: user.discord_id };
+      });
+
+      const results = await Promise.all(fetchPromises);
+      const newCache = results.reduce((acc, result) => {
+        if (result) {
+          acc[result.discordId] = result.username;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+
+      setDiscordUsernamesCache(prev => ({ ...prev, ...newCache }));
+    };
+
+    fetchDiscordUsernames();
+  }, [users, discordUsernamesCache]);
+
   // Helper function to get nested value
-  const getNestedValue = (obj: any, path: string): any => {
-    return path.split(".").reduce((current, key) => current?.[key], obj);
+  const getNestedValue = (obj: UserWithAgent, path: string): string | number | undefined => {
+    const keys = path.split(".");
+    let current: unknown = obj;
+    
+    for (const key of keys) {
+      if (current && typeof current === "object") {
+        current = (current as Record<string, unknown>)[key];
+      } else {
+        return undefined;
+      }
+    }
+    
+    return current as string | number | undefined;
   };
 
   // Filter users based on filter config
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      // Search filter - now includes Discord ID
+      // Search filter - now includes Discord ID and username
       if (filterConfig.search) {
         const searchTerm = filterConfig.search.toLowerCase();
+        const discordUsername = discordUsernamesCache[user.discord_id];
         const searchableFields = [
           user.email,
           user.interests,
           user.twitter_handle,
           user.telegram_handle,
           user.discord_id,
+          discordUsername, // Include the actual Discord username in search
         ].filter(Boolean);
 
         const matchesSearch = searchableFields.some((field) =>
@@ -95,13 +145,22 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
 
       return true;
     });
-  }, [users, filterConfig]);
+  }, [users, filterConfig, discordUsernamesCache]);
 
   // Sort filtered users
   const sortedUsers = useMemo(() => {
     const sorted = [...filteredUsers].sort((a, b) => {
-      let aValue = getNestedValue(a, sortConfig.field);
-      let bValue = getNestedValue(b, sortConfig.field);
+      let aValue: string | number | undefined;
+      let bValue: string | number | undefined;
+
+      // Handle special case for username sorting - use cached Discord usernames
+      if (sortConfig.field === "username") {
+        aValue = discordUsernamesCache[a.discord_id] || a.discord_id;
+        bValue = discordUsernamesCache[b.discord_id] || b.discord_id;
+      } else {
+        aValue = getNestedValue(a, sortConfig.field);
+        bValue = getNestedValue(b, sortConfig.field);
+      }
 
       // Handle null/undefined values
       if (aValue == null && bValue == null) return 0;
@@ -110,11 +169,11 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
 
       // Handle string sorting
       if (typeof aValue === "string" && typeof bValue === "string") {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
+        const aLower = aValue.toLowerCase();
+        const bLower = bValue.toLowerCase();
         return sortConfig.direction === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+          ? aLower.localeCompare(bLower)
+          : bLower.localeCompare(aLower);
       }
 
       // Handle number sorting
@@ -128,7 +187,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
     });
 
     return sorted;
-  }, [filteredUsers, sortConfig]);
+  }, [filteredUsers, sortConfig, discordUsernamesCache]);
 
   // Paginated users
   const paginatedUsers = useMemo(() => {

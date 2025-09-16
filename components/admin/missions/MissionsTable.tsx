@@ -28,12 +28,14 @@ import {
   Mission,
   SortState,
   ColumnVisibility,
+  DateFilter,
 } from "@/types/admin/missions/missionTypes";
 import {
   getStatusColor,
   parseReward,
 } from "@/lib/admin/missions/missionTableUtils";
 import { formatDateWithTime } from "@/lib/admin/missions/timezoneUtils";
+import { DateFilterDropdown } from "./DateFilterDropdown";
 
 interface MissionsTableProps {
   missions: Mission[];
@@ -45,6 +47,10 @@ interface MissionsTableProps {
   onEditMission: (mission: Mission) => void;
   onDeleteMission: (mission: Mission) => void;
   totalVisibleColumns: number;
+  startDateFilter?: DateFilter;
+  endDateFilter?: DateFilter;
+  onStartDateFilterChange?: (filter: DateFilter) => void;
+  onEndDateFilterChange?: (filter: DateFilter) => void;
 }
 
 // Function moved to timezoneUtils.ts for better reusability
@@ -59,6 +65,10 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
   onEditMission,
   onDeleteMission,
   totalVisibleColumns,
+  startDateFilter = { type: 'all' },
+  endDateFilter = { type: 'all' },
+  onStartDateFilterChange,
+  onEndDateFilterChange,
 }) => {
   const getSortIcon = (field: keyof Mission) => {
     if (sortState.field !== field) {
@@ -109,32 +119,72 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
             {getSortIcon(field)}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => handleSort(field, "asc")}>
-            <div className="flex items-center">
-              <ChevronUp className="w-4 h-4 mr-2" />
-              Asc
-            </div>
+        <DropdownMenuContent align="start" className="w-auto min-w-0">
+          <DropdownMenuItem onClick={() => handleSort(field, "asc")} className="p-2 justify-center">
+            <ChevronUp className="w-4 h-4" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleSort(field, "desc")}>
-            <div className="flex items-center">
-              <ChevronDown className="w-4 h-4 mr-2" />
-              Desc
-            </div>
+          <DropdownMenuItem onClick={() => handleSort(field, "desc")} className="p-2 justify-center">
+            <ChevronDown className="w-4 h-4" />
           </DropdownMenuItem>
           <div className="bg-border -mx-1 my-1 h-px"></div>
           <DropdownMenuItem
             onClick={() =>
               onToggleColumnVisibility(field as keyof ColumnVisibility)
             }
+            className="p-2 justify-center"
           >
-            <div className="flex items-center">
-              <EyeOff className="w-4 h-4 mr-2" />
-              Hide
-            </div>
+            <EyeOff className="w-4 h-4" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+    </TableHead>
+  );
+
+  // ฟังก์ชันสร้าง date column header ที่มี date filter
+  const createDateColumnHeader = (
+    field: keyof Mission,
+    label: string,
+    className: string,
+    dateFilter: DateFilter,
+    onDateFilterChange?: (filter: DateFilter) => void
+  ) => (
+    <TableHead className={className}>
+      <div className="flex flex-col space-y-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="h-auto px-0 py-1 font-medium text-foreground hover:text-foreground justify-start text-xs"
+            >
+              {label}
+              {getSortIcon(field)}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-auto min-w-0">
+            <DropdownMenuItem onClick={() => handleSort(field, "asc")} className="p-2 justify-center">
+              <ChevronUp className="w-4 h-4" />
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleSort(field, "desc")} className="p-2 justify-center">
+              <ChevronDown className="w-4 h-4" />
+            </DropdownMenuItem>
+            <div className="bg-border -mx-1 my-1 h-px"></div>
+            <DropdownMenuItem
+              onClick={() =>
+                onToggleColumnVisibility(field as keyof ColumnVisibility)
+              }
+              className="p-2 justify-center"
+            >
+              <EyeOff className="w-4 h-4" />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {onDateFilterChange && (
+          <DateFilterDropdown
+            currentFilter={dateFilter}
+            onFilterChange={onDateFilterChange}
+          />
+        )}
+      </div>
     </TableHead>
   );
 
@@ -155,7 +205,7 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
             {columnVisibility.reward &&
               createColumnHeader("reward", "Reward", "w-20 px-0")}
             {columnVisibility.partner && (
-              <TableHead className="w-28 px-0">
+              <TableHead className="h-16 w-28 px-0">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -166,41 +216,35 @@ export const MissionsTable: React.FC<MissionsTableProps> = ({
                       {getSortIcon("partnerName")}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
+                  <DropdownMenuContent align="start" className="w-auto min-w-0">
                     <DropdownMenuItem
                       onClick={() => handleSort("partnerName", "asc")}
+                      className="p-2 justify-center"
                     >
-                      <div className="flex items-center">
-                        <ChevronUp className="w-4 h-4 mr-2" />
-                        Asc
-                      </div>
+                      <ChevronUp className="w-4 h-4" />
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleSort("partnerName", "desc")}
+                      className="p-2 justify-center"
                     >
-                      <div className="flex items-center">
-                        <ChevronDown className="w-4 h-4 mr-2" />
-                        Desc
-                      </div>
+                      <ChevronDown className="w-4 h-4" />
                     </DropdownMenuItem>
                     <div className="bg-border -mx-1 my-1 h-px"></div>
                     <DropdownMenuItem
                       onClick={() => onToggleColumnVisibility("partner")}
+                      className="p-2 justify-center"
                     >
-                      <div className="flex items-center">
-                        <EyeOff className="w-4 h-4 mr-2" />
-                        Hide
-                      </div>
+                      <EyeOff className="w-4 h-4" />
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableHead>
             )}
             {columnVisibility.startDate &&
-              createColumnHeader("startDate", "Start Date", "w-32 px-0")}
+              createDateColumnHeader("startDate", "Start Date", "w-32 px-0", startDateFilter, onStartDateFilterChange)}
             {columnVisibility.endDate &&
-              createColumnHeader("endDate", "End Date", "w-32 px-0")}
-            <TableHead className="w-28 px-0 text-xs">Actions</TableHead>
+              createDateColumnHeader("endDate", "End Date", "w-32 px-0", endDateFilter, onEndDateFilterChange)}
+            <TableHead className="w-28 px-4 text-xs">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

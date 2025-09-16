@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,12 +10,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Check, X, AlertTriangle, Loader2 } from "lucide-react";
 
 export interface MissionActionConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (rejectionReason?: string) => void;
   action: "approve" | "reject";
   missionName: string;
   isLoading?: boolean;
@@ -30,14 +38,60 @@ export const MissionActionConfirmDialog: React.FC<MissionActionConfirmDialogProp
   isLoading = false,
 }) => {
   const isApprove = action === "approve";
+  const [rejectionReason, setRejectionReason] = useState<string>("");
+  const [customReason, setCustomReason] = useState<string>("");
+
+  // Reset rejection reason when dialog opens/closes or action changes
+  useEffect(() => {
+    if (!isOpen || isApprove) {
+      setRejectionReason("");
+      setCustomReason("");
+    }
+  }, [isOpen, isApprove]);
+
+  const rejectionReasons = [
+    "Submission was made after the mission deadline",
+    "Did not follow the mission instructions as written",
+    "Proof is missing or not included in the submission",
+    "Other",
+  ];
+
+  const handleRejectionReasonChange = (value: string) => {
+    setRejectionReason(value);
+    // Reset custom reason if switching away from "Other"
+    if (value !== "Other") {
+      setCustomReason("");
+    }
+  };
 
   const handleConfirm = () => {
-    onConfirm();
+    console.log("handleConfirm called - isApprove:", isApprove, "rejectionReason:", rejectionReason, "customReason:", customReason);
+    
+    if (!isApprove && !rejectionReason) {
+      // Don't allow rejection without a reason
+      console.log("Blocked: No rejection reason selected");
+      return;
+    }
+    
+    // If "Other" is selected, use the custom reason, otherwise use the selected reason
+    const finalReason = rejectionReason === "Other" ? customReason : rejectionReason;
+    console.log("Final reason:", finalReason);
+    
+    if (!isApprove && rejectionReason === "Other" && !customReason.trim()) {
+      // Don't allow rejection with "Other" selected but no custom reason provided
+      console.log("Blocked: Other selected but no custom reason");
+      return;
+    }
+    
+    console.log("Calling onConfirm with reason:", isApprove ? undefined : finalReason);
+    onConfirm(isApprove ? undefined : finalReason);
   };
+
+  const canConfirm = isApprove || (!isApprove && rejectionReason && (rejectionReason !== "Other" || customReason.trim()));
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[600px] max-w-[95vw] p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header Section with Gradient */}
         <div
           className={`relative px-6 pt-6 pb-4 ${
@@ -123,6 +177,66 @@ export const MissionActionConfirmDialog: React.FC<MissionActionConfirmDialogProp
               </div>
             </div>
           </div>
+
+          {/* Rejection Reason Section - Only show for reject action */}
+          {!isApprove && (
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm uppercase tracking-wide">
+                Rejection Reason <span className="text-red-500">*</span>
+              </h4>
+              <div className="space-y-2">
+                <Select value={rejectionReason} onValueChange={handleRejectionReasonChange}>
+                  <SelectTrigger className="w-full h-12 border-gray-300 dark:border-gray-600 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400">
+                    <SelectValue placeholder="Select a reason for rejection" />
+                  </SelectTrigger>
+                  <SelectContent className="max-w-full">
+                    {rejectionReasons.map((reason, index) => (
+                      <SelectItem 
+                        key={index} 
+                        value={reason}
+                        className="text-sm leading-relaxed py-3 px-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
+                        {reason}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {/* Custom reason textarea - show when "Other" is selected */}
+                {rejectionReason === "Other" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Please specify the reason:
+                    </label>
+                    <Textarea
+                      value={customReason}
+                      onChange={(e) => setCustomReason(e.target.value)}
+                      placeholder="Enter custom rejection reason..."
+                      className="min-h-[80px] resize-none border-gray-300 dark:border-gray-600 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400"
+                      maxLength={200}
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {customReason.length}/200 characters
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
+                {!rejectionReason && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                    Please select a reason for rejection
+                  </p>
+                )}
+                
+                {rejectionReason === "Other" && !customReason.trim() && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                    Please provide a custom reason for rejection
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Section */}
@@ -138,7 +252,7 @@ export const MissionActionConfirmDialog: React.FC<MissionActionConfirmDialogProp
             </Button>
             <Button
               onClick={handleConfirm}
-              disabled={isLoading}
+              disabled={isLoading || !canConfirm}
               className={`flex-1 sm:flex-initial h-11 px-6 font-medium transition-all duration-200 shadow-lg ${
                 isApprove
                   ? "bg-green-600 hover:bg-green-700 text-white shadow-green-200 dark:shadow-green-900/30"

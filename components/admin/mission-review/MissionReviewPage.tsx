@@ -4,7 +4,6 @@ import { useState } from "react";
 import { MissionReviewTable } from "./MissionReviewTable";
 import { MissionReviewFiltersComponent } from "./MissionReviewFilters";
 import { MissionReviewStatsComponent } from "./MissionReviewStats";
-import { MissionDetailsModal } from "./MissionDetailsModal";
 import { MissionReviewPagination } from "./MissionReviewPagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +23,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMissionReview } from "@/hooks/useMissionReview";
 import {
-  UserMission,
   MissionReviewColumnVisibility,
 } from "@/types/admin/missionReview";
 import { Settings2 } from "lucide-react";
@@ -47,12 +45,7 @@ export function MissionReviewPage() {
     handleSort,
   } = useMissionReview();
 
-  const [selectedMission, setSelectedMission] = useState<UserMission | null>(
-    null
-  );
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Column visibility state - Updated to include user_avatar
+  // Column visibility state - Updated to include user_avatar and verified_by
   const [columnVisibility, setColumnVisibility] =
     useState<MissionReviewColumnVisibility>({
       id: true,
@@ -63,24 +56,16 @@ export function MissionReviewPage() {
       status: true,
       submitted_at: true,
       submission_link: true,
+      verified_by: true,
+      completed_at: true,
     });
-
-  const handleViewDetails = (mission: UserMission) => {
-    setSelectedMission(mission);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedMission(null);
-  };
 
   const handleApprove = async (missionId: number) => {
     await approveMission(missionId);
   };
 
-  const handleReject = async (missionId: number) => {
-    await rejectMission(missionId);
+  const handleReject = async (missionId: number, rejectionReason?: string) => {
+    await rejectMission(missionId, rejectionReason);
   };
 
   const handleToggleColumnVisibility = (
@@ -118,6 +103,8 @@ export function MissionReviewPage() {
       status: "Status",
       submitted_at: "Submitted",
       submission_link: "Submission Link",
+      verified_by: "Verified By",
+      completed_at: "Completed At",
     };
 
     return labelMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
@@ -236,7 +223,6 @@ export function MissionReviewPage() {
               onToggleColumnVisibility={handleToggleColumnVisibility}
               onApprove={handleApprove}
               onReject={handleReject}
-              onViewDetails={handleViewDetails}
               isLoading={loading}
               totalVisibleColumns={totalVisibleColumns}
               emptyMessage={getEmptyMessage()}
@@ -250,15 +236,6 @@ export function MissionReviewPage() {
           </div>
         </div>
       </div>
-
-      {/* Details Modal */}
-      <MissionDetailsModal
-        mission={selectedMission}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onApprove={handleApprove}
-        onReject={handleReject}
-      />
     </div>
   );
 }

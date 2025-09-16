@@ -14,13 +14,13 @@ import {
 
 // Extended Mission type to match what UserMissionsTable expects
 interface ExtendedMission extends Mission {
-  user?: { email: string };
+  user?: { username: string };
   userMissions?: Mission[];
 }
 
 // Mission-specific sort config for UserMissionsTable
 interface MissionSortConfig {
-  field: keyof ExtendedMission | "user.email" | null;
+  field: keyof ExtendedMission | "user.username" | null;
   direction: "asc" | "desc";
 }
 
@@ -57,9 +57,9 @@ const sortMissionsByField = (
         bValue = b.completed_at;
         break;
       case "user":
-      case "user.email":
-        aValue = (a as Mission & { user?: { email: string } }).user?.email || "";
-        bValue = (b as Mission & { user?: { email: string } }).user?.email || "";
+      case "user.username":
+        aValue = (a as Mission & { user?: { username: string } }).user?.username || "";
+        bValue = (b as Mission & { user?: { username: string } }).user?.username || "";
         break;
       default:
         const field = sortConfig.field as keyof ExtendedMission;
@@ -139,7 +139,7 @@ export const useUserTableState = () => {
   });
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>({
     missionId: true,
-    userEmail: true,
+    userUsername: true,
     missionName: true,
     status: true,
     acceptedAt: true,

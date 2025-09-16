@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Eye,
   ChevronsUpDown,
   ChevronUp,
   ChevronDown,
@@ -42,10 +42,10 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
   onToggleColumnVisibility,
   onApprove,
   onReject,
-  onViewDetails,
   totalVisibleColumns,
   emptyMessage = "No mission reviews found.",
 }) => {
+  const router = useRouter();
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     action: "approve" | "reject";
@@ -58,6 +58,10 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
     missionName: "",
   });
   const [isActionLoading, setIsActionLoading] = useState(false);
+
+  const handleViewDetails = (mission: UserMission) => {
+    router.push(`/admin/mission-review/${mission.user_id}/${mission._id}`);
+  };
 
   const handleApproveClick = (mission: UserMission) => {
     setConfirmDialog({
@@ -77,13 +81,13 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
     });
   };
 
-  const handleConfirmAction = async () => {
+  const handleConfirmAction = async (rejectionReason?: string) => {
     setIsActionLoading(true);
     try {
       if (confirmDialog.action === "approve") {
         await onApprove(confirmDialog.missionId);
       } else {
-        await onReject(confirmDialog.missionId);
+        await onReject(confirmDialog.missionId, rejectionReason);
       }
     } finally {
       setIsActionLoading(false);
@@ -157,18 +161,12 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
             {getSortIcon(field)}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => handleSort(field, "asc")}>
-            <div className="flex items-center">
-              <ChevronUp className="w-4 h-4 mr-2" />
-              Asc
-            </div>
+        <DropdownMenuContent align="start" className="w-auto min-w-0">
+          <DropdownMenuItem onClick={() => handleSort(field, "asc")} className="p-2 justify-center">
+            <ChevronUp className="w-4 h-4" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleSort(field, "desc")}>
-            <div className="flex items-center">
-              <ChevronDown className="w-4 h-4 mr-2" />
-              Desc
-            </div>
+          <DropdownMenuItem onClick={() => handleSort(field, "desc")} className="p-2 justify-center">
+            <ChevronDown className="w-4 h-4" />
           </DropdownMenuItem>
           <div className="bg-border -mx-1 my-1 h-px"></div>
           <DropdownMenuItem
@@ -177,11 +175,9 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                 field as keyof MissionReviewColumnVisibility
               )
             }
+            className="p-2 justify-center"
           >
-            <div className="flex items-center">
-              <EyeOff className="w-4 h-4 mr-2" />
-              Hide
-            </div>
+            <EyeOff className="w-4 h-4" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -204,12 +200,9 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
             {label}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => onToggleColumnVisibility(column)}>
-            <div className="flex items-center">
-              <EyeOff className="w-4 h-4 mr-2" />
-              Hide
-            </div>
+        <DropdownMenuContent align="start" className="w-auto min-w-0">
+          <DropdownMenuItem onClick={() => onToggleColumnVisibility(column)} className="p-2 justify-center">
+            <EyeOff className="w-4 h-4" />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -228,16 +221,20 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
             {columnVisibility.user_id &&
               createColumnHeader("user_id", "User ID", "w-26 px-0")}
             {columnVisibility.mission_name &&
-              createColumnHeader("mission_name", "Mission", "w-48 px-0")}
+              createColumnHeader("mission_name", "Mission", "w-60 px-6")}
             {columnVisibility.status &&
               createColumnHeader("status", "Status", "w-24 px-2")}
             {columnVisibility.submission_link &&
               createColumnHeader(
                 "submission_link",
                 "Submission Link",
-                "w-48 px-0"
+                "w-48 px-4"
               )}
-            <TableHead className="w-28 px-0 text-xs">Actions</TableHead>
+            {columnVisibility.verified_by &&
+              createNonSortableHeader("Verified By", "w-32 px-22", "verified_by")}
+            {columnVisibility.completed_at &&
+              createColumnHeader("completed_at", "Verified At", "w-48 px-6")}
+            <TableHead className="w-32 px-0 text-xs">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -280,7 +277,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {columnVisibility.mission_name && (
-                  <TableCell className="px-3">
+                  <TableCell className="px-9">
                     <div className="w-full">
                       <div
                         className="truncate font-medium text-xs"
@@ -292,12 +289,12 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {columnVisibility.status && (
-                  <TableCell className="px-5">
+                  <TableCell className="px-0">
                     <MissionStatusBadge status={mission.status} />
                   </TableCell>
                 )}
                 {columnVisibility.submission_link && (
-                  <TableCell className="px-3">
+                  <TableCell className="px-7">
                     {mission.submission_link ? (
                       <a
                         href={mission.submission_link}
@@ -315,20 +312,58 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                     )}
                   </TableCell>
                 )}
+                {columnVisibility.verified_by && (
+                  <TableCell className="px-23">
+                    {mission.verified_by ? (
+                      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        {mission.verified_by}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">
+                        -
+                      </span>
+                    )}
+                  </TableCell>
+                )}
+                {columnVisibility.completed_at && (
+                  <TableCell className="px-10">
+                    {mission.completed_at ? (
+                      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        {new Date(mission.completed_at * 1000).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}{' '}
+                        <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">
+                          {new Date(mission.completed_at * 1000).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false,
+                          })}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">
+                        -
+                      </span>
+                    )}
+                  </TableCell>
+                )}
                 {/* Actions column - always visible */}
-                <TableCell className="px-0">
+                <TableCell className="px-2">
                   <div className="flex items-center space-x-1">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      onClick={() => onViewDetails(mission)}
-                      className="h-7 w-7 p-0 cursor-pointer"
+                      onClick={() => handleViewDetails(mission)}
+                      className="h-8 px-3 text-xs font-medium bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-600 cursor-pointer transition-colors"
                       title="View Details"
                     >
-                      <Eye className="h-4 w-4" />
+                      Details
                     </Button>
-                    {/* Show Approve and Reject buttons only for Submitted, Completed, and Rejected status */}
-                    {mission.status !== "accepted" && (
+                    {/* Show Approve and Reject buttons only for Submitted status */}
+                    {mission.status === "submitted" && (
                       <>
                         <Button
                           variant="outline"

@@ -146,3 +146,49 @@ export const formatDateWithTime = (
     return "N/A";
   }
 };
+
+// Convert timestamp to Date object
+export const timestampToDate = (
+  dateValue: string | number | null | undefined
+): Date | null => {
+  if (!dateValue) return null;
+
+  try {
+    let date: Date;
+
+    if (typeof dateValue === "number") {
+      date = new Date(dateValue * 1000);
+    } else if (typeof dateValue === "string") {
+      date = new Date(dateValue);
+    } else {
+      return null;
+    }
+
+    return isNaN(date.getTime()) ? null : date;
+  } catch (error) {
+    console.error("Error converting timestamp to date:", error);
+    return null;
+  }
+};
+
+// Check if date matches filter criteria
+export const matchesDateFilter = (
+  dateValue: string | number | null | undefined,
+  filter: { type: 'all' | 'date'; date?: string }
+): boolean => {
+  if (filter.type === 'all') return true;
+
+  const date = timestampToDate(dateValue);
+  if (!date) return false;
+
+  const userTimezone = getUserTimezone();
+
+  if (filter.type === 'date' && filter.date) {
+    const targetDate = new Date(filter.date);
+    const dateInTimezoneStr = date.toLocaleDateString("en-CA", { timeZone: userTimezone }); // YYYY-MM-DD format
+    const targetDateStr = targetDate.toLocaleDateString("en-CA");
+    return dateInTimezoneStr === targetDateStr;
+  }
+
+  return true;
+};

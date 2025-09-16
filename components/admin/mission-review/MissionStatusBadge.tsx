@@ -2,7 +2,13 @@
 
 import { Badge } from "@/components/ui/badge";
 import { MissionStatusBadgeProps } from "@/types/admin/missionReview";
-import { Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Calendar,
+} from "lucide-react";
 
 export function MissionStatusBadge({ status }: MissionStatusBadgeProps) {
   const getStatusConfig = (status: string) => {
@@ -36,7 +42,7 @@ export function MissionStatusBadge({ status }: MissionStatusBadgeProps) {
           variant: "default" as const,
           className:
             "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
-          icon: CheckCircle,
+          icon: Calendar,
           label: "Accepted",
         };
       default:
