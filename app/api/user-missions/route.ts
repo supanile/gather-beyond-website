@@ -57,6 +57,7 @@ export async function GET() {
       rejected_at: mission.rejected_at || null,
       submission_link: mission.submission_link || "",
       notes: mission.notes || "",
+      verified_by: mission.verified_by || null,
       discord_user: mission.user_id ? discordDataMap.get(mission.user_id as string) || null : null,
     }));
 

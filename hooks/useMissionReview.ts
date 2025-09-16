@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useUser } from "@clerk/nextjs";
 import {
   UserMission,
   MissionReviewFilters,
@@ -12,6 +13,7 @@ import {
 export function useMissionReview() {
   const [missions, setMissions] = useState<UserMission[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useUser();
   const [filters, setFilters] = useState<MissionReviewFilters>({
     status: "all",
     searchQuery: "",
@@ -209,6 +211,15 @@ export function useMissionReview() {
   // Actions
   const approveMission = async (missionId: number) => {
     try {
+      // Find the mission to get user_id
+      const mission = missions.find(m => m._id === missionId);
+      if (!mission) {
+        throw new Error("Mission not found");
+      }
+
+      // Get the current admin's username
+      const verifiedBy = user?.username || user?.firstName || "Admin";
+
       // Optimistically update the UI
       setMissions((prev) =>
         prev.map((mission) =>
@@ -217,28 +228,33 @@ export function useMissionReview() {
                 ...mission,
                 status: "completed" as const,
                 completed_at: Math.floor(Date.now() / 1000),
+                verified_by: verifiedBy,
               }
             : mission
         )
       );
 
-      // Send update to API
-      const response = await fetch(`/api/user-missions/${missionId}`, {
-        method: "PATCH",
+      // Send update to the new mission review API
+      const response = await fetch(`/api/missions/review`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          status: "completed",
-          completed_at: Math.floor(Date.now() / 1000),
+          action: "approve",
+          userId: mission.user_id,
+          missionId: mission.mission_id,
+          approvedBy: verifiedBy
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to approve mission");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to approve mission");
       }
 
-      console.log(`Approved mission ${missionId}`);
+      const result = await response.json();
+      console.log(`Approved mission ${missionId}:`, result);
     } catch (error) {
       console.error("Failed to approve mission:", error);
       // Revert the optimistic update
@@ -248,6 +264,15 @@ export function useMissionReview() {
 
   const rejectMission = async (missionId: number) => {
     try {
+      // Find the mission to get user_id
+      const mission = missions.find(m => m._id === missionId);
+      if (!mission) {
+        throw new Error("Mission not found");
+      }
+
+      // Get the current admin's username
+      const verifiedBy = user?.username || user?.firstName || "Admin";
+
       // Optimistically update the UI
       setMissions((prev) =>
         prev.map((mission) =>
@@ -255,29 +280,34 @@ export function useMissionReview() {
             ? {
                 ...mission,
                 status: "rejected" as const,
-                rejected_at: Math.floor(Date.now() / 1000),
+                completed_at: Math.floor(Date.now() / 1000),
+                verified_by: verifiedBy,
               }
             : mission
         )
       );
 
-      // Send update to API
-      const response = await fetch(`/api/user-missions/${missionId}`, {
-        method: "PATCH",
+      // Send update to the new mission review API
+      const response = await fetch(`/api/missions/review`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          status: "rejected",
-          rejected_at: Math.floor(Date.now() / 1000),
+          action: "reject",
+          userId: mission.user_id,
+          missionId: mission.mission_id,
+          approvedBy: verifiedBy
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to reject mission");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to reject mission");
       }
 
-      console.log(`Rejected mission ${missionId}`);
+      const result = await response.json();
+      console.log(`Rejected mission ${missionId}:`, result);
     } catch (error) {
       console.error("Failed to reject mission:", error);
       // Revert the optimistic update
