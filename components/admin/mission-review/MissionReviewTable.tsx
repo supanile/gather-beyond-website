@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Eye,
   ChevronsUpDown,
   ChevronUp,
   ChevronDown,
@@ -235,7 +234,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
               createNonSortableHeader("Verified By", "w-32 px-22", "verified_by")}
             {columnVisibility.completed_at &&
               createColumnHeader("completed_at", "Verified At", "w-48 px-6")}
-            <TableHead className="w-28 px-0 text-xs">Actions</TableHead>
+            <TableHead className="w-32 px-0 text-xs">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -355,13 +354,13 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                 <TableCell className="px-2">
                   <div className="flex items-center space-x-1">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={() => handleViewDetails(mission)}
-                      className="h-7 w-7 p-0 cursor-pointer"
+                      className="h-8 px-3 text-xs font-medium bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-600 cursor-pointer transition-colors"
                       title="View Details"
                     >
-                      <Eye className="h-4 w-4" />
+                      Details
                     </Button>
                     {/* Show Approve and Reject buttons only for Submitted status */}
                     {mission.status === "submitted" && (
