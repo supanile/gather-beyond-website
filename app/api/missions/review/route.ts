@@ -165,7 +165,11 @@ export async function POST(request: NextRequest) {
 
       // Send Discord DM notification to user for rejection
       try {
-        const dmResult = await sendMissionRejectionDM(userId, mission?.title || 'Unknown Mission');
+        const dmResult = await sendMissionRejectionDM(
+          userId, 
+          mission?.title || 'Unknown Mission', 
+          rejectionReason || 'No reason provided'
+        );
 
         if (!dmResult.success) {
           console.warn('Failed to send Discord rejection DM:', dmResult.error);
