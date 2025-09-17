@@ -195,7 +195,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+            className="h-auto px-2 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
           >
             {label}
           </Button>
@@ -217,7 +217,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
             {columnVisibility.id &&
               createColumnHeader("_id", "No", "w-10 px-1")}
             {columnVisibility.user_avatar &&
-              createNonSortableHeader("User", "w-36 px-3", "user_avatar")}
+              createNonSortableHeader("User", "w-36 px-15", "user_avatar")}
             {columnVisibility.user_id &&
               createColumnHeader("user_id", "User ID", "w-26 px-0")}
             {columnVisibility.mission_name &&
@@ -351,13 +351,13 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   </TableCell>
                 )}
                 {/* Actions column - always visible */}
-                <TableCell className="px-2">
+                <TableCell className="px-0">
                   <div className="flex items-center space-x-1">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleViewDetails(mission)}
-                      className="h-8 px-3 text-xs font-medium bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-600 cursor-pointer transition-colors"
+                      className="h-7 px-2 text-xs font-medium bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300 hover:text-slate-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:border-slate-600 cursor-pointer transition-colors"
                       title="View Details"
                     >
                       Details
