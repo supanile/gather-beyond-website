@@ -407,7 +407,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                       {/* Total Discord Reach */}
                       <div className="bg-gray-100 dark:bg-gray-900 rounded-2xl p-6 text-gray-900 dark:text-white">
                         <div className="text-center space-y-2">
-                          <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                            <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
                             {isLoadingServers
                               ? "Loading..."
                               : totalMembers > 0
@@ -441,7 +441,7 @@ export const ViewMissionModal: React.FC<ViewMissionModalProps> = ({
                             <div className="text-center py-8">
                               <div className="relative mx-auto w-8 h-8 mb-3">
                                 <div className="absolute inset-0 rounded-full border-2 border-gray-400 dark:border-gray-600"></div>
-                                <div className="absolute inset-0 rounded-full border-2 border-blue-600 dark:border-blue-400 border-t-transparent animate-spin"></div>
+                                <div className="absolute inset-0 rounded-full border-2 border-gray-900 dark:border-gray-100 border-t-transparent animate-spin"></div>
                               </div>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Loading server details...
