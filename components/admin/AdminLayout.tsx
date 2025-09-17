@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BarChart3, Crosshair, Home, Menu, FileText, RefreshCw } from "lucide-react";
+import { BarChart3, Crosshair, Home, Menu, FileText, RefreshCw, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/LandingDashboard/Header/Darkmode";
@@ -68,6 +68,11 @@ const items = [
     title: "Mission Reviews",
     url: "/admin/mission-review",
     icon: FileText,
+  },
+  {
+    title: "Discord Push",
+    url: "/admin/discord-push",
+    icon: MessageSquare,
   },
 ];
 
@@ -242,6 +247,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     if (pathname === "/admin/missions") return "Missions Management";
     if (pathname === "/admin/userdashboard") return "Users Dashboard";
     if (pathname === "/admin/mission-review") return "Mission Reviews";
+    if (pathname === "/admin/discord-push") return "Discord Push Messages";
     if (pathname === "/") return "Home";
     return "Admin Panel";
   };
@@ -254,6 +260,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       return "Monitor user activity and statistics";
     if (pathname === "/admin/mission-review")
       return "Review and manage user mission submissions";
+    if (pathname === "/admin/discord-push")
+      return "Send targeted messages to Discord community";
     if (pathname === "/") return "Welcome to the main dashboard";
     return "Administrative control center";
   };
