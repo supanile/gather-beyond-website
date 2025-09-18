@@ -198,7 +198,7 @@ export default function MissionDetailsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white dark:hover:bg-slate-900 transition-all duration-200"
+                className="flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white dark:hover:bg-slate-900 transition-all duration-200 cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -285,13 +285,13 @@ export default function MissionDetailsPage() {
                 <div className="flex items-center gap-4">
                   <UserAvatar
                     discordId={mission.user_id}
-                    username={mission.discord_user?.username}
+                    username={mission.user?.username}
                     avatarUrl={mission.discord_user?.avatarUrl}
                     size="lg"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-slate-900 dark:text-slate-100 text-lg truncate">
-                      {mission.discord_user?.username || "Unknown User"}
+                      {mission.user?.username || "Unknown User"}
                     </div>
                     <div className="text-sm text-slate-500 dark:text-slate-400 truncate">
                       {mission.user_id}

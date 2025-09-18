@@ -149,7 +149,7 @@ const DashboardPage = () => {
     .filter(
       (user) =>
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (discordUsernames[user.discord_id] || "")
+        (user.username || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         (user.interests || "")
@@ -167,8 +167,8 @@ const DashboardPage = () => {
       switch (sortConfig.field) {
         case "user.username":
           // Get Discord username or fallback to email
-          aValue = discordUsernames[a.discord_id]?.toLowerCase() || a.email?.toLowerCase() || "";
-          bValue = discordUsernames[b.discord_id]?.toLowerCase() || b.email?.toLowerCase() || "";
+          aValue = a.username?.toLowerCase() || a.email?.toLowerCase() || "";
+          bValue = b.username?.toLowerCase() || b.email?.toLowerCase() || "";
           break;
 
         case "agent.highest_level":
@@ -507,11 +507,11 @@ const DashboardPage = () => {
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
                 />
-                  <AdminStatCard
-                    title="Total Servers"
-                    value={totalGuilds.toLocaleString()}
-                    icon={Server}
-                  />
+                <AdminStatCard
+                  title="Total Servers"
+                  value={totalGuilds.toLocaleString()}
+                  icon={Server}
+                />
                 <AdminStatCard
                   title="Total Missions"
                   value={stats?.totalmissions?.toLocaleString() ?? "0"}

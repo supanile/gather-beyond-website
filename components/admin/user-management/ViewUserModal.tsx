@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Send } from "lucide-react";
 import { UserWithAgent } from "@/types/admin/userManagement";
-import { DiscordUsername } from "./DiscordUsername";
 import XIcon from "@/components/ui/icons/XIcon";
 
 interface ViewUserModalProps {
@@ -181,7 +180,7 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
             <CardHeader className="p-3 sm:p-6 -mb-2 sm:-mb-2">
               <CardTitle className="flex flex-col gap-2">
                 <span className="text-sm sm:text-lg break-words font-medium">
-                  <DiscordUsername discordId={user.discord_id} fallback={user.discord_id} />
+                  {user.username || user.discord_id}
                 </span>
                 <div className="text-sm text-muted-foreground">
                   {user.twitter_handle && (

@@ -4,6 +4,12 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { UserMission } from "@/types/admin/missionReview";
 
+// Define User interface for the users from API
+interface User {
+  discord_id: string;
+  [key: string]: unknown; // Allow other properties that might exist
+}
+
 export function useMissionDetails(missionId: string) {
   const [mission, setMission] = useState<UserMission | null>(null);
   const [loading, setLoading] = useState(true);
@@ -18,19 +24,35 @@ export function useMissionDetails(missionId: string) {
       setError(null);
 
       try {
-        // Fetch user mission details
-        const userMissionResponse = await fetch(`/api/user-missions/${missionId}`);
+        // Fetch user mission details, users data, and mission reward details
+        const [userMissionResponse, usersResponse] = await Promise.all([
+          fetch(`/api/user-missions/${missionId}`),
+          fetch(`/api/users`),
+        ]);
+
         if (!userMissionResponse.ok) {
           throw new Error("Failed to fetch mission details");
         }
+        if (!usersResponse.ok) {
+          throw new Error("Failed to fetch users data");
+        }
+
         const userMissionData = await userMissionResponse.json();
+        const users: User[] = await usersResponse.json();
+
+        // Find the user for this mission
+        const user = users.find(
+          (u: User) => u.discord_id === userMissionData.user_id
+        );
 
         // Fetch mission reward details
-        const missionResponse = await fetch(`/api/missions/${userMissionData.mission_id}`);
+        const missionResponse = await fetch(
+          `/api/missions/${userMissionData.mission_id}`
+        );
         if (!missionResponse.ok) {
           console.warn("Failed to fetch mission reward details");
         }
-        
+
         let missionData = null;
         try {
           missionData = await missionResponse.json();
@@ -38,10 +60,11 @@ export function useMissionDetails(missionId: string) {
           console.warn("Error parsing mission reward data:", e);
         }
 
-        // Combine user mission data with reward information
+        // Combine user mission data with user info and reward information
         const combinedData = {
           ...userMissionData,
-          reward: missionData?.reward || null
+          user: user,
+          reward: missionData?.reward || null,
         };
 
         setMission(combinedData);
@@ -75,7 +98,7 @@ export function useMissionDetails(missionId: string) {
           action: "approve",
           userId: mission.user_id,
           missionId: mission.mission_id,
-          approvedBy: verifiedBy
+          approvedBy: verifiedBy,
         }),
       });
 
@@ -85,15 +108,19 @@ export function useMissionDetails(missionId: string) {
       }
 
       const responseData = await response.json();
-      
+
       // Update the local mission state
-      setMission(prev => prev ? {
-        ...prev,
-        status: "completed" as const,
-        completed_at: Math.floor(Date.now() / 1000),
-        verified_by: verifiedBy,
-      } : null);
-      
+      setMission((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: "completed" as const,
+              completed_at: Math.floor(Date.now() / 1000),
+              verified_by: verifiedBy,
+            }
+          : null
+      );
+
       return responseData;
     } catch (error) {
       console.error("Error approving mission:", error);
@@ -101,7 +128,10 @@ export function useMissionDetails(missionId: string) {
     }
   };
 
-  const rejectMission = async (_missionId: number, rejectionReason?: string) => {
+  const rejectMission = async (
+    _missionId: number,
+    rejectionReason?: string
+  ) => {
     try {
       if (!mission) {
         throw new Error("Mission not found");
@@ -117,9 +147,9 @@ export function useMissionDetails(missionId: string) {
         userId: mission.user_id,
         missionId: mission.mission_id,
         approvedBy: verifiedBy,
-        rejectionReason: rejectionReason
+        rejectionReason: rejectionReason,
       };
-      
+
       console.log("Request body to send:", requestBody);
 
       const response = await fetch(`/api/missions/review`, {
@@ -136,16 +166,20 @@ export function useMissionDetails(missionId: string) {
       }
 
       const responseData = await response.json();
-      
+
       // Update the local mission state
-      setMission(prev => prev ? {
-        ...prev,
-        status: "rejected" as const,
-        completed_at: Math.floor(Date.now() / 1000),
-        verified_by: verifiedBy,
-        notes: rejectionReason || prev.notes, // Add rejection reason to notes
-      } : null);
-      
+      setMission((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: "rejected" as const,
+              completed_at: Math.floor(Date.now() / 1000),
+              verified_by: verifiedBy,
+              notes: rejectionReason || prev.notes, // Add rejection reason to notes
+            }
+          : null
+      );
+
       return responseData;
     } catch (error) {
       console.error("Error rejecting mission:", error);
@@ -166,19 +200,35 @@ export function useMissionDetails(missionId: string) {
           setError(null);
 
           try {
-            // Fetch user mission details
-            const userMissionResponse = await fetch(`/api/user-missions/${missionId}`);
+            // Fetch user mission details, users data, and mission reward details
+            const [userMissionResponse, usersResponse] = await Promise.all([
+              fetch(`/api/user-missions/${missionId}`),
+              fetch(`/api/users`),
+            ]);
+
             if (!userMissionResponse.ok) {
               throw new Error("Failed to fetch mission details");
             }
+            if (!usersResponse.ok) {
+              throw new Error("Failed to fetch users data");
+            }
+
             const userMissionData = await userMissionResponse.json();
+            const users: User[] = await usersResponse.json();
+
+            // Find the user for this mission
+            const user = users.find(
+              (u: User) => u.discord_id === userMissionData.user_id
+            );
 
             // Fetch mission reward details
-            const missionResponse = await fetch(`/api/missions/${userMissionData.mission_id}`);
+            const missionResponse = await fetch(
+              `/api/missions/${userMissionData.mission_id}`
+            );
             if (!missionResponse.ok) {
               console.warn("Failed to fetch mission reward details");
             }
-            
+
             let missionData = null;
             try {
               missionData = await missionResponse.json();
@@ -186,10 +236,11 @@ export function useMissionDetails(missionId: string) {
               console.warn("Error parsing mission reward data:", e);
             }
 
-            // Combine user mission data with reward information
+            // Combine user mission data with user info and reward information
             const combinedData = {
               ...userMissionData,
-              reward: missionData?.reward || null
+              user: user,
+              reward: missionData?.reward || null,
             };
 
             setMission(combinedData);
