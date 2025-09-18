@@ -56,7 +56,7 @@ export function UserAvatar({
   }, [discordId, providedAvatarUrl, username]);
 
   // Determine what data to use
-  const displayUsername = username || discordData?.username || "Unknown User";
+  const displayUsername = username ||"Unknown User";
   const displayAvatarUrl = providedAvatarUrl || discordData?.avatarUrl;
 
   // Generate initials from username

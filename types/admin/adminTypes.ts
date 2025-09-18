@@ -10,6 +10,7 @@ export interface User {
   twitter_handle: string;
   wallet_address: string;
   created_at: string;
+  username?: string;
 }
 
 export interface Mission {

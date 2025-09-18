@@ -162,10 +162,16 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-auto min-w-0">
-          <DropdownMenuItem onClick={() => handleSort(field, "asc")} className="p-2 justify-center">
+          <DropdownMenuItem
+            onClick={() => handleSort(field, "asc")}
+            className="p-2 justify-center"
+          >
             <ChevronUp className="w-4 h-4" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleSort(field, "desc")} className="p-2 justify-center">
+          <DropdownMenuItem
+            onClick={() => handleSort(field, "desc")}
+            className="p-2 justify-center"
+          >
             <ChevronDown className="w-4 h-4" />
           </DropdownMenuItem>
           <div className="bg-border -mx-1 my-1 h-px"></div>
@@ -201,7 +207,10 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-auto min-w-0">
-          <DropdownMenuItem onClick={() => onToggleColumnVisibility(column)} className="p-2 justify-center">
+          <DropdownMenuItem
+            onClick={() => onToggleColumnVisibility(column)}
+            className="p-2 justify-center"
+          >
             <EyeOff className="w-4 h-4" />
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -231,7 +240,11 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                 "w-48 px-4"
               )}
             {columnVisibility.verified_by &&
-              createNonSortableHeader("Verified By", "w-32 px-22", "verified_by")}
+              createNonSortableHeader(
+                "Verified By",
+                "w-32 px-22",
+                "verified_by"
+              )}
             {columnVisibility.completed_at &&
               createColumnHeader("completed_at", "Verified At", "w-48 px-6")}
             <TableHead className="w-32 px-0 text-xs">Actions</TableHead>
@@ -253,14 +266,14 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                     <div className="flex items-center gap-2">
                       <UserAvatar
                         discordId={mission.user_id}
-                        username={mission.discord_user?.username}
+                        username={mission.user?.username}
                         avatarUrl={mission.discord_user?.avatarUrl}
                         size="md"
                         className="flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-xs text-slate-900 dark:text-slate-100 truncate">
-                          {mission.discord_user?.username || "Unknown User"}
+                          {mission.user?.username || "Unknown User"}
                         </div>
                       </div>
                     </div>
@@ -319,9 +332,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                         {mission.verified_by}
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400 italic">
-                        -
-                      </span>
+                      <span className="text-xs text-gray-400 italic">-</span>
                     )}
                   </TableCell>
                 )}
@@ -329,24 +340,26 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                   <TableCell className="px-10">
                     {mission.completed_at ? (
                       <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                        {new Date(mission.completed_at * 1000).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}{' '}
+                        {new Date(
+                          mission.completed_at * 1000
+                        ).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}{" "}
                         <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">
-                          {new Date(mission.completed_at * 1000).toLocaleTimeString('en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
+                          {new Date(
+                            mission.completed_at * 1000
+                          ).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
                             hour12: false,
                           })}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400 italic">
-                        -
-                      </span>
+                      <span className="text-xs text-gray-400 italic">-</span>
                     )}
                   </TableCell>
                 )}

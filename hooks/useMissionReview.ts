@@ -9,6 +9,28 @@ import {
   MissionReviewPaginationState,
   MissionReviewSortState,
 } from "@/types/admin/missionReview";
+import { User } from "@/types/admin/userManagement";
+
+// Interface for raw mission data from API
+interface RawMissionData {
+  _id: number;
+  mission_id: number;
+  mission_name: string;
+  user_id: string;
+  status: "accepted" | "submitted" | "completed" | "rejected";
+  accepted_at: number | null;
+  submitted_at: number | null;
+  completed_at: number | null;
+  rejected_at?: number | null;
+  submission_link: string;
+  notes: string;
+  verified_by?: string;
+  reward?: {
+    xp: number;
+    credits: number;
+    health: number;
+  } | null;
+}
 
 export function useMissionReview() {
   const [missions, setMissions] = useState<UserMission[]>([]);
@@ -37,27 +59,65 @@ export function useMissionReview() {
     totalPages: 0,
   });
 
-  // Load initial data
-  useEffect(() => {
-    const loadMissions = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch("/api/user-missions");
-        if (!response.ok) {
-          throw new Error("Failed to fetch missions");
-        }
-        const data = await response.json();
-        setMissions(data);
-      } catch (error) {
-        console.error("Error loading missions:", error);
-        setMissions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // // Load initial data
+  // useEffect(() => {
+  //   const loadMissions = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch("/api/user-missions");
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch missions");
+  //       }
+  //       const data = await response.json();
+  //       setMissions(data);
+  //     } catch (error) {
+  //       console.error("Error loading missions:", error);
+  //       setMissions([]);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    loadMissions();
-  }, []);
+  //   loadMissions();
+  // }, []);
+  // Load initial data
+useEffect(() => {
+  const loadMissions = async () => {
+    setLoading(true);
+    try {
+      // Fetch missions และ users แยกกัน
+      const [missionsResponse, usersResponse] = await Promise.all([
+        fetch("/api/user-missions"),
+        fetch("/api/users")
+      ]);
+      
+      if (!missionsResponse.ok || !usersResponse.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      
+      const missions = await missionsResponse.json();
+      const users = await usersResponse.json();
+      
+      // Join missions กับ users data
+      const missionsWithUsers = missions.map((mission: RawMissionData) => {
+        const user = users.find((u: User) => u.discord_id === mission.user_id);
+        return {
+          ...mission,
+          user: user
+        };
+      });
+      
+      setMissions(missionsWithUsers);
+    } catch (error) {
+      console.error("Error loading missions:", error);
+      setMissions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadMissions();
+}, []);
 
   // Filter missions based on current filters
   const filteredMissions = useMemo(() => {
@@ -94,9 +154,9 @@ export function useMissionReview() {
           mission.mission_id.toString().includes(searchTerm) ||
           mission.mission_id.toString().startsWith(searchTerm);
 
-        // Search in Discord username
-        const usernameMatch = mission.discord_user?.username
-          ? mission.discord_user.username.toLowerCase().includes(searchTerm)
+        // Search in username from Users table
+        const usernameMatch = mission.user?.username
+          ? mission.user.username.toLowerCase().includes(searchTerm)
           : false;
 
         // Return true if any field matches
@@ -142,7 +202,12 @@ export function useMissionReview() {
       }
 
       // Special handling for numeric fields
-      if (field === "mission_id" || field === "submitted_at" || field === "completed_at" || field === "accepted_at") {
+      if (
+        field === "mission_id" ||
+        field === "submitted_at" ||
+        field === "completed_at" ||
+        field === "accepted_at"
+      ) {
         const numA = Number(aValue) || 0;
         const numB = Number(bValue) || 0;
         return direction === "asc" ? numA - numB : numB - numA;
@@ -212,7 +277,7 @@ export function useMissionReview() {
   const approveMission = async (missionId: number) => {
     try {
       // Find the mission to get user_id
-      const mission = missions.find(m => m._id === missionId);
+      const mission = missions.find((m) => m._id === missionId);
       if (!mission) {
         throw new Error("Mission not found");
       }
@@ -244,7 +309,7 @@ export function useMissionReview() {
           action: "approve",
           userId: mission.user_id,
           missionId: mission.mission_id,
-          approvedBy: verifiedBy
+          approvedBy: verifiedBy,
         }),
       });
 
@@ -265,7 +330,7 @@ export function useMissionReview() {
   const rejectMission = async (missionId: number, rejectionReason?: string) => {
     try {
       // Find the mission to get user_id
-      const mission = missions.find(m => m._id === missionId);
+      const mission = missions.find((m) => m._id === missionId);
       if (!mission) {
         throw new Error("Mission not found");
       }
@@ -298,7 +363,7 @@ export function useMissionReview() {
           userId: mission.user_id,
           missionId: mission.mission_id,
           approvedBy: verifiedBy,
-          rejectionReason: rejectionReason
+          rejectionReason: rejectionReason,
         }),
       });
 
@@ -349,21 +414,52 @@ export function useMissionReview() {
     }));
   };
 
+  // const refreshMissions = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await fetch("/api/user-missions");
+  //     if (!response.ok) {
+  //       throw new Error("Failed to refresh missions");
+  //     }
+  //     const data = await response.json();
+  //     setMissions(data);
+  //   } catch (error) {
+  //     console.error("Error refreshing missions:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const refreshMissions = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/user-missions");
-      if (!response.ok) {
-        throw new Error("Failed to refresh missions");
-      }
-      const data = await response.json();
-      setMissions(data);
-    } catch (error) {
-      console.error("Error refreshing missions:", error);
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const [missionsResponse, usersResponse] = await Promise.all([
+      fetch("/api/user-missions"),
+      fetch("/api/users")
+    ]);
+    
+    if (!missionsResponse.ok || !usersResponse.ok) {
+      throw new Error("Failed to refresh data");
     }
-  };
+    
+    const missions = await missionsResponse.json();
+    const users = await usersResponse.json();
+    
+    const missionsWithUsers = missions.map((mission: RawMissionData) => {
+      const user = users.find((u: User) => u.discord_id === mission.user_id);
+      return {
+        ...mission,
+        user: user
+      };
+    });
+    
+    setMissions(missionsWithUsers);
+  } catch (error) {
+    console.error("Error refreshing missions:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return {
     missions: paginatedMissions,
