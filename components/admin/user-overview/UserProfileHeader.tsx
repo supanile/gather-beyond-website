@@ -161,12 +161,12 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
             </div>
           ) : (
             <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
-              {discordData?.username ? discordData.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+              {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
             </div>
           )}
           <div className="min-w-0 flex-1">
             <p className="text-sm sm:text-base md:text-lg font-semibold text-foreground truncate">
-              {discordData?.username || user.email}
+              {user.username || user.email}
             </p>
             <p className="text-xs text-muted-foreground truncate">
               ID: {user.discord_id}

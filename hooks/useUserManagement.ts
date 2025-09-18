@@ -30,48 +30,14 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
     total: 0,
   });
 
-  // Cache for Discord usernames
-  const [discordUsernamesCache, setDiscordUsernamesCache] = useState<Record<string, string>>({});
-
-  // Fetch Discord usernames for sorting
-  useEffect(() => {
-    const fetchDiscordUsernames = async () => {
-      const uncachedUsers = users.filter(user => !discordUsernamesCache[user.discord_id]);
-      
-      if (uncachedUsers.length === 0) return;
-
-      const fetchPromises = uncachedUsers.map(async (user) => {
-        try {
-          const response = await fetch(`/api/discord/${user.discord_id}`);
-          if (response.ok) {
-            const data = await response.json();
-            return { discordId: user.discord_id, username: data.username || user.discord_id };
-          }
-        } catch (error) {
-          console.error(`Error fetching username for ${user.discord_id}:`, error);
-        }
-        return { discordId: user.discord_id, username: user.discord_id };
-      });
-
-      const results = await Promise.all(fetchPromises);
-      const newCache = results.reduce((acc, result) => {
-        if (result) {
-          acc[result.discordId] = result.username;
-        }
-        return acc;
-      }, {} as Record<string, string>);
-
-      setDiscordUsernamesCache(prev => ({ ...prev, ...newCache }));
-    };
-
-    fetchDiscordUsernames();
-  }, [users, discordUsernamesCache]);
-
   // Helper function to get nested value
-  const getNestedValue = (obj: UserWithAgent, path: string): string | number | undefined => {
+  const getNestedValue = (
+    obj: UserWithAgent,
+    path: string
+  ): string | number | undefined => {
     const keys = path.split(".");
     let current: unknown = obj;
-    
+
     for (const key of keys) {
       if (current && typeof current === "object") {
         current = (current as Record<string, unknown>)[key];
@@ -79,7 +45,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
         return undefined;
       }
     }
-    
+
     return current as string | number | undefined;
   };
 
@@ -89,18 +55,17 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
       // Search filter - now includes Discord ID and username
       if (filterConfig.search) {
         const searchTerm = filterConfig.search.toLowerCase();
-        const discordUsername = discordUsernamesCache[user.discord_id];
         const searchableFields = [
           user.email,
           user.interests,
           user.twitter_handle,
           user.telegram_handle,
           user.discord_id,
-          discordUsername, // Include the actual Discord username in search
-        ].filter(Boolean);
+          user.username,
+        ].filter(Boolean) as string[];
 
         const matchesSearch = searchableFields.some((field) =>
-          field.toLowerCase().includes(searchTerm)
+          (field ?? "").toString().toLowerCase().includes(searchTerm)
         );
 
         if (!matchesSearch) return false;
@@ -145,7 +110,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
 
       return true;
     });
-  }, [users, filterConfig, discordUsernamesCache]);
+  }, [users, filterConfig]);
 
   // Sort filtered users
   const sortedUsers = useMemo(() => {
@@ -155,8 +120,8 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
 
       // Handle special case for username sorting - use cached Discord usernames
       if (sortConfig.field === "username") {
-        aValue = discordUsernamesCache[a.discord_id] || a.discord_id;
-        bValue = discordUsernamesCache[b.discord_id] || b.discord_id;
+        aValue = a.username || a.discord_id;
+        bValue = b.username || b.discord_id;
       } else {
         aValue = getNestedValue(a, sortConfig.field);
         bValue = getNestedValue(b, sortConfig.field);
@@ -187,7 +152,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
     });
 
     return sorted;
-  }, [filteredUsers, sortConfig, discordUsernamesCache]);
+  }, [filteredUsers, sortConfig]);
 
   // Paginated users
   const paginatedUsers = useMemo(() => {

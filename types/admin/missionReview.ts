@@ -1,3 +1,5 @@
+import { User } from "./userManagement";
+
 export interface UserMission {
   _id: number;
   mission_id: number;
@@ -11,6 +13,7 @@ export interface UserMission {
   submission_link: string;
   notes: string;
   discord_user?: DiscordUserData;
+  user?: User; // ใช้ User interface แทน
   verified_by?: string; // Username of the admin who approved/rejected
   reward?: {
     xp: number;
@@ -47,7 +50,9 @@ export interface MissionReviewTableProps {
   sortState: MissionReviewSortState;
   columnVisibility: MissionReviewColumnVisibility;
   onSort: (field: keyof UserMission) => void;
-  onToggleColumnVisibility: (column: keyof MissionReviewColumnVisibility) => void;
+  onToggleColumnVisibility: (
+    column: keyof MissionReviewColumnVisibility
+  ) => void;
   onApprove: (missionId: number) => void;
   onReject: (missionId: number, rejectionReason?: string) => void;
   isLoading?: boolean;

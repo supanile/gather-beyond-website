@@ -68,7 +68,6 @@ const DashboardPage = () => {
     direction: "asc",
     label: "Username A-Z",
   });
-  const [discordUsernames, setDiscordUsernames] = useState<Record<string, string>>({});
 
   const { totalGuilds } = useDiscordServers();
   const {
@@ -82,38 +81,6 @@ const DashboardPage = () => {
     isLoading: isLoadingData,
     error: dataError,
   } = useAdminData();
-
-  // Fetch Discord usernames for users
-  useEffect(() => {
-    const fetchDiscordUsernames = async () => {
-      const usernameMap: Record<string, string> = {};
-      
-      for (const user of users) {
-        if (user.discord_id && !discordUsernames[user.discord_id]) {
-          try {
-            const response = await fetch(`/api/discord/${user.discord_id}`);
-            if (response.ok) {
-              const data = await response.json();
-              if (data.username) {
-                usernameMap[user.discord_id] = data.username;
-              }
-            }
-          } catch (error) {
-            console.error(`Failed to fetch Discord data for ${user.discord_id}:`, error);
-          }
-        }
-      }
-      
-      if (Object.keys(usernameMap).length > 0) {
-        setDiscordUsernames(prev => ({ ...prev, ...usernameMap }));
-      }
-    };
-
-    if (users.length > 0) {
-      fetchDiscordUsernames();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [users]); // Removed discordUsernames from dependencies to prevent infinite loop
 
   // Sort options - added last_active options
   const sortOptions: SortOption[] = [
@@ -149,7 +116,7 @@ const DashboardPage = () => {
     .filter(
       (user) =>
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (discordUsernames[user.discord_id] || "")
+        (user.username || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         (user.interests || "")
@@ -167,8 +134,8 @@ const DashboardPage = () => {
       switch (sortConfig.field) {
         case "user.username":
           // Get Discord username or fallback to email
-          aValue = discordUsernames[a.discord_id]?.toLowerCase() || a.email?.toLowerCase() || "";
-          bValue = discordUsernames[b.discord_id]?.toLowerCase() || b.email?.toLowerCase() || "";
+          aValue = a.username?.toLowerCase() || a.email?.toLowerCase() || "";
+          bValue = b.username?.toLowerCase() || b.email?.toLowerCase() || "";
           break;
 
         case "agent.highest_level":
@@ -507,11 +474,11 @@ const DashboardPage = () => {
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
                 />
-                  <AdminStatCard
-                    title="Total Servers"
-                    value={totalGuilds.toLocaleString()}
-                    icon={Server}
-                  />
+                <AdminStatCard
+                  title="Total Servers"
+                  value={totalGuilds.toLocaleString()}
+                  icon={Server}
+                />
                 <AdminStatCard
                   title="Total Missions"
                   value={stats?.totalmissions?.toLocaleString() ?? "0"}
