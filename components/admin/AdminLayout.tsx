@@ -70,8 +70,8 @@ const items = [
     icon: FileText,
   },
   {
-    title: "Discord Push",
-    url: "/admin/discord-push",
+    title: "Push Messages",
+    url: "/admin/push-messages",
     icon: MessageSquare,
   },
 ];
@@ -247,7 +247,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     if (pathname === "/admin/missions") return "Missions Management";
     if (pathname === "/admin/userdashboard") return "Users Dashboard";
     if (pathname === "/admin/mission-review") return "Mission Reviews";
-    if (pathname === "/admin/discord-push") return "Discord Push Messages";
+    if (pathname === "/admin/push-messages") return "Push Messages";
     if (pathname === "/") return "Home";
     return "Admin Panel";
   };
@@ -260,7 +260,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       return "Monitor user activity and statistics";
     if (pathname === "/admin/mission-review")
       return "Review and manage user mission submissions";
-    if (pathname === "/admin/discord-push")
+    if (pathname === "/admin/push-messages")
       return "Send targeted messages to Discord community";
     if (pathname === "/") return "Welcome to the main dashboard";
     return "Administrative control center";

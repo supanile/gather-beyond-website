@@ -1,3 +1,25 @@
+// Add these to your existing discordPush types file
+
+export interface Button {
+  id: string;
+  label: string;
+  style: "primary" | "secondary" | "success" | "danger" | "link";
+  url?: string;
+}
+
+// Update your existing MessageComposerForm interface
+export interface MessageComposerForm {
+  title: string;
+  description: string;
+  color: string;
+  largeImageUrl?: string;
+  thumbnailUrl?: string;
+  targetUsers: string[];
+  scheduledAt?: Date;
+  buttons?: Button[]; // Add this line
+}
+
+// Update your existing DiscordMessage interface if it doesn't already have buttons
 export interface DiscordMessage {
   id: string;
   title: string;
@@ -7,10 +29,34 @@ export interface DiscordMessage {
   thumbnailUrl?: string;
   createdAt: string;
   scheduledAt?: string;
-  status: "draft" | "scheduled" | "sent" | "failed";
+  status: "sent" | "scheduled" | "draft" | "failed";
   targetUsers: string[];
-  deliveryStats?: MessageDeliveryStats;
+  buttons?: Button[]; // Add this line
+  deliveryStats?: {
+    totalSent: number;
+    delivered: number;
+    failed: number;
+    opened: number;
+    clickThrough: number;
+    deliveryRate: number;
+    openRate: number;
+    clickThroughRate: number;
+  };
 }
+
+// export interface DiscordMessage {
+//   id: string;
+//   title: string;
+//   description: string;
+//   color: string;
+//   largeImageUrl?: string;
+//   thumbnailUrl?: string;
+//   createdAt: string;
+//   scheduledAt?: string;
+//   status: "draft" | "scheduled" | "sent" | "failed";
+//   targetUsers: string[];
+//   deliveryStats?: MessageDeliveryStats;
+// }
 
 export interface MessageDeliveryStats {
   totalSent: number;
@@ -33,15 +79,15 @@ export interface DiscordUser {
   roles: string[];
 }
 
-export interface MessageComposerForm {
-  title: string;
-  description: string;
-  color: string;
-  largeImageUrl: string;
-  thumbnailUrl: string;
-  targetUsers: string[];
-  scheduledAt?: Date;
-}
+// export interface MessageComposerForm {
+//   title: string;
+//   description: string;
+//   color: string;
+//   largeImageUrl: string;
+//   thumbnailUrl: string;
+//   targetUsers: string[];
+//   scheduledAt?: Date;
+// }
 
 export interface MediaUpload {
   file: File;

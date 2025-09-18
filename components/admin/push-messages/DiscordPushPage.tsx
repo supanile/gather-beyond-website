@@ -133,52 +133,62 @@ export function DiscordPushPage() {
   const sentMessages = messages.filter(m => m.status === "sent");
   const scheduledMessages = messages.filter(m => m.status === "scheduled");
   const draftMessages = messages.filter(m => m.status === "draft");
+  const totalRecipients = sentMessages.reduce((sum, msg) => sum + msg.targetUsers.length, 0);
+
+  const statItems = [
+    {
+      title: "Sent Messages",
+      value: sentMessages.length,
+      icon: Send,
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-100 dark:bg-green-900/20",
+    },
+    {
+      title: "Scheduled",
+      value: scheduledMessages.length,
+      icon: Calendar,
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-100 dark:bg-blue-900/20",
+    },
+    {
+      title: "Draft Messages",
+      value: draftMessages.length,
+      icon: Edit,
+      color: "text-gray-600 dark:text-gray-400",
+      bgColor: "bg-gray-100 dark:bg-gray-900/20",
+    },
+    {
+      title: "Total Recipients",
+      value: totalRecipients,
+      icon: Users,
+      color: "text-purple-600 dark:text-purple-400",
+      bgColor: "bg-purple-100 dark:bg-purple-900/20",
+    },
+  ];
 
   return (
     <div className="space-y-4">
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card>
-          <CardContent className="p-3">
-            <div className="flex items-center space-x-2">
-              <Send className="w-4 h-4 text-green-600" />
-              <span className="text-xs font-medium">Sent</span>
-            </div>
-            <div className="text-xl font-bold mt-1">{sentMessages.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-3">
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-medium">Scheduled</span>
-            </div>
-            <div className="text-xl font-bold mt-1">{scheduledMessages.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-3">
-            <div className="flex items-center space-x-2">
-              <Edit className="w-4 h-4 text-gray-600" />
-              <span className="text-xs font-medium">Drafts</span>
-            </div>
-            <div className="text-xl font-bold mt-1">{draftMessages.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-3">
-            <div className="flex items-center space-x-2">
-              <Users className="w-4 h-4 text-purple-600" />
-              <span className="text-xs font-medium">Recipients</span>
-            </div>
-            <div className="text-xl font-bold mt-1">
-              {sentMessages.reduce((sum, msg) => sum + msg.targetUsers.length, 0)}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statItems.map((item) => (
+          <Card key={item.title} className="transition-all hover:shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className={`p-2 rounded-lg ${item.bgColor}`}>
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
+                    {item.title}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {item.value.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Main Content */}
@@ -188,14 +198,14 @@ export function DiscordPushPage() {
             <MessageSquare className="w-4 h-4" />
             <span>Compose</span>
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center space-x-2 text-sm">
-            <Clock className="w-4 h-4" />
-            <span>History</span>
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center space-x-2 text-sm">
+          {/* <TabsTrigger value="analytics" className="flex items-center space-x-2 text-sm">
             <BarChart3 className="w-4 h-4" />
             <span>Analytics</span>
           </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center space-x-2 text-sm">
+            <Clock className="w-4 h-4" />
+            <span>History</span>
+          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="composer">

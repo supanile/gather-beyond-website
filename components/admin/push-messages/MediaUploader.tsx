@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { MediaUploaderProps } from "@/types/admin/discordPush";
 import { Upload, Link, ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
 
 export function MediaUploader({ 
   onImageUpload, 
@@ -152,11 +151,9 @@ export function MediaUploader({
         {currentUrl && (
           <div className="mt-3">
             <div className="relative">
-              <Image
+              <img
                 src={currentUrl}
                 alt={`${title} preview`}
-                width={type === "large" ? 300 : 64}
-                height={type === "large" ? 150 : 64}
                 className={`
                   rounded-md object-cover border
                   ${type === "large" ? "w-full h-32" : "w-16 h-16"}
@@ -194,21 +191,21 @@ export function MediaUploader({
         <ImageUploadCard
           type="large"
           title="Large Image"
-          description="Main banner image (recommended: 600x300px)"
+          description="Main banner image (recommended: px)"
           currentUrl={largeImageUrl}
         />
         
         <ImageUploadCard
           type="thumbnail"
           title="Thumbnail"
-          description="Small thumbnail image (recommended: 80x80px)"
+          description="Small thumbnail image (recommended:px)"
           currentUrl={thumbnailUrl}
         />
       </div>
 
       <div className="text-xs text-muted-foreground">
         <p>• Supported formats: JPG, PNG, GIF, WebP</p>
-        <p>• Maximum file size: 8MB</p>
+        <p>• Maximum file size: xMB</p>
         <p>• Images will be automatically resized if needed</p>
       </div>
     </div>
