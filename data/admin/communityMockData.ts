@@ -2,6 +2,7 @@ export interface Community {
   id: number;
   name: string;
   logo: string;
+  image_url?: string;
   description?: string;
   engagementLevel: number; // 0-100
   verifiedCampaigns: number;
@@ -66,32 +67,60 @@ export const communityTags = [
 export const allCommunities: Community[] = [
   {
     id: 1,
-    name: "DecentraDAO Community",
-    logo: "🏛️",
+    name: "Super Connector Community",
+    logo: "🤖",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
-      "Leading decentralized autonomous organization focused on community-driven governance and Web3 innovation.",
-    engagementLevel: 92,
-    verifiedCampaigns: 24,
-    sentimentTrend: "positive",
+      "AI-native community powering the Agent Economy through missions, memory, and autonomous coordination between agents and projects.",
+    engagementLevel: 88,
+    verifiedCampaigns: 21,
+    sentimentTrend: "positive" as const,
     agentReadiness: true,
     region: "Global",
     language: "English",
-    averageCampaignXP: 175,
-    tags: ["governance", "DeFi", "innovation"],
-    memberCount: 12500,
-    trustScore: 85,
-    mindshareScore: 72,
-    createdAt: "2023-01-15",
-    lastActive: "2 hours ago",
-    category: "DAO",
+    averageCampaignXP: 190,
+    tags: ["AI", "agent economy", "automation"],
+    memberCount: 6526, // Using holder count from API
+    trustScore: 67,
+    mindshareScore: 75,
+    createdAt: "2024-08-15",
+    lastActive: "1 hour ago",
+    category: "AI Agent",
     verified: true,
-    reviews: 4.3,
-    reviewCount: 127,
+    reviews: 4.1,
+    reviewCount: 89,
   },
+  // {
+  //   id: 1,
+  //   name: "DecentraDAO Community",
+  //   logo: "🏛️",
+  //   description:
+  //     "Leading decentralized autonomous organization focused on community-driven governance and Web3 innovation.",
+  //   engagementLevel: 92,
+  //   verifiedCampaigns: 24,
+  //   sentimentTrend: "positive",
+  //   agentReadiness: true,
+  //   region: "Global",
+  //   language: "English",
+  //   averageCampaignXP: 175,
+  //   tags: ["governance", "DeFi", "innovation"],
+  //   memberCount: 12500,
+  //   trustScore: 85,
+  //   mindshareScore: 72,
+  //   createdAt: "2023-01-15",
+  //   lastActive: "2 hours ago",
+  //   category: "DAO",
+  //   verified: true,
+  //   reviews: 4.3,
+  //   reviewCount: 127,
+  // },
   {
     id: 2,
     name: "CryptoGuild Alliance",
     logo: "⚔️",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
       "Premier gaming guild connecting Web3 gamers across multiple blockchain games and metaverses.",
     engagementLevel: 88,
@@ -116,6 +145,8 @@ export const allCommunities: Community[] = [
     id: 3,
     name: "Web3Social Collective",
     logo: "🌐",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
       "Vibrant social community building the future of decentralized communication and content creation.",
     engagementLevel: 95,
@@ -140,6 +171,8 @@ export const allCommunities: Community[] = [
     id: 4,
     name: "DeFi Masters Hub",
     logo: "💰",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
       "Advanced DeFi community for yield farming, liquidity provision, and protocol governance participation.",
     engagementLevel: 84,
@@ -164,6 +197,8 @@ export const allCommunities: Community[] = [
     id: 5,
     name: "NFT Creators Circle",
     logo: "🎨",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
       "Creative community supporting digital artists, collectors, and NFT marketplace innovation.",
     engagementLevel: 76,
@@ -188,6 +223,8 @@ export const allCommunities: Community[] = [
     id: 6,
     name: "MetaVerse Pioneers",
     logo: "🚀",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
       "Exploring virtual worlds and building the infrastructure for tomorrow's metaverse experiences.",
     engagementLevel: 69,
@@ -212,6 +249,8 @@ export const allCommunities: Community[] = [
     id: 7,
     name: "Blockchain Developers United",
     logo: "🔧",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
       "Technical community for blockchain developers, smart contract engineers, and protocol contributors.",
     engagementLevel: 91,
@@ -236,6 +275,8 @@ export const allCommunities: Community[] = [
     id: 8,
     name: "Crypto Trading Legion",
     logo: "📈",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
       "Professional trading community sharing strategies, market analysis, and risk management techniques.",
     engagementLevel: 82,
@@ -282,31 +323,61 @@ export const allCommunities: Community[] = [
   },
   {
     id: 10,
-    name: "AI Agent Network",
-    logo: "🤖",
+    name: "Staika Community",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/29063/large/STIK.png?1696528030",
+    logo: "💎",
     description:
-      "Cutting-edge community exploring AI integration in Web3, autonomous agents, and machine learning applications.",
-    engagementLevel: 45,
-    verifiedCampaigns: 3,
-    sentimentTrend: "neutral",
-    agentReadiness: false,
-    region: "North America",
+      "Staika platform community focused on governance, multi-service payments, and altcoin exchange. Building the future of comprehensive blockchain services and rewards systems.",
+    engagementLevel: 72,
+    verifiedCampaigns: 15,
+    sentimentTrend: "positive" as const,
+    agentReadiness: true,
+    region: "Asia Pacific", // Staika appears to be based in Asia
     language: "English",
-    averageCampaignXP: 80,
-    tags: ["innovation", "developer", "education"],
-    memberCount: 1800,
-    trustScore: 20,
-    mindshareScore: 28,
-    createdAt: "2024-01-10",
-    lastActive: "2 days ago",
-    category: "AI",
-    verified: false,
-    reviews: 2.8,
-    reviewCount: 45,
+    averageCampaignXP: 145,
+    tags: ["governance", "payments", "platform"],
+    memberCount: 27758, // Using holder count from API
+    trustScore: 38, // Using gt_score from API
+    mindshareScore: 65,
+    createdAt: "2022-10-15", // Established platform based on mature holder base
+    lastActive: "3 hours ago",
+    category: "Platform",
+    verified: true,
+    reviews: 3.8,
+    reviewCount: 156,
   },
+  // {
+  //   id: 10,
+  //   name: "AI Agent Network",
+  //   image_url:
+  //     "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
+  //   logo: "🤖",
+  //   description:
+  //     "Cutting-edge community exploring AI integration in Web3, autonomous agents, and machine learning applications.",
+  //   engagementLevel: 45,
+  //   verifiedCampaigns: 3,
+  //   sentimentTrend: "neutral",
+  //   agentReadiness: false,
+  //   region: "North America",
+  //   language: "English",
+  //   averageCampaignXP: 80,
+  //   tags: ["innovation", "developer", "education"],
+  //   memberCount: 1800,
+  //   trustScore: 20,
+  //   mindshareScore: 28,
+  //   createdAt: "2024-01-10",
+  //   lastActive: "2 days ago",
+  //   category: "AI",
+  //   verified: false,
+  //   reviews: 2.8,
+  //   reviewCount: 45,
+  // },
   {
     id: 11,
     name: "Music NFT Collective",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     logo: "🎵",
     description:
       "Community of musicians, producers, and fans revolutionizing the music industry through blockchain technology.",
@@ -332,6 +403,8 @@ export const allCommunities: Community[] = [
     id: 12,
     name: "Sports DAO Arena",
     logo: "⚽",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
       "Sports enthusiasts building fan engagement platforms and athlete tokenization systems.",
     engagementLevel: 65,

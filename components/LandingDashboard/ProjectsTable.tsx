@@ -15,7 +15,9 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [sortBy, setSortBy] = useState<"name" | "trustScore" | "mindshareScore" | "reviews">("trustScore");
+  const [sortBy, setSortBy] = useState<
+    "name" | "trustScore" | "mindshareScore" | "reviews"
+  >("trustScore");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const categories: string[] = [
@@ -64,10 +66,13 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
     window.location.href = `/project-profile?id=${project.id}`;
   };
 
-  const renderStars = (trustScore: number, mindshareScore: number): React.ReactElement[] => {
+  const renderStars = (
+    trustScore: number,
+    mindshareScore: number
+  ): React.ReactElement[] => {
     // Calculate rating from trust and mindshare scores (0-5 scale)
     const rating = Math.min(5, (trustScore + mindshareScore) / 40);
-    
+
     return [...Array(5)].map((_, i: number) => (
       <Star
         key={i}
@@ -82,7 +87,10 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
     ));
   };
 
-  const getScoreColor = (score: number, type: "trust" | "mindshare"): string => {
+  const getScoreColor = (
+    score: number,
+    type: "trust" | "mindshare"
+  ): string => {
     if (type === "trust") {
       return score >= 80
         ? "from-green-500 to-green-600"
@@ -94,7 +102,10 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
     }
   };
 
-  const getScoreTextColor = (score: number, type: "trust" | "mindshare"): string => {
+  const getScoreTextColor = (
+    score: number,
+    type: "trust" | "mindshare"
+  ): string => {
     if (type === "trust") {
       return score >= 80
         ? "text-green-600 dark:text-green-400"
@@ -105,7 +116,10 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
     return "text-blue-600 dark:text-blue-400";
   };
 
-  const getReviewCount = (trustScore: number, mindshareScore: number): number => {
+  const getReviewCount = (
+    trustScore: number,
+    mindshareScore: number
+  ): number => {
     // Generate review count based on scores (higher scores = more reviews)
     const baseCount = Math.floor((trustScore + mindshareScore) / 2);
     return Math.max(10, baseCount + Math.floor(Math.random() * 100));
@@ -129,7 +143,9 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                     type="text"
                     placeholder="Search projects..."
                     value={searchTerm}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setSearchTerm(e.target.value)
+                    }
                     className="w-full pl-10 pr-4 py-3 bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-gray-500/50 dark:focus:ring-slate-400/50 focus:border-gray-500/50 dark:focus:border-slate-400/50 transition-all duration-200"
                   />
                 </div>
@@ -140,7 +156,9 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                   <div className="relative">
                     <select
                       value={selectedCategory}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedCategory(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setSelectedCategory(e.target.value)
+                      }
                       className="appearance-none bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl px-4 py-3 pr-8 text-foreground focus:outline-none focus:ring-2 focus:ring-gray-500/50 dark:focus:ring-slate-400/50 focus:border-gray-500/50 dark:focus:border-slate-400/50 transition-all duration-200"
                     >
                       {categories.map((category: string) => (
@@ -242,9 +260,12 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
               </thead>
               <tbody className="divide-y divide-border/50">
                 {filteredAndSortedProjects.map((project: Project) => {
-                  const reviewCount = getReviewCount(project.trustScore, project.mindshareScore);
+                  const reviewCount = getReviewCount(
+                    project.trustScore,
+                    project.mindshareScore
+                  );
                   // const reviewScore = Math.min(5, (project.trustScore + project.mindshareScore) / 40);
-                  
+
                   return (
                     <tr
                       key={project.id}
@@ -253,11 +274,26 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-3">
-                          {project.logo && (
-                            <div className="w-10 h-10 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg flex items-center justify-center text-lg">
-                              {project.logo}
-                            </div>
-                          )}
+                          <div className="w-10 h-10 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg flex items-center justify-center text-lg overflow-hidden">
+                            {project.image_url ? (
+                              <img
+                                src={project.image_url}
+                                alt={project.name}
+                                className="w-full h-full object-cover rounded-lg"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = "none";
+                                  target.parentElement!.innerHTML = `<span class="text-lg">${
+                                    project.logo || "🔗"
+                                  }</span>`;
+                                }}
+                              />
+                            ) : (
+                              <span className="text-lg">
+                                {project.logo || "🔗"}
+                              </span>
+                            )}
+                          </div>
                           <div>
                             <div className="font-medium text-foreground group-hover:text-gray-800 dark:group-hover:text-slate-200 transition-colors duration-200">
                               {project.name}
@@ -318,7 +354,10 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <div className="flex">
-                            {renderStars(project.trustScore, project.mindshareScore)}
+                            {renderStars(
+                              project.trustScore,
+                              project.mindshareScore
+                            )}
                           </div>
                           <span className="text-sm text-muted-foreground">
                             ({reviewCount})

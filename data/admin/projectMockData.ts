@@ -1,7 +1,8 @@
 export interface Project {
   id: number;
   name: string;
-  logo: string;
+  logo?: string; // Made optional for Super Connector
+  image_url?: string; // Added for Super Connector
   description?: string;
   trustScore: number;
   mindshareScore: number;
@@ -17,43 +18,83 @@ export interface Project {
 
 // ข้อมูลโปรเจค 10 อันหลักจาก FeaturedProjects
 export const allProjects: Project[] = [
+  // {
+  //   id: 1,
+  //   name: "DecentraDAO",
+  //   logo: "🏛️",
+  //   description: "A decentralized autonomous organization focused on community-driven governance and blockchain gaming infrastructure.",
+  //   trustScore: 85,
+  //   mindshareScore: 72,
+  //   category: "DAO",
+  //   chain: "Ethereum",
+  //   narrative: "Gaming DeFi",
+  //   badges: ["Verified", "Audited", "Gold Tier"],
+  //   tags: ["Gaming", "DePIN", "Governance", "Community"],
+  //   verified: true,
+  //   reviews: 4.3,
+  //   reviewCount: 127,
+  // },
   {
     id: 1,
-    name: "DecentraDAO",
-    logo: "🏛️",
-    description: "A decentralized autonomous organization focused on community-driven governance and blockchain gaming infrastructure.",
-    trustScore: 85,
-    mindshareScore: 72,
-    category: "DAO",
-    chain: "Ethereum",
-    narrative: "Gaming DeFi",
-    badges: ["Verified", "Audited", "Gold Tier"],
-    tags: ["Gaming", "DePIN", "Governance", "Community"],
+    name: "Super Connector",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
+    description:
+      "Super Connector is the AI-native trust layer powering the Agent Economy. Built as an Agent-as-a-Service (AaaS), it coordinates growth between communities and projects using missions, memory, and behavior—not ads. $SUPER fuels this autonomous engine, enabling mission-based distribution, campaign matching, and trust scoring across networks. Plug in, activate, and let the agent work autopilot. It’s coordination, upgraded.\r\n",
+    trustScore: 67, // Using gt_score from API
+    mindshareScore: 75,
+    category: "Virtuals Protocol",
+    chain: "Base",
+    narrative: "Agent Economy",
+    badges: ["Verified", "AI-Native", "Base Network"],
+    tags: ["AI", "Agent Economy", "Trust Layer", "AaaS", "Automation"],
     verified: true,
-    reviews: 4.3,
-    reviewCount: 127,
+    reviews: 4.1,
+    reviewCount: 89,
   },
   {
     id: 2,
-    name: "AiAgent Protocol",
-    logo: "🤖",
-    description: "Advanced AI agent infrastructure for decentralized autonomous systems and community governance.",
-    trustScore: 20,
-    mindshareScore: 28,
-    category: "AI",
-    chain: "Polygon",
-    narrative: "AI Infrastructure",
-    badges: ["New"],
-    tags: ["AI", "Infrastructure", "Automation"],
-    verified: false,
-    reviews: 2.8,
-    reviewCount: 45,
+    name: "Staika",
+    image_url:
+      "https://coin-images.coingecko.com/coins/images/29063/large/STIK.png?1696528030",
+    description:
+      "The Staika token is the governance token of the Staika project and the ticker is marked as STIK.\r\nSTIK can be obtained by purchasing from a designated exchange or by swapping from a DEX(decentralized exchange) or Staika Wallet.\r\nThe use cases of the Staika are as follows:\r\n- Means to receive benefits and rewards within the Staika platform\r\n- Payment methods avaiable within the various services provided by the Staika platform\r\n- Exchange (swap) means for other altcoins\r\n- Payment and exchange methods(swap) for Staika-based Altcoin",
+    trustScore: Math.round(37.61467889908257), // 38 - Using gt_score from API
+    mindshareScore: 65, // Derived from holder count and platform features
+    category: "Platform", // Based on multi-use platform description
+    chain: "Solana", // From the API ID solana_8BMz...
+    narrative: "Platform Governance",
+    badges: ["Governance Token", "Multi-Service"],
+    tags: ["Governance", "Payments", "Platform", "DeFi", "Exchange"],
+    verified: true, // Platform has good holder distribution
+    reviews: 3.8, // Moderate score based on gt_score
+    reviewCount: 156,
   },
+  // {
+  //   id: 2,
+  //   name: "AiAgent Protocol",
+  //   logo: "🤖",
+  //   image_url:
+  //     "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
+  //   description:
+  //     "Advanced AI agent infrastructure for decentralized autonomous systems and community governance.",
+  //   trustScore: 20,
+  //   mindshareScore: 28,
+  //   category: "AI",
+  //   chain: "Polygon",
+  //   narrative: "AI Infrastructure",
+  //   badges: ["New"],
+  //   tags: ["AI", "Infrastructure", "Automation"],
+  //   verified: false,
+  //   reviews: 2.8,
+  //   reviewCount: 45,
+  // },
   {
     id: 3,
     name: "CryptoGuild",
     logo: "⚔️",
-    description: "Gaming-focused blockchain guild providing players with tools and community for Web3 gaming.",
+    description:
+      "Gaming-focused blockchain guild providing players with tools and community for Web3 gaming.",
     trustScore: 78,
     mindshareScore: 65,
     category: "Gaming",
@@ -69,7 +110,8 @@ export const allProjects: Project[] = [
     id: 4,
     name: "Web3Social",
     logo: "🌐",
-    description: "Decentralized social networking platform built on blockchain technology for authentic community engagement.",
+    description:
+      "Decentralized social networking platform built on blockchain technology for authentic community engagement.",
     trustScore: 92,
     mindshareScore: 88,
     category: "Social",
@@ -85,7 +127,8 @@ export const allProjects: Project[] = [
     id: 5,
     name: "MetaVerse Hub",
     logo: "🚀",
-    description: "Virtual world platform connecting multiple metaverse experiences through unified identity and assets.",
+    description:
+      "Virtual world platform connecting multiple metaverse experiences through unified identity and assets.",
     trustScore: 67,
     mindshareScore: 54,
     category: "Metaverse",
@@ -101,7 +144,8 @@ export const allProjects: Project[] = [
     id: 6,
     name: "BlockChain Games",
     logo: "🎮",
-    description: "Next-generation blockchain gaming platform with play-to-earn mechanics and NFT integration.",
+    description:
+      "Next-generation blockchain gaming platform with play-to-earn mechanics and NFT integration.",
     trustScore: 73,
     mindshareScore: 61,
     category: "Gaming",
@@ -117,7 +161,8 @@ export const allProjects: Project[] = [
     id: 7,
     name: "DeFi Protocol",
     logo: "💰",
-    description: "Innovative decentralized finance protocol offering advanced yield farming and liquidity solutions.",
+    description:
+      "Innovative decentralized finance protocol offering advanced yield farming and liquidity solutions.",
     trustScore: 88,
     mindshareScore: 79,
     category: "DeFi",
@@ -133,7 +178,8 @@ export const allProjects: Project[] = [
     id: 8,
     name: "NFT Marketplace",
     logo: "🎨",
-    description: "Premier NFT marketplace for digital art and collectibles with creator-focused features.",
+    description:
+      "Premier NFT marketplace for digital art and collectibles with creator-focused features.",
     trustScore: 81,
     mindshareScore: 68,
     category: "NFT",
@@ -149,7 +195,8 @@ export const allProjects: Project[] = [
     id: 9,
     name: "Smart Contracts",
     logo: "📋",
-    description: "Enterprise-grade smart contract platform with advanced security features and audit tools.",
+    description:
+      "Enterprise-grade smart contract platform with advanced security features and audit tools.",
     trustScore: 95,
     mindshareScore: 85,
     category: "Infrastructure",
@@ -165,7 +212,8 @@ export const allProjects: Project[] = [
     id: 10,
     name: "Crypto Wallet",
     logo: "💳",
-    description: "Secure multi-chain wallet with advanced DeFi integration and community governance features.",
+    description:
+      "Secure multi-chain wallet with advanced DeFi integration and community governance features.",
     trustScore: 90,
     mindshareScore: 82,
     category: "Wallet",
@@ -181,14 +229,16 @@ export const allProjects: Project[] = [
 
 // ข้อมูลสำหรับ ProjectProfilePage (DecentraDAO - id: 1)
 export const getProjectDetails = (projectId: number) => {
-  const project = allProjects.find(p => p.id === projectId);
+  const project = allProjects.find((p) => p.id === projectId);
   if (!project) return null;
 
   return {
     ...project,
     // Overview data
     overview: {
-      about: project.description || `${project.name} is a leading ${project.category} project in the Web3 space.`,
+      about:
+        project.description ||
+        `${project.name} is a leading ${project.category} project in the Web3 space.`,
       verifiedWallets: [
         {
           address: "0x742d35Cc6634C0532925a3b8D322C3b1e0c39e9f",
@@ -207,15 +257,35 @@ export const getProjectDetails = (projectId: number) => {
         },
       ],
       audits: [
-        { company: "CertiK", date: "2024-01-15", status: "Passed", score: Math.min(95, project.trustScore + 10) },
-        { company: "ConsenSys", date: "2023-11-20", status: project.trustScore > 70 ? "Passed" : "Failed", score: project.trustScore },
+        {
+          company: "CertiK",
+          date: "2024-01-15",
+          status: "Passed",
+          score: Math.min(95, project.trustScore + 10),
+        },
+        {
+          company: "ConsenSys",
+          date: "2023-11-20",
+          status: project.trustScore > 70 ? "Passed" : "Failed",
+          score: project.trustScore,
+        },
       ],
       communityLinks: {
-        discord: `https://discord.gg/${project.name.toLowerCase().replace(/\s+/g, '')}`,
-        telegram: `https://t.me/${project.name.toLowerCase().replace(/\s+/g, '')}`,
-        twitter: `https://twitter.com/${project.name.toLowerCase().replace(/\s+/g, '')}`,
-        github: `https://github.com/${project.name.toLowerCase().replace(/\s+/g, '')}`,
-        website: `https://${project.name.toLowerCase().replace(/\s+/g, '')}.org`,
+        discord: `https://discord.gg/${project.name
+          .toLowerCase()
+          .replace(/\s+/g, "")}`,
+        telegram: `https://t.me/${project.name
+          .toLowerCase()
+          .replace(/\s+/g, "")}`,
+        twitter: `https://twitter.com/${project.name
+          .toLowerCase()
+          .replace(/\s+/g, "")}`,
+        github: `https://github.com/${project.name
+          .toLowerCase()
+          .replace(/\s+/g, "")}`,
+        website: `https://${project.name
+          .toLowerCase()
+          .replace(/\s+/g, "")}.org`,
       },
     },
 
@@ -231,9 +301,15 @@ export const getProjectDetails = (projectId: number) => {
         { date: "2024-01-08", value: Math.max(0, project.mindshareScore - 4) },
         { date: "2024-01-15", value: Math.max(0, project.mindshareScore - 2) },
         { date: "2024-01-22", value: project.mindshareScore },
-        { date: "2024-01-29", value: Math.min(100, project.mindshareScore + 2) },
+        {
+          date: "2024-01-29",
+          value: Math.min(100, project.mindshareScore + 2),
+        },
         { date: "2024-02-05", value: project.mindshareScore },
-        { date: "2024-02-12", value: Math.min(100, project.mindshareScore + 3) },
+        {
+          date: "2024-02-12",
+          value: Math.min(100, project.mindshareScore + 3),
+        },
       ],
       sentiment: {
         positive: Math.max(40, Math.min(80, project.trustScore - 20)),
@@ -289,9 +365,9 @@ export const getProjectDetails = (projectId: number) => {
       totalReviews: project.reviewCount || 100,
       breakdown: {
         5: Math.floor((project.reviewCount || 100) * 0.35),
-        4: Math.floor((project.reviewCount || 100) * 0.30),
-        3: Math.floor((project.reviewCount || 100) * 0.20),
-        2: Math.floor((project.reviewCount || 100) * 0.10),
+        4: Math.floor((project.reviewCount || 100) * 0.3),
+        3: Math.floor((project.reviewCount || 100) * 0.2),
+        2: Math.floor((project.reviewCount || 100) * 0.1),
         1: Math.floor((project.reviewCount || 100) * 0.05),
       },
       recent: [
@@ -316,9 +392,10 @@ export const getProjectDetails = (projectId: number) => {
         {
           id: 3,
           rating: project.trustScore > 70 ? 5 : 3,
-          comment: project.trustScore > 70 
-            ? `Best ${project.category} platform I've used. The rewards system is fair and the community is helpful.`
-            : `Decent ${project.category} project but needs improvement in trust and community building.`,
+          comment:
+            project.trustScore > 70
+              ? `Best ${project.category} platform I've used. The rewards system is fair and the community is helpful.`
+              : `Decent ${project.category} project but needs improvement in trust and community building.`,
           author: "TokenHolder",
           type: "Anonymous",
           date: "1 week ago",
@@ -330,9 +407,12 @@ export const getProjectDetails = (projectId: number) => {
 };
 
 // Related projects (สุ่มเลือก 3 โปรเจคที่ไม่ใช่โปรเจคหลัก)
-export const getRelatedProjects = (currentProjectId: number, limit: number = 3): Project[] => {
+export const getRelatedProjects = (
+  currentProjectId: number,
+  limit: number = 3
+): Project[] => {
   return allProjects
-    .filter(p => p.id !== currentProjectId)
+    .filter((p) => p.id !== currentProjectId)
     .sort(() => Math.random() - 0.5)
     .slice(0, limit);
 };
@@ -352,7 +432,11 @@ export const liveInsightsData = {
     { name: "Low Activity DAO", risk: "Low" as const },
   ],
   recentlyVerified: [
-    { name: "Smart Contracts", verifiedDate: "2 hours ago", category: "Infrastructure" },
+    {
+      name: "Smart Contracts",
+      verifiedDate: "2 hours ago",
+      category: "Infrastructure",
+    },
     { name: "Web3Social", verifiedDate: "5 hours ago", category: "Social" },
     { name: "DeFi Protocol", verifiedDate: "1 day ago", category: "DeFi" },
     { name: "CryptoGuild", verifiedDate: "2 days ago", category: "Gaming" },
@@ -364,7 +448,8 @@ export const mediaFeedArticles = [
   {
     id: 1,
     title: "The Rise of AI Agents in Web3 Communities",
-    subtitle: "How artificial intelligence is transforming decentralized communities and creating new trust paradigms",
+    subtitle:
+      "How artificial intelligence is transforming decentralized communities and creating new trust paradigms",
     category: "Technology",
     readTime: "5 min read",
     author: "Sarah Chen",
@@ -375,7 +460,8 @@ export const mediaFeedArticles = [
   {
     id: 2,
     title: "Trust Metrics That Matter: New Verification Standards",
-    subtitle: "Understanding the evolving paradigms of community verification and reputation systems",
+    subtitle:
+      "Understanding the evolving paradigms of community verification and reputation systems",
     category: "Research",
     readTime: "8 min read",
     author: "Michael Rodriguez",
@@ -385,7 +471,8 @@ export const mediaFeedArticles = [
   {
     id: 3,
     title: "Badge Announcement: Smart Contracts Achieves Platinum Trust Rating",
-    subtitle: "Enterprise blockchain platform reaches highest verification level with perfect security score",
+    subtitle:
+      "Enterprise blockchain platform reaches highest verification level with perfect security score",
     category: "Badge",
     readTime: "3 min read",
     publishedAt: "8 hours ago",
@@ -394,7 +481,8 @@ export const mediaFeedArticles = [
   {
     id: 4,
     title: "Security Audit: Web3Social Protocol Review Complete",
-    subtitle: "Comprehensive audit reveals exceptional security practices and community governance standards",
+    subtitle:
+      "Comprehensive audit reveals exceptional security practices and community governance standards",
     category: "Audit",
     readTime: "6 min read",
     author: "Security Team",
@@ -404,7 +492,8 @@ export const mediaFeedArticles = [
   {
     id: 5,
     title: "Protocol News: New Trust Layer Integration",
-    subtitle: "Latest updates on cross-chain community verification and reputation scoring",
+    subtitle:
+      "Latest updates on cross-chain community verification and reputation scoring",
     category: "Protocol",
     readTime: "4 min read",
     publishedAt: "1 day ago",
@@ -413,7 +502,8 @@ export const mediaFeedArticles = [
   {
     id: 6,
     title: "DeFi Protocol Success: Revolutionary Yield Farming Results",
-    subtitle: "Analyzing breakthrough yield farming strategies and their impact on community trust building",
+    subtitle:
+      "Analyzing breakthrough yield farming strategies and their impact on community trust building",
     category: "Case Study",
     readTime: "7 min read",
     author: "Emma Thompson",
@@ -424,20 +514,21 @@ export const mediaFeedArticles = [
 
 // Helper functions
 export const getProjectById = (id: number): Project | undefined => {
-  return allProjects.find(p => p.id === id);
+  return allProjects.find((p) => p.id === id);
 };
 
 export const getProjectsByCategory = (category: string): Project[] => {
   if (category === "All") return allProjects;
-  return allProjects.filter(p => p.category === category);
+  return allProjects.filter((p) => p.category === category);
 };
 
 export const searchProjects = (searchTerm: string): Project[] => {
   const term = searchTerm.toLowerCase();
-  return allProjects.filter(p => 
-    p.name.toLowerCase().includes(term) ||
-    p.category.toLowerCase().includes(term) ||
-    p.tags.some(tag => tag.toLowerCase().includes(term))
+  return allProjects.filter(
+    (p) =>
+      p.name.toLowerCase().includes(term) ||
+      p.category.toLowerCase().includes(term) ||
+      p.tags.some((tag) => tag.toLowerCase().includes(term))
   );
 };
 
@@ -445,7 +536,7 @@ export const searchProjects = (searchTerm: string): Project[] => {
 export const featuredProjects = allProjects;
 
 // สำหรับ ProjectsTable - แปลงข้อมูลให้ตรงกับ interface
-export const projectsTableData = allProjects.map(project => ({
+export const projectsTableData = allProjects.map((project) => ({
   id: project.id,
   name: project.name,
   category: project.category,

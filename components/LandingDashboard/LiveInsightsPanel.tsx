@@ -29,15 +29,20 @@ interface LiveInsightsPanelProps {
 
 // Generate dynamic data from projects
 const generateTopGainers = (): GainerItem[] => {
-  return projects
-    .filter((p: Project) => p.mindshareScore >= 70)
+  // Ensure Super Connector is first in top gainers
+  const superConnector = projects.find((p: Project) => p.id === 1);
+  const otherProjects = projects
+    .filter((p: Project) => p.id !== 1 && p.mindshareScore >= 70)
     .sort((a: Project, b: Project) => b.mindshareScore - a.mindshareScore)
-    .slice(0, 4)
-    .map((project: Project) => ({
-      name: project.name,
-      gain: `+${Math.floor(Math.random() * 20 + 25)}%`,
-      project
-    }));
+    .slice(0, 3);
+  
+  const topProjects = superConnector ? [superConnector, ...otherProjects] : otherProjects.slice(0, 4);
+  
+  return topProjects.map((project: Project) => ({
+    name: project.name,
+    gain: project.id === 1 ? "+45%" : `+${Math.floor(Math.random() * 20 + 25)}%`,
+    project
+  }));
 };
 
 const generateRiskWatchlist = (): RiskItem[] => {
@@ -137,7 +142,27 @@ const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
                   className="flex justify-between items-center p-3 rounded-xl bg-accent/30 hover:bg-accent/50 transition-all duration-200 cursor-pointer transform hover:scale-105"
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="text-lg">{item.project.logo}</span>
+                    <div className="w-8 h-8 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg flex items-center justify-center text-lg flex-shrink-0 overflow-hidden">
+                      {item.project.image_url ? (
+                        <img
+                          src={item.project.image_url}
+                          alt={`${item.name} logo`}
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = "none";
+                            const sibling = target.nextElementSibling as HTMLElement;
+                            if (sibling) sibling.style.display = "block";
+                          }}
+                        />
+                      ) : null}
+                      <span 
+                        className="text-lg"
+                        style={{ display: item.project.image_url ? "none" : "block" }}
+                      >
+                        {item.project.logo}
+                      </span>
+                    </div>
                     <span className="font-medium text-foreground text-sm sm:text-base">
                       {item.name}
                     </span>
@@ -167,7 +192,27 @@ const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
                   className="flex justify-between items-center p-3 rounded-xl bg-accent/30 hover:bg-accent/50 transition-all duration-200 cursor-pointer transform hover:scale-105"
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="text-lg">{item.project.logo}</span>
+                    <div className="w-8 h-8 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg flex items-center justify-center text-lg flex-shrink-0 overflow-hidden">
+                      {item.project.image_url ? (
+                        <img
+                          src={item.project.image_url}
+                          alt={`${item.name} logo`}
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = "none";
+                            const sibling = target.nextElementSibling as HTMLElement;
+                            if (sibling) sibling.style.display = "block";
+                          }}
+                        />
+                      ) : null}
+                      <span 
+                        className="text-lg"
+                        style={{ display: item.project.image_url ? "none" : "block" }}
+                      >
+                        {item.project.logo}
+                      </span>
+                    </div>
                     <span className="font-medium text-foreground text-sm sm:text-base">
                       {item.name}
                     </span>
@@ -202,7 +247,27 @@ const LiveInsightsPanel: React.FC<LiveInsightsPanelProps> = ({
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center space-x-3">
-                      <span className="text-lg">{item.project.logo}</span>
+                      <div className="w-8 h-8 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg flex items-center justify-center text-lg flex-shrink-0 overflow-hidden">
+                        {item.project.image_url ? (
+                          <img
+                            src={item.project.image_url}
+                            alt={`${item.name} logo`}
+                            className="w-full h-full object-cover rounded-lg"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                              const sibling = target.nextElementSibling as HTMLElement;
+                              if (sibling) sibling.style.display = "block";
+                            }}
+                          />
+                        ) : null}
+                        <span 
+                          className="text-lg"
+                          style={{ display: item.project.image_url ? "none" : "block" }}
+                        >
+                          {item.project.logo}
+                        </span>
+                      </div>
                       <span className="font-medium text-foreground text-sm sm:text-base">
                         {item.name}
                       </span>

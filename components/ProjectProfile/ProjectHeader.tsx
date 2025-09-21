@@ -16,6 +16,12 @@ interface Project {
   narrative: string;
   badges: string[];
   tags: string[];
+  // Add tokenData for image URL support
+  tokenData?: {
+    imageUrl?: string;
+    address?: string;
+    [key: string]: any;
+  };
 }
 
 interface ProjectHeaderProps {
@@ -25,7 +31,8 @@ interface ProjectHeaderProps {
 const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
   const [copiedAddress, setCopiedAddress] = React.useState(false);
 
-  const projectAddress = "0x742d35Cc6634C0532925a3b8D322C3b1e0c39e9f";
+  // Use token contract address if available, otherwise fallback
+  const projectAddress = project.tokenData?.address || "0x742d35Cc6634C0532925a3b8D322C3b1e0c39e9f";
 
   const handleCopyAddress = async () => {
     try {
@@ -72,6 +79,10 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
         "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
       Featured:
         "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+      "AI-Native":
+        "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400",
+      "Base Network":
+        "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
     };
     return (
       colors[badge] ||
@@ -87,8 +98,34 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
           <div className="lg:col-span-2 space-y-6">
             {/* Project Title & Logo */}
             <div className="flex items-start space-x-4">
-              <div className="w-20 h-20 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0">
-                {project.logo}
+              {/* Logo - Prioritize image_url over logo */}
+              <div className="w-20 h-20 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0">
+                {project.tokenData?.imageUrl ? (
+                  <img
+                    src={project.tokenData.imageUrl}
+                    alt={`${project.name} logo`}
+                    className="w-full h-full object-cover rounded-2xl"
+                    onError={(e) => {
+                      // Fallback to default icon if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallbackElement = target.nextElementSibling as HTMLElement;
+                      if (fallbackElement) {
+                        fallbackElement.textContent = project.logo || "🔗";
+                        fallbackElement.style.display = 'block';
+                      }
+                    }}
+                  />
+                ) : (
+                  <span className="text-4xl">{project.logo || "🔗"}</span>
+                )}
+                {/* Hidden fallback emoji */}
+                <span 
+                  className="text-4xl" 
+                  style={{ display: 'none' }}
+                >
+                  {project.logo || "🔗"}
+                </span>
               </div>
               <div className="flex-1 min-w-0 space-y-2">
                 <div className="flex items-center space-x-3 flex-wrap">

@@ -105,8 +105,25 @@ export const FeaturedProjects: React.FC<FeaturedProjectsProps> = ({
 
                           <div className="relative space-y-3 sm:space-y-4">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
-                                {project.logo}
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-800 dark:to-slate-800 rounded-lg sm:rounded-xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0 overflow-hidden">
+                                {project.image_url ? (
+                                  <img
+                                    src={project.image_url}
+                                    alt={`${project.name} logo`}
+                                    className="w-full h-full object-cover rounded-lg sm:rounded-xl"
+                                    onError={(e) => {
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      target.style.display = "none";
+                                      target.nextElementSibling!.style.display =
+                                        "block";
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="text-xl sm:text-2xl">
+                                    {project.logo || "🔗"}
+                                  </span>
+                                )}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-gray-100 truncate">
