@@ -40,7 +40,7 @@ export const allProjects: Project[] = [
     image_url:
       "https://coin-images.coingecko.com/coins/images/55873/large/23678_Super_Connector_5ba88a91b1.png?1747554890",
     description:
-      "Super Connector is the AI-native trust layer powering the Agent Economy. Built as an Agent-as-a-Service (AaaS), it coordinates growth between communities and projects using missions, memory, and behavior—not ads. $SUPER fuels this autonomous engine, enabling mission-based distribution, campaign matching, and trust scoring across networks. Plug in, activate, and let the agent work autopilot. It’s coordination, upgraded.\r\n",
+      "Super Connector is the AI-native trust layer powering the Agent Economy. Built as an Agent-as-a-Service (AaaS), it coordinates growth between communities and projects using missions, memory, and behavior—not ads. $SUPER fuels this autonomous engine, enabling mission-based distribution, campaign matching, and trust scoring across networks. Plug in, activate, and let the agent work autopilot. It’s coordination, upgraded.",
     trustScore: 67, // Using gt_score from API
     mindshareScore: 75,
     category: "Virtuals Protocol",
@@ -58,7 +58,7 @@ export const allProjects: Project[] = [
     image_url:
       "https://coin-images.coingecko.com/coins/images/29063/large/STIK.png?1696528030",
     description:
-      "The Staika token is the governance token of the Staika project and the ticker is marked as STIK.\r\nSTIK can be obtained by purchasing from a designated exchange or by swapping from a DEX(decentralized exchange) or Staika Wallet.\r\nThe use cases of the Staika are as follows:\r\n- Means to receive benefits and rewards within the Staika platform\r\n- Payment methods avaiable within the various services provided by the Staika platform\r\n- Exchange (swap) means for other altcoins\r\n- Payment and exchange methods(swap) for Staika-based Altcoin",
+      "The Staika token is the governance token of the Staika project and the ticker is marked as STIK. STIK can be obtained by purchasing from a designated exchange or by swapping from a DEX(decentralized exchange) or Staika Wallet. The use cases of the Staika are as follows: - Means to receive benefits and rewards within the Staika platform - Payment methods avaiable within the various services provided by the Staika platform - Exchange (swap) means for other altcoins - Payment and exchange methods(swap) for Staika-based Altcoin",
     trustScore: Math.round(37.61467889908257), // 38 - Using gt_score from API
     mindshareScore: 65, // Derived from holder count and platform features
     category: "Platform", // Based on multi-use platform description
