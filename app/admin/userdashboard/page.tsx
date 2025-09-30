@@ -10,7 +10,6 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Send,
-  ShieldUser,
   ArrowUp,
   ArrowDown,
   Filter,
@@ -18,6 +17,8 @@ import {
   Zap,
   UserCog,
   Server,
+  ShieldUser,
+  Activity,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
@@ -81,6 +82,15 @@ const DashboardPage = () => {
     isLoading: isLoadingData,
     error: dataError,
   } = useAdminData();
+
+  // Calculate active users within the last 7 days
+  const getActiveUsersLast7Days = () => {
+    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
+    return users.filter(user => {
+      const lastActive = user.agent?.last_active;
+      return lastActive && lastActive > sevenDaysAgo;
+    }).length;
+  };
 
   // Sort options - added last_active options
   const sortOptions: SortOption[] = [
@@ -465,14 +475,14 @@ const DashboardPage = () => {
             ) : (
               <>
                 <AdminStatCard
-                  title="Total Users"
-                  value={stats?.totalcommunity?.toLocaleString() ?? "0"}
-                  icon={Users}
-                />
-                <AdminStatCard
-                  title="SUPER Users"
+                  title="Total SC Users"
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
+                />
+                <AdminStatCard
+                  title="Active Users (7d)"
+                  value={getActiveUsersLast7Days().toLocaleString()}
+                  icon={Activity}
                 />
                 <AdminStatCard
                   title="Total Servers"

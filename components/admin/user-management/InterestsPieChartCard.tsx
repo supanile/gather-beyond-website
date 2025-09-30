@@ -65,6 +65,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
   // Process interests data
   const processInterestsData = () => {
     const interestCounts: Record<string, number> = {};
+    let totalInterests = 0;
 
     users.forEach((user) => {
       if (user.interests && user.interests.trim()) {
@@ -77,28 +78,22 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
 
         userInterests.forEach((interest) => {
           interestCounts[interest] = (interestCounts[interest] || 0) + 1;
+          totalInterests += 1;
         });
       }
     });
 
-    // Convert to array format for recharts
-    let data = Object.entries(interestCounts)
-      .map(([name, value], index) => ({
-        name,
-        value,
-        percentage: ((value / users.length) * 100).toFixed(1),
-        color: COLORS[index % COLORS.length], // Add color property
-      }))
-      .sort((a, b) => b.value - a.value);
-
-    // Reassign colors after sorting to maintain consistent color mapping
-    data = data.map((item, index) => ({
-      ...item,
-      color: COLORS[index % COLORS.length],
+    // Convert to array format for recharts (don't sort yet)
+    const data = Object.entries(interestCounts).map(([name, value], index) => ({
+      name,
+      value,
+      percentage: totalInterests > 0 ? (value / totalInterests) * 100 : 0,
+      color: COLORS[index % COLORS.length], // Add color property
+      otherItems: [] as string[], // Track what's included in Others
     }));
 
-    // Group small interests into "Others" if they are less than 2% of total users
-    const threshold = users.length * 0.02; // 2% threshold
+    // Group small interests into "Others" if they are less than 2% of total interests
+    const threshold = totalInterests * 0.02; // 2% threshold
     const mainInterests = data.filter((item) => item.value >= threshold);
     const otherInterests = data.filter((item) => item.value < threshold);
 
@@ -111,14 +106,29 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
         mainInterests.push({
           name: "Others",
           value: othersSum,
-          percentage: ((othersSum / users.length) * 100).toFixed(1),
+          percentage:
+            totalInterests > 0
+              ? (othersSum / totalInterests) * 100
+              : 0,
           color: COLORS[mainInterests.length % COLORS.length],
+          otherItems: otherInterests.map(
+            (item) => `${item.name} (${item.value})`
+          ),
         });
       }
     }
 
+    // Now sort by value (after grouping Others)
+    const sortedData = mainInterests.sort((a, b) => b.value - a.value);
+
+    // Reassign colors after sorting to maintain consistent color mapping
+    const finalData = sortedData.map((item, index) => ({
+      ...item,
+      color: COLORS[index % COLORS.length],
+    }));
+
     // Limit to top 10 interests (including Others if present)
-    return mainInterests.slice(0, 10);
+    return finalData.slice(0, 10);
   };
 
   const data = processInterestsData();
@@ -134,17 +144,36 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
   }: {
     active?: boolean;
     payload?: Array<{
-      payload: { name: string; value: number; percentage: string };
+      payload: {
+        name: string;
+        value: number;
+        percentage: number;
+        otherItems?: string[];
+      };
     }>;
   }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-popover border border-border rounded-lg shadow-lg p-3">
+        <div className="bg-popover border border-border rounded-lg shadow-lg p-3 max-w-xs">
           <p className="font-medium text-popover-foreground">{data.name}</p>
           <p className="text-sm text-muted-foreground">
-            Users: {data.value} ({data.percentage}%)
+            Users: {data.value} ({data.percentage.toFixed(1)}%)
           </p>
+          {data.name === "Others" &&
+            data.otherItems &&
+            data.otherItems.length > 0 && (
+              <div className="mt-2 pt-2 border-t border-border">
+                <p className="text-xs font-medium text-popover-foreground mb-1">
+                  Includes:
+                </p>
+                <div className="text-xs text-muted-foreground space-y-0.5 max-h-32 overflow-y-auto">
+                  {data.otherItems.map((item, index) => (
+                    <div key={index}>{item}</div>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       );
     }
@@ -155,11 +184,11 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
   const renderLabel = (entry: {
     name: string;
     value: number;
-    percentage: string;
+    percentage: number;
     color: string;
   }) => {
-    const percentage = parseFloat(entry.percentage);
-    return percentage >= 10 ? `${entry.percentage}%` : "";
+    const percentage = entry.percentage;
+    return percentage >= 10 ? `${percentage.toFixed(1)}%` : "";
   };
 
   return (
