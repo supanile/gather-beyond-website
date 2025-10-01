@@ -39,7 +39,7 @@ const CountryBarChartCard: React.FC<CountryBarChartCardProps> = ({
   // Normalize country names
   const normalizeCountry = (country: string): string => {
     const normalized = country.trim();
-    if (!normalized) return "Unknown";
+    if (!normalized) return "Not Yet Filled";
 
     // Capitalize first letter of each word
     return normalized
@@ -57,7 +57,7 @@ const CountryBarChartCard: React.FC<CountryBarChartCardProps> = ({
         const country = normalizeCountry(user.country);
         countryCounts[country] = (countryCounts[country] || 0) + 1;
       } else {
-        countryCounts["Unknown"] = (countryCounts["Unknown"] || 0) + 1;
+        countryCounts["Not Yet Filled"] = (countryCounts["Not Yet Filled"] || 0) + 1;
       }
     });
 
