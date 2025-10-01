@@ -7,12 +7,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { PieChartIcon, Info } from "lucide-react";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { PieChartIcon } from "lucide-react";
 
 // Mock type for demonstration
 interface UserWithAgent {
@@ -193,7 +188,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
     return null;
   };
 
-  // Custom label function with 8% threshold for displaying percentage
+  // Custom label function - show user count instead of percentage
   const renderLabel = (entry: {
     cx: number;
     cy: number;
@@ -201,6 +196,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
     innerRadius: number;
     outerRadius: number;
     percentage: number;
+    value: number;
     color: string;
   }) => {
     const RADIAN = Math.PI / 180;
@@ -208,6 +204,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
     const x = entry.cx + radius * Math.cos(-entry.midAngle * RADIAN);
     const y = entry.cy + radius * Math.sin(-entry.midAngle * RADIAN);
 
+    // Show label only if percentage >= 8% (to avoid cluttering)
     if (entry.percentage < 8) return null;
 
     return (
@@ -220,7 +217,7 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
         fontSize={16}
         fontWeight={700}
       >
-        {`${entry.percentage.toFixed(1)}%`}
+        {entry.value}
       </text>
     );
   };
@@ -233,31 +230,6 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
             <h3 className="text-lg font-semibold text-foreground truncate">
               {title}
             </h3>
-            <HoverCard>
-                <HoverCardTrigger asChild>
-                <button className="relative inline-flex items-center justify-center rounded-full hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors p-1 group">
-                  <Info className="w-4 h-4 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors relative z-10" />
-                  {/* Animated ping effect */}
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75 animate-ping group-hover:opacity-0 transition-opacity"></span>
-                  {/* Pulsing background */}
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-40 animate-pulse group-hover:opacity-0 transition-opacity"></span>
-                </button>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80 bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-black border-gray-300 dark:border-gray-700" side="top" align="start">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-black dark:text-white flex items-center gap-2">
-                  <span className="inline-block w-1 h-4 bg-gradient-to-b from-gray-500 to-black rounded-full"></span>
-                  How to read this chart
-                  </h4>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Each segment shows how many users have that interest. Since
-                  users can have multiple interests, the total percentage may
-                  exceed 100%. For example, if <span className="font-semibold text-gray-900 dark:text-gray-100">80% like NFTs</span> and <span className="font-semibold text-gray-900 dark:text-gray-100">60% like Gaming</span>,
-                  some users likely enjoy both.
-                  </p>
-                </div>
-                </HoverCardContent>
-            </HoverCard>
           </div>
           <p className="text-sm text-muted-foreground truncate">
             {usersWithInterests} of {totalUsers} users have interests listed
