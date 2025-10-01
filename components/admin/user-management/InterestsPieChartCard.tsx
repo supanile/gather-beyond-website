@@ -234,29 +234,29 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
               {title}
             </h3>
             <HoverCard>
-              <HoverCardTrigger asChild>
-                <button className="relative inline-flex items-center justify-center rounded-full hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors p-1 group">
-                  <Info className="w-4 h-4 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors relative z-10" />
+                <HoverCardTrigger asChild>
+                <button className="relative inline-flex items-center justify-center rounded-full hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors p-1 group">
+                  <Info className="w-4 h-4 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors relative z-10" />
                   {/* Animated ping effect */}
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75 animate-ping group-hover:opacity-0 transition-opacity"></span>
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75 animate-ping group-hover:opacity-0 transition-opacity"></span>
                   {/* Pulsing background */}
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-40 animate-pulse group-hover:opacity-0 transition-opacity"></span>
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-40 animate-pulse group-hover:opacity-0 transition-opacity"></span>
                 </button>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-80 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/50 dark:to-pink-950/50 border-purple-200 dark:border-purple-800" side="top" align="start">
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80 bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-black border-gray-300 dark:border-gray-700" side="top" align="start">
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-100 flex items-center gap-2">
-                    <span className="inline-block w-1 h-4 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></span>
-                    How to read this chart
+                  <h4 className="text-sm font-semibold text-black dark:text-white flex items-center gap-2">
+                  <span className="inline-block w-1 h-4 bg-gradient-to-b from-gray-500 to-black rounded-full"></span>
+                  How to read this chart
                   </h4>
-                  <p className="text-sm text-purple-800 dark:text-purple-200 leading-relaxed">
-                    Each segment shows how many users have that interest. Since
-                    users can have multiple interests, the total percentage may
-                    exceed 100%. For example, if <span className="font-semibold text-purple-600 dark:text-purple-300">80% like NFTs</span> and <span className="font-semibold text-pink-600 dark:text-pink-300">60% like Gaming</span>,
-                    some users likely enjoy both.
+                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  Each segment shows how many users have that interest. Since
+                  users can have multiple interests, the total percentage may
+                  exceed 100%. For example, if <span className="font-semibold text-gray-900 dark:text-gray-100">80% like NFTs</span> and <span className="font-semibold text-gray-900 dark:text-gray-100">60% like Gaming</span>,
+                  some users likely enjoy both.
                   </p>
                 </div>
-              </HoverCardContent>
+                </HoverCardContent>
             </HoverCard>
           </div>
           <p className="text-sm text-muted-foreground truncate">
