@@ -65,17 +65,32 @@ interface MissionPerformance {
 
 const DailySubmissionLineChartCard = () => {
   const [userMissions, setUserMissions] = useState<UserMission[]>([]);
+  const [statisticsData, setStatisticsData] = useState<DailySubmissionData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<string>("30");
   const [filterType, setFilterType] = useState<string>("days");
   const [showAllMissions, setShowAllMissions] = useState(false);
 
-  const fetchUserMissions = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
+      // Fetch statistics data from the new endpoint
+      const statisticsResponse = await fetch("/api/user-missions/statistics");
+      if (!statisticsResponse.ok) {
+        throw new Error("Failed to fetch statistics data");
+      }
+      const statisticsResult = await statisticsResponse.json();
+      
+      if (statisticsResult.success) {
+        setStatisticsData(statisticsResult.data);
+      } else {
+        throw new Error(statisticsResult.error || "Failed to fetch statistics");
+      }
+
+      // Still fetch user missions for top missions calculation
       const userMissionsResponse = await fetch("/api/user-missions");
       if (!userMissionsResponse.ok) {
         throw new Error("Failed to fetch user missions");
@@ -91,11 +106,11 @@ const DailySubmissionLineChartCard = () => {
   };
 
   useEffect(() => {
-    fetchUserMissions();
-  }, []);
+    fetchData();
+  }, [timeRange, filterType]);
 
   const processChartData = (): DailySubmissionData[] => {
-    if (!userMissions.length) return [];
+    if (!statisticsData.length) return [];
 
     const endDate = new Date();
     const startDate = new Date();
@@ -108,68 +123,14 @@ const DailySubmissionLineChartCard = () => {
       startDate.setMonth(startDate.getMonth() - months);
     }
 
-    const dailyData: { [key: string]: DailySubmissionData } = {};
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      const dateStr = d.toISOString().split("T")[0];
-      const dateLabel = d.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
-
-      dailyData[dateStr] = {
-        date: dateStr,
-        dateLabel,
-        totalSubmissions: 0,
-        acceptedMissions: 0,
-        submittedMissions: 0,
-        completedMissions: 0,
-        rejectedMissions: 0,
-      };
-    }
-
-    userMissions.forEach((mission) => {
-      if (
-        mission.status === "accepted" &&
-        mission.accepted_at &&
-        mission.accepted_at > 0
-      ) {
-        const acceptedDate = new Date(mission.accepted_at * 1000);
-        if (acceptedDate >= startDate && acceptedDate <= endDate) {
-          const dateStr = acceptedDate.toISOString().split("T")[0];
-          if (dailyData[dateStr]) {
-            dailyData[dateStr].acceptedMissions += 1;
-          }
-        }
-      }
-
-      if (mission.submitted_at && mission.submitted_at > 0) {
-        const submittedDate = new Date(mission.submitted_at * 1000);
-        if (submittedDate >= startDate && submittedDate <= endDate) {
-          const dateStr = submittedDate.toISOString().split("T")[0];
-          if (dailyData[dateStr]) {
-            dailyData[dateStr].totalSubmissions += 1;
-
-            if (mission.status === "completed") {
-              dailyData[dateStr].completedMissions += 1;
-            } else if (mission.status === "rejected") {
-              dailyData[dateStr].rejectedMissions += 1;
-            } else if (mission.status === "submitted") {
-              dailyData[dateStr].submittedMissions += 1;
-            }
-          }
-        }
-      }
+    // Filter statistics data based on the selected time range
+    const filteredData = statisticsData.filter((item) => {
+      const itemDate = new Date(item.date);
+      return itemDate >= startDate && itemDate <= endDate;
     });
 
-    const result = Object.values(dailyData).sort((a, b) =>
-      a.date.localeCompare(b.date)
-    );
-
-    return result;
+    // Sort by date
+    return filteredData.sort((a, b) => a.date.localeCompare(b.date));
   };
 
   const processTopMissions = (): MissionPerformance[] => {
