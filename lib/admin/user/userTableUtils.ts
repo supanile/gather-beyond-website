@@ -568,11 +568,23 @@ export const formatExpenseDate = (timestamp: number): string => {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffDays > 0) {
+  if (diffDays > 30) {
+    return `${diffDays}d ago (>30d)`;
+  } else if (diffDays > 0) {
     return `${diffDays}d ago`;
   } else if (diffHours > 0) {
     return `${diffHours}h ago`;
   } else {
     return "Just now";
   }
+};
+
+// Helper function to check if expense is within 30 days
+export const isExpenseRecent = (timestamp: number | null | undefined): boolean => {
+  if (!timestamp) return false;
+  const now = Date.now();
+  const expenseTime = timestamp * 1000;
+  const diffMs = now - expenseTime;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return diffDays <= 30;
 };
