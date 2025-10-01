@@ -37,6 +37,7 @@ interface UserMission {
   mission_name: string;
   user_id: string;
   status: "accepted" | "submitted" | "completed" | "rejected";
+  platform?: string;
   accepted_at: number;
   submitted_at: number | null;
   completed_at: number | null;

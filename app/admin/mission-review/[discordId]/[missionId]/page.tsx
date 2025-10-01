@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { MissionStatusBadge } from "@/components/admin/mission-review/MissionStatusBadge";
+import { PlatformBadge } from "@/components/admin/mission-review/PlatformBadge";
 import { UserAvatar } from "@/components/admin/mission-review/UserAvatar";
 import { MissionActionConfirmDialog } from "@/components/admin/mission-review/MissionActionConfirmDialog";
 import { useMissionDetails } from "@/hooks/useMissionDetails";
@@ -320,6 +321,13 @@ export default function MissionDetailsPage() {
                       Status
                     </span>
                     <MissionStatusBadge status={mission.status} />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Platform
+                    </span>
+                    <PlatformBadge platform={mission.platform} />
                   </div>
                 </div>
               </div>
