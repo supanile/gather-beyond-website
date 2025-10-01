@@ -7,8 +7,17 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { ChartPie } from "lucide-react";
-import { UserWithAgent } from "@/types/admin/userManagement";
+import { PieChartIcon, Info } from "lucide-react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
+// Mock type for demonstration
+interface UserWithAgent {
+  interests?: string;
+}
 
 interface InterestsPieChartCardProps {
   users: UserWithAgent[];
@@ -62,10 +71,16 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
     return lower.charAt(0).toUpperCase() + lower.slice(1); // Capitalize others
   };
 
+  const totalUsers = users.length;
+  const usersWithInterests = users.filter(
+    (user) => user.interests && user.interests.trim()
+  ).length;
+
   // Process interests data
   const processInterestsData = () => {
     const interestCounts: Record<string, number> = {};
 
+    // Count unique users for each interest
     users.forEach((user) => {
       if (user.interests && user.interests.trim()) {
         // Split interests by comma, semicolon, or "and", and clean up
@@ -75,30 +90,27 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
           .filter((interest) => interest.length > 0 && !/^\d+$/.test(interest)) // Remove empty and numeric-only strings
           .map(normalizeInterest); // Normalize interests
 
-        userInterests.forEach((interest) => {
+        // Remove duplicates for this user (in case they have the same interest multiple times)
+        const uniqueUserInterests = [...new Set(userInterests)];
+
+        uniqueUserInterests.forEach((interest) => {
           interestCounts[interest] = (interestCounts[interest] || 0) + 1;
         });
       }
     });
 
-    // Convert to array format for recharts
-    let data = Object.entries(interestCounts)
-      .map(([name, value], index) => ({
-        name,
-        value,
-        percentage: ((value / users.length) * 100).toFixed(1),
-        color: COLORS[index % COLORS.length], // Add color property
-      }))
-      .sort((a, b) => b.value - a.value);
-
-    // Reassign colors after sorting to maintain consistent color mapping
-    data = data.map((item, index) => ({
-      ...item,
-      color: COLORS[index % COLORS.length],
+    // Convert to array format for recharts (don't sort yet)
+    const data = Object.entries(interestCounts).map(([name, value], index) => ({
+      name,
+      value,
+      percentage:
+        usersWithInterests > 0 ? (value / usersWithInterests) * 100 : 0,
+      color: COLORS[index % COLORS.length], // Add color property
+      otherItems: [] as string[], // Track what's included in Others
     }));
 
-    // Group small interests into "Others" if they are less than 2% of total users
-    const threshold = users.length * 0.02; // 2% threshold
+    // Group small interests into "Others" if they represent less than 5% of users with interests
+    const threshold = Math.max(1, usersWithInterests * 0.05); // At least 1 user or 5% threshold
     const mainInterests = data.filter((item) => item.value >= threshold);
     const otherInterests = data.filter((item) => item.value < threshold);
 
@@ -111,21 +123,31 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
         mainInterests.push({
           name: "Others",
           value: othersSum,
-          percentage: ((othersSum / users.length) * 100).toFixed(1),
+          percentage:
+            usersWithInterests > 0 ? (othersSum / usersWithInterests) * 100 : 0,
           color: COLORS[mainInterests.length % COLORS.length],
+          otherItems: otherInterests.map(
+            (item) =>
+              `${item.name} (${item.value} user${item.value !== 1 ? "s" : ""})`
+          ),
         });
       }
     }
 
+    // Now sort by value (after grouping Others)
+    const sortedData = mainInterests.sort((a, b) => b.value - a.value);
+
+    // Reassign colors after sorting to maintain consistent color mapping
+    const finalData = sortedData.map((item, index) => ({
+      ...item,
+      color: COLORS[index % COLORS.length],
+    }));
+
     // Limit to top 10 interests (including Others if present)
-    return mainInterests.slice(0, 10);
+    return finalData.slice(0, 10);
   };
 
   const data = processInterestsData();
-  const totalUsers = users.length;
-  const usersWithInterests = users.filter(
-    (user) => user.interests && user.interests.trim()
-  ).length;
 
   // Custom tooltip with dark theme support
   const CustomTooltip = ({
@@ -134,47 +156,119 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
   }: {
     active?: boolean;
     payload?: Array<{
-      payload: { name: string; value: number; percentage: string };
+      payload: {
+        name: string;
+        value: number;
+        percentage: number;
+        otherItems?: string[];
+      };
     }>;
   }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-popover border border-border rounded-lg shadow-lg p-3">
+        <div className="bg-popover border border-border rounded-lg shadow-lg p-3 max-w-xs">
           <p className="font-medium text-popover-foreground">{data.name}</p>
           <p className="text-sm text-muted-foreground">
-            Users: {data.value} ({data.percentage}%)
+            {data.value} user{data.value !== 1 ? "s" : ""} (
+            {data.percentage.toFixed(1)}% of users with interests)
           </p>
+          {data.name === "Others" &&
+            data.otherItems &&
+            data.otherItems.length > 0 && (
+              <div className="mt-2 pt-2 border-t border-border">
+                <p className="text-xs font-medium text-popover-foreground mb-1">
+                  Includes:
+                </p>
+                <div className="text-xs text-muted-foreground space-y-0.5 max-h-32 overflow-y-auto">
+                  {data.otherItems.map((item, index) => (
+                    <div key={index}>{item}</div>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       );
     }
     return null;
   };
 
-  // Custom label function with 10% threshold for displaying percentage
+  // Custom label function with 8% threshold for displaying percentage
   const renderLabel = (entry: {
-    name: string;
-    value: number;
-    percentage: string;
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percentage: number;
     color: string;
   }) => {
-    const percentage = parseFloat(entry.percentage);
-    return percentage >= 10 ? `${entry.percentage}%` : "";
+    const RADIAN = Math.PI / 180;
+    const radius = entry.outerRadius + 25;
+    const x = entry.cx + radius * Math.cos(-entry.midAngle * RADIAN);
+    const y = entry.cy + radius * Math.sin(-entry.midAngle * RADIAN);
+
+    if (entry.percentage < 8) return null;
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill={entry.color}
+        textAnchor={x > entry.cx ? "start" : "end"}
+        dominantBaseline="central"
+        fontSize={16}
+        fontWeight={700}
+      >
+        {`${entry.percentage.toFixed(1)}%`}
+      </text>
+    );
   };
 
   return (
-    <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm border border-border hover:shadow-md transition-all duration-300 hover:border-primary/20 h-full flex flex-col">
+    <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm border border-border transition-shadow duration-300 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 gap-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-foreground truncate">
-            {title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-foreground truncate">
+              {title}
+            </h3>
+            <HoverCard>
+                <HoverCardTrigger asChild>
+                <button className="relative inline-flex items-center justify-center rounded-full hover:bg-yellow-50 dark:hover:bg-yellow-950/30 transition-colors p-1 group">
+                  <Info className="w-4 h-4 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors relative z-10" />
+                  {/* Animated ping effect */}
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75 animate-ping group-hover:opacity-0 transition-opacity"></span>
+                  {/* Pulsing background */}
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-40 animate-pulse group-hover:opacity-0 transition-opacity"></span>
+                </button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80 bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-black border-gray-300 dark:border-gray-700" side="top" align="start">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-black dark:text-white flex items-center gap-2">
+                  <span className="inline-block w-1 h-4 bg-gradient-to-b from-gray-500 to-black rounded-full"></span>
+                  How to read this chart
+                  </h4>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  Each segment shows how many users have that interest. Since
+                  users can have multiple interests, the total percentage may
+                  exceed 100%. For example, if <span className="font-semibold text-gray-900 dark:text-gray-100">80% like NFTs</span> and <span className="font-semibold text-gray-900 dark:text-gray-100">60% like Gaming</span>,
+                  some users likely enjoy both.
+                  </p>
+                </div>
+                </HoverCardContent>
+            </HoverCard>
+          </div>
           <p className="text-sm text-muted-foreground truncate">
             {usersWithInterests} of {totalUsers} users have interests listed
           </p>
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            Note: Percentages may exceed 100% as users can have multiple
+            interests
+          </p>
         </div>
         <div className="p-3 rounded-full bg-gray-200 dark:bg-white shrink-0">
-          <ChartPie className="w-6 h-6 text-gray-700 dark:text-gray-900" />
+          <PieChartIcon className="w-6 h-6 text-gray-700 dark:text-gray-900" />
         </div>
       </div>
 
@@ -183,20 +277,54 @@ const InterestsPieChartCard: React.FC<InterestsPieChartCardProps> = ({
           <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
+                <defs>
+                  {data.map((entry, index) => (
+                    <linearGradient
+                      key={`gradient-${index}`}
+                      id={`interestGradient${index}`}
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor={entry.color}
+                        stopOpacity={0.8}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor={entry.color}
+                        stopOpacity={1}
+                      />
+                    </linearGradient>
+                  ))}
+                </defs>
                 <Pie
                   data={data}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
+                  labelLine={{
+                    stroke: "currentColor",
+                    strokeWidth: 1,
+                    opacity: 0.5,
+                  }}
                   label={renderLabel}
-                  outerRadius="80%"
-                  fill="#8884d8"
+                  outerRadius="70%"
                   dataKey="value"
                   stroke="hsl(var(--border))"
-                  strokeWidth={1}
+                  strokeWidth={2}
+                  animationDuration={800}
+                  animationBegin={0}
                 >
                   {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={`url(#interestGradient${index})`}
+                      style={{
+                        filter: "drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1))",
+                      }}
+                    />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
