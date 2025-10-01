@@ -16,6 +16,7 @@ export interface UserMission {
   user_id: string;
   mission_id: number;
   status: 'submitted' | 'completed' | 'rejected';
+  platform?: string;
   completed_at?: string;
 }
 

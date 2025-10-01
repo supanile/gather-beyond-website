@@ -8,6 +8,7 @@ interface GristMissionRecord {
   mission_name?: string;
   user_id?: string;
   status?: string;
+  platform?: string;
   accepted_at?: number;
   submitted_at?: number;
   completed_at?: number;
@@ -78,6 +79,7 @@ export async function GET(
       mission_name: mission.mission_name || "Unknown Mission",
       user_id: mission.user_id || "unknown",
       status: mission.status || "submitted",
+      platform: mission.platform || null,
       accepted_at: mission.accepted_at || null,
       submitted_at: mission.submitted_at || null,
       completed_at: mission.completed_at || null,
