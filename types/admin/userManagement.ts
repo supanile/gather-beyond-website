@@ -24,6 +24,12 @@ export interface UserAgent {
   current_level_progress: number;
   xp_required: number;
   credits: number;
+  // Mockup fields for Credits Used and Credit Expense Note
+  credits_used_lifetime?: number;
+  credits_used_30d?: number;
+  last_expense_reason?: string;
+  last_expense_date?: number;
+  last_expense_type?: "mystery_box" | "upgrade" | "purchase" | "other";
 }
 
 export interface User {
@@ -64,6 +70,8 @@ export interface SortConfig {
     | "agent.mood"
     | "agent.last_active"
     | "agent.created_at"
+    | "agent.credits_used_lifetime"
+    | "agent.credits_used_30d"
     | "username";
   direction: "asc" | "desc";
 }

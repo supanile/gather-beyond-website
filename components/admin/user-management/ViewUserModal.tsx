@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 import { Send } from "lucide-react";
 import { UserWithAgent } from "@/types/admin/userManagement";
@@ -171,6 +172,68 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
     }
   };
 
+  const getCreditsUsedBadgeColor = (creditsUsed: number, allUsers: UserWithAgent[]) => {
+    if (allUsers.length === 0) {
+      return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+    }
+
+    const creditsUsedValues = allUsers.map((user) => user.agent?.credits_used_lifetime || 0);
+    const minCreditsUsed = Math.min(...creditsUsedValues);
+    const maxCreditsUsed = Math.max(...creditsUsedValues);
+
+    if (creditsUsed === minCreditsUsed && creditsUsed === maxCreditsUsed) {
+      return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+    } else if (creditsUsed === minCreditsUsed) {
+      return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800";
+    } else if (creditsUsed === maxCreditsUsed) {
+      return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800";
+    } else {
+      return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+    }
+  };
+
+  const getExpenseTypeIcon = (type: string) => {
+    switch (type) {
+      case "mystery_box":
+        return "🎁";
+      case "upgrade":
+        return "⬆️";
+      case "purchase":
+        return "🛒";
+      default:
+        return "💳";
+    }
+  };
+
+  const getExpenseTypeBadgeColor = (type: string) => {
+    switch (type) {
+      case "mystery_box":
+        return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800";
+      case "upgrade":
+        return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
+      case "purchase":
+        return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800";
+    }
+  };
+
+  const formatExpenseDate = (timestamp: number) => {
+    const now = Date.now();
+    const expenseTime = timestamp * 1000;
+    const diffMs = now - expenseTime;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+      return `${diffDays}d ago`;
+    } else if (diffHours > 0) {
+      return `${diffHours}h ago`;
+    } else {
+      return "Just now";
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xs sm:max-w-2xl mx-2 sm:mx-auto">
@@ -205,7 +268,7 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
             </CardHeader>
             <CardContent className="space-y-4 p-3 sm:p-6 pt-2">
               {/* XP and Level - Same styling as table */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
                   <Label className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 block">
                     XP
@@ -249,6 +312,34 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                     >
                       {user.agent?.credits?.toLocaleString() || "0"} Credits
                     </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 block">
+                    Credits Used
+                  </Label>
+                  <div className="flex justify-start">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant="outline"
+                            className={`cursor-help ${getCreditsUsedBadgeColor(
+                              user.agent?.credits_used_lifetime || 0,
+                              allUsers
+                            )}`}
+                          >
+                            {user.agent?.credits_used_lifetime?.toLocaleString() || "0"} Used
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="text-xs">
+                            <div>Lifetime: {user.agent?.credits_used_lifetime?.toLocaleString() || "0"}</div>
+                            <div>30 days: {user.agent?.credits_used_30d?.toLocaleString() || "0"}</div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               </div>
@@ -338,6 +429,32 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                   )}
                 </div>
               </div>
+              {/* Credit Expense Note */}
+              {user.agent?.last_expense_reason && (
+                <div>
+                  <Label className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 block">
+                    Latest Credit Expense
+                  </Label>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={getExpenseTypeBadgeColor(user.agent.last_expense_type || "other")}
+                      >
+                        <span className="mr-1">
+                          {getExpenseTypeIcon(user.agent.last_expense_type || "other")}
+                        </span>
+                        {user.agent.last_expense_reason}
+                      </Badge>
+                      {user.agent.last_expense_date && (
+                        <span className="text-xs text-muted-foreground">
+                          {formatExpenseDate(user.agent.last_expense_date)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* Last Active and Joined Date */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
