@@ -46,6 +46,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InterestsPieChartCard from "@/components/admin/user-management/InterestsPieChartCard";
 import MoodBarChartCard from "@/components/admin/user-management/MoodBarChartCard";
 import DailySubmissionLineChartCard from "@/components/admin/user-management/DailySubmissionLineChartCard";
+import ServerOverview from "@/components/admin/server-overview/ServerOverview";
 import { useDiscordServers } from "@/hooks/useDiscordServers";
 
 type SortOption = {
@@ -522,7 +523,7 @@ const DashboardPage = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="user-management" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 md:h-16">
+          <TabsList className="grid w-full grid-cols-3 h-12 sm:h-14 md:h-16">
             <TabsTrigger
               value="user-management"
               className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
@@ -536,6 +537,13 @@ const DashboardPage = () => {
             >
               <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
               <span className="truncate">User Overview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="server-overview"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
+            >
+              <Server className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">Server Overview</span>
             </TabsTrigger>
           </TabsList>
 
@@ -789,6 +797,11 @@ const DashboardPage = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* Server Overview Tab */}
+          <TabsContent value="server-overview">
+            <ServerOverview />
           </TabsContent>
 
           {/* User Management Tab */}
