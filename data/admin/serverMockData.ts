@@ -4,42 +4,42 @@ import { DiscordServer, ServerStats } from "@/types/admin/serverTypes";
 export const mockDiscordServers: DiscordServer[] = [
   {
     id: "1",
-    name: "Gather Beyond Official",
-    icon: "https://via.placeholder.com/64x64/7289da/ffffff?text=GB",
-    owner_id: "123456789",
-    owner_name: "GatherBeyond Admin",
+    name: "Super Connector",
+    image_url: "https://cdn.discordapp.com/icons/908568690033844246/35d6d7aba59bef7102940cc0288c507d.png",
+    // owner_id: "123456789",
+    // owner_name: "Admin pond",
     member_count: 15420,
-    sc_user_count: 2847,
+    sc_user_count: 22847,
     total_credits: 145672,
     total_xp: 892450,
     created_at: "2023-01-15T10:30:00Z",
     joined_at: "2023-01-15T10:30:00Z",
     is_active: true,
-    server_type: "premium",
-    features: ["COMMUNITY", "NEWS", "PARTNERED", "VERIFIED"]
+    // server_type: "premium",
+    categories: ["GAMING", "WEB3", "TRADING", "EDUCATION"]
   },
   {
     id: "2", 
-    name: "Web3 Builders Hub",
-    icon: "https://via.placeholder.com/64x64/00d4aa/ffffff?text=W3",
-    owner_id: "987654321",
-    owner_name: "CryptoBuilder",
-    member_count: 8934,
-    sc_user_count: 1562,
+    name: "스타이카 Staika",
+    image_url: "https://coin-images.coingecko.com/coins/images/29063/large/STIK.png?1696528030",
+    // owner_id: "987654321",
+    // owner_name: "CryptoBuilder",
+    member_count: 28934,
+    sc_user_count: 3562,
     total_credits: 78950,
     total_xp: 456780,
     created_at: "2023-03-22T14:15:00Z",
     joined_at: "2023-03-22T14:20:00Z",
     is_active: true,
-    server_type: "standard",
-    features: ["COMMUNITY", "THREADS"]
+    // server_type: "standard",
+    categories: ["DEVELOPMENT", "WEB3", "BLOCKCHAIN"]
   },
   {
     id: "3",
     name: "DeFi Enthusiasts",
-    icon: "https://via.placeholder.com/64x64/f04747/ffffff?text=DE",
-    owner_id: "456789123",
-    owner_name: "DeFiGuru",
+    image_url: "https://via.placeholder.com/64x64/f04747/ffffff?text=DE",
+    // owner_id: "456789123",
+    // owner_name: "DeFiGuru",
     member_count: 12567,
     sc_user_count: 2103,
     total_credits: 96340,
@@ -47,15 +47,15 @@ export const mockDiscordServers: DiscordServer[] = [
     created_at: "2023-02-08T09:45:00Z",
     joined_at: "2023-02-08T10:00:00Z",
     is_active: true,
-    server_type: "premium",
-    features: ["COMMUNITY", "NEWS", "EVENTS"]
+    // server_type: "premium",
+    categories: ["DEFI", "TRADING", "FINANCE", "EDUCATION"]
   },
   {
     id: "4",
     name: "NFT Creators Guild",
-    icon: "https://via.placeholder.com/64x64/9b59b6/ffffff?text=NC",
-    owner_id: "789123456",
-    owner_name: "ArtistPro",
+    image_url: "https://via.placeholder.com/64x64/9b59b6/ffffff?text=NC",
+    // owner_id: "789123456",
+    // owner_name: "ArtistPro",
     member_count: 6789,
     sc_user_count: 987,
     total_credits: 45230,
@@ -63,15 +63,15 @@ export const mockDiscordServers: DiscordServer[] = [
     created_at: "2023-04-12T16:20:00Z",
     joined_at: "2023-04-12T16:25:00Z",
     is_active: true,
-    server_type: "standard",
-    features: ["COMMUNITY", "DISCOVERABLE"]
+    // server_type: "standard",
+    categories: ["NFT", "ART", "CREATIVITY"]
   },
   {
     id: "5",
     name: "Blockchain Gaming",
-    icon: "https://via.placeholder.com/64x64/e67e22/ffffff?text=BG",
-    owner_id: "321654987",
-    owner_name: "GameMaster",
+    image_url: "https://via.placeholder.com/64x64/e67e22/ffffff?text=BG",
+    // owner_id: "321654987",
+    // owner_name: "GameMaster",
     member_count: 9876,
     sc_user_count: 1654,
     total_credits: 67890,
@@ -79,15 +79,15 @@ export const mockDiscordServers: DiscordServer[] = [
     created_at: "2023-05-30T11:10:00Z",
     joined_at: "2023-05-30T11:15:00Z",
     is_active: true,
-    server_type: "premium",
-    features: ["COMMUNITY", "THREADS", "EVENTS"]
+    // server_type: "premium",
+    categories: ["GAMING", "BLOCKCHAIN", "WEB3", "ENTERTAINMENT"]
   },
   {
     id: "6",
     name: "Crypto Traders",
-    icon: "https://via.placeholder.com/64x64/27ae60/ffffff?text=CT",
-    owner_id: "654321987",
-    owner_name: "TradeExpert",
+    image_url: "https://via.placeholder.com/64x64/27ae60/ffffff?text=CT",
+    // owner_id: "654321987",
+    // owner_name: "TradeExpert",
     member_count: 4532,
     sc_user_count: 756,
     total_credits: 32450,
@@ -95,15 +95,15 @@ export const mockDiscordServers: DiscordServer[] = [
     created_at: "2023-06-18T13:30:00Z",
     joined_at: "2023-06-18T13:35:00Z",
     is_active: true,
-    server_type: "basic",
-    features: ["COMMUNITY"]
+    // server_type: "basic",
+    categories: ["TRADING", "FINANCE"]
   },
   {
     id: "7",
     name: "Metaverse Explorers",
-    icon: "https://via.placeholder.com/64x64/3498db/ffffff?text=ME",
-    owner_id: "147258369",
-    owner_name: "MetaExplorer",
+    image_url: "https://via.placeholder.com/64x64/3498db/ffffff?text=ME",
+    // owner_id: "147258369",
+    // owner_name: "MetaExplorer",
     member_count: 7234,
     sc_user_count: 1245,
     total_credits: 56780,
@@ -111,15 +111,15 @@ export const mockDiscordServers: DiscordServer[] = [
     created_at: "2023-07-05T08:45:00Z",
     joined_at: "2023-07-05T08:50:00Z",
     is_active: false,
-    server_type: "standard",
-    features: ["COMMUNITY", "DISCOVERABLE"]
+    // server_type: "standard",
+    categories: ["METAVERSE", "VR", "GAMING", "TECHNOLOGY"]
   },
   {
     id: "8",
     name: "Smart Contract Devs",
-    icon: "https://via.placeholder.com/64x64/e74c3c/ffffff?text=SC",
-    owner_id: "963852741",
-    owner_name: "DevLead",
+    image_url: "https://via.placeholder.com/64x64/e74c3c/ffffff?text=SC",
+    // owner_id: "963852741",
+    // owner_name: "DevLead",
     member_count: 3456,
     sc_user_count: 892,
     total_credits: 43210,
@@ -127,8 +127,8 @@ export const mockDiscordServers: DiscordServer[] = [
     created_at: "2023-08-20T15:25:00Z",
     joined_at: "2023-08-20T15:30:00Z",
     is_active: true,
-    server_type: "premium",
-    features: ["COMMUNITY", "THREADS", "NEWS"]
+    // server_type: "premium",
+    categories: ["DEVELOPMENT", "BLOCKCHAIN", "SMART_CONTRACTS", "EDUCATION"]
   }
 ];
 
@@ -143,7 +143,7 @@ export const calculateServerStats = (servers: DiscordServer[]): ServerStats => {
   
   const mostActiveServer = activeServers.length > 0 
     ? activeServers.reduce((max, server) => 
-        server.member_count > max.member_count ? server : max
+        server.sc_user_count > max.sc_user_count ? server : max
       )
     : null;
 

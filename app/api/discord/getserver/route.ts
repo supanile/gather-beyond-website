@@ -7,7 +7,7 @@ interface DiscordGuild {
   owner: boolean;
   permissions: string;
   permissions_new: string;
-  features: string[];
+  categories: string[];
   approximate_member_count?: number;
   approximate_presence_count?: number;
 }

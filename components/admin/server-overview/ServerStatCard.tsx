@@ -13,7 +13,7 @@ const ServerStatCard: React.FC<ServerStatCardProps> = ({
     <div className="bg-card rounded-2xl shadow-sm border border-border p-6 hover:shadow-md transition-shadow duration-300">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-muted-foreground mb-1">
+          <p className="text-sm font-medium text-foreground mb-1">
             {title}
           </p>
           <p className="text-2xl font-bold text-foreground mb-1">

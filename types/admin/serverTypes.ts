@@ -1,18 +1,18 @@
 export interface DiscordServer {
   id: string;
   name: string;
-  icon?: string;
-  owner_id: string;
-  owner_name: string;
+  image_url?: string;
+  // owner_id: string;
+  // owner_name: string;
   member_count: number;
-  sc_user_count: number; // Super Community users
+  sc_user_count: number; // Super Connector users
   total_credits: number;
   total_xp: number;
   created_at: string;
   joined_at: string;
   is_active: boolean;
-  server_type: "premium" | "standard" | "basic";
-  features: string[];
+  // server_type: "premium" | "standard" | "basic";
+  categories: string[];
 }
 
 export interface ServerStats {
