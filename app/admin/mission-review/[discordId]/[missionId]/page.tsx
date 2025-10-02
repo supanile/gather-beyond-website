@@ -323,12 +323,14 @@ export default function MissionDetailsPage() {
                     <MissionStatusBadge status={mission.status} />
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Platform
-                    </span>
-                    <PlatformBadge platform={mission.platform} />
-                  </div>
+                  {mission.platform && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Platform
+                      </span>
+                      <PlatformBadge platform={mission.platform} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
