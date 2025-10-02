@@ -144,32 +144,50 @@ const MoodBarChartCard: React.FC<MoodBarChartCardProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={data}
-                margin={{
-                  top: 60,
-                  right: 30,
-                  left: 20,
-                  bottom: -15,
-                }}
-                barCategoryGap="40%"
+                margin={{ top: 40, right: 30, left: 20, bottom: 5 }}
+                layout="horizontal"
               >
+                <defs>
+                  {data.map((entry, index) => (
+                    <linearGradient
+                      key={`gradient-${index}`}
+                      id={`moodColorGradient${index}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor={entry.color} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={entry.color} stopOpacity={1} />
+                    </linearGradient>
+                  ))}
+                </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="currentColor"
-                  opacity={0.1}
+                  opacity={0.08}
+                  horizontal={true}
+                  vertical={false}
                 />
                 <XAxis
                   dataKey="name"
+                  type="category"
                   stroke="currentColor"
                   fontSize={12}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                  interval={0}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: "currentColor", fontWeight: 500 }}
                 />
-                <YAxis stroke="currentColor" fontSize={12} />
+                <YAxis
+                  type="number"
+                  stroke="currentColor"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={{ stroke: "currentColor", opacity: 0.2 }}
+                />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={false}
+                  cursor={{ fill: "currentColor", opacity: 0.05, radius: 4 }}
                   allowEscapeViewBox={{ x: false, y: false }}
                 />
                 <Legend
@@ -181,23 +199,36 @@ const MoodBarChartCard: React.FC<MoodBarChartCardProps> = ({
                   }}
                   content={<CustomLegend />}
                 />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                <Bar
+                  dataKey="value"
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={32}
+                  animationDuration={800}
+                  animationBegin={0}
+                >
                   {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={`url(#moodColorGradient${index})`}
+                      style={{
+                        filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.1))",
+                      }}
+                    />
                   ))}
                   <LabelList
                     dataKey="emoji"
                     position="top"
-                    offset={30}
+                    offset={28}
                     fontSize={20}
                   />
                   <LabelList
                     dataKey="percentage"
                     position="top"
-                    offset={10}
+                    offset={8}
                     fontSize={12}
-                    fontWeight={600}
+                    fontWeight={700}
                     formatter={(value: string) => `${value}%`}
+                    fill="currentColor"
                   />
                 </Bar>
               </BarChart>

@@ -48,6 +48,7 @@ import MoodBarChartCard from "@/components/admin/user-management/MoodBarChartCar
 import DailySubmissionLineChartCard from "@/components/admin/user-management/DailySubmissionLineChartCard";
 import ServerOverview from "@/components/admin/server-overview/ServerOverview";
 import { useDiscordServers } from "@/hooks/useDiscordServers";
+import CountryBarChartCard from "@/components/admin/user-management/CountryBarChartCard";
 
 type SortOption = {
   field:
@@ -271,7 +272,8 @@ const DashboardPage = () => {
           </div>
 
           {/* Chart Cards Loading */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <Skeleton className="h-96 rounded-2xl" />
             <Skeleton className="h-96 rounded-2xl" />
             <Skeleton className="h-96 rounded-2xl" />
           </div>
@@ -499,14 +501,17 @@ const DashboardPage = () => {
             )}
           </div>
 
-          {/* Chart Cards - 2 columns */}
+          {/* Chart Cards - 3 columns */}
           {!isLoadingStats && !statsError && (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               <div className="h-full">
                 <InterestsPieChartCard users={users} />
               </div>
               <div className="h-full">
                 <MoodBarChartCard users={users} />
+              </div>
+              <div className="h-full">
+                <CountryBarChartCard users={users} />
               </div>
             </div>
           )}
