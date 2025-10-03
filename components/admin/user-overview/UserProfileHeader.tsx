@@ -5,6 +5,7 @@ import Image from "next/image";
 import { UserWithAgent } from "@/types/admin/userManagement";
 import { UserAgent } from "@/types/admin/userTableTypes";
 import { Badge } from "@/components/ui/badge";
+import { UserAvatar } from "@/components/admin/mission-review/UserAvatar";
 import XIcon from "@/components/ui/icons/XIcon";
 import { formatDate } from "@/lib/admin/user/userTableUtils";
 import {
@@ -27,11 +28,6 @@ interface UserProfileHeaderProps {
   user: UserWithAgent;
   userAgent: UserAgent;
   totalMissions: number;
-}
-
-interface DiscordData {
-  username: string;
-  avatarUrl: string;
 }
 
 interface DiscordGuild {
@@ -90,33 +86,8 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   userAgent,
   totalMissions,
 }) => {
-  const [discordData, setDiscordData] = useState<DiscordData | null>(null);
   const [discordGuilds, setDiscordGuilds] = useState<DiscordGuildsData | null>(null);
-  const [isLoadingDiscord, setIsLoadingDiscord] = useState(false);
   const [isLoadingGuilds, setIsLoadingGuilds] = useState(false);
-
-  useEffect(() => {
-    async function fetchDiscordData() {
-      if (!user.discord_id) return;
-
-      setIsLoadingDiscord(true);
-      try {
-        const response = await fetch(`/api/discord/${user.discord_id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch Discord data");
-        }
-        const data = await response.json();
-        setDiscordData(data);
-      } catch (error) {
-        console.error(error);
-        setDiscordData(null);
-      } finally {
-        setIsLoadingDiscord(false);
-      }
-    }
-
-    fetchDiscordData();
-  }, [user.discord_id]);
 
   useEffect(() => {
     async function fetchDiscordGuilds() {
@@ -147,23 +118,13 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
         <div className="flex items-center space-x-3 sm:space-x-4">
-          {isLoadingDiscord ? (
-            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
-          ) : discordData?.avatarUrl ? (
-            <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full shadow-lg overflow-hidden">
-              <Image
-                src={discordData.avatarUrl}
-                alt={`${discordData.username}'s avatar`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 56px"
-              />
-            </div>
-          ) : (
-            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center text-white font-medium text-lg sm:text-xl md:text-2xl shadow-lg shadow-purple-500/25">
-              {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <UserAvatar
+            discordId={user.discord_id}
+            username={user.username}
+            size="lg"
+            className="shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            clickable={true}
+          />
           <div className="min-w-0 flex-1">
             <p className="text-sm sm:text-base md:text-lg font-semibold text-foreground truncate">
               {user.username || user.email}

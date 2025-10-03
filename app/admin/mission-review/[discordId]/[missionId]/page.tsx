@@ -286,13 +286,13 @@ export default function MissionDetailsPage() {
                 <div className="flex items-center gap-4">
                   <UserAvatar
                     discordId={mission.user_id}
-                    username={mission.user?.username}
+                    username={mission.discord_user?.username}
                     avatarUrl={mission.discord_user?.avatarUrl}
                     size="lg"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-slate-900 dark:text-slate-100 text-lg truncate">
-                      {mission.user?.username || "Unknown User"}
+                      {mission.discord_user?.username || "Unknown User"}
                     </div>
                     <div className="text-sm text-slate-500 dark:text-slate-400 truncate">
                       {mission.user_id}

@@ -266,14 +266,14 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                     <div className="flex items-center gap-2">
                       <UserAvatar
                         discordId={mission.user_id}
-                        username={mission.user?.username}
+                        username={mission.discord_user?.username}
                         avatarUrl={mission.discord_user?.avatarUrl}
                         size="md"
                         className="flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-xs text-slate-900 dark:text-slate-100 truncate">
-                          {mission.user?.username || "Unknown User"}
+                          {mission.discord_user?.username || "Unknown User"}
                         </div>
                       </div>
                     </div>

@@ -46,6 +46,7 @@ import {
   formatLastActive,
 } from "@/lib/admin/user/userTableUtils";
 import XIcon from "@/components/ui/icons/XIcon";
+import { UserAvatar } from "@/components/admin/mission-review/UserAvatar";
 
 interface UserDataTableProps {
   users: UserWithAgent[];
@@ -174,23 +175,35 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                 {/* Username Section */}
                 {columnVisibility.username && (
                   <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium text-sm">
-                        {user.username || "Unknown User"}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {user.twitter_handle && (
-                          <span className="mr-2 flex items-center gap-1">
-                            <XIcon className="h-3 w-3" />
-                            {user.twitter_handle}
-                          </span>
-                        )}
-                        {user.telegram_handle && (
-                          <span className="flex items-center gap-1">
-                            <Send className="h-3 w-3" />
-                            {user.telegram_handle}
-                          </span>
-                        )}
+                    <div className="flex items-center gap-3">
+                      <UserAvatar
+                        discordId={user.discord_id}
+                        username={user.username || "Unknown User"}
+                        avatarUrl={undefined}
+                        size="md"
+                        className="flex-shrink-0"
+                      />
+                      <div>
+                        <div className="font-medium text-sm">
+                          {user.username || "Unknown User"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          ID: {user.discord_id}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {user.twitter_handle && (
+                            <span className="mr-2 flex items-center gap-1">
+                              <XIcon className="h-3 w-3" />
+                              {user.twitter_handle}
+                            </span>
+                          )}
+                          {user.telegram_handle && (
+                            <span className="flex items-center gap-1">
+                              <Send className="h-3 w-3" />
+                              {user.telegram_handle}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <Button
@@ -662,23 +675,35 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                 >
                   {columnVisibility.username && (
                     <TableCell className="font-medium">
-                      <div>
-                        <div className="font-medium">
-                          {user.username || "Unknown User"}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {user.twitter_handle && (
-                            <span className="mr-2 flex items-center gap-1">
-                              <XIcon className="h-3 w-3" />
-                              {user.twitter_handle}
-                            </span>
-                          )}
-                          {user.telegram_handle && (
-                            <span className="flex items-center gap-1">
-                              <Send className="h-3 w-3" />
-                              {user.telegram_handle}
-                            </span>
-                          )}
+                      <div className="flex items-center gap-3">
+                        <UserAvatar
+                          discordId={user.discord_id}
+                          username={user.username || "Unknown User"}
+                          avatarUrl={undefined}
+                          size="sm"
+                          className="flex-shrink-0"
+                        />
+                        <div>
+                          <div className="font-medium">
+                            {user.username || "Unknown User"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            ID: {user.discord_id}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {user.twitter_handle && (
+                              <span className="mr-2 flex items-center gap-1">
+                                <XIcon className="h-3 w-3" />
+                                {user.twitter_handle}
+                              </span>
+                            )}
+                            {user.telegram_handle && (
+                              <span className="flex items-center gap-1">
+                                <Send className="h-3 w-3" />
+                                {user.telegram_handle}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
