@@ -110,26 +110,26 @@ const WinnersTable = () => {
     setCurrentPage(1);
   };
 
-  const getCompetitionTypeBadgeColor = (type: string) => {
-    switch (type) {
-      case "monthly":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "weekly":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "seasonal":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "special":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
+  // const getCompetitionTypeBadgeColor = (type: string) => {
+  //   switch (type) {
+  //     case "monthly":
+  //       return "bg-purple-100 text-purple-800 border-purple-200";
+  //     case "weekly":
+  //       return "bg-blue-100 text-blue-800 border-blue-200";
+  //     case "seasonal":
+  //       return "bg-green-100 text-green-800 border-green-200";
+  //     case "special":
+  //       return "bg-orange-100 text-orange-800 border-orange-200";
+  //     default:
+  //       return "bg-gray-100 text-gray-800 border-gray-200";
+  //   }
+  // };
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return "🥇";
     if (rank === 2) return "🥈";
     if (rank === 3) return "🥉";
-    return `#${rank}`;
+    return `${rank}`;
   };
 
   const getSortIcon = () => {
@@ -318,7 +318,7 @@ const WinnersTable = () => {
                   <div className="flex items-center gap-4 flex-1">
                     {/* Rank */}
                     <div className="flex items-center gap-2 min-w-[60px]">
-                      <span className="text-2xl">
+                      <span className="text-2xl pl-4">
                         {getRankIcon(winner.rank_achieved)}
                       </span>
                     </div>
@@ -336,9 +336,9 @@ const WinnersTable = () => {
                           <h4 className="font-semibold text-foreground truncate">
                             {winner.username}
                           </h4>
-                          <Badge className={getCompetitionTypeBadgeColor(winner.competition_type)}>
+                          {/* <Badge className={getCompetitionTypeBadgeColor(winner.competition_type)}>
                             {winner.competition_type.toUpperCase()}
-                          </Badge>
+                          </Badge> */}
                         </div>
                         <p className="text-sm text-muted-foreground truncate">
                           {winner.email}
@@ -359,7 +359,7 @@ const WinnersTable = () => {
                       <div className="text-center">
                         <div className="flex items-center gap-1 text-sm font-medium">
                           <Gift className="h-4 w-4 text-green-500" />
-                          ${winner.prize_value.toLocaleString()}
+                          {winner.prize_value.toLocaleString()}
                         </div>
                         <p className="text-xs text-muted-foreground">Prize Value</p>
                       </div>
@@ -378,7 +378,7 @@ const WinnersTable = () => {
                   <div className="md:hidden flex flex-col items-end gap-1">
                     <div className="flex items-center gap-1 text-sm font-medium">
                       <Gift className="h-4 w-4 text-green-500" />
-                      ${winner.prize_value.toLocaleString()}
+                      {winner.prize_value.toLocaleString()}
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Zap className="h-3 w-3 text-blue-500" />

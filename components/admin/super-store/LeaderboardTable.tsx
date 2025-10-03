@@ -127,6 +127,19 @@ const LeaderboardTable = () => {
     }
   };
 
+  const getMoodWithEmoji = (mood: string) => {
+    switch (mood) {
+      case "happy":
+        return "😊 Happy";
+      case "neutral":
+        return "😐 Neutral";
+      case "sad":
+        return "😢 Sad";
+      default:
+        return mood;
+    }
+  };
+
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "active":
@@ -358,9 +371,9 @@ const LeaderboardTable = () => {
               className="bg-background rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-300"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 flex-1">
+                <div className="flex items-center gap-0 flex-1">
                   {/* Rank */}
-                  <div className="flex items-center gap-2 min-w-[80px]">
+                  <div className="flex items-center gap-2 min-w-[60px]">
                     <span className="text-2xl font-bold">
                       {getRankIcon(claimer.rank)}
                     </span>
@@ -415,7 +428,7 @@ const LeaderboardTable = () => {
 
                     <div className="text-center">
                       <Badge className={getMoodBadgeColor(claimer.mood)}>
-                        {claimer.mood}
+                        {getMoodWithEmoji(claimer.mood)}
                       </Badge>
                     </div>
                   </div>
@@ -432,7 +445,7 @@ const LeaderboardTable = () => {
                     {claimer.total_xp.toLocaleString()}
                   </div>
                   <Badge className={getMoodBadgeColor(claimer.mood)}>
-                    {claimer.mood}
+                    {getMoodWithEmoji(claimer.mood)}
                   </Badge>
                 </div>
               </div>

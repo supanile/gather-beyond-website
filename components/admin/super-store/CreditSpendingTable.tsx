@@ -325,7 +325,7 @@ const CreditSpendingTable = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 flex-1">
                   {/* Ranking */}
-                  <div className="flex items-center gap-2 min-w-[60px]">
+                  <div className="flex items-center gap-2 min-w-[40px]">
                     <span className="text-xl font-bold text-muted-foreground">
                       {startIndex + index + 1}
                     </span>
@@ -362,7 +362,7 @@ const CreditSpendingTable = () => {
                     <div className="text-center">
                       <div className="flex items-center gap-1 text-sm font-medium">
                         <CreditCard className="h-4 w-4 text-green-500" />
-                        ${spending.total_credits_spent.toLocaleString()}
+                        {spending.total_credits_spent.toLocaleString()}
                       </div>
                       <p className="text-xs text-muted-foreground">Total Spent</p>
                     </div>
@@ -378,7 +378,7 @@ const CreditSpendingTable = () => {
                     <div className="text-center">
                       <div className="flex items-center gap-1 text-sm font-medium">
                         <TrendingUp className="h-4 w-4 text-purple-500" />
-                        ${spending.avg_purchase_amount}
+                        {spending.avg_purchase_amount}
                       </div>
                       <p className="text-xs text-muted-foreground">Avg Amount</p>
                     </div>
@@ -397,14 +397,14 @@ const CreditSpendingTable = () => {
                 <div className="lg:hidden flex flex-col items-end gap-1">
                   <div className="flex items-center gap-1 text-sm font-medium">
                     <CreditCard className="h-4 w-4 text-green-500" />
-                    ${spending.total_credits_spent.toLocaleString()}
+                    {spending.total_credits_spent.toLocaleString()}
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <ShoppingBag className="h-3 w-3 text-blue-500" />
                     {spending.purchases_count} purchases
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Avg: ${spending.avg_purchase_amount}
+                    Avg: {spending.avg_purchase_amount}
                   </div>
                 </div>
               </div>
