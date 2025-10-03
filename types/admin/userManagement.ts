@@ -39,6 +39,7 @@ export interface User {
   telegram_id: string | null;
   missions_completed: number;
   username?: string;
+  country?: string;
 }
 
 export interface UserWithAgent extends User {

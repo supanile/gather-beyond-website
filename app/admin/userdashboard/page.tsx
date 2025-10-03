@@ -46,7 +46,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InterestsPieChartCard from "@/components/admin/user-management/InterestsPieChartCard";
 import MoodBarChartCard from "@/components/admin/user-management/MoodBarChartCard";
 import DailySubmissionLineChartCard from "@/components/admin/user-management/DailySubmissionLineChartCard";
+import ServerOverview from "@/components/admin/server-overview/ServerOverview";
 import { useDiscordServers } from "@/hooks/useDiscordServers";
+import CountryBarChartCard from "@/components/admin/user-management/CountryBarChartCard";
 
 type SortOption = {
   field:
@@ -303,7 +305,8 @@ const DashboardPage = () => {
           </div>
 
           {/* Chart Cards Loading */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <Skeleton className="h-96 rounded-2xl" />
             <Skeleton className="h-96 rounded-2xl" />
             <Skeleton className="h-96 rounded-2xl" />
           </div>
@@ -531,14 +534,17 @@ const DashboardPage = () => {
             )}
           </div>
 
-          {/* Chart Cards - 2 columns */}
+          {/* Chart Cards - 3 columns */}
           {!isLoadingStats && !statsError && (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               <div className="h-full">
                 <InterestsPieChartCard users={users} />
               </div>
               <div className="h-full">
                 <MoodBarChartCard users={users} />
+              </div>
+              <div className="h-full">
+                <CountryBarChartCard users={users} />
               </div>
             </div>
           )}
@@ -555,7 +561,7 @@ const DashboardPage = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="user-management" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 md:h-16">
+          <TabsList className="grid w-full grid-cols-3 h-12 sm:h-14 md:h-16">
             <TabsTrigger
               value="user-management"
               className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
@@ -569,6 +575,13 @@ const DashboardPage = () => {
             >
               <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
               <span className="truncate">User Overview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="server-overview"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
+            >
+              <Server className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">Server Overview</span>
             </TabsTrigger>
           </TabsList>
 
@@ -822,6 +835,11 @@ const DashboardPage = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* Server Overview Tab */}
+          <TabsContent value="server-overview">
+            <ServerOverview />
           </TabsContent>
 
           {/* User Management Tab */}
