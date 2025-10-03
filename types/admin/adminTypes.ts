@@ -2,7 +2,8 @@ export interface User {
   _id: string;
   discord_id: string;
   missions_completed: number;
-  total_points: number;
+  total_points: number; // Keep for backward compatibility
+  credit: number; // New credit field
   email: string;
   interests: string;
   telegram_id: string;

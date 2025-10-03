@@ -161,10 +161,10 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
           <div className="flex items-center space-x-2">
             <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 dark:text-green-400 flex-shrink-0" />
             <span className="text-sm sm:text-base md:text-lg text-foreground font-medium">
-              {user.total_points || 0}
+              {user.credit || 0}
             </span>
             <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
-              {(user.total_points || 0) === 1 ? "credit" : "credits"}
+              {(user.credit || 0) === 1 ? "credit" : "credits"}
             </span>
             </div>
           <div className="flex items-center space-x-2">

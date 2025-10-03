@@ -14,7 +14,9 @@ export async function GET() {
       const discordUser = discordNames.find(discord => discord.discord_id === user.discord_id);
       return {
         ...user,
-        username: discordUser?.username || null
+        username: discordUser?.username || null,
+        // Add credit field - use total_points as credit for backward compatibility
+        credit: user.credit || user.total_points || 0
       };
     });
 
