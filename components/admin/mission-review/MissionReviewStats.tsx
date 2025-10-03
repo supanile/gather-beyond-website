@@ -26,7 +26,7 @@ export function MissionReviewStatsComponent({ stats }: MissionReviewStatsProps) 
       bgColor: "bg-blue-100 dark:bg-blue-900/20",
     },
     {
-      title: "Submited",
+      title: "Submitted",
       value: stats.submitted,
       icon: Clock,
       color: "text-yellow-600 dark:text-yellow-400",
