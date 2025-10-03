@@ -143,8 +143,8 @@ export async function POST(request: Request) {
     }
 
     console.log(`Partner "${body.partner}" mapped to ID: ${partnerId}`);
-    // Fix: treat startDate/endDate as UTC, format as ISO string without timezone conversion
-    function toIsoUtcString(dt: string | undefined) {
+    // Fix: treat startDate/endDate as local time, don't add timezone conversion
+    function toLocalIsoString(dt: string | undefined) {
       if (!dt) return undefined;
       let s = dt.replace(" ", "T");
       // If no seconds, add ':00'
@@ -153,13 +153,12 @@ export async function POST(request: Request) {
       }
       // Remove milliseconds if present
       s = s.replace(/\.\d{3}/, "");
-      // Add 'Z' if not present
-      if (!s.endsWith("Z")) s += "Z";
+      // Don't add 'Z' to preserve local time
       return s;
     }
     const durationData = {
-      start: body.startDate ? toIsoUtcString(body.startDate) : new Date().toISOString(),
-      end: body.endDate ? toIsoUtcString(body.endDate) : null,
+      start: body.startDate ? toLocalIsoString(body.startDate) : new Date().toISOString(),
+      end: body.endDate ? toLocalIsoString(body.endDate) : null,
     };
 
     console.log("Duration data created:", durationData);
@@ -418,27 +417,27 @@ export async function PUT(request: Request) {
         }
       }
 
-      // Fix: treat startDate/endDate as UTC, format as ISO string without timezone conversion
-      function toIsoUtcString(dt: string | undefined) {
+      // Fix: treat startDate/endDate as local time, don't add timezone conversion
+      function toLocalIsoString(dt: string | undefined) {
         if (!dt) return undefined;
         let s = dt.replace(" ", "T");
         if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) {
           s += ":00";
         }
         s = s.replace(/\.\d{3}/, "");
-        if (!s.endsWith("Z")) s += "Z";
+        // Don't add 'Z' to preserve local time
         return s;
       }
 
       const durationData = {
         ...currentDuration,
         start: updateData.startDate
-          ? toIsoUtcString(updateData.startDate)
+          ? toLocalIsoString(updateData.startDate)
           : currentDuration.start || new Date().toISOString(),
         end:
           updateData.endDate !== undefined
             ? updateData.endDate
-              ? toIsoUtcString(updateData.endDate)
+              ? toLocalIsoString(updateData.endDate)
               : null
             : currentDuration.end,
       };
