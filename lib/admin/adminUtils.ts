@@ -29,7 +29,8 @@ export const calculateStats = async (users: User[]) => {
     (sum, user) => sum + user.missions_completed,
     0
   );
-  const totalPoints = users.reduce((sum, user) => sum + user.total_points, 0);
+  // Use credit field, fallback to total_points for backward compatibility
+  const totalPoints = users.reduce((sum, user) => sum + (user.credit || 0), 0);
 
   let totalCommunities = 0;
   for (const user of users) {
