@@ -4,9 +4,11 @@ import {
   Claimer, 
   CreditSpending, 
   Winner,
+  Campaign,
   LeaderboardFilters,
   CreditSpendingFilters,
-  WinnerFilters
+  WinnerFilters,
+  CampaignFilters
 } from "@/types/admin/superStoreTypes";
 import { mockSuperStoreData } from "@/data/admin/superStoreMockData";
 
@@ -276,6 +278,106 @@ export function useWinners(filters?: WinnerFilters) {
   return {
     winners: filteredWinners,
     totalWinners: data?.winners.length || 0,
+    isLoading,
+    error
+  };
+}
+
+// Hook for campaigns data
+export function useCampaigns(filters: CampaignFilters) {
+  const { data, isLoading, error } = useSuperStoreData();
+  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
+
+  useEffect(() => {
+    if (!data) {
+      setFilteredCampaigns([]);
+      return;
+    }
+
+    let filtered = [...data.campaigns];
+
+    // Apply status filter
+    if (filters.status.length > 0) {
+      filtered = filtered.filter(campaign => 
+        filters.status.includes(campaign.status)
+      );
+    }
+
+    // Apply campaign type filter
+    if (filters.campaignType.length > 0) {
+      filtered = filtered.filter(campaign => 
+        filters.campaignType.includes(campaign.campaign_type)
+      );
+    }
+
+    // Apply date range filter
+    if (filters.dateRange.start || filters.dateRange.end) {
+      filtered = filtered.filter(campaign => {
+        const campaignStartDate = new Date(campaign.start_date);
+        const campaignEndDate = new Date(campaign.end_date);
+        
+        let matchesStart = true;
+        let matchesEnd = true;
+
+        if (filters.dateRange.start) {
+          const filterStart = new Date(filters.dateRange.start);
+          matchesStart = campaignStartDate >= filterStart || campaignEndDate >= filterStart;
+        }
+
+        if (filters.dateRange.end) {
+          const filterEnd = new Date(filters.dateRange.end);
+          matchesEnd = campaignStartDate <= filterEnd || campaignEndDate <= filterEnd;
+        }
+
+        return matchesStart && matchesEnd;
+      });
+    }
+
+    // Apply sorting
+    if (filters.sortBy) {
+      filtered.sort((a, b) => {
+        let aValue: string | number;
+        let bValue: string | number;
+
+        switch (filters.sortBy) {
+          case "start_date":
+            aValue = new Date(a.start_date).getTime();
+            bValue = new Date(b.start_date).getTime();
+            break;
+          case "end_date":
+            aValue = new Date(a.end_date).getTime();
+            bValue = new Date(b.end_date).getTime();
+            break;
+          case "total_participants":
+            aValue = a.total_participants;
+            bValue = b.total_participants;
+            break;
+          case "total_credits_spent":
+            aValue = a.total_credits_spent;
+            bValue = b.total_credits_spent;
+            break;
+          case "total_prize_value":
+            aValue = a.total_prize_value;
+            bValue = b.total_prize_value;
+            break;
+          default:
+            return 0;
+        }
+
+        if (filters.sortDirection === "asc") {
+          return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        } else {
+          return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+        }
+      });
+    }
+
+    setFilteredCampaigns(filtered);
+  }, [data, filters]);
+
+  return {
+    campaigns: filteredCampaigns,
+    totalCampaigns: data?.campaigns.length || 0,
     isLoading,
     error
   };

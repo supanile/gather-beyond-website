@@ -15,6 +15,7 @@ import {
   Calendar,
   Zap,
   Users,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,37 +35,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { useWinners } from "@/hooks/useSuperStoreData";
-import { WinnerFilters } from "@/types/admin/superStoreTypes";
+import { useCampaigns } from "@/hooks/useSuperStoreData";
+import { CampaignFilters } from "@/types/admin/superStoreTypes";
 
 const WinnersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [filters, setFilters] = useState<WinnerFilters>({
-    competitionType: [],
-    sortBy: "won_date",
+  const [filters, setFilters] = useState<CampaignFilters>({
+    campaignType: [],
+    sortBy: "start_date",
     sortDirection: "desc",
+    status: [],
     dateRange: { start: "", end: "" }
   });
 
-  const { winners, totalWinners, isLoading, error } = useWinners(filters);
+  const { campaigns, totalCampaigns, isLoading, error } = useCampaigns(filters);
 
   // Filter by search term
-  const filteredWinners = winners.filter(
-    (winner) =>
-      winner.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      winner.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      winner.competition_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      winner.prize_title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCampaigns = campaigns.filter(
+    (campaign) =>
+      campaign.campaign_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.campaign_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.winners.some(winner => 
+        winner.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        winner.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        winner.prize_title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
   );
 
   // Calculate pagination
-  const totalItems = filteredWinners.length;
+  const totalItems = filteredCampaigns.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentWinners = filteredWinners.slice(startIndex, endIndex);
+  const currentCampaigns = filteredCampaigns.slice(startIndex, endIndex);
 
   // Reset to first page when search or items per page changes
   useEffect(() => {
@@ -79,7 +85,7 @@ const WinnersTable = () => {
     setItemsPerPage(parseInt(value));
   };
 
-  const handleSortChange = (sortBy: WinnerFilters["sortBy"], direction: "asc" | "desc") => {
+  const handleSortChange = (sortBy: CampaignFilters["sortBy"], direction: "asc" | "desc") => {
     setFilters(prev => ({
       ...prev,
       sortBy,
@@ -90,10 +96,11 @@ const WinnersTable = () => {
   // Check if any filters are applied (not default values)
   const hasActiveFilters = () => {
     return (
-      filters.competitionType.length > 0 ||
+      filters.campaignType.length > 0 ||
+      filters.status.length > 0 ||
       filters.dateRange.start !== "" ||
       filters.dateRange.end !== "" ||
-      filters.sortBy !== "won_date" ||
+      filters.sortBy !== "start_date" ||
       filters.sortDirection !== "desc"
     );
   };
@@ -101,29 +108,43 @@ const WinnersTable = () => {
   // Clear all filters to default values
   const clearAllFilters = () => {
     setFilters({
-      competitionType: [],
-      sortBy: "won_date",
+      campaignType: [],
+      sortBy: "start_date",
       sortDirection: "desc",
+      status: [],
       dateRange: { start: "", end: "" }
     });
     setSearchTerm("");
     setCurrentPage(1);
   };
 
-  // const getCompetitionTypeBadgeColor = (type: string) => {
-  //   switch (type) {
-  //     case "monthly":
-  //       return "bg-purple-100 text-purple-800 border-purple-200";
-  //     case "weekly":
-  //       return "bg-blue-100 text-blue-800 border-blue-200";
-  //     case "seasonal":
-  //       return "bg-green-100 text-green-800 border-green-200";
-  //     case "special":
-  //       return "bg-orange-100 text-orange-800 border-orange-200";
-  //     default:
-  //       return "bg-gray-100 text-gray-800 border-gray-200";
-  //   }
-  // };
+  const getCampaignTypeBadgeColor = (type: string) => {
+    switch (type) {
+      case "monthly":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "weekly":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "seasonal":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "special":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "completed":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      case "upcoming":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return "🥇";
@@ -174,7 +195,7 @@ const WinnersTable = () => {
         </div>
         <div className="skeleton h-10 w-full" />
         {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="skeleton h-20 w-full rounded-lg" />
+          <div key={index} className="skeleton h-32 w-full rounded-lg" />
         ))}
       </div>
     );
@@ -183,7 +204,7 @@ const WinnersTable = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-32">
-        <p className="text-destructive">Error loading winners data: {error}</p>
+        <p className="text-destructive">Error loading campaigns data: {error}</p>
       </div>
     );
   }
@@ -191,9 +212,9 @@ const WinnersTable = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">Competition Winners</h3>
+        <h3 className="text-xl font-semibold">Campaign Winners</h3>
         <p className="text-sm text-muted-foreground">
-          Total: {totalWinners.toLocaleString()} winners
+          Total: {totalCampaigns.toLocaleString()} campaigns
         </p>
       </div>
 
@@ -207,10 +228,11 @@ const WinnersTable = () => {
                 <Filter className="h-4 w-4 mr-1" />
                 {getSortIcon()}
                 <span className="sm:inline ml-1">
-                  Sort by {filters.sortBy === "won_date" ? "Date Won" : 
-                           filters.sortBy === "prize_value" ? "Prize Value" : 
-                           filters.sortBy === "rank_achieved" ? "Rank" :
-                           "XP Earned"}
+                  Sort by {filters.sortBy === "start_date" ? "Start Date" : 
+                           filters.sortBy === "end_date" ? "End Date" : 
+                           filters.sortBy === "total_participants" ? "Participants" :
+                           filters.sortBy === "total_credits_spent" ? "Credits Spent" :
+                           "Prize Value"}
                 </span>
               </Button>
             </DropdownMenuTrigger>
@@ -218,45 +240,54 @@ const WinnersTable = () => {
               <DropdownMenuLabel>Sort by</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => handleSortChange("won_date", "desc")}
+                onClick={() => handleSortChange("start_date", "desc")}
                 className="flex items-center justify-between"
               >
-                <span>Date Won (Recent)</span>
-                {filters.sortBy === "won_date" && filters.sortDirection === "desc" && (
+                <span>Start Date (Recent)</span>
+                {filters.sortBy === "start_date" && filters.sortDirection === "desc" && (
                   <CheckIcon className="h-4 w-4 text-green-500" />
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => handleSortChange("prize_value", "desc")}
+                onClick={() => handleSortChange("end_date", "desc")}
+                className="flex items-center justify-between"
+              >
+                <span>End Date (Recent)</span>
+                {filters.sortBy === "end_date" && filters.sortDirection === "desc" && (
+                  <CheckIcon className="h-4 w-4 text-green-500" />
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSortChange("total_participants", "desc")}
+                className="flex items-center justify-between"
+              >
+                <span>Participants (High to Low)</span>
+                {filters.sortBy === "total_participants" && filters.sortDirection === "desc" && (
+                  <CheckIcon className="h-4 w-4 text-green-500" />
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSortChange("total_credits_spent", "desc")}
+                className="flex items-center justify-between"
+              >
+                <span>Credits Spent (High to Low)</span>
+                {filters.sortBy === "total_credits_spent" && filters.sortDirection === "desc" && (
+                  <CheckIcon className="h-4 w-4 text-green-500" />
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSortChange("total_prize_value", "desc")}
                 className="flex items-center justify-between"
               >
                 <span>Prize Value (High to Low)</span>
-                {filters.sortBy === "prize_value" && filters.sortDirection === "desc" && (
-                  <CheckIcon className="h-4 w-4 text-green-500" />
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSortChange("rank_achieved", "asc")}
-                className="flex items-center justify-between"
-              >
-                <span>Rank (Best to Worst)</span>
-                {filters.sortBy === "rank_achieved" && filters.sortDirection === "asc" && (
-                  <CheckIcon className="h-4 w-4 text-green-500" />
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleSortChange("xp_earned", "desc")}
-                className="flex items-center justify-between"
-              >
-                <span>XP Earned (High to Low)</span>
-                {filters.sortBy === "xp_earned" && filters.sortDirection === "desc" && (
+                {filters.sortBy === "total_prize_value" && filters.sortDirection === "desc" && (
                   <CheckIcon className="h-4 w-4 text-green-500" />
                 )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Clear Filter Button - แสดงเฉพาะเมื่อไม่ใช่ค่าเริ่มต้น */}
+          {/* Clear Filter Button */}
           {hasActiveFilters() && (
             <Button
               variant="destructive"
@@ -272,7 +303,7 @@ const WinnersTable = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground whitespace-nowrap">
-              Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} winners
+              Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} campaigns
             </span>
           </div>
           <div className="flex items-center space-x-2">
@@ -297,135 +328,167 @@ const WinnersTable = () => {
         <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
         <input
           type="text"
-          placeholder="Search winners by username, email, competition, or prize..."
+          placeholder="Search campaigns by name, type, status, or winners..."
           className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* Winners List */}
-      <div className="space-y-4 mb-6">
-        {currentWinners.length > 0 ? (
-          currentWinners.map((winner) => (
+      {/* Campaigns List */}
+      <div className="space-y-6 mb-6">
+        {currentCampaigns.length > 0 ? (
+          currentCampaigns.map((campaign) => (
             <div
-              key={winner._id}
-              className="bg-background rounded-lg border border-border p-4 hover:shadow-lg transition-all duration-300"
+              key={campaign._id}
+              className="bg-background rounded-lg border border-border p-6 hover:shadow-lg transition-all duration-300"
             >
-              <div className="flex flex-col gap-4">
-                {/* Header Row */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 flex-1">
-                    {/* Rank */}
-                    <div className="flex items-center gap-2 min-w-[60px]">
-                      <span className="text-2xl pl-4">
-                        {getRankIcon(winner.rank_achieved)}
-                      </span>
-                    </div>
-
-                    {/* User Info */}
-                    <div className="flex items-center gap-3 flex-1">
-                      <Avatar className="h-12 w-12">
-                        <AvatarFallback>
-                          {winner.username.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-foreground truncate">
-                            {winner.username}
-                          </h4>
-                          {/* <Badge className={getCompetitionTypeBadgeColor(winner.competition_type)}>
-                            {winner.competition_type.toUpperCase()}
-                          </Badge> */}
-                        </div>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {winner.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Date and Basic Stats */}
-                    <div className="hidden md:flex items-center gap-6">
-                      <div className="text-center">
-                        <div className="flex items-center gap-1 text-sm font-medium">
-                          <Calendar className="h-4 w-4 text-gray-500" />
-                          {new Date(winner.won_date).toLocaleDateString()}
-                        </div>
-                        <p className="text-xs text-muted-foreground">Date Won</p>
-                      </div>
-
-                      <div className="text-center">
-                        <div className="flex items-center gap-1 text-sm font-medium">
-                          <Gift className="h-4 w-4 text-green-500" />
-                          {winner.prize_value.toLocaleString()}
-                        </div>
-                        <p className="text-xs text-muted-foreground">Prize Value</p>
-                      </div>
-
-                      <div className="text-center">
-                        <div className="flex items-center gap-1 text-sm font-medium">
-                          <Zap className="h-4 w-4 text-blue-500" />
-                          {winner.xp_earned.toLocaleString()}
-                        </div>
-                        <p className="text-xs text-muted-foreground">XP Earned</p>
-                      </div>
-                    </div>
+              {/* Campaign Header */}
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h4 className="text-xl font-bold text-foreground">
+                      {campaign.campaign_name}
+                    </h4>
+                    <Badge className={getCampaignTypeBadgeColor(campaign.campaign_type)}>
+                      {campaign.campaign_type.toUpperCase()}
+                    </Badge>
+                    <Badge className={getStatusBadgeColor(campaign.status)}>
+                      {campaign.status.toUpperCase()}
+                    </Badge>
                   </div>
-
-                  {/* Mobile Stats */}
-                  <div className="md:hidden flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-1 text-sm font-medium">
-                      <Gift className="h-4 w-4 text-green-500" />
-                      {winner.prize_value.toLocaleString()}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Zap className="h-3 w-3 text-blue-500" />
-                      {winner.xp_earned} XP
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(winner.won_date).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Competition Details */}
-                <div className="pl-16 md:pl-20">
-                  <div className="bg-muted/30 rounded-lg p-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex-1">
-                        <h5 className="font-medium text-foreground mb-1">
-                          {winner.competition_name}
-                        </h5>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {winner.prize_title}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {winner.prize_description}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4 text-gray-500" />
-                          <span>{winner.total_participants.toLocaleString()} participants</span>
-                        </div>
-                        {winner.badge_earned && (
-                          <Badge variant="secondary">
-                            🏆 {winner.badge_earned}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+                  
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>
+                      {new Date(campaign.start_date).toLocaleDateString()} - {new Date(campaign.end_date).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
               </div>
+
+              {/* Campaign Stats */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="bg-muted/30 rounded-lg p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Users className="h-5 w-5 text-blue-500" />
+                    <span className="text-lg font-semibold">{campaign.total_participants.toLocaleString()}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Participants</p>
+                </div>
+
+                <div className="bg-muted/30 rounded-lg p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Zap className="h-5 w-5 text-purple-500" />
+                    <span className="text-lg font-semibold">{campaign.total_credits_spent.toLocaleString()}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Credits Spent</p>
+                </div>
+
+                <div className="bg-muted/30 rounded-lg p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Gift className="h-5 w-5 text-green-500" />
+                    <span className="text-lg font-semibold">{campaign.total_prize_value.toLocaleString()}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Prize Value</p>
+                </div>
+
+                <div className="bg-muted/30 rounded-lg p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Trophy className="h-5 w-5 text-yellow-500" />
+                    <span className="text-lg font-semibold">{campaign.winners.length}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Winners</p>
+                </div>
+              </div>
+
+              {/* Winners List */}
+              {campaign.winners.length > 0 ? (
+                <div>
+                  <h5 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-yellow-500" />
+                    List of Winners:
+                  </h5>
+                  <div className="space-y-3">
+                    {campaign.winners.map((winner) => (
+                      <div
+                        key={winner._id}
+                        className="bg-muted/20 rounded-lg p-4 flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          {/* Rank */}
+                          <div className="flex items-center gap-2 min-w-[40px]">
+                            <span className="text-xl">
+                              {getRankIcon(winner.rank_achieved)}
+                            </span>
+                          </div>
+
+                          {/* Winner Info */}
+                          <div className="flex items-center gap-3 flex-1">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback>
+                                {winner.username.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            
+                            <div className="flex-1 min-w-0">
+                              <h6 className="font-medium text-foreground truncate">
+                                {winner.username}
+                              </h6>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {winner.email}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Prize Info */}
+                          <div className="hidden md:flex flex-col items-end">
+                            <div className="flex items-center gap-1 text-sm font-medium">
+                              <Gift className="h-4 w-4 text-green-500" />
+                              {winner.prize_title}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Value: {winner.prize_value.toLocaleString()}
+                            </p>
+                          </div>
+
+                          {/* Date Won */}
+                          <div className="text-right">
+                            <div className="flex items-center gap-1 text-sm font-medium">
+                              <Calendar className="h-4 w-4 text-gray-500" />
+                              {new Date(winner.won_date).toLocaleDateString()}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {winner.xp_earned} XP earned
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Mobile Prize Info */}
+                        <div className="md:hidden flex flex-col items-end gap-1">
+                          <div className="flex items-center gap-1 text-sm font-medium">
+                            <Gift className="h-4 w-4 text-green-500" />
+                            {winner.prize_value.toLocaleString()}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {winner.xp_earned} XP
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-muted/20 rounded-lg">
+                  <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground">No winners yet for this campaign</p>
+                </div>
+              )}
             </div>
           ))
         ) : (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No winners found matching your search.</p>
+            <p className="text-muted-foreground">No campaigns found matching your search.</p>
           </div>
         )}
       </div>
