@@ -18,6 +18,7 @@ import {
   Zap,
   UserCog,
   Server,
+  ShoppingBasket,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
@@ -49,6 +50,7 @@ import DailySubmissionLineChartCard from "@/components/admin/user-management/Dai
 import ServerOverview from "@/components/admin/server-overview/ServerOverview";
 import { useDiscordServers } from "@/hooks/useDiscordServers";
 import CountryBarChartCard from "@/components/admin/user-management/CountryBarChartCard";
+import SuperStoreOverview from "@/components/admin/super-store/SuperStoreOverview";
 
 type SortOption = {
   field:
@@ -561,7 +563,7 @@ const DashboardPage = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="user-management" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-12 sm:h-14 md:h-16">
+          <TabsList className="grid w-full grid-cols-4 h-12 sm:h-14 md:h-16">
             <TabsTrigger
               value="user-management"
               className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
@@ -582,6 +584,13 @@ const DashboardPage = () => {
             >
               <Server className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
               <span className="truncate">Server Overview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="super-store"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
+            >
+              <ShoppingBasket className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">Super Store Data</span>
             </TabsTrigger>
           </TabsList>
 
@@ -847,6 +856,11 @@ const DashboardPage = () => {
             <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
               <UserDataTable users={users} />
             </div>
+          </TabsContent>
+
+          {/* Super Store Data Tab */}
+          <TabsContent value="super-store">
+            <SuperStoreOverview />
           </TabsContent>
         </Tabs>
       </div>
