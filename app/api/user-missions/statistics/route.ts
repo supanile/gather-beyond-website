@@ -1,9 +1,26 @@
 import { NextResponse } from 'next/server';
 import { grist } from '@/lib/grist';
 
+interface UserMission {
+  id?: number;
+  id2?: number;
+  accepted_at?: string | number;
+  status?: 'accepted' | 'submitted' | 'completed' | 'rejected';
+}
+
+interface StatisticsData {
+  date: string;
+  dateLabel: string;
+  totalSubmissions: number;
+  acceptedMissions: number;
+  submittedMissions: number;
+  completedMissions: number;
+  rejectedMissions: number;
+}
+
 export async function GET() {
   try {
-    const userMissions = await grist.fetchTable("User_missions") as any[];
+    const userMissions = await grist.fetchTable("User_missions") as UserMission[];
     
     if (userMissions.length > 0) {
       console.log('Sample mission:', {
@@ -12,9 +29,9 @@ export async function GET() {
       });
     }
 
-    const dateGroups = new Map();
+    const dateGroups = new Map<string, UserMission[]>();
 
-    userMissions.forEach((mission: any) => {
+    userMissions.forEach((mission: UserMission) => {
       if (!mission.accepted_at) return;
       
       let date: Date | null = null;
@@ -34,15 +51,20 @@ export async function GET() {
         dateGroups.set(dateKey, []);
       }
 
-      dateGroups.get(dateKey).push(mission);
+      const dayMissions = dateGroups.get(dateKey);
+      if (dayMissions) {
+        dayMissions.push(mission);
+      }
     });
 
-    const statisticsData: any[] = [];
+    const statisticsData: StatisticsData[] = [];
 
     const sortedDates = Array.from(dateGroups.keys()).sort();
 
     sortedDates.forEach(dateKey => {
       const dayMissions = dateGroups.get(dateKey);
+      if (!dayMissions) return;
+      
       const date = new Date(dateKey);
 
       let acceptedMissions = 0;
@@ -50,16 +72,16 @@ export async function GET() {
       let completedMissions = 0;
       let rejectedMissions = 0;
 
-      const uniqueMissions = new Map();
+      const uniqueMissions = new Map<number, UserMission>();
 
-      dayMissions.forEach((mission: any) => {
+      dayMissions.forEach((mission: UserMission) => {
         const missionId = mission.id2 || mission.id;
-        if (!uniqueMissions.has(missionId)) {
+        if (missionId && !uniqueMissions.has(missionId)) {
           uniqueMissions.set(missionId, mission);
         }
       });
 
-      uniqueMissions.forEach((mission: any) => {
+      uniqueMissions.forEach((mission: UserMission) => {
         const status = mission.status;
         switch (status) {
           case 'accepted':
