@@ -41,6 +41,19 @@ export interface Winner {
   total_participants: number;
 }
 
+export interface Campaign {
+  _id: string;
+  campaign_name: string;
+  campaign_type: "weekly" | "monthly" | "seasonal" | "special";
+  start_date: string;
+  end_date: string;
+  total_participants: number;
+  total_credits_spent: number;
+  total_prize_value: number;
+  status: "active" | "completed" | "upcoming";
+  winners: Winner[];
+}
+
 export interface SuperStoreStats {
   total_claimers: number;
   total_credits_spent: number;
@@ -60,6 +73,7 @@ export interface SuperStoreData {
   claimers: Claimer[];
   creditSpending: CreditSpending[];
   winners: Winner[];
+  campaigns: Campaign[];
   stats: SuperStoreStats;
 }
 
@@ -86,8 +100,19 @@ export interface CreditSpendingFilters {
 
 export interface WinnerFilters {
   competitionType: string[];
-  sortBy: "won_date" | "prize_value" | "rank_achieved" | "xp_earned";
+  sortBy: "won_date" | "prize_value" | "rank_achieved" | "xp_earned" | "campaign_name";
   sortDirection: "asc" | "desc";
+  dateRange: {
+    start: string;
+    end: string;
+  };
+}
+
+export interface CampaignFilters {
+  campaignType: string[];
+  sortBy: "start_date" | "end_date" | "total_participants" | "total_credits_spent" | "total_prize_value";
+  sortDirection: "asc" | "desc";
+  status: string[];
   dateRange: {
     start: string;
     end: string;

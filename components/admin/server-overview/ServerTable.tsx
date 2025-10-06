@@ -14,6 +14,7 @@ import {
   CheckIcon,
   ArrowUp,
   ArrowDown,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,7 @@ type SortField =
   | "sc_user_count"
   | "total_credits"
   | "total_xp"
+  | "missions_completed"
   | "created_at";
 type SortDirection = "asc" | "desc";
 
@@ -69,6 +71,8 @@ const ServerTable: React.FC<ServerTableProps> = ({ servers }) => {
     { field: "total_credits", direction: "asc", label: "Least Credits" },
     { field: "total_xp", direction: "desc", label: "Most XP" },
     { field: "total_xp", direction: "asc", label: "Least XP" },
+    { field: "missions_completed", direction: "desc", label: "Most Missions" },
+    { field: "missions_completed", direction: "asc", label: "Least Missions" },
     { field: "created_at", direction: "desc", label: "Newest First" },
     { field: "created_at", direction: "asc", label: "Oldest First" },
   ];
@@ -151,6 +155,10 @@ const ServerTable: React.FC<ServerTableProps> = ({ servers }) => {
           aValue = a.total_xp;
           bValue = b.total_xp;
           break;
+        case "missions_completed":
+          aValue = a.missions_completed;
+          bValue = b.missions_completed;
+          break;
         case "created_at":
           aValue = new Date(a.created_at).getTime();
           bValue = new Date(b.created_at).getTime();
@@ -174,8 +182,10 @@ const ServerTable: React.FC<ServerTableProps> = ({ servers }) => {
   return (
     <div className="space-y-6">
       {/* Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-center
-sm:justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center
+sm:justify-between gap-4"
+      >
         <div className="flex items-center gap-2">
           {/* Sort Dropdown */}
           <DropdownMenu>
@@ -210,8 +220,10 @@ sm:justify-between gap-4">
           </DropdownMenu>
 
           {/* Clear Sort Button - แสดงเฉพาะเมื่อไม่ใช่ค่าเริ่มต้น */}
-          {!(sortConfig.field === "sc_user_count" &&
-            sortConfig.direction === "desc") && (
+          {!(
+            sortConfig.field === "sc_user_count" &&
+            sortConfig.direction === "desc"
+          ) && (
             <Button
               variant="destructive"
               size="sm"
@@ -310,6 +322,14 @@ sm:justify-between gap-4">
                           </p>
                           <p className="text-muted-foreground">XP</p>
                         </div>
+                        <div className="text-center">
+                          <p className="font-semibold text-foreground">
+                            {server.missions_completed.toLocaleString()}
+                          </p>
+                          <p className="text-muted-foreground">
+                            Missions Completed
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -363,26 +383,43 @@ sm:justify-between gap-4">
                       <Zap className="h-4 w-4 text-muted-foreground" />
                       <span>{server.total_xp.toLocaleString()} XP</span>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <span>
+                        {server.missions_completed.toLocaleString()} Missions
+                        Completed
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Expandable Content */}
                 <CollapsibleContent>
-                  <div className="border-t border-border bg-muted/30 p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Server Details */}
-                      <div className="bg-background rounded-lg border border-border p-4 space-y-4">
-                        <h4 className="font-semibold text-foreground flex items-center gap-2 pb-2 border-b border-border">
-                          <Server className="h-4 w-4 text-primary" />
+                  <div className="border-t border-border bg-gradient-to-br from-muted/20 to-muted/40 p-6">
+                    {/* Server Details */}
+                    <div className="bg-background/95 backdrop-blur-sm rounded-xl border border-border/50 shadow-sm overflow-hidden">
+                      <div className="p-4 border-b border-border/50">
+                        <h4 className="font-semibold text-foreground flex items-center gap-2">
+                          <div className="p-1.5 bg-primary/10 rounded-lg">
+                            <Server className="h-4 w-4 text-primary" />
+                          </div>
                           Server Information
                         </h4>
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors">
-                            <span className="text-sm text-muted-foreground flex items-center gap-2">
-                              <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
-                              Created
-                            </span>
-                            <span className="text-sm font-medium text-foreground">
+                      </div>
+
+                      <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Created Date */}
+                        <div className="group relative overflow-hidden rounded-lg border border-border/50 bg-gradient-to-br from-blue-50/50 to-background p-4 hover:shadow-md hover:border-blue-200/50 transition-all duration-300">
+                          <div className="relative">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="p-1.5 bg-blue-500/10 rounded-md">
+                                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                              </div>
+                              <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
+                                Created
+                              </span>
+                            </div>
+                            <p className="text-base font-semibold text-foreground">
                               {new Date(server.created_at).toLocaleDateString(
                                 "en-US",
                                 {
@@ -391,14 +428,22 @@ sm:justify-between gap-4">
                                   day: "numeric",
                                 }
                               )}
-                            </span>
+                            </p>
                           </div>
-                          <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors">
-                            <span className="text-sm text-muted-foreground flex items-center gap-2">
-                              <div className="h-1.5 w-1.5 rounded-full bg-purple-500"></div>
-                              Joined
-                            </span>
-                            <span className="text-sm font-medium text-foreground">
+                        </div>
+
+                        {/* Joined Date */}
+                        <div className="group relative overflow-hidden rounded-lg border border-border/50 bg-gradient-to-br from-purple-50/50 to-background p-4 hover:shadow-md hover:border-purple-200/50 transition-all duration-300">
+                          <div className="relative">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="p-1.5 bg-purple-500/10 rounded-md">
+                                <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+                              </div>
+                              <span className="text-xs font-medium text-purple-600 uppercase tracking-wide">
+                                Joined
+                              </span>
+                            </div>
+                            <p className="text-base font-semibold text-foreground">
                               {new Date(server.joined_at).toLocaleDateString(
                                 "en-US",
                                 {
@@ -407,57 +452,60 @@ sm:justify-between gap-4">
                                   day: "numeric",
                                 }
                               )}
-                            </span>
+                            </p>
                           </div>
-                          <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors">
-                            <span className="text-sm text-muted-foreground flex items-center gap-2">
+                        </div>
+
+                        {/* Status */}
+                        <div
+                          className={`group relative overflow-hidden rounded-lg border border-border/50 bg-gradient-to-br ${
+                            server.is_active
+                              ? "from-green-50/50"
+                              : "from-red-50/50"
+                          } to-background p-4 hover:shadow-md hover:border-${
+                            server.is_active ? "green" : "red"
+                          }-200/50 transition-all duration-300`}
+                        >
+                          <div className="relative">
+                            <div className="flex items-center gap-2 mb-2">
                               <div
-                                className={`h-1.5 w-1.5 rounded-full ${
+                                className={`p-1.5 ${
                                   server.is_active
-                                    ? "bg-green-500"
-                                    : "bg-red-500"
-                                }`}
-                              ></div>
-                              Status
-                            </span>
+                                    ? "bg-green-500/10"
+                                    : "bg-red-500/10"
+                                } rounded-md`}
+                              >
+                                <div
+                                  className={`h-2 w-2 rounded-full ${
+                                    server.is_active
+                                      ? "bg-green-500 animate-pulse"
+                                      : "bg-red-500"
+                                  }`}
+                                ></div>
+                              </div>
+                              <span
+                                className={`text-xs font-medium ${
+                                  server.is_active
+                                    ? "text-green-600"
+                                    : "text-red-600"
+                                } uppercase tracking-wide`}
+                              >
+                                Status
+                              </span>
+                            </div>
                             <Badge
                               variant={
-                              server.is_active ? "default" : "destructive"
+                                server.is_active ? "default" : "destructive"
                               }
-                              className={`text-xs font-semibold ${
-                              server.is_active
-                                ? "bg-green-100 text-green-800 border-green-200"
-                                : ""
+                              className={`text-sm font-semibold px-3 py-1 ${
+                                server.is_active
+                                  ? "bg-green-100 text-green-800 border-green-300 hover:bg-green-200"
+                                  : "hover:bg-red-600"
                               }`}
                             >
                               {server.is_active ? "● Active" : "● Inactive"}
                             </Badge>
                           </div>
-                        </div>
-                      </div>
-
-                      {/* Server Categories */}
-                      <div className="bg-background rounded-lg border border-border p-4 space-y-4">
-                        <h4 className="font-semibold text-foreground flex items-center gap-2 pb-2 border-b border-border">
-                          <Filter className="h-4 w-4 text-primary" />
-                          Categories
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {server.categories.length > 0 ? (
-                            server.categories.map((category, index) => (
-                              <Badge
-                                key={index}
-                                variant="secondary"
-                                className="text-xs font-medium px-3 py-1 hover:bg-secondary/80 transition-colors"
-                              >
-                                {category}
-                              </Badge>
-                            ))
-                          ) : (
-                            <span className="text-sm text-muted-foreground italic">
-                              No categories assigned
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
