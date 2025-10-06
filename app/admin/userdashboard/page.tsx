@@ -18,14 +18,16 @@ import {
   UserCog,
   Server,
   ShieldUser,
-  Activity,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
+import ActiveUsersCard from "@/components/admin/ActiveUsersCard";
 import AdminUserTable from "@/components/admin/AdminUserTable";
 import { UserDataTable } from "@/components/admin/user-management/UserDataTable";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAdminData } from "@/hooks/useAdminData";
+import { mockUsers } from "@/data/admin/mockActiveUsers";
+import { config, logMockData } from "@/config/mockConfig";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -84,14 +86,13 @@ const DashboardPage = () => {
     error: dataError,
   } = useAdminData();
 
-  // Calculate active users within the last 7 days
-  const getActiveUsersLast7Days = () => {
-    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
-    return users.filter(user => {
-      const lastActive = user.agent?.last_active;
-      return lastActive && lastActive > sevenDaysAgo;
-    }).length;
-  };
+  // Get mock data based on configuration
+  const activeUsersData = config.useMockData ? mockUsers : users;
+  
+  // Log mock data for debugging
+  if (config.useMockData && config.showDataInfo) {
+    logMockData(activeUsersData, 'Active Users Data');
+  }
 
   // Sort options - added last_active options
   const sortOptions: SortOption[] = [
@@ -481,11 +482,7 @@ const DashboardPage = () => {
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
                 />
-                <AdminStatCard
-                  title="Active Users (7d)"
-                  value={getActiveUsersLast7Days().toLocaleString()}
-                  icon={Activity}
-                />
+                <ActiveUsersCard users={activeUsersData} />
                 <AdminStatCard
                   title="Total Servers"
                   value={totalGuilds.toLocaleString()}
