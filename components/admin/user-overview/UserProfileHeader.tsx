@@ -6,6 +6,7 @@ import { UserWithAgent } from "@/types/admin/userManagement";
 import { UserAgent } from "@/types/admin/userTableTypes";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/admin/mission-review/UserAvatar";
+import { PlatformBadge } from "@/components/admin/mission-review/PlatformBadge";
 import XIcon from "@/components/ui/icons/XIcon";
 import { formatDate } from "@/lib/admin/user/userTableUtils";
 import {
@@ -22,6 +23,7 @@ import {
   CreditCard,
   Server as ServerIcon,
   Users as UsersIcon,
+  Smartphone,
 } from "lucide-react";
 
 interface UserProfileHeaderProps {
@@ -188,6 +190,14 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                   : "Unknown"}
               </span>
             </div>
+          </div>
+          {/* Platform Display */}
+          <div className="flex items-center space-x-2">
+            <Smartphone className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+            <span className="text-sm sm:text-base md:text-lg text-muted-foreground">
+              Platform:
+            </span>
+            <PlatformBadge platform={user.platform} />
           </div>
         </div>
 
