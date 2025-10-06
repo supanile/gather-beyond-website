@@ -91,6 +91,7 @@ export interface MissionReviewFilters {
 
 export interface MissionReviewStats {
   total: number;
+  accepted: number;
   submitted: number;
   completed: number;
   rejected: number;
