@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Eye,
   Search,
@@ -42,8 +43,12 @@ import {
   getLevelBadgeColor,
   getXPBadgeColor,
   getCreditsBadgeColor,
+  getCreditsUsedBadgeColor,
+  getExpenseTypeIcon,
+  getExpenseTypeBadgeColor,
   formatUserTableDate,
   formatLastActive,
+  formatExpenseDate,
 } from "@/lib/admin/user/userTableUtils";
 import XIcon from "@/components/ui/icons/XIcon";
 import { UserAvatar } from "@/components/admin/mission-review/UserAvatar";
@@ -74,6 +79,8 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     lastActive: true,
     joinedDate: true,
     credits: true,
+    creditsUsed: true,
+    creditExpenseNote: true,
   });
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithAgent | null>(null);
@@ -250,6 +257,29 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                       {user.agent?.credits?.toLocaleString() || "0"} Credits
                     </Badge>
                   )}
+                  {columnVisibility.creditsUsed && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant="outline"
+                            className={`text-xs cursor-help ${getCreditsUsedBadgeColor(
+                              user.agent?.credits_used_lifetime || 0,
+                              users
+                            )}`}
+                          >
+                            {user.agent?.credits_used_lifetime?.toLocaleString() || "0"} Used
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="text-xs">
+                            <div>Lifetime: {user.agent?.credits_used_lifetime?.toLocaleString() || "0"}</div>
+                            <div>30 days: {user.agent?.credits_used_30d?.toLocaleString() || "0"}</div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   {columnVisibility.mood && user.agent?.mood && (
                     <Badge
                       variant="outline"
@@ -263,6 +293,31 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     </Badge>
                   )}
                 </div>
+
+                {/* Credit Expense Note */}
+                {columnVisibility.creditExpenseNote && user.agent?.last_expense_reason && (
+                  <div className="space-y-1">
+                    <span className="text-xs text-muted-foreground">
+                      Latest Expense
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${getExpenseTypeBadgeColor(user.agent.last_expense_type || "other")}`}
+                      >
+                        <span className="mr-1">
+                          {getExpenseTypeIcon(user.agent.last_expense_type || "other")}
+                        </span>
+                        {user.agent.last_expense_reason}
+                      </Badge>
+                      {user.agent.last_expense_date && (
+                        <span className="text-xs text-muted-foreground">
+                          {formatExpenseDate(user.agent.last_expense_date)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Health Bar */}
                 {columnVisibility.health &&
@@ -497,6 +552,64 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   </DropdownMenu>
                 </TableHead>
               )}
+              {columnVisibility.creditsUsed && (
+                <TableHead>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+                      >
+                        Credits Used
+                        {getSortIcon("agent.credits_used_lifetime")}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
+                      <DropdownMenuItem
+                        onClick={() => handleSort("agent.credits_used_lifetime")}
+                        className="p-2 justify-center"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSort("agent.credits_used_lifetime")}
+                        className="p-2 justify-center"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => onToggleColumnVisibility("creditsUsed")}
+                        className="p-2 justify-center"
+                      >
+                        <EyeOff className="w-4 h-4" />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableHead>
+              )}
+              {columnVisibility.creditExpenseNote && (
+                <TableHead>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+                      >
+                        Credit Expense
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-auto min-w-0">
+                      <DropdownMenuItem
+                        onClick={() => onToggleColumnVisibility("creditExpenseNote")}
+                        className="p-2 justify-center"
+                      >
+                        <EyeOff className="w-4 h-4" />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableHead>
+              )}
               {columnVisibility.mood && (
                 <TableHead>
                   <DropdownMenu>
@@ -597,7 +710,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+                        className="-ml-3 h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
                       >
                         Last Active
                         {getSortIcon("agent.last_active")}
@@ -633,7 +746,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
+                        className="-ml-6 h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
                       >
                         Joined Date
                         {getSortIcon("agent.created_at")}
@@ -753,6 +866,57 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                       </div>
                     </TableCell>
                   )}
+                  {columnVisibility.creditsUsed && (
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge
+                                variant="outline"
+                                className={`cursor-help ${getCreditsUsedBadgeColor(
+                                  user.agent?.credits_used_lifetime || 0,
+                                  users
+                                )}`}
+                              >
+                                {user.agent?.credits_used_lifetime?.toLocaleString() || "0"} Used
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="text-xs">
+                                <div>Lifetime: {user.agent?.credits_used_lifetime?.toLocaleString() || "0"}</div>
+                                <div>30 days: {user.agent?.credits_used_30d?.toLocaleString() || "0"}</div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </TableCell>
+                  )}
+                  {columnVisibility.creditExpenseNote && (
+                    <TableCell>
+                      {user.agent?.last_expense_reason ? (
+                        <div className="flex flex-col gap-1">
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${getExpenseTypeBadgeColor(user.agent.last_expense_type || "other")}`}
+                          >
+                            <span className="mr-1">
+                              {getExpenseTypeIcon(user.agent.last_expense_type || "other")}
+                            </span>
+                            {user.agent.last_expense_reason}
+                          </Badge>
+                          {user.agent.last_expense_date && (
+                            <span className="text-xs text-muted-foreground">
+                              {formatExpenseDate(user.agent.last_expense_date)}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                  )}
                   {columnVisibility.mood && (
                     <TableCell>
                       {user.agent?.mood ? (
@@ -814,7 +978,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                                   title={interest.trim()}
                                 >
                                   {interest.trim().length > 50
-                                    ? `${interest.trim().substring(0, 50)}...`
+                                    ? `${interest.trim().substring(0, 10)}...`
                                     : interest.trim()}
                                 </Badge>
                               ))}
@@ -841,7 +1005,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     </TableCell>
                   )}
                   {columnVisibility.lastActive && (
-                    <TableCell className="pl-4">
+                    <TableCell className="ml-0">
                       {user.agent?.last_active ? (
                         <div className="text-sm">
                           {formatLastActive(user.agent.last_active)}
@@ -852,7 +1016,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                     </TableCell>
                   )}
                   {columnVisibility.joinedDate && (
-                    <TableCell className="pl-4">
+                    <TableCell className="pl-0">
                       {user.agent?.created_at ? (
                         formatUserTableDate(user.agent.created_at)
                       ) : (
