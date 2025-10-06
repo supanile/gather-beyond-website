@@ -8,6 +8,7 @@ export interface DiscordServer {
   sc_user_count: number; // Super Connector users
   total_credits: number;
   total_xp: number;
+  missions_completed: number;
   created_at: string;
   joined_at: string;
   is_active: boolean;
@@ -21,6 +22,7 @@ export interface ServerStats {
   totalSCUsers: number;
   totalCredits: number;
   totalXP: number;
+  totalMissionsCompleted: number;
   averageMembersPerServer: number;
   mostActiveServer: DiscordServer | null;
 }

@@ -12,6 +12,7 @@ export const mockDiscordServers: DiscordServer[] = [
     sc_user_count: 22847,
     total_credits: 145672,
     total_xp: 892450,
+    missions_completed: 3247,
     created_at: "2023-01-15T10:30:00Z",
     joined_at: "2023-01-15T10:30:00Z",
     is_active: true,
@@ -28,6 +29,7 @@ export const mockDiscordServers: DiscordServer[] = [
     sc_user_count: 3562,
     total_credits: 78950,
     total_xp: 456780,
+    missions_completed: 1876,
     created_at: "2023-03-22T14:15:00Z",
     joined_at: "2023-03-22T14:20:00Z",
     is_active: true,
@@ -44,6 +46,7 @@ export const mockDiscordServers: DiscordServer[] = [
     sc_user_count: 2103,
     total_credits: 96340,
     total_xp: 623490,
+    missions_completed: 1432,
     created_at: "2023-02-08T09:45:00Z",
     joined_at: "2023-02-08T10:00:00Z",
     is_active: true,
@@ -60,6 +63,7 @@ export const mockDiscordServers: DiscordServer[] = [
     sc_user_count: 987,
     total_credits: 45230,
     total_xp: 234560,
+    missions_completed: 567,
     created_at: "2023-04-12T16:20:00Z",
     joined_at: "2023-04-12T16:25:00Z",
     is_active: true,
@@ -76,6 +80,7 @@ export const mockDiscordServers: DiscordServer[] = [
     sc_user_count: 1654,
     total_credits: 67890,
     total_xp: 398720,
+    missions_completed: 892,
     created_at: "2023-05-30T11:10:00Z",
     joined_at: "2023-05-30T11:15:00Z",
     is_active: true,
@@ -92,6 +97,7 @@ export const mockDiscordServers: DiscordServer[] = [
     sc_user_count: 756,
     total_credits: 32450,
     total_xp: 178920,
+    missions_completed: 234,
     created_at: "2023-06-18T13:30:00Z",
     joined_at: "2023-06-18T13:35:00Z",
     is_active: true,
@@ -108,6 +114,7 @@ export const mockDiscordServers: DiscordServer[] = [
     sc_user_count: 1245,
     total_credits: 56780,
     total_xp: 289450,
+    missions_completed: 456,
     created_at: "2023-07-05T08:45:00Z",
     joined_at: "2023-07-05T08:50:00Z",
     is_active: false,
@@ -124,6 +131,7 @@ export const mockDiscordServers: DiscordServer[] = [
     sc_user_count: 892,
     total_credits: 43210,
     total_xp: 234780,
+    missions_completed: 723,
     created_at: "2023-08-20T15:25:00Z",
     joined_at: "2023-08-20T15:30:00Z",
     is_active: true,
@@ -140,6 +148,7 @@ export const calculateServerStats = (servers: DiscordServer[]): ServerStats => {
   const totalSCUsers = activeServers.reduce((sum, server) => sum + server.sc_user_count, 0);
   const totalCredits = activeServers.reduce((sum, server) => sum + server.total_credits, 0);
   const totalXP = activeServers.reduce((sum, server) => sum + server.total_xp, 0);
+  const totalMissionsCompleted = activeServers.reduce((sum, server) => sum + server.missions_completed, 0);
   
   const mostActiveServer = activeServers.length > 0 
     ? activeServers.reduce((max, server) => 
@@ -153,6 +162,7 @@ export const calculateServerStats = (servers: DiscordServer[]): ServerStats => {
     totalSCUsers,
     totalCredits,
     totalXP,
+    totalMissionsCompleted,
     averageMembersPerServer: activeServers.length > 0 ? Math.round(totalMembers / activeServers.length) : 0,
     mostActiveServer
   };

@@ -2,6 +2,7 @@ import {
   Claimer, 
   CreditSpending, 
   Winner, 
+  Campaign,
   SuperStoreStats, 
   SuperStoreData 
 } from "@/types/admin/superStoreTypes";
@@ -325,6 +326,186 @@ export const mockWinners: Winner[] = [
   }
 ];
 
+// Mock Campaigns Data
+export const mockCampaigns: Campaign[] = [
+  {
+    _id: "campaign_001",
+    campaign_name: "September XP Challenge",
+    campaign_type: "monthly",
+    start_date: "2024-12-15T00:00:00Z",
+    end_date: "2024-12-31T23:59:59Z",
+    total_participants: 1250,
+    total_credits_spent: 45000,
+    total_prize_value: 7500,
+    status: "completed",
+    winners: [
+      {
+        _id: "winner_001",
+        user_id: "123456789012345678",
+        username: "Aki",
+        email: "aki@example.com",
+        competition_name: "September XP Challenge",
+        competition_type: "monthly",
+        prize_title: "Ultimate Gaming Setup",
+        prize_value: 2500,
+        prize_description: "High-end gaming monitor, mechanical keyboard, and gaming mouse",
+        won_date: "2024-09-30T18:00:00Z",
+        xp_earned: 1000,
+        badge_earned: "Monthly Champion",
+        rank_achieved: 1,
+        total_participants: 1250
+      },
+      {
+        _id: "winner_007",
+        user_id: "789012345678901234",
+        username: "Tin",
+        email: "tin@example.com",
+        competition_name: "September XP Challenge",
+        competition_type: "monthly",
+        prize_title: "Gaming Accessories Bundle",
+        prize_value: 800,
+        prize_description: "Premium gaming headset and RGB lighting kit",
+        won_date: "2024-09-30T18:00:00Z",
+        xp_earned: 600,
+        badge_earned: "Monthly Runner-up",
+        rank_achieved: 2,
+        total_participants: 1250
+      },
+      {
+        _id: "winner_008",
+        user_id: "890123456789012345",
+        username: "Pond",
+        email: "pond@example.com",
+        competition_name: "September XP Challenge",
+        competition_type: "monthly",
+        prize_title: "Store Credit Bonus",
+        prize_value: 1200,
+        prize_description: "1200 premium credits with 20% bonus",
+        won_date: "2024-09-30T18:00:00Z",
+        xp_earned: 400,
+        badge_earned: "Monthly Top 3",
+        rank_achieved: 3,
+        total_participants: 1250
+      }
+    ]
+  },
+  {
+    _id: "campaign_002",
+    campaign_name: "Summer Season Finale",
+    campaign_type: "seasonal",
+    start_date: "2024-06-01T00:00:00Z",
+    end_date: "2024-08-31T23:59:59Z",
+    total_participants: 2100,
+    total_credits_spent: 78000,
+    total_prize_value: 12000,
+    status: "completed",
+    winners: [
+      {
+        _id: "winner_003",
+        user_id: "345678901234567890",
+        username: "GammaTactician",
+        email: "gamma.tactician@example.com",
+        competition_name: "Summer Season Finale",
+        competition_type: "seasonal",
+        prize_title: "Exclusive NFT Collection",
+        prize_value: 1800,
+        prize_description: "Limited edition seasonal NFT with special abilities",
+        won_date: "2024-08-31T23:59:00Z",
+        xp_earned: 750,
+        badge_earned: "Season Master",
+        rank_achieved: 1,
+        total_participants: 2100
+      },
+      {
+        _id: "winner_009",
+        user_id: "901234567890123456",
+        username: "IotaInnovator",
+        email: "iota.innovator@example.com",
+        competition_name: "Summer Season Finale",
+        competition_type: "seasonal",
+        prize_title: "Tech Gadget Package",
+        prize_value: 1500,
+        prize_description: "Latest smartphone and wireless accessories",
+        won_date: "2024-08-31T23:59:00Z",
+        xp_earned: 650,
+        badge_earned: "Season Elite",
+        rank_achieved: 2,
+        total_participants: 2100
+      }
+    ]
+  },
+  {
+    _id: "campaign_003",
+    campaign_name: "Week 39 Mission Sprint",
+    campaign_type: "weekly",
+    start_date: "2024-09-23T00:00:00Z",
+    end_date: "2024-09-29T23:59:59Z",
+    total_participants: 340,
+    total_credits_spent: 12000,
+    total_prize_value: 1500,
+    status: "completed",
+    winners: [
+      {
+        _id: "winner_002",
+        user_id: "234567890123456789",
+        username: "BetaStrategist",
+        email: "beta.strategist@example.com",
+        competition_name: "Week 39 Mission Sprint",
+        competition_type: "weekly",
+        prize_title: "Premium Store Credits",
+        prize_value: 500,
+        prize_description: "500 premium credits for store purchases",
+        won_date: "2024-09-29T20:00:00Z",
+        xp_earned: 250,
+        badge_earned: "Weekly Winner",
+        rank_achieved: 1,
+        total_participants: 340
+      }
+    ]
+  },
+  {
+    _id: "campaign_004", 
+    campaign_name: "Halloween Special Event",
+    campaign_type: "special",
+    start_date: "2024-10-01T00:00:00Z",
+    end_date: "2024-10-31T23:59:59Z",
+    total_participants: 890,
+    total_credits_spent: 25000,
+    total_prize_value: 5000,
+    status: "active",
+    winners: [
+      {
+        _id: "winner_004",
+        user_id: "456789012345678901",
+        username: "DeltaDefender",
+        email: "delta.defender@example.com",
+        competition_name: "Halloween Special Event",
+        competition_type: "special",
+        prize_title: "Spooky Gaming Theme",
+        prize_value: 400,
+        prize_description: "Exclusive Halloween-themed gaming setup",
+        won_date: "2024-10-05T15:30:00Z",
+        xp_earned: 200,
+        badge_earned: "Spooky Winner",
+        rank_achieved: 1,
+        total_participants: 890
+      }
+    ]
+  },
+  {
+    _id: "campaign_005",
+    campaign_name: "December Mega Competition",
+    campaign_type: "monthly",
+    start_date: "2024-12-01T00:00:00Z",
+    end_date: "2024-12-31T23:59:59Z",
+    total_participants: 0,
+    total_credits_spent: 0,
+    total_prize_value: 15000,
+    status: "upcoming",
+    winners: []
+  }
+];
+
 // Mock Super Store Stats
 export const mockSuperStoreStats: SuperStoreStats = {
   total_claimers: 1847,
@@ -346,5 +527,6 @@ export const mockSuperStoreData: SuperStoreData = {
   claimers: mockClaimers,
   creditSpending: mockCreditSpending,
   winners: mockWinners,
+  campaigns: mockCampaigns,
   stats: mockSuperStoreStats
 };
