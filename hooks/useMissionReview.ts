@@ -255,6 +255,9 @@ useEffect(() => {
   // Calculate stats based on filtered missions
   const stats: MissionReviewStats = useMemo(() => {
     const total = filteredMissions.length;
+    const accepted = filteredMissions.filter(
+      (m) => m.status === "accepted"
+    ).length;
     const submitted = filteredMissions.filter(
       (m) => m.status === "submitted"
     ).length;
@@ -267,6 +270,7 @@ useEffect(() => {
 
     return {
       total,
+      accepted,
       submitted,
       completed,
       rejected,

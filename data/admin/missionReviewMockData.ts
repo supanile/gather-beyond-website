@@ -101,6 +101,7 @@ export const mockUserMissions: UserMission[] = [
 
 export const mockMissionReviewStats: MissionReviewStats = {
   total: 8,
+  accepted: 2,
   submitted: 1,
   completed: 5,
   rejected: 0
