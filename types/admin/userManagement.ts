@@ -47,6 +47,7 @@ export interface User {
   missions_completed: number;
   username?: string;
   country?: string;
+  platform?: string;
 }
 
 export interface UserWithAgent extends User {
