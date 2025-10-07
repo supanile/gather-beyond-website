@@ -444,11 +444,11 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
                   )}
                 </div>
               </div>
-              {/* Credit Expense Note */}
+              {/* Last Spent Note */}
               {user.agent?.last_expense_reason && (
                 <div>
                   <Label className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 block">
-                    Latest Credit Expense
+                    Latest Last Spent
                   </Label>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">

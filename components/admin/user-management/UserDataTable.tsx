@@ -80,7 +80,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     joinedDate: true,
     credits: true,
     creditsUsed: true,
-    creditExpenseNote: true,
+    lastSpentNote: true,
   });
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithAgent | null>(null);
@@ -108,6 +108,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
   };
 
   const hasActiveFilters = () => {
+    const defaultLastSpentRange = [0, Date.now()];
     return (
       filterConfig.search !== "" ||
       filterConfig.mood.length > 0 ||
@@ -115,7 +116,9 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
       filterConfig.healthRange[0] !== 0 ||
       filterConfig.healthRange[1] !== 100 ||
       filterConfig.levelRange[0] !== 1 ||
-      filterConfig.levelRange[1] !== 100
+      filterConfig.levelRange[1] !== 100 ||
+      filterConfig.lastSpentDateRange[0] !== defaultLastSpentRange[0] ||
+      Math.abs(filterConfig.lastSpentDateRange[1] - defaultLastSpentRange[1]) > 60000 // Allow 1 minute tolerance
     );
   };
 
@@ -166,6 +169,8 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
           onPageSizeChange={handlePageSizeChange}
           columnVisibility={columnVisibility}
           onToggleColumnVisibility={onToggleColumnVisibility}
+          filterConfig={filterConfig}
+          onFilterChange={handleFilter}
         />
       </div>
 
@@ -294,8 +299,8 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   )}
                 </div>
 
-                {/* Credit Expense Note */}
-                {columnVisibility.creditExpenseNote && user.agent?.last_expense_reason && (
+                {/* Last Spent Note */}
+                {columnVisibility.lastSpentNote && user.agent?.last_expense_reason && (
                   <div className="space-y-1">
                     <span className="text-xs text-muted-foreground">
                       Latest Expense
@@ -588,7 +593,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   </DropdownMenu>
                 </TableHead>
               )}
-              {columnVisibility.creditExpenseNote && (
+              {columnVisibility.lastSpentNote && (
                 <TableHead>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -596,12 +601,26 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         variant="ghost"
                         className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
                       >
-                        Credit Expense
+                        Last Spent
+                        {getSortIcon("agent.last_expense_date")}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
-                        onClick={() => onToggleColumnVisibility("creditExpenseNote")}
+                        onClick={() => handleSort("agent.last_expense_date")}
+                        className="p-2 justify-center"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSort("agent.last_expense_date")}
+                        className="p-2 justify-center"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => onToggleColumnVisibility("lastSpentNote")}
                         className="p-2 justify-center"
                       >
                         <EyeOff className="w-4 h-4" />
@@ -893,7 +912,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                       </div>
                     </TableCell>
                   )}
-                  {columnVisibility.creditExpenseNote && (
+                  {columnVisibility.lastSpentNote && (
                     <TableCell>
                       {user.agent?.last_expense_reason ? (
                         <div className="flex flex-col gap-1">

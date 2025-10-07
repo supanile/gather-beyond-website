@@ -18,7 +18,7 @@ export interface ColumnVisibility {
   level: boolean;
   credits: boolean;
   creditsUsed: boolean;
-  creditExpenseNote: boolean;
+  lastSpentNote: boolean;
   mood: boolean;
   health: boolean;
   interests: boolean;
@@ -354,7 +354,7 @@ export const getColumnLabel = (key: string): string => {
     level: "Level",
     credits: "Credits",
     creditsUsed: "Credits Used",
-    creditExpenseNote: "Credit Expense",
+    lastSpentNote: "Last Spent",
     mood: "Mood",
     health: "Health",
     interests: "Interests",
@@ -373,7 +373,7 @@ export const getColumnOrder = (): (keyof ColumnVisibility)[] => {
     "level",
     "credits",
     "creditsUsed",
-    "creditExpenseNote",
+    "lastSpentNote",
     "mood",
     "health",
     "interests",
@@ -535,7 +535,7 @@ export const getCreditsUsedBadgeColor = (creditsUsed: number, allUsers: { agent?
   }
 };
 
-// Credit Expense Note utilities
+// Last Spent Note utilities
 export const getExpenseTypeIcon = (type: string): string => {
   switch (type) {
     case "mystery_box":
