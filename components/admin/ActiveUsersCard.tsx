@@ -1,14 +1,18 @@
 import { Activity, TrendingUp, TrendingDown } from "lucide-react";
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface User {
-  agent?: {
-    last_active?: number;
-  };
+interface ActiveUsersData {
+  last7Days: number;
+  last14Days: number;
+  last30Days: number;
+  last60Days: number;
 }
 
 interface ActiveUsersCardProps {
-  users: User[];
+  activeUsers?: ActiveUsersData;
+  totalUsers?: number;
+  isLoading?: boolean;
 }
 
 interface TimeRangeData {
@@ -24,28 +28,20 @@ const timeRanges: TimeRangeData[] = [
   { label: "60 days", days: 60, shortLabel: "60d" },
 ];
 
-const ActiveUsersCard = ({ users }: ActiveUsersCardProps) => {
+const ActiveUsersCard = ({ activeUsers, totalUsers = 0, isLoading = false }: ActiveUsersCardProps) => {
   const [selectedRange, setSelectedRange] = useState(0); // Default to 7 days
 
-  const getActiveUsersInDays = (days: number) => {
-    const daysAgo = Date.now() - days * 24 * 60 * 60 * 1000;
-    return users.filter((user) => {
-      const lastActive = user.agent?.last_active;
-      return lastActive && lastActive > daysAgo;
-    }).length;
-  };
+  // Map the activeUsers data to our timeRanges structure
+  const activeUsersData = activeUsers ? [
+    activeUsers.last7Days,
+    activeUsers.last14Days,
+    activeUsers.last30Days,
+    activeUsers.last60Days
+  ] : [0, 0, 0, 0];
 
-  // Mock data for demonstration (สามารถเปลี่ยนค่าได้ตามต้องการ)
-  const mockActiveUsers = [180, 140, 20, 20]; // สำหรับ 7d, 14d, 30d, 60d ตามลำดับ
-  const useMockData = true; // เปลี่ยนเป็น true เพื่อใช้ mock data
-
-  const currentActiveUsers = useMockData 
-    ? mockActiveUsers[selectedRange] 
-    : getActiveUsersInDays(timeRanges[selectedRange].days);
+  const currentActiveUsers = activeUsersData[selectedRange];
   const previousRangeIndex = Math.min(selectedRange + 1, timeRanges.length - 1);
-  const previousActiveUsers = useMockData 
-    ? mockActiveUsers[previousRangeIndex] 
-    : getActiveUsersInDays(timeRanges[previousRangeIndex].days);
+  const previousActiveUsers = activeUsersData[previousRangeIndex];
 
   // Calculate growth percentage (comparing with next longer period)
   const growthPercentage =
@@ -59,8 +55,25 @@ const ActiveUsersCard = ({ users }: ActiveUsersCardProps) => {
   const isPositiveGrowth = growthPercentage >= 0;
   
   // For 60d, show activity rate instead of growth
-  const totalUsers = users.length;
   const activeRate = totalUsers > 0 ? Math.round((currentActiveUsers / totalUsers) * 100) : 0;
+
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+            <Skeleton className="h-8 w-16 mb-2" />
+            <Skeleton className="h-8 w-32" />
+          </div>
+          <Skeleton className="w-12 h-12 rounded-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-card rounded-2xl p-6 shadow-sm border border-border hover:shadow-md transition-all duration-300 hover:border-primary/20">

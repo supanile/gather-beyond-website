@@ -482,7 +482,11 @@ const DashboardPage = () => {
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
                 />
-                <ActiveUsersCard users={activeUsersData} />
+                <ActiveUsersCard 
+                  activeUsers={stats?.activeUsers}
+                  totalUsers={stats?.totaluser}
+                  isLoading={isLoadingStats}
+                />
                 <AdminStatCard
                   title="Total Servers"
                   value={totalGuilds.toLocaleString()}
