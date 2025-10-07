@@ -60,7 +60,6 @@ export const UserDataTableControls: React.FC<UserDataTableControlsProps> = ({
             Showing {startIndex + 1}-{endIndex} of {pagination.total} users
           </span>
         </div>
-
         <div className="flex items-center space-x-2">
           <span className="text-xs text-muted-foreground sm:text-sm whitespace-nowrap">
             Show:

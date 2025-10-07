@@ -117,7 +117,6 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
     if (allUsers.length === 0) {
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     }
-
     const xpValues = allUsers.map((user) => user.agent?.xp || 0);
     const minXP = Math.min(...xpValues);
     const maxXP = Math.max(...xpValues);
@@ -137,7 +136,6 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
     if (allUsers.length === 0) {
       return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
     }
-
     const levels = allUsers.map((user) => user.agent?.level || 1);
     const minLevel = Math.min(...levels);
     const maxLevel = Math.max(...levels);

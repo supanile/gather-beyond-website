@@ -293,7 +293,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     <p className="text-xs lg:text-sm text-muted-foreground flex items-center space-x-1 lg:space-x-2 mt-0.5">
                       {isClient ? (
                         <>
-                          <span>
+                          <span className="hidden sm:inline">
                             {currentTime.toLocaleDateString("en-US", {
                               weekday: "long",
                               year: "numeric",

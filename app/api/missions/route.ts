@@ -280,7 +280,7 @@ export async function POST(request: Request) {
       title: body.title,
       description: body.description,
       type: body.type,
-      platform: body.platform,
+      platform: body.platform, 
       reward: body.reward || JSON.stringify({ amount: 0, token: "XP" }),
       partner: partnerId,
       level_required: body.level_required || 1,

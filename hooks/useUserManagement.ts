@@ -46,7 +46,6 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
         return undefined;
       }
     }
-
     return current as string | number | undefined;
   };
 
