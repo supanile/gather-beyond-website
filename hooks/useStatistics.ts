@@ -6,6 +6,12 @@ interface Statistics {
   totalcommunity: number;
   totalmissionsubmitted: number;
   totalXP: number;
+  activeUsers: {
+    last7Days: number;
+    last14Days: number;
+    last30Days: number;
+    last60Days: number;
+  };
 }
 
 export const useStatistics = () => {

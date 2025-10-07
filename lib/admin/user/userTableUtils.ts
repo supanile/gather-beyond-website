@@ -17,6 +17,8 @@ export interface ColumnVisibility {
   xp: boolean;
   level: boolean;
   credits: boolean;
+  creditsUsed: boolean;
+  lastSpentNote: boolean;
   mood: boolean;
   health: boolean;
   interests: boolean;
@@ -351,6 +353,8 @@ export const getColumnLabel = (key: string): string => {
     xp: "XP",
     level: "Level",
     credits: "Credits",
+    creditsUsed: "Credits Used",
+    lastSpentNote: "Last Spent",
     mood: "Mood",
     health: "Health",
     interests: "Interests",
@@ -368,6 +372,8 @@ export const getColumnOrder = (): (keyof ColumnVisibility)[] => {
     "xp", 
     "level",
     "credits",
+    "creditsUsed",
+    "lastSpentNote",
     "mood",
     "health",
     "interests",
@@ -510,4 +516,76 @@ export const formatLastActive = (timestamp: number): string => {
   } else {
     return "Just now";
   }
+};
+
+// Credits Used utilities
+export const getCreditsUsedBadgeColor = (creditsUsed: number, allUsers: { agent?: { credits_used_lifetime?: number } }[]): string => {
+  const creditsUsedValues = allUsers.map((user) => user.agent?.credits_used_lifetime || 0);
+  const minCreditsUsed = Math.min(...creditsUsedValues);
+  const maxCreditsUsed = Math.max(...creditsUsedValues);
+
+  if (creditsUsed === minCreditsUsed && creditsUsed === maxCreditsUsed) {
+    return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+  } else if (creditsUsed === minCreditsUsed) {
+    return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800";
+  } else if (creditsUsed === maxCreditsUsed) {
+    return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800";
+  } else {
+    return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600";
+  }
+};
+
+// Last Spent Note utilities
+export const getExpenseTypeIcon = (type: string): string => {
+  switch (type) {
+    case "mystery_box":
+      return "🎁";
+    case "upgrade":
+      return "⬆️";
+    case "purchase":
+      return "🛒";
+    default:
+      return "💳";
+  }
+};
+
+export const getExpenseTypeBadgeColor = (type: string): string => {
+  switch (type) {
+    case "mystery_box":
+      return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800";
+    case "upgrade":
+      return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
+    case "purchase":
+      return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800";
+  }
+};
+
+export const formatExpenseDate = (timestamp: number): string => {
+  const now = Date.now();
+  const expenseTime = timestamp * 1000;
+  const diffMs = now - expenseTime;
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 30) {
+    return `${diffDays}d ago (>30d)`;
+  } else if (diffDays > 0) {
+    return `${diffDays}d ago`;
+  } else if (diffHours > 0) {
+    return `${diffHours}h ago`;
+  } else {
+    return "Just now";
+  }
+};
+
+// Helper function to check if expense is within 30 days
+export const isExpenseRecent = (timestamp: number | null | undefined): boolean => {
+  if (!timestamp) return false;
+  const now = Date.now();
+  const expenseTime = timestamp * 1000;
+  const diffMs = now - expenseTime;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return diffDays <= 30;
 };

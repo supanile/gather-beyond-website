@@ -10,7 +10,6 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Send,
-  ShieldUser,
   ArrowUp,
   ArrowDown,
   Filter,
@@ -18,14 +17,18 @@ import {
   Zap,
   UserCog,
   Server,
+  ShieldUser,
   ShoppingBasket,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
+import ActiveUsersCard from "@/components/admin/ActiveUsersCard";
 import AdminUserTable from "@/components/admin/AdminUserTable";
 import { UserDataTable } from "@/components/admin/user-management/UserDataTable";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAdminData } from "@/hooks/useAdminData";
+import { mockUsers } from "@/data/admin/mockActiveUsers";
+import { config, logMockData } from "@/config/mockConfig";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -72,7 +75,6 @@ const DashboardPage = () => {
     direction: "asc",
     label: "Username A-Z",
   });
-  const [discordUsernames, setDiscordUsernames] = useState<Record<string, string>>({});
 
   const { totalGuilds } = useDiscordServers();
   const {
@@ -87,37 +89,13 @@ const DashboardPage = () => {
     error: dataError,
   } = useAdminData();
 
-  // Fetch Discord usernames for users
-  useEffect(() => {
-    const fetchDiscordUsernames = async () => {
-      const usernameMap: Record<string, string> = {};
-      
-      for (const user of users) {
-        if (user.discord_id && !discordUsernames[user.discord_id]) {
-          try {
-            const response = await fetch(`/api/discord/${user.discord_id}`);
-            if (response.ok) {
-              const data = await response.json();
-              if (data.username) {
-                usernameMap[user.discord_id] = data.username;
-              }
-            }
-          } catch (error) {
-            console.error(`Failed to fetch Discord data for ${user.discord_id}:`, error);
-          }
-        }
-      }
-      
-      if (Object.keys(usernameMap).length > 0) {
-        setDiscordUsernames(prev => ({ ...prev, ...usernameMap }));
-      }
-    };
-
-    if (users.length > 0) {
-      fetchDiscordUsernames();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [users]); // Removed discordUsernames from dependencies to prevent infinite loop
+  // Get mock data based on configuration
+  const activeUsersData = config.useMockData ? mockUsers : users;
+  
+  // Log mock data for debugging
+  if (config.useMockData && config.showDataInfo) {
+    logMockData(activeUsersData, 'Active Users Data');
+  }
 
   // Sort options - added last_active options
   const sortOptions: SortOption[] = [
@@ -503,14 +481,14 @@ const DashboardPage = () => {
             ) : (
               <>
                 <AdminStatCard
-                  title="Total Users"
-                  value={stats?.totalcommunity?.toLocaleString() ?? "0"}
-                  icon={Users}
-                />
-                <AdminStatCard
-                  title="SUPER Users"
+                  title="Total SC Users"
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
+                />
+                <ActiveUsersCard 
+                  activeUsers={stats?.activeUsers}
+                  totalUsers={stats?.totaluser}
+                  isLoading={isLoadingStats}
                 />
                 <AdminStatCard
                   title="Total Servers"

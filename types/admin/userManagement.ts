@@ -24,6 +24,12 @@ export interface UserAgent {
   current_level_progress: number;
   xp_required: number;
   credits: number;
+  // Mockup fields for Credits Used and Last Spent Note
+  credits_used_lifetime?: number;
+  credits_used_30d?: number;
+  last_expense_reason?: string;
+  last_expense_date?: number;
+  last_expense_type?: "mystery_box" | "upgrade" | "purchase" | "other";
 }
 
 export interface User {
@@ -41,7 +47,6 @@ export interface User {
   missions_completed: number;
   username?: string;
   country?: string;
-  platform?: string; // User's preferred platform (iOS, Android, etc.)
 }
 
 export interface UserWithAgent extends User {
@@ -66,6 +71,9 @@ export interface SortConfig {
     | "agent.mood"
     | "agent.last_active"
     | "agent.created_at"
+    | "agent.credits_used_lifetime"
+    | "agent.credits_used_30d"
+    | "agent.last_expense_date"
     | "username";
   direction: "asc" | "desc";
 }
@@ -76,6 +84,7 @@ export interface FilterConfig {
   healthRange: [number, number];
   levelRange: [number, number];
   interests: string[];
+  lastSpentDateRange: [number, number]; // Unix timestamps for date range
 }
 
 export interface PaginationConfig {

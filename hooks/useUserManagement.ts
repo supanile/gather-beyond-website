@@ -22,6 +22,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
     healthRange: [0, 100],
     levelRange: [1, 100],
     interests: [],
+    lastSpentDateRange: [0, Date.now()], // Default: from beginning to now
   });
 
   const [pagination, setPagination] = useState<PaginationConfig>({
@@ -105,6 +106,44 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
           )
         );
         if (!hasMatchingInterest) return false;
+      }
+
+      // Last Spent date range filter
+      // Only apply filter if the range is not the default "all time" range
+      const isDefaultRange = filterConfig.lastSpentDateRange[0] === 0 && 
+        Math.abs(filterConfig.lastSpentDateRange[1] - Date.now()) <= 60000; // 1 minute tolerance
+      
+      // Debug logging
+      if (user.discord_id === (users[0]?.discord_id)) { // Log for first user only
+        const expenseDate = user.agent?.last_expense_date;
+        const expenseDateMs = expenseDate && expenseDate < 10000000000 ? expenseDate * 1000 : expenseDate;
+        console.log('Last Spent Filter Debug:', {
+          isDefaultRange,
+          filterRange: filterConfig.lastSpentDateRange,
+          currentTime: Date.now(),
+          hasExpenseDate: !!user.agent?.last_expense_date,
+          expenseDate: expenseDate,
+          expenseDateMs: expenseDateMs,
+          expenseDateFormatted: expenseDateMs ? new Date(expenseDateMs).toLocaleString() : null
+        });
+      }
+      
+      if (!isDefaultRange) {
+        // If user has no expense date, exclude them when filtering by date
+        if (!user.agent?.last_expense_date) {
+          return false;
+        }
+        
+        // Convert expense date from seconds to milliseconds if needed
+        const expenseDate = user.agent.last_expense_date;
+        const expenseDateMs = expenseDate < 10000000000 ? expenseDate * 1000 : expenseDate;
+        
+        if (
+          expenseDateMs < filterConfig.lastSpentDateRange[0] ||
+          expenseDateMs > filterConfig.lastSpentDateRange[1]
+        ) {
+          return false;
+        }
       }
 
       return true;
@@ -192,6 +231,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
       healthRange: [0, 100],
       levelRange: [1, 100],
       interests: [],
+      lastSpentDateRange: [0, Date.now()],
     });
   };
 
