@@ -91,10 +91,10 @@ const DashboardPage = () => {
 
   // Get mock data based on configuration
   const activeUsersData = config.useMockData ? mockUsers : users;
-
+  
   // Log mock data for debugging
   if (config.useMockData && config.showDataInfo) {
-    logMockData(activeUsersData, "Active Users Data");
+    logMockData(activeUsersData, 'Active Users Data');
   }
 
   // Sort options - added last_active options
@@ -485,7 +485,11 @@ const DashboardPage = () => {
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
                 />
-                <ActiveUsersCard users={activeUsersData} />
+                <ActiveUsersCard 
+                  activeUsers={stats?.activeUsers}
+                  totalUsers={stats?.totaluser}
+                  isLoading={isLoadingStats}
+                />
                 <AdminStatCard
                   title="Total Servers"
                   value={totalGuilds.toLocaleString()}
