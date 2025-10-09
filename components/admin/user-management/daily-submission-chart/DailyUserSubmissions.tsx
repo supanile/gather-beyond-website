@@ -11,6 +11,8 @@ import { DiscordUserDisplay } from "./DiscordUserDisplay";
 
 interface DailyUserSubmissionsProps {
   chartData: DailySubmissionData[];
+  timeRange: string;
+  filterType: string;
 }
 
 // Helper function to format date with full month name and year
@@ -26,6 +28,8 @@ const formatFullDate = (dateString: string): string => {
 
 export const DailyUserSubmissions = ({
   chartData,
+  timeRange,
+  filterType,
 }: DailyUserSubmissionsProps) => {
   const [openDay, setOpenDay] = useState<string | null>(null);
 
@@ -34,6 +38,29 @@ export const DailyUserSubmissions = ({
   };
 
   const filteredData = chartData.filter((day) => day.userDetails.length > 0);
+
+  // Determine if scrollable container should be used
+  const shouldUseScrollable = () => {
+    if (filterType === "days") {
+      return parseInt(timeRange) >= 14;
+    } else if (filterType === "months") {
+      return parseInt(timeRange) >= 1;
+    }
+    return false;
+  };
+
+  const isScrollable = shouldUseScrollable();
+
+  // Helper function to get time range display text
+  const getTimeRangeDisplay = () => {
+    const timeValue = parseInt(timeRange);
+    if (filterType === "days") {
+      return `${timeValue} ${timeValue === 1 ? "Day" : "Days"}`;
+    } else if (filterType === "months") {
+      return `${timeValue} ${timeValue === 1 ? "Month" : "Months"}`;
+    }
+    return "";
+  };
 
   if (filteredData.length === 0) {
     return (
@@ -48,14 +75,24 @@ export const DailyUserSubmissions = ({
 
   return (
     <div className="mt-6 pt-6 border-t border-border flex-shrink-0">
-      <div className="flex items-center gap-2 mb-4">
-        <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-        <h4 className="text-sm sm:text-base font-semibold text-foreground">
-          Daily User Submissions
-        </h4>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+          <h4 className="text-sm sm:text-base font-semibold text-foreground">
+            Daily User Submissions
+          </h4>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs sm:text-sm text-muted-foreground">
+            Showing last
+          </span>
+            <span className="text-xs sm:text-sm font-semibold text-indigo-700 dark:text-indigo-200 bg-gradient-to-r from-indigo-50 to-sky-50 dark:from-slate-800/30 dark:to-indigo-900/30 px-2 py-1 rounded-md border border-indigo-200/40 dark:border-indigo-700/40 shadow-sm ring-1 ring-indigo-100/40 dark:ring-indigo-900/20 backdrop-blur-sm transition-transform hover:scale-105">
+              {getTimeRangeDisplay()}
+            </span>
+        </div>
       </div>
 
-      <div className="space-y-3">
+      <div className={`${isScrollable ? 'max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent' : ''} space-y-3`}>
         {filteredData.map((day) => {
           const isOpen = openDay === day.date;
           const fullDateLabel = formatFullDate(day.date);

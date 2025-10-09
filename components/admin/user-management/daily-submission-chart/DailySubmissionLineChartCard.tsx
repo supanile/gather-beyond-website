@@ -130,7 +130,11 @@ const DailySubmissionLineChartCard = () => {
       {/* Daily User Details Section */}
       {chartData.length > 0 &&
         chartData.some((day) => day.userDetails.length > 0) && (
-          <DailyUserSubmissions chartData={chartData} />
+          <DailyUserSubmissions 
+            chartData={chartData} 
+            timeRange={timeRange}
+            filterType={filterType}
+          />
         )}
 
       {/* Top Performing Missions Section */}
