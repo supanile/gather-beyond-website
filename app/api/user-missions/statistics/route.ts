@@ -105,7 +105,7 @@ export async function GET() {
         date: dateKey,
         dateLabel: date.toLocaleDateString('en-GB', {
           day: 'numeric',
-          month: 'short'
+          month: 'short',
         }),
         totalSubmissions,
         acceptedMissions,

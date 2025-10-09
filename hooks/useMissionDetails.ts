@@ -79,8 +79,7 @@ export function useMissionDetails(missionId: string) {
     fetchMissionDetails();
   }, [missionId]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const approveMission = async (_missionId: number) => {
+  const approveMission = async (missionId: number) => {
     try {
       if (!mission) {
         throw new Error("Mission not found");
@@ -89,17 +88,24 @@ export function useMissionDetails(missionId: string) {
       // Get the current admin's username
       const verifiedBy = user?.username || user?.firstName || "Admin";
 
-      const response = await fetch(`/api/missions/review`, {
+      console.log("🚀 useMissionDetails - About to call approve API:", {
+        missionId,
+        mission_id2: mission.id2,
+        currentStatus: mission.status
+      });
+
+      // Use id2 for the API call if available, otherwise use the mission ID from the URL
+      const apiMissionId = mission.id2 || missionId;
+      const timestamp = Date.now();
+      const apiUrl = `/api/user-missions/${apiMissionId}/approve?t=${timestamp}`;
+
+      console.log("🚀 useMissionDetails - API URL:", apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          action: "approve",
-          userId: mission.user_id,
-          missionId: mission.mission_id,
-          approvedBy: verifiedBy,
-        }),
       });
 
       if (!response.ok) {
@@ -129,7 +135,7 @@ export function useMissionDetails(missionId: string) {
   };
 
   const rejectMission = async (
-    _missionId: number,
+    missionId: number,
     rejectionReason?: string
   ) => {
     try {
@@ -140,24 +146,29 @@ export function useMissionDetails(missionId: string) {
       // Get the current admin's username
       const verifiedBy = user?.username || user?.firstName || "Admin";
 
-      console.log("Rejecting mission with reason:", rejectionReason);
+      console.log("� VERSION 2.0 - useMissionDetails - About to call reject API:", {
+        missionId,
+        mission_id2: mission.id2,
+        currentStatus: mission.status,
+        rejectionReason,
+        version: "2.0"
+      });
 
-      const requestBody = {
-        action: "reject",
-        userId: mission.user_id,
-        missionId: mission.mission_id,
-        approvedBy: verifiedBy,
-        rejectionReason: rejectionReason,
-      };
+      // Use id2 for the API call if available, otherwise use the mission ID from the URL
+      const apiMissionId = mission.id2 || missionId;
+      const timestamp = Date.now();
+      const apiUrl = `/api/user-missions/${apiMissionId}/reject?t=${timestamp}`;
 
-      console.log("Request body to send:", requestBody);
+      console.log("🚀 useMissionDetails - API URL:", apiUrl);
 
-      const response = await fetch(`/api/missions/review`, {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          rejectionReason: rejectionReason,
+        }),
       });
 
       if (!response.ok) {

@@ -17,9 +17,9 @@ export async function POST(
       );
     }
 
-    // Get the mission record to find user_id
+    // Get the mission record using id2 field
     const userMissions = await grist.fetchTable("User_missions");
-    const userMission = userMissions.find(um => ensureNumber(um.id) === missionId);
+    const userMission = userMissions.find(um => ensureNumber(um.id2) === missionId);
 
     if (!userMission) {
       return NextResponse.json(
@@ -56,8 +56,8 @@ export async function POST(
     // Get mission details for response
     const mission = await getMissionById(actualMissionId);
 
-    // Fetch updated mission data
-    const updatedMissionResponse = await fetch(`${process.env.PUBLIC_URL || 'http://localhost:3000'}/api/user-missions/${missionId}`);
+    // Fetch updated mission data using the actual record id
+    const updatedMissionResponse = await fetch(`${process.env.PUBLIC_URL || 'http://localhost:3000'}/api/user-missions/${userMission.id}`);
     const updatedMission = await updatedMissionResponse.json();
 
     return NextResponse.json({

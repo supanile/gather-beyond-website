@@ -49,7 +49,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InterestsPieChartCard from "@/components/admin/user-management/InterestsPieChartCard";
 import MoodBarChartCard from "@/components/admin/user-management/MoodBarChartCard";
-import DailySubmissionLineChartCard from "@/components/admin/user-management/DailySubmissionLineChartCard";
+import DailySubmissionLineChartCard from "@/components/admin/user-management/daily-submission-chart/DailySubmissionLineChartCard";
 import ServerOverview from "@/components/admin/server-overview/ServerOverview";
 import { useDiscordServers } from "@/hooks/useDiscordServers";
 import CountryBarChartCard from "@/components/admin/user-management/CountryBarChartCard";

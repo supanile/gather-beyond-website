@@ -47,6 +47,7 @@ export async function GET() {
     // Transform the data to match the expected format
     const transformedMissions = userMissions.map((mission) => ({
       _id: mission.id,
+      id2: mission.id2, // Add id2 mapping
       mission_id: mission.mission_id,
       mission_name: mission.mission_name,
       user_id: mission.user_id,

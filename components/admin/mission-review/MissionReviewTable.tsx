@@ -64,6 +64,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
   };
 
   const handleApproveClick = (mission: UserMission) => {
+    console.log("🔵 Approve clicked for mission:", mission._id, mission);
     setConfirmDialog({
       isOpen: true,
       action: "approve",
@@ -73,6 +74,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
   };
 
   const handleRejectClick = (mission: UserMission) => {
+    console.log("🔴 Reject clicked for mission:", mission._id, mission);
     setConfirmDialog({
       isOpen: true,
       action: "reject",
@@ -83,10 +85,18 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
 
   const handleConfirmAction = async (rejectionReason?: string) => {
     setIsActionLoading(true);
+    console.log("🎯 Confirming action:", {
+      action: confirmDialog.action,
+      missionId: confirmDialog.missionId,
+      rejectionReason
+    });
+    
     try {
       if (confirmDialog.action === "approve") {
+        console.log("⚡ Calling onApprove...");
         await onApprove(confirmDialog.missionId);
       } else {
+        console.log("⚡ Calling onReject...");
         await onReject(confirmDialog.missionId, rejectionReason);
       }
     } finally {
@@ -384,6 +394,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                           onClick={() => handleApproveClick(mission)}
                           className="h-7 w-7 p-0 border-green-500 text-green-600 hover:text-green-700 hover:bg-green-50 cursor-pointer"
                           title="Approve Mission"
+                          disabled={isActionLoading}
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -393,6 +404,7 @@ export const MissionReviewTable: React.FC<MissionReviewTableProps> = ({
                           onClick={() => handleRejectClick(mission)}
                           className="h-7 w-7 p-0 border-red-500 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
                           title="Reject Mission"
+                          disabled={isActionLoading}
                         >
                           <X className="h-4 w-4" />
                         </Button>

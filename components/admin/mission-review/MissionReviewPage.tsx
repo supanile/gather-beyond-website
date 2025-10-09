@@ -61,11 +61,21 @@ export function MissionReviewPage() {
     });
 
   const handleApprove = async (missionId: number) => {
-    await approveMission(missionId);
+    try {
+      await approveMission(missionId);
+    } catch (error) {
+      console.error("Failed to approve mission:", error);
+      // You can add toast notification here if needed
+    }
   };
 
   const handleReject = async (missionId: number, rejectionReason?: string) => {
-    await rejectMission(missionId, rejectionReason);
+    try {
+      await rejectMission(missionId, rejectionReason);
+    } catch (error) {
+      console.error("Failed to reject mission:", error);
+      // You can add toast notification here if needed
+    }
   };
 
   const handleToggleColumnVisibility = (
