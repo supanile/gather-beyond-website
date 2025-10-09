@@ -1,0 +1,147 @@
+"use client";
+
+import { useState } from "react";
+import { Send } from "lucide-react";
+import { useDailySubmissionData } from "@/hooks/useDailySubmissionData";
+import { StatsSummary } from "./StatsSummary";
+import { DailyUserSubmissions } from "./DailyUserSubmissions";
+import { TopPerformingMissions } from "./TopPerformingMissions";
+import { TimeRangeSelector } from "./TimeRangeSelector";
+import { LoadingState, ErrorState } from "./LoadingState";
+import { CompletionRateHighlight } from "./CompletionRateHighlight";
+import { MissionChart } from "./MissionChart";
+
+const DailySubmissionLineChartCard = () => {
+  const [timeRange, setTimeRange] = useState<string>("30");
+  const [filterType, setFilterType] = useState<string>("days");
+
+  const {
+    userMissions,
+    isLoading,
+    error,
+    chartData,
+    topMissions,
+  } = useDailySubmissionData(timeRange, filterType);
+
+  // Calculate summary stats
+  const totalSubmissions = chartData.reduce(
+    (sum, day) => sum + day.totalSubmissions,
+    0
+  );
+  const totalAccepted = chartData.reduce(
+    (sum, day) => sum + day.acceptedMissions,
+    0
+  );
+  const totalSubmitted = chartData.reduce(
+    (sum, day) => sum + day.submittedMissions,
+    0
+  );
+  const totalCompleted = chartData.reduce(
+    (sum, day) => sum + day.completedMissions,
+    0
+  );
+  const totalRejected = chartData.reduce(
+    (sum, day) => sum + day.rejectedMissions,
+    0
+  );
+  
+  // Calculate total unique users across all days (without double counting)
+  const allUniqueUsers = new Set();
+  chartData.forEach((day) => {
+    day.userDetails.forEach((user) => {
+      allUniqueUsers.add(user.user_id);
+    });
+  });
+  const totalUniqueUsers = allUniqueUsers.size;
+
+  const avgDaily =
+    chartData.length > 0 ? Math.round(totalSubmissions / chartData.length) : 0;
+  const completionRate =
+    totalSubmissions > 0
+      ? Math.round((totalCompleted / totalSubmissions) * 100)
+      : 0;
+
+  const getTimeRangeLabel = () => {
+    if (filterType === "days") {
+      return `${timeRange} ${timeRange === "1" ? "day" : "days"}`;
+    } else {
+      return `${timeRange} ${timeRange === "1" ? "month" : "months"}`;
+    }
+  };
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (error) {
+    return <ErrorState error={error} />;
+  }
+
+  return (
+    <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm border border-border hover:shadow-md transition-all duration-300 hover:border-primary/20 h-full flex flex-col">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <div className="flex-1">
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">
+            Daily Mission Submissions
+          </h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Mission activity over {getTimeRangeLabel()}
+          </p>
+        </div>
+        <div className="flex items-center gap-3 self-start sm:self-center">
+          <TimeRangeSelector
+            timeRange={timeRange}
+            filterType={filterType}
+            onTimeRangeChange={setTimeRange}
+            onFilterTypeChange={setFilterType}
+          />
+          <div className="p-3 rounded-full bg-gray-200 dark:bg-white">
+            <Send className="w-6 h-6 text-gray-700 dark:text-gray-900" />
+          </div>
+        </div>
+      </div>
+
+      {/* Completion Rate Highlight */}
+      <CompletionRateHighlight completionRate={completionRate} />
+
+      {/* Chart */}
+      <div className="flex-1 min-h-0">
+        <MissionChart
+          chartData={chartData}
+          totalSubmissions={totalSubmissions}
+          totalAccepted={totalAccepted}
+        />
+      </div>
+
+      {/* Overall Stats Summary */}
+      {(totalSubmissions > 0 || totalAccepted > 0) && (
+        <StatsSummary
+          totalSubmissions={totalSubmissions}
+          totalAccepted={totalAccepted}
+          totalSubmitted={totalSubmitted}
+          totalCompleted={totalCompleted}
+          totalRejected={totalRejected}
+          avgDaily={avgDaily}
+          totalUniqueUsers={totalUniqueUsers}
+        />
+      )}
+
+      {/* Daily User Details Section */}
+      {chartData.length > 0 &&
+        chartData.some((day) => day.userDetails.length > 0) && (
+          <DailyUserSubmissions chartData={chartData} />
+        )}
+
+      {/* Top Performing Missions Section */}
+      {topMissions.length > 0 && (
+        <TopPerformingMissions 
+          topMissions={topMissions} 
+          userMissions={userMissions} 
+        />
+      )}
+    </div>
+  );
+};
+
+export default DailySubmissionLineChartCard;
