@@ -2,6 +2,7 @@ import { User } from "./userManagement";
 
 export interface UserMission {
   _id: number;
+  id2?: number; // The actual mission ID used in API calls
   mission_id: number;
   mission_name: string;
   user_id: string;

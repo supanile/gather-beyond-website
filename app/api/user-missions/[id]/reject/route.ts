@@ -17,9 +17,13 @@ export async function POST(
       );
     }
 
-    // Get the mission record to find user_id
+    // Parse request body for rejection reason
+    const body = await req.json().catch(() => ({}));
+    const rejectionReason = body.rejectionReason || "No reason provided";
+
+    // Get the mission record using id2 field
     const userMissions = await grist.fetchTable("User_missions");
-    const userMission = userMissions.find(um => ensureNumber(um.id) === missionId);
+    const userMission = userMissions.find(um => ensureNumber(um.id2) === missionId);
 
     if (!userMission) {
       return NextResponse.json(
@@ -43,18 +47,19 @@ export async function POST(
     const userId = ensureString(userMission.user_id);
     const actualMissionId = ensureNumber(userMission.mission_id);
 
-    // Update mission status to rejected
+    // Update mission status to rejected with rejection reason using the actual record id
     await grist.updateRecords("User_missions", [{
-      id: missionId,
+      id: userMission.id, // Use the actual Grist record id
       status: 'rejected',
-      completed_at: new Date().toISOString()
+      completed_at: new Date().toISOString(),
+      notes: rejectionReason
     }]);
 
     // Get mission details for response
     const mission = await getMissionById(actualMissionId);
 
-    // Fetch updated mission data
-    const updatedMissionResponse = await fetch(`${process.env.PUBLIC_URL || 'http://localhost:3000'}/api/user-missions/${missionId}`);
+    // Fetch updated mission data using the actual record id
+    const updatedMissionResponse = await fetch(`${process.env.PUBLIC_URL || 'http://localhost:3000'}/api/user-missions/${userMission.id}`);
     const updatedMission = await updatedMissionResponse.json();
 
     return NextResponse.json({
@@ -64,6 +69,7 @@ export async function POST(
         userId,
         missionId: actualMissionId,
         mission: mission,
+        rejectionReason: rejectionReason,
         rejectionTime: new Date().toISOString()
       },
       mission: updatedMission

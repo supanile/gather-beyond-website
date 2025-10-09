@@ -14,6 +14,7 @@ import { User } from "@/types/admin/userManagement";
 // Interface for raw mission data from API
 interface RawMissionData {
   _id: number;
+  id2?: number; // The actual mission ID used in API calls
   mission_id: number;
   mission_name: string;
   user_id: string;
@@ -286,10 +287,44 @@ useEffect(() => {
         throw new Error("Mission not found");
       }
 
+      console.log(`Attempting to approve mission ${missionId}:`, {
+        missionId,
+        currentStatus: mission.status,
+        id2: mission.id2,
+        apiMissionId: mission.id2 || missionId
+      });
+
       // Get the current admin's username
       const verifiedBy = user?.username || user?.firstName || "Admin";
 
-      // Optimistically update the UI
+      // Use id2 for the API call instead of _id
+      const apiMissionId = mission.id2 || missionId;
+      const apiUrl = `/api/user-missions/${apiMissionId}/approve`;
+      
+      console.log("🚀 About to call approve API:", {
+        originalMissionId: missionId,
+        apiMissionId,
+        apiUrl,
+        mission
+      });
+
+      // Send update to the correct API endpoint
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to approve mission");
+      }
+
+      const result = await response.json();
+      console.log(`Approved mission ${missionId}:`, result);
+
+      // Update the UI with the response data
       setMissions((prev) =>
         prev.map((mission) =>
           mission._id === missionId
@@ -302,32 +337,11 @@ useEffect(() => {
             : mission
         )
       );
-
-      // Send update to the new mission review API
-      const response = await fetch(`/api/missions/review`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "approve",
-          userId: mission.user_id,
-          missionId: mission.mission_id,
-          approvedBy: verifiedBy,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to approve mission");
-      }
-
-      const result = await response.json();
-      console.log(`Approved mission ${missionId}:`, result);
     } catch (error) {
       console.error("Failed to approve mission:", error);
-      // Revert the optimistic update
+      // Refresh missions to get the latest state
       refreshMissions();
+      throw error;
     }
   };
 
@@ -339,10 +353,52 @@ useEffect(() => {
         throw new Error("Mission not found");
       }
 
+      console.log(`Attempting to reject mission ${missionId}:`, {
+        missionId,
+        currentStatus: mission.status,
+        id2: mission.id2,
+        rejectionReason,
+        apiMissionId: mission.id2 || missionId
+      });
+
       // Get the current admin's username
       const verifiedBy = user?.username || user?.firstName || "Admin";
 
-      // Optimistically update the UI
+      // Use id2 for the API call instead of _id
+      const apiMissionId = mission.id2 || missionId;
+      const apiUrl = `/api/user-missions/${apiMissionId}/reject`;
+      
+      console.log("🚀 About to call reject API:", {
+        originalMissionId: missionId,
+        apiMissionId,
+        apiUrl,
+        mission,
+        rejectionReason
+      });
+
+      // Send update to the correct API endpoint
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          rejectionReason: rejectionReason,
+        }),
+      });
+
+      console.log(`Response status: ${response.status}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error from API:", errorData);
+        throw new Error(errorData.error || "Failed to reject mission");
+      }
+
+      const result = await response.json();
+      console.log(`Successfully rejected mission ${missionId}:`, result);
+
+      // Update the UI with the response data
       setMissions((prev) =>
         prev.map((mission) =>
           mission._id === missionId
@@ -355,33 +411,11 @@ useEffect(() => {
             : mission
         )
       );
-
-      // Send update to the new mission review API
-      const response = await fetch(`/api/missions/review`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "reject",
-          userId: mission.user_id,
-          missionId: mission.mission_id,
-          approvedBy: verifiedBy,
-          rejectionReason: rejectionReason,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to reject mission");
-      }
-
-      const result = await response.json();
-      console.log(`Rejected mission ${missionId}:`, result);
     } catch (error) {
       console.error("Failed to reject mission:", error);
-      // Revert the optimistic update
+      // Refresh missions to get the latest state
       refreshMissions();
+      throw error;
     }
   };
 

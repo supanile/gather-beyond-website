@@ -54,20 +54,33 @@ export async function handleMissionReviewAction(
   action: 'approve' | 'reject',
   userId: string,
   missionId: number,
-  approvedBy: string
+  approvedBy: string,
+  rejectionReason?: string
 ) {
   try {
-    const response = await fetch(`${process.env.PUBLIC_URL || 'http://localhost:3000'}/api/missions/review`, {
+    const apiUrl = action === 'approve' 
+      ? `/api/user-missions/${missionId}/approve`
+      : `/api/user-missions/${missionId}/reject`;
+
+    console.log(`🚀 Discord handler - About to call ${action} API:`, {
+      action,
+      userId,
+      missionId,
+      approvedBy,
+      apiUrl,
+      rejectionReason
+    });
+
+    const body = action === 'approve' 
+      ? {} 
+      : { rejectionReason: rejectionReason || "No reason provided" };
+
+    const response = await fetch(`${process.env.PUBLIC_URL || 'http://localhost:3000'}${apiUrl}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        action,
-        userId,
-        missionId,
-        approvedBy
-      })
+      body: JSON.stringify(body)
     });
 
     const result = await response.json();

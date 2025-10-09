@@ -4,6 +4,7 @@ import type { DiscordUserData } from "@/types/admin/missionReview";
 
 interface GristMissionRecord {
   id: number;
+  id2?: number;
   mission_id?: number;
   mission_name?: string;
   user_id?: string;
@@ -75,6 +76,7 @@ export async function GET(
     // Transform the mission data to match the UserMission interface
     const transformedMission = {
       _id: mission.id,
+      id2: mission.id2,
       mission_id: mission.mission_id || 1,
       mission_name: mission.mission_name || "Unknown Mission",
       user_id: mission.user_id || "unknown",
