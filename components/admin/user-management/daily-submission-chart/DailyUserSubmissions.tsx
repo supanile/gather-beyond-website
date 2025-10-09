@@ -119,10 +119,15 @@ export const DailyUserSubmissions = ({
                           >
                             {/* User Header */}
                             <div className="flex items-center justify-between">
-                              <DiscordUserDisplay
-                                discordId={user.user_id}
-                                size="sm"
-                              />
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-semibold text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                                  #{userIndex + 1}
+                                </span>
+                                <DiscordUserDisplay
+                                  discordId={user.user_id}
+                                  size="sm"
+                                />
+                              </div>
                               <div className="flex items-center gap-1">
                                 <span className="text-xs font-bold text-foreground">
                                   {user.submissions}
