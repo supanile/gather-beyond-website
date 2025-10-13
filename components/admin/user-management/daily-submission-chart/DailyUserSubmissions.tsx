@@ -51,17 +51,6 @@ export const DailyUserSubmissions = ({
 
   const isScrollable = shouldUseScrollable();
 
-  // Helper function to get time range display text
-  const getTimeRangeDisplay = () => {
-    const timeValue = parseInt(timeRange);
-    if (filterType === "days") {
-      return `${timeValue} ${timeValue === 1 ? "Day" : "Days"}`;
-    } else if (filterType === "months") {
-      return `${timeValue} ${timeValue === 1 ? "Month" : "Months"}`;
-    }
-    return "";
-  };
-
   if (filteredData.length === 0) {
     return (
       <div className="text-center py-8">
@@ -82,17 +71,15 @@ export const DailyUserSubmissions = ({
             Daily User Submissions
           </h4>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs sm:text-sm text-muted-foreground">
-            Showing last
-          </span>
-            <span className="text-xs sm:text-sm font-semibold text-indigo-700 dark:text-indigo-200 bg-gradient-to-r from-indigo-50 to-sky-50 dark:from-slate-800/30 dark:to-indigo-900/30 px-2 py-1 rounded-md border border-indigo-200/40 dark:border-indigo-700/40 shadow-sm ring-1 ring-indigo-100/40 dark:ring-indigo-900/20 backdrop-blur-sm transition-transform hover:scale-105">
-              {getTimeRangeDisplay()}
-            </span>
-        </div>
       </div>
 
-      <div className={`${isScrollable ? 'max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent' : ''} space-y-3`}>
+      <div
+        className={`${
+          isScrollable
+            ? "max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+            : ""
+        } space-y-3`}
+      >
         {filteredData.map((day) => {
           const isOpen = openDay === day.date;
           const fullDateLabel = formatFullDate(day.date);

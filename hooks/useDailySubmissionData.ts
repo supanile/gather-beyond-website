@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { UserMission, DailySubmissionData, MissionPerformance } from "@/types/admin/user-missions";
 
-export const useDailySubmissionData = (timeRange: string, filterType: string) => {
+export const useDailySubmissionData = (
+  timeRange: string, 
+  filterType: string,
+  dateRangeMode: "relative" | "date" | "all" = "relative",
+  customDateRange?: { from: Date | undefined; to: Date | undefined }
+) => {
   const [userMissions, setUserMissions] = useState<UserMission[]>([]);
   const [statisticsData, setStatisticsData] = useState<DailySubmissionData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,20 +47,55 @@ export const useDailySubmissionData = (timeRange: string, filterType: string) =>
 
   useEffect(() => {
     fetchData();
-  }, [timeRange, filterType]);
+  }, [timeRange, filterType, dateRangeMode, customDateRange]);
 
   const processChartData = (): DailySubmissionData[] => {
     if (!statisticsData.length) return [];
 
-    const endDate = new Date();
-    const startDate = new Date();
+    let startDate: Date;
+    let endDate: Date;
 
-    if (filterType === "days") {
-      const days = parseInt(timeRange);
-      startDate.setDate(startDate.getDate() - days);
-    } else if (filterType === "months") {
-      const months = parseInt(timeRange);
-      startDate.setMonth(startDate.getMonth() - months);
+    if (dateRangeMode === "all") {
+      // Use all available data
+      const dates = statisticsData.map(item => new Date(item.date));
+      startDate = new Date(Math.min(...dates.map(d => d.getTime())));
+      endDate = new Date(Math.max(...dates.map(d => d.getTime())));
+    } else if (dateRangeMode === "date" && customDateRange?.from && customDateRange?.to) {
+      // Use custom date range
+      startDate = new Date(customDateRange.from);
+      endDate = new Date(customDateRange.to);
+      
+      // ถ้าเลือกวันเดียวกัน ตั้งเวลาให้ครอบคลุมทั้งวัน
+      if (startDate.getTime() === endDate.getTime()) {
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        // ถ้าเป็นช่วงวันที่ ตั้งเวลาให้ครอบคลุมทั้งวันทั้งสองวัน
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+      }
+    } else if (dateRangeMode === "date" && customDateRange?.from) {
+      // ถ้ามีแค่วันเริ่มต้น
+      startDate = new Date(customDateRange.from);
+      endDate = new Date(customDateRange.from);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      // Use relative date range (default behavior)
+      endDate = new Date();
+      // ตั้งเวลาให้ครอบคลุมถึงสิ้นวันปัจจุบัน
+      endDate.setHours(23, 59, 59, 999);
+      
+      startDate = new Date();
+      startDate.setHours(0, 0, 0, 0);
+
+      if (filterType === "days") {
+        const days = parseInt(timeRange);
+        startDate.setDate(startDate.getDate() - days + 1); // +1 เพื่อนับรวมวันปัจจุบัน
+      } else if (filterType === "months") {
+        const months = parseInt(timeRange);
+        startDate.setMonth(startDate.getMonth() - months);
+      }
     }
 
     // Filter statistics data based on the selected time range
@@ -147,15 +187,55 @@ export const useDailySubmissionData = (timeRange: string, filterType: string) =>
   const processTopMissions = (): MissionPerformance[] => {
     if (!userMissions.length) return [];
 
-    const endDate = new Date();
-    const startDate = new Date();
+    let startDate: Date;
+    let endDate: Date;
 
-    if (filterType === "days") {
-      const days = parseInt(timeRange);
-      startDate.setDate(startDate.getDate() - days);
-    } else if (filterType === "months") {
-      const months = parseInt(timeRange);
-      startDate.setMonth(startDate.getMonth() - months);
+    if (dateRangeMode === "all") {
+      // Use all available data
+      const submissionDates = userMissions
+        .filter(m => m.submitted_at && m.submitted_at > 0)
+        .map(m => new Date(m.submitted_at! * 1000));
+      
+      if (submissionDates.length === 0) return [];
+      
+      startDate = new Date(Math.min(...submissionDates.map(d => d.getTime())));
+      endDate = new Date(Math.max(...submissionDates.map(d => d.getTime())));
+    } else if (dateRangeMode === "date" && customDateRange?.from && customDateRange?.to) {
+      // Use custom date range
+      startDate = new Date(customDateRange.from);
+      endDate = new Date(customDateRange.to);
+      
+      // ถ้าเลือกวันเดียวกัน ตั้งเวลาให้ครอบคลุมทั้งวัน
+      if (startDate.getTime() === endDate.getTime()) {
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        // ถ้าเป็นช่วงวันที่ ตั้งเวลาให้ครอบคลุมทั้งวันทั้งสองวัน
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+      }
+    } else if (dateRangeMode === "date" && customDateRange?.from) {
+      // ถ้ามีแค่วันเริ่มต้น
+      startDate = new Date(customDateRange.from);
+      endDate = new Date(customDateRange.from);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      // Use relative date range (default behavior)
+      endDate = new Date();
+      // ตั้งเวลาให้ครอบคลุมถึงสิ้นวันปัจจุบัน
+      endDate.setHours(23, 59, 59, 999);
+      
+      startDate = new Date();
+      startDate.setHours(0, 0, 0, 0);
+
+      if (filterType === "days") {
+        const days = parseInt(timeRange);
+        startDate.setDate(startDate.getDate() - days + 1); // +1 เพื่อนับรวมวันปัจจุบัน
+      } else if (filterType === "months") {
+        const months = parseInt(timeRange);
+        startDate.setMonth(startDate.getMonth() - months);
+      }
     }
 
     // Filter missions based on time range
