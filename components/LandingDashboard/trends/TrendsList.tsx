@@ -57,13 +57,13 @@ const TrendsList: React.FC<TrendsListProps> = ({
 
   return (
     <Card className={`bg-background/60 backdrop-blur-xl border border-border/50 shadow-lg ${className}`}>
-      <CardHeader className="pb-2 px-3 pt-3">
+      <CardHeader className="-mb-4 px-3 pt-0">
         <CardTitle className="flex items-center space-x-2 text-foreground text-sm font-semibold">
           {getIcon()}
           <span>{title}</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className={`px-3 pb-3 ${isHorizontal ? 'space-y-0' : 'space-y-2'}`}>
+      <CardContent className={`px-3 pb-1 ${isHorizontal ? 'space-y-0' : 'space-y-2'}`}>
         {trends.length === 0 ? (
           <div className="text-center text-muted-foreground py-3">
             <p className="text-xs">No trends available</p>

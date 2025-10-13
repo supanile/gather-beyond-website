@@ -50,10 +50,10 @@ const Dashboard: React.FC = () => {
         onFilterSelect={handleFilterSelect}
         selectedFilter={selectedFilter}
       />
+      <TwitterTrendsArena />
       <FeaturedProjects 
         projects={searchTerm || selectedFilter ? filteredProjects.slice(0, 6) : featuredProjects}
       />
-      <TwitterTrendsArena />
       <LiveInsightsPanel />
       <MediaFeed />
       <ProjectsTable 

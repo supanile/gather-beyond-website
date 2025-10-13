@@ -12,7 +12,8 @@ import LocationFilter from "./trends/LocationFilter";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Twitter, Globe } from "lucide-react";
+import { RefreshCw, Globe } from "lucide-react";
+import XIcon from "../ui/icons/XIcon";
 
 interface TwitterTrendsArenaProps {
   className?: string;
@@ -49,19 +50,20 @@ const TwitterTrendsArena: React.FC<TwitterTrendsArenaProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text text-transparent">
-            X Trends
+          <h2 className="flex items-center text-2xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text">
+            <XIcon className="w-7 h-7 mr-2" />
+            Trends
           </h2>
         </div>
 
-        <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-4">
           {/* Controls Card */}
-          <Card className="bg-background/60 backdrop-blur-xl border border-border/50 shadow-2xl">
-            <CardHeader className="pb-4">
+          <Card className="bg-background/60 backdrop-blur-xl border border-border/50 shadow-lg">
+            <CardHeader className="pb-1">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-                    <Twitter className="w-4 h-4 text-blue-500" />
+                    <XIcon className="w-4 h-4 text-blue-500" />
                   </div>
                   <div>
                     <CardTitle className="text-sm font-semibold text-foreground">

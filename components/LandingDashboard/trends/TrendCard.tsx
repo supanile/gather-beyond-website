@@ -13,8 +13,9 @@ interface TrendCardProps {
     y: number;
   };
   onClick?: () => void;
-  isTop3?: boolean; // Add prop to determine if trend is in Top 3 by volume
-  top3Rank?: number; // Add rank within top 3 (1, 2, or 3)
+  isTop3?: boolean;
+  top3Rank?: number;
+  onTrendClick?: (trend: TrendWithStats) => void; // เพิ่ม prop นี้
 }
 
 const TrendCard: React.FC<TrendCardProps> = ({
@@ -23,6 +24,7 @@ const TrendCard: React.FC<TrendCardProps> = ({
   onClick,
   isTop3 = false,
   top3Rank,
+  onTrendClick, // รับ prop
 }) => {
   const getColorByCategory = (
     category: string,
@@ -31,25 +33,19 @@ const TrendCard: React.FC<TrendCardProps> = ({
   ) => {
     if (volume === null) return "bg-muted/60 backdrop-blur-sm";
 
-    // Special styling for Others card
     if (trend.id === "others") {
       return "bg-gradient-to-br from-gray-800/90 to-gray-900/90 backdrop-blur-sm";
     }
 
-    // Use volume change for stock-like colors
     const change = volumeChange || 0;
 
     if (change > 10) {
-      // Strong Up - Dark Green
       return "bg-gradient-to-br from-green-600/90 to-green-700/95 backdrop-blur-sm";
     } else if (change > 1) {
-      // Up - Light Green
       return "bg-gradient-to-br from-green-400/85 to-green-500/90 backdrop-blur-sm";
     } else if (change >= -10) {
-      // Down - Light Red
       return "bg-gradient-to-br from-red-400/85 to-red-500/90 backdrop-blur-sm";
     } else {
-      // Strong Down - Dark Red
       return "bg-gradient-to-br from-red-600/90 to-red-700/95 backdrop-blur-sm";
     }
   };
@@ -65,31 +61,36 @@ const TrendCard: React.FC<TrendCardProps> = ({
   };
 
   const handleClick = () => {
-    if (onClick) {
-      onClick();
+    console.log("TrendCard clicked:", trend.name, trend.id);
+    
+    if (trend.id === "others") {
+      // ให้ onClick จัดการกับ "others" card
+      if (onClick) {
+        onClick();
+      }
     } else {
-      window.open(trend.url, "_blank", "noopener,noreferrer");
+      // สำหรับ trend ปกติ เรียก onTrendClick
+      if (onTrendClick) {
+        console.log("Calling onTrendClick for:", trend.name);
+        onTrendClick(trend);
+      }
     }
   };
 
-  // Calculate responsive sizing based on card dimensions
   const avgDimension = (size.width + size.height) / 2;
-
-  // Dynamic font scaling based on card size
   const baseFontSize = Math.max(8, Math.min(20, avgDimension / 8));
 
-  // Scale factor based on rank for fine-tuning
   let rankScale = 1;
   if (trend.rank <= 5) {
-    rankScale = 1.1; // Top 5: slightly larger
+    rankScale = 1.1;
   } else if (trend.rank <= 15) {
-    rankScale = 1.0; // Top 6-15: normal
+    rankScale = 1.0;
   } else if (trend.rank <= 35) {
-    rankScale = 0.95; // Top 16-35: slightly smaller
+    rankScale = 0.95;
   } else if (trend.rank <= 60) {
-    rankScale = 0.9; // Top 36-60: smaller
+    rankScale = 0.9;
   } else {
-    rankScale = 0.85; // Top 61+: smallest
+    rankScale = 0.85;
   }
 
   const fontSize = baseFontSize * rankScale;
@@ -106,41 +107,39 @@ const TrendCard: React.FC<TrendCardProps> = ({
         trend.volume_change_24h
       )}`}
       style={{
-        left: size.x + 1, // Add 1px margin on left
-        top: size.y + 1, // Add 1px margin on top
-        width: size.width - 2, // Reduce width by 2px for margins
-        height: size.height - 2, // Reduce height by 2px for margins
+        left: size.x + 1,
+        top: size.y + 1,
+        width: size.width - 2,
+        height: size.height - 2,
         fontSize: `${fontSize}px`,
         padding: `${padding}px`,
-        zIndex: isTop3 ? 10 : 1, // Higher z-index for Top 3
+        zIndex: isTop3 ? 10 : 1,
         minWidth: "40px",
         minHeight: "30px",
         opacity: 0.8,
-        outline: isTop3 ? "2px solid #FDE047" : "2px solid transparent", // Reduced outline width
-        outlineOffset: "1px", // Add spacing between cards
-        boxShadow: isTop3 ? "0 0 15px rgba(253, 224, 71, 0.4)" : "none", // Golden glow for Top 3
+        outline: isTop3 ? "2px solid #FDE047" : "2px solid transparent",
+        outlineOffset: "1px",
+        boxShadow: isTop3 ? "0 0 15px rgba(253, 224, 71, 0.4)" : "none",
       }}
       onClick={handleClick}
       onMouseEnter={(e) => {
         e.currentTarget.style.zIndex = "50";
         e.currentTarget.style.opacity = "1";
-        // Keep golden border for Top 3, use hover border for others
         if (!isTop3) {
           e.currentTarget.style.outline = "2px solid #FDE69F";
           e.currentTarget.style.outlineOffset = "1px";
         } else {
-          e.currentTarget.style.boxShadow = "0 0 20px rgba(253, 224, 71, 0.6)"; // Enhanced glow on hover for Top 3
+          e.currentTarget.style.boxShadow = "0 0 20px rgba(253, 224, 71, 0.6)";
         }
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.zIndex = isTop3 ? "10" : "1";
         e.currentTarget.style.opacity = "0.8";
-        // Restore original border state
         if (!isTop3) {
           e.currentTarget.style.outline = "2px solid transparent";
           e.currentTarget.style.outlineOffset = "1px";
         } else {
-          e.currentTarget.style.boxShadow = "0 0 15px rgba(253, 224, 71, 0.4)"; // Original glow for Top 3
+          e.currentTarget.style.boxShadow = "0 0 15px rgba(253, 224, 71, 0.4)";
         }
       }}
       title={
@@ -158,7 +157,6 @@ const TrendCard: React.FC<TrendCardProps> = ({
       }
     >
       <div className="flex flex-col h-full justify-between relative">
-        {/* Top 3 Ranking Number - Top Right Corner */}
         {isTop3 && top3Rank && (
           <div className="absolute top-1 right-1 z-20">
             <div
@@ -188,7 +186,6 @@ const TrendCard: React.FC<TrendCardProps> = ({
           </div>
         )}
 
-        {/* Header with Title */}
         <div className="flex items-start justify-between relative z-10 min-h-0">
           {trend.id !== "others" && (
             <div className="flex-1 min-w-0 overflow-hidden">
@@ -210,7 +207,6 @@ const TrendCard: React.FC<TrendCardProps> = ({
           )}
         </div>
 
-        {/* Rank Badge - Positioned at top right for non-Top3, below Top3 number for Top3 */}
         {trend.id !== "others" && (
           <div
             className={`absolute ${
@@ -231,7 +227,7 @@ const TrendCard: React.FC<TrendCardProps> = ({
                   fontSize * 0.1
                 )}px`,
                 height: "auto",
-                boxShadow: isTop3 ? "0 0 8px rgba(251, 191, 36, 0.5)" : "none", // Golden glow for Top 3 badge
+                boxShadow: isTop3 ? "0 0 8px rgba(251, 191, 36, 0.5)" : "none",
               }}
             >
               #{trend.rank}
@@ -239,7 +235,6 @@ const TrendCard: React.FC<TrendCardProps> = ({
           </div>
         )}
 
-        {/* Content - Volume and Percentage */}
         <div className="flex-1 flex flex-col justify-center relative z-10 min-h-0">
           <div className={`${isXSmall ? "space-y-0" : "space-y-0.5"}`}>
             {trend.id === "others" ? (
@@ -292,7 +287,6 @@ const TrendCard: React.FC<TrendCardProps> = ({
           </div>
         </div>
 
-        {/* Footer - Volume Change */}
         {!isXSmall &&
           trend.volume_change_24h !== undefined &&
           trend.id !== "others" && (
