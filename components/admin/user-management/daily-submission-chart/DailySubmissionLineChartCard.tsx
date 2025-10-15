@@ -14,6 +14,11 @@ import { MissionChart } from "./MissionChart";
 const DailySubmissionLineChartCard = () => {
   const [timeRange, setTimeRange] = useState<string>("30");
   const [filterType, setFilterType] = useState<string>("days");
+  const [dateRangeMode, setDateRangeMode] = useState<"relative" | "date" | "all">("relative");
+  const [customDateRange, setCustomDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({ from: undefined, to: undefined });
 
   const {
     userMissions,
@@ -21,7 +26,7 @@ const DailySubmissionLineChartCard = () => {
     error,
     chartData,
     topMissions,
-  } = useDailySubmissionData(timeRange, filterType);
+  } = useDailySubmissionData(timeRange, filterType, dateRangeMode, customDateRange);
 
   // Calculate summary stats
   const totalSubmissions = chartData.reduce(
@@ -62,7 +67,22 @@ const DailySubmissionLineChartCard = () => {
       : 0;
 
   const getTimeRangeLabel = () => {
-    if (filterType === "days") {
+    if (dateRangeMode === "all") {
+      return "all time";
+    } else if (dateRangeMode === "date" && customDateRange?.from && customDateRange?.to) {
+      const formatDate = (date: Date) => date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+      return `${formatDate(customDateRange.from)} - ${formatDate(customDateRange.to)}`;
+    } else if (dateRangeMode === "date" && customDateRange?.from) {
+      return `from ${customDateRange.from.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      })}`;
+    } else if (filterType === "days") {
       return `${timeRange} ${timeRange === "1" ? "day" : "days"}`;
     } else {
       return `${timeRange} ${timeRange === "1" ? "month" : "months"}`;
@@ -95,6 +115,10 @@ const DailySubmissionLineChartCard = () => {
             filterType={filterType}
             onTimeRangeChange={setTimeRange}
             onFilterTypeChange={setFilterType}
+            dateRangeMode={dateRangeMode}
+            onDateRangeModeChange={setDateRangeMode}
+            customDateRange={customDateRange}
+            onCustomDateRangeChange={setCustomDateRange}
           />
           <div className="p-3 rounded-full bg-gray-200 dark:bg-white">
             <Send className="w-6 h-6 text-gray-700 dark:text-gray-900" />
