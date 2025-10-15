@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { completeMission, getMissionById, ensureString, ensureNumber } from "@/lib/missions/missionUtils";
 import { grist } from "@/lib/grist";
+import { sendMissionApprovalDM } from "@/lib/discord/missionReviewHandlers";
 
 export async function POST(
   req: NextRequest,
@@ -16,6 +17,10 @@ export async function POST(
         { status: 400 }
       );
     }
+
+    // Parse request body for approvedBy (optional)
+    const body = await req.json().catch(() => ({}));
+    const approvedBy = body.approvedBy || "system";
 
     // Get the mission record using id2 field
     const userMissions = await grist.fetchTable("User_missions");
@@ -53,8 +58,66 @@ export async function POST(
       );
     }
 
+    // Update verified_by field after successful completion
+    try {
+      await grist.updateRecords("User_missions", [{
+        id: userMission.id, // Use the actual Grist record id
+        verified_by: approvedBy,
+        completed_at: new Date().toISOString()
+      }]);
+      console.log(`✅ Updated verified_by field to "${approvedBy}" for mission ${missionId}`);
+    } catch (updateError) {
+      console.error('Error updating verified_by field:', updateError);
+      // Don't fail the main operation if this update fails
+    }
+
     // Get mission details for response
     const mission = await getMissionById(actualMissionId);
+
+    // Send Discord DM notification to user for approval
+    try {
+      // Prepare xpResult data
+      const xpResultData = result.xpResult && result.xpResult.success && result.xpResult.leveledUp ? {
+        leveledUp: result.xpResult.leveledUp,
+        newLevel: result.xpResult.newLevel,
+        oldLevel: result.xpResult.oldLevel
+      } : undefined;
+
+      // Prepare healthResult data
+      const healthResultData = result.healthResult && result.healthResult.success && result.healthResult.newMood ? {
+        newMood: result.healthResult.newMood,
+        newHealth: result.healthResult.newHealth
+      } : undefined;
+
+      const dmResult = await sendMissionApprovalDM({
+        userId,
+        missionId: actualMissionId,
+        mission: {
+          title: mission?.title || 'Unknown Mission',
+          reward: {
+            amount: mission?.reward?.amount || 0,
+            token: mission?.reward?.token || 'TOKENS'
+          }
+        },
+        rewards: {
+          xp: result.rewards?.xp || 0,
+          health: result.rewards?.health || 0,
+          credits: result.rewards?.credits || 0,
+          levelUp: result.rewards?.levelUp || false,
+          newLevel: result.rewards?.newLevel || null
+        },
+        xpResult: xpResultData,
+        healthResult: healthResultData
+      });
+
+      if (!dmResult.success) {
+        console.warn('Failed to send Discord approval DM:', dmResult.error);
+      } else {
+        console.log('✅ Discord approval notification sent successfully');
+      }
+    } catch (dmError) {
+      console.error('Error sending Discord approval DM:', dmError);
+    }
 
     // Fetch updated mission data using the actual record id
     const updatedMissionResponse = await fetch(`${process.env.PUBLIC_URL || 'http://localhost:3000'}/api/user-missions/${userMission.id}`);

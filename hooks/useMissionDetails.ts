@@ -106,6 +106,9 @@ export function useMissionDetails(missionId: string) {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          approvedBy: verifiedBy
+        }),
       });
 
       if (!response.ok) {
@@ -135,7 +138,7 @@ export function useMissionDetails(missionId: string) {
   };
 
   const rejectMission = async (
-    missionId: number,
+    _missionId: number,
     rejectionReason?: string
   ) => {
     try {
@@ -168,6 +171,7 @@ export function useMissionDetails(missionId: string) {
         },
         body: JSON.stringify({
           rejectionReason: rejectionReason,
+          rejectedBy: verifiedBy,
         }),
       });
 

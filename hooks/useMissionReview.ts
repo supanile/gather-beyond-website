@@ -314,6 +314,9 @@ useEffect(() => {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          approvedBy: verifiedBy
+        }),
       });
 
       if (!response.ok) {
@@ -384,6 +387,7 @@ useEffect(() => {
         },
         body: JSON.stringify({
           rejectionReason: rejectionReason,
+          rejectedBy: verifiedBy,
         }),
       });
 

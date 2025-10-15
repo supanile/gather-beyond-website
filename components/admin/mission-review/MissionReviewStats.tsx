@@ -8,7 +8,7 @@ import {
   CheckCircle,
   XCircle,
   TrendingUp,
-  UserPlus,
+  Calendar,
 } from "lucide-react";
 
 interface MissionReviewStatsProps {
@@ -32,7 +32,7 @@ export function MissionReviewStatsComponent({
     {
       title: "Accepted",
       value: stats.accepted,
-      icon: UserPlus,
+      icon: Calendar,
       color: "text-yellow-800 dark:text-yellow-600",
       bgColor: "bg-yellow-100 dark:bg-yellow-900/20",
     },

@@ -7,7 +7,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  UserPlus,
+  Calendar,
 } from "lucide-react";
 
 export function MissionStatusBadge({ status }: MissionStatusBadgeProps) {
@@ -42,7 +42,7 @@ export function MissionStatusBadge({ status }: MissionStatusBadgeProps) {
           variant: "default" as const,
           className:
             "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
-          icon: UserPlus,
+          icon: Calendar,
           label: "Accepted",
         };
       default:

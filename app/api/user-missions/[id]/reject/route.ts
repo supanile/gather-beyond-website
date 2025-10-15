@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMissionById, ensureString, ensureNumber } from "@/lib/missions/missionUtils";
 import { grist } from "@/lib/grist";
+import { sendMissionRejectionDM } from "@/lib/discord/missionReviewHandlers";
 
 export async function POST(
   req: NextRequest,
@@ -17,9 +18,10 @@ export async function POST(
       );
     }
 
-    // Parse request body for rejection reason
+    // Parse request body for rejection reason and rejectedBy
     const body = await req.json().catch(() => ({}));
     const rejectionReason = body.rejectionReason || "No reason provided";
+    const rejectedBy = body.rejectedBy || body.approvedBy || "system";
 
     // Get the mission record using id2 field
     const userMissions = await grist.fetchTable("User_missions");
@@ -47,16 +49,36 @@ export async function POST(
     const userId = ensureString(userMission.user_id);
     const actualMissionId = ensureNumber(userMission.mission_id);
 
-    // Update mission status to rejected with rejection reason using the actual record id
+    // Update mission status to rejected with rejection reason and verified_by using the actual record id
     await grist.updateRecords("User_missions", [{
       id: userMission.id, // Use the actual Grist record id
       status: 'rejected',
       completed_at: new Date().toISOString(),
-      notes: rejectionReason
+      notes: rejectionReason,
+      verified_by: rejectedBy
     }]);
+
+    console.log(`✅ Updated verified_by field to "${rejectedBy}" for rejected mission ${missionId}`);
 
     // Get mission details for response
     const mission = await getMissionById(actualMissionId);
+
+    // Send Discord DM notification to user for rejection
+    try {
+      const dmResult = await sendMissionRejectionDM(
+        userId,
+        mission?.title || 'Unknown Mission',
+        rejectionReason
+      );
+
+      if (!dmResult.success) {
+        console.warn('Failed to send Discord rejection DM:', dmResult.error);
+      } else {
+        console.log('✅ Discord rejection notification sent successfully');
+      }
+    } catch (dmError) {
+      console.error('Error sending Discord rejection DM:', dmError);
+    }
 
     // Fetch updated mission data using the actual record id
     const updatedMissionResponse = await fetch(`${process.env.PUBLIC_URL || 'http://localhost:3000'}/api/user-missions/${userMission.id}`);

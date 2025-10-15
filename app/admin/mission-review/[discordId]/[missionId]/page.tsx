@@ -18,6 +18,7 @@ import {
   ExternalLink,
   X,
   User,
+  Calendar,
   MessageSquare,
   ArrowLeft,
   Shield,
@@ -25,7 +26,6 @@ import {
   Sparkle,
   Coins,
   Heart,
-  UserPlus,
 } from "lucide-react";
 
 export default function MissionDetailsPage() {
@@ -425,7 +425,7 @@ export default function MissionDetailsPage() {
                   {/* Accepted */}
                   <div className="flex-1 text-center relative z-10">
                     <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-yellow-500/25">
-                      <UserPlus className="w-5 h-5 text-white" />
+                      <Calendar className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300 block mb-2">
                       Accepted
