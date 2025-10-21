@@ -194,12 +194,20 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
 
   const getExpenseTypeIcon = (type: string) => {
     switch (type) {
+      case "onchain":
+        return "⛓️";
+      case "digital":
+        return "💻";
+      case "irl":
+        return "🎫";
+      case "access":
+        return "�";
       case "mystery_box":
         return "🎁";
-      case "upgrade":
-        return "⬆️";
-      case "purchase":
-        return "🛒";
+      case "guarantee":
+        return "✅";
+      case "raffle":
+        return "🎲";
       default:
         return "💳";
     }
@@ -207,20 +215,39 @@ export const ViewUserModal: React.FC<ViewUserModalProps> = ({
 
   const getExpenseTypeBadgeColor = (type: string) => {
     switch (type) {
-      case "mystery_box":
-        return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800";
-      case "upgrade":
+      case "onchain":
         return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
-      case "purchase":
+      case "digital":
+        return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800";
+      case "irl":
         return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800";
+      case "access":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800";
+      case "mystery_box":
+        return "bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900/20 dark:text-pink-400 dark:border-pink-800";
+      case "guarantee":
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800";
+      case "raffle":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800";
     }
   };
 
-  const formatExpenseDate = (timestamp: number) => {
+  const formatExpenseDate = (timestamp: string | number | undefined) => {
+    if (!timestamp) return "N/A";
+    
     const now = Date.now();
-    const expenseTime = timestamp * 1000;
+    let expenseTime: number;
+    
+    // Handle string timestamps (ISO format)
+    if (typeof timestamp === 'string') {
+      expenseTime = new Date(timestamp).getTime();
+    } else {
+      // Handle number timestamps (Unix timestamp in seconds)
+      expenseTime = timestamp < 10000000000 ? timestamp * 1000 : timestamp;
+    }
+    
     const diffMs = now - expenseTime;
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
