@@ -11,19 +11,6 @@ interface HistoryLog {
   item_name?: string;
 }
 
-interface StoreItem {
-  id?: number;
-  name?: string;
-  category?: string;
-}
-
-interface User {
-  id?: number;
-  discord_id?: string;
-  credit?: number;
-  [key: string]: unknown;
-}
-
 interface CreditUsageStats {
   discord_id: string;
   credits_used_lifetime: number;
