@@ -19,6 +19,7 @@ import {
   Server,
   ShieldUser,
   Activity,
+  ShoppingBasket,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
@@ -489,6 +490,11 @@ const DashboardPage = () => {
                   activeUsers={stats?.activeUsers}
                   totalUsers={stats?.totaluser}
                   isLoading={isLoadingStats}
+                />
+                <AdminStatCard
+                  title="Active Users (7d)"
+                  value={getActiveUsersLast7Days().toLocaleString()}
+                  icon={Activity}
                 />
                 <AdminStatCard
                   title="Active Users (7d)"
