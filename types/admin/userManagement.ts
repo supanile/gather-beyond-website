@@ -27,7 +27,7 @@ export interface UserAgent {
   credits_used_lifetime?: number;
   credits_used_30d?: number;
   last_expense_reason?: string;
-  last_expense_date?: string;
+  last_expense_date?: string | number;
   last_expense_type?: "onchain" | "digital" | "irl" | "access" | "mystery_box" | "guarantee" | "raffle" | "other";
 }
 
@@ -41,6 +41,7 @@ export interface User {
   credit: number; // New credit field
   level: number;
   email: string;
+  platform: string;
   telegram_handle: string;
   telegram_id: string | null;
   missions_completed: number;
