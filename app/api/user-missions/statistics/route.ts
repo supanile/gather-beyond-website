@@ -4,13 +4,6 @@ import { grist } from '@/lib/grist';
 export async function GET() {
   try {
     const userMissions = await grist.fetchTable("User_missions") as any[];
-    
-    if (userMissions.length > 0) {
-      console.log('Sample mission:', {
-        accepted_at: userMissions[0].accepted_at,
-        status: userMissions[0].status,
-      });
-    }
 
     const dateGroups = new Map();
 
