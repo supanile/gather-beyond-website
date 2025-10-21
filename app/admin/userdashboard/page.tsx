@@ -19,6 +19,7 @@ import {
   Server,
   ShieldUser,
   Activity,
+  ShoppingBasket,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
@@ -27,8 +28,6 @@ import AdminUserTable from "@/components/admin/AdminUserTable";
 import { UserDataTable } from "@/components/admin/user-management/UserDataTable";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAdminData } from "@/hooks/useAdminData";
-import { mockUsers } from "@/data/admin/mockActiveUsers";
-import { config, logMockData } from "@/config/mockConfig";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -53,6 +52,7 @@ import DailySubmissionLineChartCard from "@/components/admin/user-management/Dai
 import ServerOverview from "@/components/admin/server-overview/ServerOverview";
 import { useDiscordServers } from "@/hooks/useDiscordServers";
 import CountryBarChartCard from "@/components/admin/user-management/CountryBarChartCard";
+import SuperStoreOverview from "@/components/admin/super-store/SuperStoreOverview";
 
 type SortOption = {
   field:
