@@ -116,7 +116,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
       // Debug logging
       if (user.discord_id === (users[0]?.discord_id)) { // Log for first user only
         const expenseDate = user.agent?.last_expense_date;
-        const expenseDateMs = expenseDate && expenseDate < 10000000000 ? expenseDate * 1000 : expenseDate;
+        const expenseDateMs = expenseDate && Number(expenseDate) < 10000000000 ? Number(expenseDate) * 1000 : Number(expenseDate);
         console.log('Last Spent Filter Debug:', {
           isDefaultRange,
           filterRange: filterConfig.lastSpentDateRange,
@@ -136,7 +136,7 @@ export const useUserManagement = ({ users }: UseUserManagementProps) => {
         
         // Convert expense date from seconds to milliseconds if needed
         const expenseDate = user.agent.last_expense_date;
-        const expenseDateMs = expenseDate < 10000000000 ? expenseDate * 1000 : expenseDate;
+        const expenseDateMs = Number(expenseDate) < 10000000000 ? Number(expenseDate) * 1000 : Number(expenseDate);
         
         if (
           expenseDateMs < filterConfig.lastSpentDateRange[0] ||

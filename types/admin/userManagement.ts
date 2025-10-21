@@ -24,12 +24,11 @@ export interface UserAgent {
   current_level_progress: number;
   xp_required: number;
   credits: number;
-  // Mockup fields for Credits Used and Last Spent Note
   credits_used_lifetime?: number;
   credits_used_30d?: number;
   last_expense_reason?: string;
-  last_expense_date?: number;
-  last_expense_type?: "mystery_box" | "upgrade" | "purchase" | "other";
+  last_expense_date?: string | number;
+  last_expense_type?: "onchain" | "digital" | "irl" | "access" | "mystery_box" | "guarantee" | "raffle" | "other";
 }
 
 export interface User {
