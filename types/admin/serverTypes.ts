@@ -10,9 +10,6 @@ export interface DiscordServer {
   total_xp: number;
   created_at: string;
   joined_at: string;
-  is_active: boolean;
-  // server_type: "premium" | "standard" | "basic";
-  categories: string[];
 }
 
 export interface ServerStats {
