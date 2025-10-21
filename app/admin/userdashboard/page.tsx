@@ -28,8 +28,6 @@ import AdminUserTable from "@/components/admin/AdminUserTable";
 import { UserDataTable } from "@/components/admin/user-management/UserDataTable";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAdminData } from "@/hooks/useAdminData";
-import { mockUsers } from "@/data/admin/mockActiveUsers";
-import { config, logMockData } from "@/config/mockConfig";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
