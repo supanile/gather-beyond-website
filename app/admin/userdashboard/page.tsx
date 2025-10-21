@@ -54,6 +54,7 @@ import DailySubmissionLineChartCard from "@/components/admin/user-management/Dai
 import ServerOverview from "@/components/admin/server-overview/ServerOverview";
 import { useDiscordServers } from "@/hooks/useDiscordServers";
 import CountryBarChartCard from "@/components/admin/user-management/CountryBarChartCard";
+import SuperStoreOverview from "@/components/admin/super-store/SuperStoreOverview";
 
 type SortOption = {
   field:
