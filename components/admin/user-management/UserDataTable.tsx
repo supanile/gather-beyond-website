@@ -80,7 +80,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
     joinedDate: true,
     credits: true,
     creditsUsed: true,
-    lastSpentNote: true,
+    creditExpenseNote: true,
   });
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithAgent | null>(null);
@@ -299,8 +299,8 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   )}
                 </div>
 
-                {/* Last Spent Note */}
-                {columnVisibility.lastSpentNote && user.agent?.last_expense_reason && (
+                {/* Credit Expense Note */}
+                {columnVisibility.creditExpenseNote && user.agent?.last_expense_reason && (
                   <div className="space-y-1">
                     <span className="text-xs text-muted-foreground">
                       Latest Expense
@@ -593,7 +593,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                   </DropdownMenu>
                 </TableHead>
               )}
-              {columnVisibility.lastSpentNote && (
+              {columnVisibility.creditExpenseNote && (
                 <TableHead>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -601,26 +601,12 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                         variant="ghost"
                         className="h-auto px-0 py-2 font-medium text-foreground hover:text-foreground justify-start text-xs"
                       >
-                        Last Spent
-                        {getSortIcon("agent.last_expense_date")}
+                        Credit Expense
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-auto min-w-0">
                       <DropdownMenuItem
-                        onClick={() => handleSort("agent.last_expense_date")}
-                        className="p-2 justify-center"
-                      >
-                        <ChevronUp className="w-4 h-4" />
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleSort("agent.last_expense_date")}
-                        className="p-2 justify-center"
-                      >
-                        <ChevronDown className="w-4 h-4" />
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => onToggleColumnVisibility("lastSpentNote")}
+                        onClick={() => onToggleColumnVisibility("creditExpenseNote")}
                         className="p-2 justify-center"
                       >
                         <EyeOff className="w-4 h-4" />
@@ -912,7 +898,7 @@ export const UserDataTable = ({ users }: UserDataTableProps) => {
                       </div>
                     </TableCell>
                   )}
-                  {columnVisibility.lastSpentNote && (
+                  {columnVisibility.creditExpenseNote && (
                     <TableCell>
                       {user.agent?.last_expense_reason ? (
                         <div className="flex flex-col gap-1">
