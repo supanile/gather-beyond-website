@@ -6,6 +6,7 @@ export interface UserMission {
   mission_name: string;
   user_id: string;
   status: "accepted" | "submitted" | "completed" | "rejected";
+  platform?: string | null;
   accepted_at: number | null;
   submitted_at: number | null;
   completed_at: number | null;
@@ -90,6 +91,7 @@ export interface MissionReviewFilters {
 
 export interface MissionReviewStats {
   total: number;
+  accepted: number;
   submitted: number;
   completed: number;
   rejected: number;

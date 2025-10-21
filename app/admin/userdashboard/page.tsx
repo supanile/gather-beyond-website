@@ -22,10 +22,13 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminStatCard from "@/components/admin/AdminStatCard";
+import ActiveUsersCard from "@/components/admin/ActiveUsersCard";
 import AdminUserTable from "@/components/admin/AdminUserTable";
 import { UserDataTable } from "@/components/admin/user-management/UserDataTable";
 import { useStatistics } from "@/hooks/useStatistics";
 import { useAdminData } from "@/hooks/useAdminData";
+import { mockUsers } from "@/data/admin/mockActiveUsers";
+import { config, logMockData } from "@/config/mockConfig";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -47,6 +50,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InterestsPieChartCard from "@/components/admin/user-management/InterestsPieChartCard";
 import MoodBarChartCard from "@/components/admin/user-management/MoodBarChartCard";
 import DailySubmissionLineChartCard from "@/components/admin/user-management/DailySubmissionLineChartCard";
+import ServerOverview from "@/components/admin/server-overview/ServerOverview";
 import { useDiscordServers } from "@/hooks/useDiscordServers";
 import CountryBarChartCard from "@/components/admin/user-management/CountryBarChartCard";
 
@@ -481,6 +485,16 @@ const DashboardPage = () => {
                   value={users.length.toLocaleString()}
                   icon={ShieldUser}
                 />
+                <ActiveUsersCard 
+                  activeUsers={stats?.activeUsers}
+                  totalUsers={stats?.totaluser}
+                  isLoading={isLoadingStats}
+                />
+                <AdminStatCard
+                  title="Active Users (7d)"
+                  value={getActiveUsersLast7Days().toLocaleString()}
+                  icon={Activity}
+                />
                 <AdminStatCard
                   title="Active Users (7d)"
                   value={getActiveUsersLast7Days().toLocaleString()}
@@ -537,7 +551,7 @@ const DashboardPage = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="user-management" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 md:h-16">
+          <TabsList className="grid w-full grid-cols-4 h-12 sm:h-14 md:h-16">
             <TabsTrigger
               value="user-management"
               className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
@@ -551,6 +565,20 @@ const DashboardPage = () => {
             >
               <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
               <span className="truncate">User Overview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="server-overview"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
+            >
+              <Server className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">Server Overview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="super-store"
+              className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
+            >
+              <ShoppingBasket className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
+              <span className="truncate">Super Store Data</span>
             </TabsTrigger>
           </TabsList>
 
@@ -806,11 +834,21 @@ const DashboardPage = () => {
             </div>
           </TabsContent>
 
+          {/* Server Overview Tab */}
+          <TabsContent value="server-overview">
+            <ServerOverview />
+          </TabsContent>
+
           {/* User Management Tab */}
           <TabsContent value="user-management">
             <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
               <UserDataTable users={users} />
             </div>
+          </TabsContent>
+
+          {/* Super Store Data Tab */}
+          <TabsContent value="super-store">
+            <SuperStoreOverview />
           </TabsContent>
         </Tabs>
       </div>

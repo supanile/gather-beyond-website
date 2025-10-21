@@ -30,22 +30,32 @@ export function UserAvatar({
   const [error, setError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // เพิ่ม state สำหรับ modal
 
-  // Size classes
+  // Size classes - updated for responsive design
   const sizeClasses = {
-    sm: "w-8 h-8",
-    md: "w-10 h-10", 
-    lg: "w-12 h-12"
+    sm: "w-6 h-6 sm:w-8 sm:h-8",
+    md: "w-8 h-8 sm:w-10 sm:h-10", 
+    lg: "w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
   };
 
   // Fetch Discord data if discordId is provided and no direct data is given
   useEffect(() => {
-    if (discordId && !providedAvatarUrl && !username) {
+    // Fetch if we have discordId but no avatarUrl provided (we may still want Discord avatar even if we have username)
+    if (discordId && !providedAvatarUrl) {
       setLoading(true);
-      fetch(`/api/discord/${discordId}`)
+      fetch('/api/discord/discord-name', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ discord_id: discordId }),
+      })
         .then(res => res.json())
         .then(data => {
-          if (data.username && data.avatarUrl) {
-            setDiscordData(data);
+          if (data.username || data.avatarUrl) {
+            setDiscordData({
+              username: data.username || username || "Unknown User",
+              avatarUrl: data.avatarUrl
+            });
           } else {
             setError(true);
           }
@@ -55,8 +65,8 @@ export function UserAvatar({
     }
   }, [discordId, providedAvatarUrl, username]);
 
-  // Determine what data to use
-  const displayUsername = username ||"Unknown User";
+  // Determine what data to use - prioritize provided props over fetched data
+  const displayUsername = username || discordData?.username || "Unknown User";
   const displayAvatarUrl = providedAvatarUrl || discordData?.avatarUrl;
 
   // Generate initials from username

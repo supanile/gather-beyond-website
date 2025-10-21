@@ -37,7 +37,8 @@ export interface User {
   twitter_handle: string;
   wallet_address: string;
   interests: string;
-  total_points: number;
+  total_points: number; // Keep for backward compatibility
+  credit: number; // New credit field
   level: number;
   email: string;
   telegram_handle: string;
@@ -81,6 +82,7 @@ export interface FilterConfig {
   healthRange: [number, number];
   levelRange: [number, number];
   interests: string[];
+  lastSpentDateRange: [number, number]; // Unix timestamps for date range
 }
 
 export interface PaginationConfig {

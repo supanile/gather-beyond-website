@@ -359,7 +359,6 @@ const MissionTargetingForm: React.FC<MissionTargetingFormProps> = ({
   // Reset state when initialData changes (especially when null for new mission)
   useEffect(() => {
     console.log("🔄 MissionTargetingForm: initialData changed:", initialData);
-
     // Reset to default values if initialData is null (new mission)
     if (initialData === null) {
       console.log("🔄 Resetting to default values for new mission");

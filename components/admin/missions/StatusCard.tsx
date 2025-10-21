@@ -86,6 +86,10 @@ export const StatusCard: React.FC<StatusCardProps> = ({
           )}
         </div>
       </div>
+
+      {/* Bottom subtle line indicator */}
+      <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent
+        opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isSelected ? 'opacity-100 via-blue-400/50' : ''}`} />
     </div>
   </div>
 );

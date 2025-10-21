@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { MissionStatusBadge } from "@/components/admin/mission-review/MissionStatusBadge";
+import { PlatformBadge } from "@/components/admin/mission-review/PlatformBadge";
 import { UserAvatar } from "@/components/admin/mission-review/UserAvatar";
 import { MissionActionConfirmDialog } from "@/components/admin/mission-review/MissionActionConfirmDialog";
 import { useMissionDetails } from "@/hooks/useMissionDetails";
@@ -285,13 +286,13 @@ export default function MissionDetailsPage() {
                 <div className="flex items-center gap-4">
                   <UserAvatar
                     discordId={mission.user_id}
-                    username={mission.user?.username}
+                    username={mission.discord_user?.username}
                     avatarUrl={mission.discord_user?.avatarUrl}
                     size="lg"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-slate-900 dark:text-slate-100 text-lg truncate">
-                      {mission.user?.username || "Unknown User"}
+                      {mission.discord_user?.username || "Unknown User"}
                     </div>
                     <div className="text-sm text-slate-500 dark:text-slate-400 truncate">
                       {mission.user_id}
@@ -321,6 +322,15 @@ export default function MissionDetailsPage() {
                     </span>
                     <MissionStatusBadge status={mission.status} />
                   </div>
+                  
+                  {mission.platform && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Platform
+                      </span>
+                      <PlatformBadge platform={mission.platform} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

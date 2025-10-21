@@ -13,6 +13,7 @@ export interface UserAgent {
   total_xp: number;
   current_level_progress: number;
   xp_required: number;
+  credits: number;
 }
 
 export interface ColumnVisibility {

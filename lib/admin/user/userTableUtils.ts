@@ -304,6 +304,7 @@ export const getDefaultUserAgent = (userId: string): UserAgent => {
     total_xp: 0,
     current_level_progress: 0,
     xp_required: 100,
+    credits: 0,
   };
 };
 

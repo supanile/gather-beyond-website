@@ -2,20 +2,24 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { MissionReviewStats } from "@/types/admin/missionReview";
-import { 
-  FileText, 
-  Clock, 
-  CheckCircle, 
+import {
+  FileText,
+  Clock,
+  CheckCircle,
   XCircle,
-  TrendingUp
+  TrendingUp,
+  Calendar,
 } from "lucide-react";
 
 interface MissionReviewStatsProps {
   stats: MissionReviewStats;
 }
 
-export function MissionReviewStatsComponent({ stats }: MissionReviewStatsProps) {
-  const completionRate = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
+export function MissionReviewStatsComponent({
+  stats,
+}: MissionReviewStatsProps) {
+  const completionRate =
+    stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
 
   const statItems = [
     {
@@ -26,11 +30,18 @@ export function MissionReviewStatsComponent({ stats }: MissionReviewStatsProps) 
       bgColor: "bg-blue-100 dark:bg-blue-900/20",
     },
     {
-      title: "Summited",
+      title: "Accepted",
+      value: stats.accepted,
+      icon: Calendar,
+      color: "text-yellow-800 dark:text-yellow-600",
+      bgColor: "bg-yellow-100 dark:bg-yellow-900/20",
+    },
+    {
+      title: "Submitted",
       value: stats.submitted,
       icon: Clock,
-      color: "text-yellow-600 dark:text-yellow-400",
-      bgColor: "bg-yellow-100 dark:bg-yellow-900/20",
+      color: "text-orange-800 dark:text-orange-600",
+      bgColor: "bg-orange-100 dark:bg-orange-900/20",
     },
     {
       title: "Completed",
@@ -49,7 +60,7 @@ export function MissionReviewStatsComponent({ stats }: MissionReviewStatsProps) 
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       {statItems.map((item) => (
         <Card key={item.title} className="transition-all hover:shadow-lg">
           <CardContent className="p-4">

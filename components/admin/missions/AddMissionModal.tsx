@@ -666,7 +666,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
     (data: MissionTargetingData | null) => {
       console.log("🎯 handleTargetingChange called with:", data);
       setMissionTargeting(data);
-
       // Also update parent component immediately
       onMissionChange((prev) => {
         const updated = {
@@ -1022,7 +1021,6 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
         // Always preserve missionTargeting from either source
         missionTargeting: prev.missionTargeting || missionTargeting || null,
       };
-
       return updated;
     });
 
@@ -1160,13 +1158,11 @@ export const AddMissionModal: React.FC<AddMissionModalProps> = ({
       try {
         const draftString = JSON.stringify(draftData);
         localStorage.setItem(draftKey, draftString);
-
         // Verify the save was successful
         const verifyData = localStorage.getItem(draftKey);
         if (!verifyData || verifyData !== draftString) {
           throw new Error("Failed to verify draft save");
         }
-
         console.log("Draft saved successfully:", draftKey);
         console.log("Saved data:", draftData);
 

@@ -22,12 +22,16 @@ import {
   getColumnLabel,
   getColumnOrder
 } from "@/lib/admin/user/userTableUtils";
+import { FilterConfig } from "@/types/admin/userManagement";
+import { LastSpentFilter } from "./LastSpentFilter";
 
 interface UserDataTableControlsProps {
   pagination: UserDataPaginationState;
   onPageSizeChange: (pageSize: number) => void;
   columnVisibility: ColumnVisibility;
   onToggleColumnVisibility: (column: keyof ColumnVisibility) => void;
+  filterConfig: FilterConfig;
+  onFilterChange: (filter: Partial<FilterConfig>) => void;
 }
 
 export const UserDataTableControls: React.FC<UserDataTableControlsProps> = ({
@@ -35,6 +39,8 @@ export const UserDataTableControls: React.FC<UserDataTableControlsProps> = ({
   onPageSizeChange,
   columnVisibility,
   onToggleColumnVisibility,
+  filterConfig,
+  onFilterChange,
 }) => {
   const startIndex = (pagination.page - 1) * pagination.pageSize;
   const endIndex = Math.min(startIndex + pagination.pageSize, pagination.total);
@@ -42,7 +48,10 @@ export const UserDataTableControls: React.FC<UserDataTableControlsProps> = ({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div className="flex items-center gap-2">
-        {/* Empty space for consistency - can add filters here later */}
+        <LastSpentFilter
+          filterConfig={filterConfig}
+          onFilterChange={onFilterChange}
+        />
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -51,7 +60,6 @@ export const UserDataTableControls: React.FC<UserDataTableControlsProps> = ({
             Showing {startIndex + 1}-{endIndex} of {pagination.total} users
           </span>
         </div>
-
         <div className="flex items-center space-x-2">
           <span className="text-xs text-muted-foreground sm:text-sm whitespace-nowrap">
             Show:
