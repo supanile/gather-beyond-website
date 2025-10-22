@@ -18,14 +18,22 @@ export function useSuperStoreData() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate API call
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        setData(mockSuperStoreData);
+        // Fetch stats from API
+        const statsResponse = await fetch('/api/super-store/stats');
+        if (!statsResponse.ok) {
+          throw new Error('Failed to fetch super store stats');
+        }
+        const stats = await statsResponse.json();
+        
+        // For now, use mock data for other sections but real stats
+        setData({
+          ...mockSuperStoreData,
+          stats: stats
+        });
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch super store data");
@@ -41,27 +49,69 @@ export function useSuperStoreData() {
     data,
     isLoading,
     error,
-    refetch: () => {
+    refetch: async () => {
       setIsLoading(true);
-      setTimeout(() => {
-        setData(mockSuperStoreData);
+      try {
+        // Fetch stats from API
+        const statsResponse = await fetch('/api/super-store/stats');
+        if (!statsResponse.ok) {
+          throw new Error('Failed to fetch super store stats');
+        }
+        const stats = await statsResponse.json();
+        
+        // For now, use mock data for other sections but real stats
+        setData({
+          ...mockSuperStoreData,
+          stats: stats
+        });
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch super store data");
+      } finally {
         setIsLoading(false);
-      }, 500);
+      }
     }
   };
 }
 
 export function useLeaderboard(filters?: LeaderboardFilters) {
-  const { data, isLoading, error } = useSuperStoreData();
+  const [claimers, setClaimers] = useState<Claimer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filteredClaimers, setFilteredClaimers] = useState<Claimer[]>([]);
 
+  // Fetch leaderboard data from API
   useEffect(() => {
-    if (!data?.claimers) {
+    const fetchLeaderboard = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/super-store/leaderboard');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch leaderboard data');
+        }
+        
+        const data = await response.json();
+        setClaimers(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch leaderboard data");
+        setClaimers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, []);
+
+  useEffect(() => {
+    if (!claimers.length) {
       setFilteredClaimers([]);
       return;
     }
 
-    let filtered = [...data.claimers];
+    let filtered = [...claimers];
 
     // Apply filters
     if (filters) {
@@ -105,8 +155,8 @@ export function useLeaderboard(filters?: LeaderboardFilters) {
             bValue = b.total_xp;
             break;
           case "join_date":
-            aValue = new Date(a.join_date).getTime();
-            bValue = new Date(b.join_date).getTime();
+            aValue = typeof a.join_date === 'number' ? a.join_date * 1000 : new Date(a.join_date).getTime();
+            bValue = typeof b.join_date === 'number' ? b.join_date * 1000 : new Date(b.join_date).getTime();
             break;
           default:
             return 0;
@@ -121,27 +171,54 @@ export function useLeaderboard(filters?: LeaderboardFilters) {
     }
 
     setFilteredClaimers(filtered);
-  }, [data, filters]);
+  }, [claimers, filters]);
 
   return {
     claimers: filteredClaimers,
-    totalClaimers: data?.claimers.length || 0,
+    totalClaimers: claimers.length || 0,
     isLoading,
     error
   };
 }
 
 export function useCreditSpending(filters?: CreditSpendingFilters) {
-  const { data, isLoading, error } = useSuperStoreData();
+  const [creditSpending, setCreditSpending] = useState<CreditSpending[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filteredSpending, setFilteredSpending] = useState<CreditSpending[]>([]);
 
+  // Fetch credit spending data from API
   useEffect(() => {
-    if (!data?.creditSpending) {
+    const fetchCreditSpending = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/super-store/credit-spending');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch credit spending data');
+        }
+        
+        const data = await response.json();
+        setCreditSpending(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch credit spending data");
+        setCreditSpending([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCreditSpending();
+  }, []);
+
+  useEffect(() => {
+    if (!creditSpending.length) {
       setFilteredSpending([]);
       return;
     }
 
-    let filtered = [...data.creditSpending];
+    let filtered = [...creditSpending];
 
     // Apply filters
     if (filters) {
@@ -197,11 +274,11 @@ export function useCreditSpending(filters?: CreditSpendingFilters) {
     }
 
     setFilteredSpending(filtered);
-  }, [data, filters]);
+  }, [creditSpending, filters]);
 
   return {
     creditSpending: filteredSpending,
-    totalSpenders: data?.creditSpending.length || 0,
+    totalSpenders: creditSpending.length || 0,
     isLoading,
     error
   };
@@ -285,16 +362,43 @@ export function useWinners(filters?: WinnerFilters) {
 
 // Hook for campaigns data
 export function useCampaigns(filters: CampaignFilters) {
-  const { data, isLoading, error } = useSuperStoreData();
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
 
+  // Fetch campaigns data from API
   useEffect(() => {
-    if (!data) {
+    const fetchCampaigns = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/super-store/campaigns');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch campaigns data');
+        }
+        
+        const data = await response.json();
+        setCampaigns(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch campaigns data");
+        setCampaigns([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCampaigns();
+  }, []);
+
+  useEffect(() => {
+    if (!campaigns.length) {
       setFilteredCampaigns([]);
       return;
     }
 
-    let filtered = [...data.campaigns];
+    let filtered = [...campaigns];
 
     // Apply status filter
     if (filters.status.length > 0) {
@@ -373,11 +477,11 @@ export function useCampaigns(filters: CampaignFilters) {
     }
 
     setFilteredCampaigns(filtered);
-  }, [data, filters]);
+  }, [campaigns, filters]);
 
   return {
     campaigns: filteredCampaigns,
-    totalCampaigns: data?.campaigns.length || 0,
+    totalCampaigns: campaigns.length || 0,
     isLoading,
     error
   };
