@@ -106,9 +106,9 @@ const ServerTable: React.FC<ServerTableProps> = ({ servers }) => {
 
   const handleClearSort = () => {
     setSortConfig({
-      field: "member_count",
+      field: "sc_user_count",
       direction: "desc",
-      label: "Most Members",
+      label: "Most SC Users",
     });
   };
 
@@ -125,7 +125,6 @@ const ServerTable: React.FC<ServerTableProps> = ({ servers }) => {
     .filter(
       (server) =>
         server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        // server.owner_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         server.categories.some((category) =>
           category.toLowerCase().includes(searchTerm.toLowerCase())
         )
@@ -248,7 +247,7 @@ sm:justify-between gap-4"
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Search servers by name, owner, or categories..."
+          placeholder="Search servers by name or categories..."
           className="w-full pl-10 pr-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
