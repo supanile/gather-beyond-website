@@ -47,23 +47,48 @@ const WinnersTable = () => {
     sortBy: "start_date",
     sortDirection: "desc",
     status: [],
-    dateRange: { start: "", end: "" }
+    dateRange: { start: "", end: "" },
   });
 
   const { campaigns, totalCampaigns, isLoading, error } = useCampaigns(filters);
 
   // Filter by search term
-  const filteredCampaigns = campaigns.filter(
-    (campaign) =>
-      campaign.campaign_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      campaign.campaign_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      campaign.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      campaign.winners.some(winner => 
-        winner.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        winner.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        winner.prize_title.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-  );
+  const filteredCampaigns = campaigns
+    .map((campaign) => {
+      // If no search term, return the campaign as is
+      if (!searchTerm.trim()) {
+        return campaign;
+      }
+
+      // Check if campaign info matches search term
+      const campaignMatches =
+        campaign.campaign_name
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        campaign.campaign_type
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        campaign.status.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Filter winners based on search term
+      const filteredWinners = campaign.winners.filter(
+        (winner) =>
+          winner.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          winner.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          winner.prize_title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      // If campaign info matches or has matching winners, include it
+      if (campaignMatches || filteredWinners.length > 0) {
+        return {
+          ...campaign,
+          winners: campaignMatches ? campaign.winners : filteredWinners,
+        };
+      }
+
+      return null;
+    })
+    .filter((campaign) => campaign !== null);
 
   // Calculate pagination
   const totalItems = filteredCampaigns.length;
@@ -85,11 +110,14 @@ const WinnersTable = () => {
     setItemsPerPage(parseInt(value));
   };
 
-  const handleSortChange = (sortBy: CampaignFilters["sortBy"], direction: "asc" | "desc") => {
-    setFilters(prev => ({
+  const handleSortChange = (
+    sortBy: CampaignFilters["sortBy"],
+    direction: "asc" | "desc"
+  ) => {
+    setFilters((prev) => ({
       ...prev,
       sortBy,
-      sortDirection: direction
+      sortDirection: direction,
     }));
   };
 
@@ -112,7 +140,7 @@ const WinnersTable = () => {
       sortBy: "start_date",
       sortDirection: "desc",
       status: [],
-      dateRange: { start: "", end: "" }
+      dateRange: { start: "", end: "" },
     });
     setSearchTerm("");
     setCurrentPage(1);
@@ -171,7 +199,10 @@ const WinnersTable = () => {
         pages.push(i);
       }
     } else {
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let startPage = Math.max(
+        1,
+        currentPage - Math.floor(maxVisiblePages / 2)
+      );
       const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
       if (endPage - startPage < maxVisiblePages - 1) {
@@ -204,7 +235,9 @@ const WinnersTable = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-32">
-        <p className="text-destructive">Error loading campaigns data: {error}</p>
+        <p className="text-destructive">
+          Error loading campaigns data: {error}
+        </p>
       </div>
     );
   }
@@ -224,15 +257,24 @@ const WinnersTable = () => {
           {/* Sort Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 cursor-pointer">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 cursor-pointer"
+              >
                 <Filter className="h-4 w-4 mr-1" />
                 {getSortIcon()}
                 <span className="sm:inline ml-1">
-                  Sort by {filters.sortBy === "start_date" ? "Start Date" : 
-                           filters.sortBy === "end_date" ? "End Date" : 
-                           filters.sortBy === "total_participants" ? "Participants" :
-                           filters.sortBy === "total_credits_spent" ? "Credits Spent" :
-                           "Prize Value"}
+                  Sort by{" "}
+                  {filters.sortBy === "start_date"
+                    ? "Start Date"
+                    : filters.sortBy === "end_date"
+                    ? "End Date"
+                    : filters.sortBy === "total_participants"
+                    ? "Participants"
+                    : filters.sortBy === "total_credits_spent"
+                    ? "Credits Spent"
+                    : "Prize Value"}
                 </span>
               </Button>
             </DropdownMenuTrigger>
@@ -244,45 +286,50 @@ const WinnersTable = () => {
                 className="flex items-center justify-between"
               >
                 <span>Start Date (Recent)</span>
-                {filters.sortBy === "start_date" && filters.sortDirection === "desc" && (
-                  <CheckIcon className="h-4 w-4 text-green-500" />
-                )}
+                {filters.sortBy === "start_date" &&
+                  filters.sortDirection === "desc" && (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleSortChange("end_date", "desc")}
                 className="flex items-center justify-between"
               >
                 <span>End Date (Recent)</span>
-                {filters.sortBy === "end_date" && filters.sortDirection === "desc" && (
-                  <CheckIcon className="h-4 w-4 text-green-500" />
-                )}
+                {filters.sortBy === "end_date" &&
+                  filters.sortDirection === "desc" && (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleSortChange("total_participants", "desc")}
                 className="flex items-center justify-between"
               >
                 <span>Participants (High to Low)</span>
-                {filters.sortBy === "total_participants" && filters.sortDirection === "desc" && (
-                  <CheckIcon className="h-4 w-4 text-green-500" />
-                )}
+                {filters.sortBy === "total_participants" &&
+                  filters.sortDirection === "desc" && (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleSortChange("total_credits_spent", "desc")}
                 className="flex items-center justify-between"
               >
                 <span>Credits Spent (High to Low)</span>
-                {filters.sortBy === "total_credits_spent" && filters.sortDirection === "desc" && (
-                  <CheckIcon className="h-4 w-4 text-green-500" />
-                )}
+                {filters.sortBy === "total_credits_spent" &&
+                  filters.sortDirection === "desc" && (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleSortChange("total_prize_value", "desc")}
                 className="flex items-center justify-between"
               >
                 <span>Prize Value (High to Low)</span>
-                {filters.sortBy === "total_prize_value" && filters.sortDirection === "desc" && (
-                  <CheckIcon className="h-4 w-4 text-green-500" />
-                )}
+                {filters.sortBy === "total_prize_value" &&
+                  filters.sortDirection === "desc" && (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -303,12 +350,18 @@ const WinnersTable = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground whitespace-nowrap">
-              Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} campaigns
+              Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of{" "}
+              {totalItems} campaigns
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground whitespace-nowrap">Show:</span>
-            <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
+              Show:
+            </span>
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={handleItemsPerPageChange}
+            >
               <SelectTrigger className="w-20 h-8 cursor-pointer">
                 <SelectValue />
               </SelectTrigger>
@@ -350,18 +403,23 @@ const WinnersTable = () => {
                     <h4 className="text-xl font-bold text-foreground">
                       {campaign.campaign_name}
                     </h4>
-                    <Badge className={getCampaignTypeBadgeColor(campaign.campaign_type)}>
+                    <Badge
+                      className={getCampaignTypeBadgeColor(
+                        campaign.campaign_type
+                      )}
+                    >
                       {campaign.campaign_type.toUpperCase()}
                     </Badge>
                     <Badge className={getStatusBadgeColor(campaign.status)}>
                       {campaign.status.toUpperCase()}
                     </Badge>
                   </div>
-                  
+
                   <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      {new Date(campaign.start_date).toLocaleDateString()} - {new Date(campaign.end_date).toLocaleDateString()}
+                      {new Date(campaign.start_date).toLocaleDateString()} -{" "}
+                      {new Date(campaign.end_date).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
@@ -372,7 +430,9 @@ const WinnersTable = () => {
                 <div className="bg-muted/30 rounded-lg p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Users className="h-5 w-5 text-blue-500" />
-                    <span className="text-lg font-semibold">{campaign.total_participants.toLocaleString()}</span>
+                    <span className="text-lg font-semibold">
+                      {campaign.total_participants.toLocaleString()}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">Participants</p>
                 </div>
@@ -380,7 +440,9 @@ const WinnersTable = () => {
                 <div className="bg-muted/30 rounded-lg p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Zap className="h-5 w-5 text-purple-500" />
-                    <span className="text-lg font-semibold">{campaign.total_credits_spent.toLocaleString()}</span>
+                    <span className="text-lg font-semibold">
+                      {campaign.total_credits_spent.toLocaleString()}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">Credits Spent</p>
                 </div>
@@ -388,7 +450,9 @@ const WinnersTable = () => {
                 <div className="bg-muted/30 rounded-lg p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Gift className="h-5 w-5 text-green-500" />
-                    <span className="text-lg font-semibold">{campaign.total_prize_value.toLocaleString()}</span>
+                    <span className="text-lg font-semibold">
+                      {campaign.total_prize_value.toLocaleString()}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">Prize Value</p>
                 </div>
@@ -396,7 +460,9 @@ const WinnersTable = () => {
                 <div className="bg-muted/30 rounded-lg p-4 text-center">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Trophy className="h-5 w-5 text-yellow-500" />
-                    <span className="text-lg font-semibold">{campaign.winners.length}</span>
+                    <span className="text-lg font-semibold">
+                      {campaign.winners.length}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">Winners</p>
                 </div>
@@ -427,16 +493,17 @@ const WinnersTable = () => {
                           <div className="flex items-center gap-3 flex-1">
                             <Avatar className="h-10 w-10">
                               <AvatarFallback>
-                                {winner.username !== "Unknown" 
+                                {winner.username !== "Unknown"
                                   ? winner.username.slice(0, 2).toUpperCase()
-                                  : winner.email.slice(0, 2).toUpperCase()
-                                }
+                                  : winner.email.slice(0, 2).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            
+
                             <div className="flex-1 min-w-0">
                               <h6 className="font-medium text-foreground truncate">
-                                {winner.username !== "Unknown" ? winner.username : winner.email.split('@')[0]}
+                                {winner.username !== "Unknown"
+                                  ? winner.username
+                                  : winner.email.split("@")[0]}
                               </h6>
                               <p className="text-sm text-muted-foreground truncate">
                                 {winner.email}
@@ -484,14 +551,18 @@ const WinnersTable = () => {
               ) : (
                 <div className="text-center py-8 bg-muted/20 rounded-lg">
                   <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-muted-foreground">No winners yet for this campaign</p>
+                  <p className="text-muted-foreground">
+                    No winners yet for this campaign
+                  </p>
                 </div>
               )}
             </div>
           ))
         ) : (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No campaigns found matching your search.</p>
+            <p className="text-muted-foreground">
+              No campaigns found matching your search.
+            </p>
           </div>
         )}
       </div>
