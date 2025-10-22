@@ -144,42 +144,6 @@ const ServerOverview: React.FC = () => {
         />
       </div>
 
-      {/* Most Active Server Highlight */}
-      {stats?.mostActiveServer && (
-        <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/20 via-yellow-500/20 to-orange-500/20 rounded-2xl border-2 border-amber-400/40 p-6 shadow-lg">
-          {/* Glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 blur-xl"></div>
-
-          <div className="relative flex items-center gap-4">
-            <div className="h-20 w-20 rounded-xl flex items-center justify-center shadow-lg p-3">
-              <img
-              src={stats.mostActiveServer.image_url}
-              alt={stats.mostActiveServer.name}
-              className="h-full w-full object-cover rounded-lg"
-              onError={(e) => {
-                e.currentTarget.src =
-                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>';
-              }}
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                  👑 Most Active SC Server
-                </h3>
-              </div>
-              <p className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 dark:from-amber-400 dark:to-yellow-400 bg-clip-text text-transparent mb-1">
-                {stats.mostActiveServer.name}
-              </p>
-              <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                {stats.mostActiveServer.member_count.toLocaleString()} members •{" "}
-                {stats.mostActiveServer.sc_user_count.toLocaleString()} SC users
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Server Table */}
       <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
         <div className="mb-6">

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { DiscordServer, ServerStats } from "@/types/admin/serverTypes";
-import { mockDiscordServers, calculateServerStats } from "@/data/admin/serverMockData";
 
 export const useServerData = () => {
   const [servers, setServers] = useState<DiscordServer[]>([]);
@@ -8,43 +7,42 @@ export const useServerData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchServerData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // In the future, this will be replaced with actual API calls
-        // const response = await fetch('/api/admin/servers');
-        // const data = await response.json();
-        
-        setServers(mockDiscordServers);
-        setStats(calculateServerStats(mockDiscordServers));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch server data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchServerData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Fetch servers and statistics in parallel
+      const [serversResponse, statsResponse] = await Promise.all([
+        fetch('/api/server'),
+        fetch('/api/server/statistics')
+      ]);
 
+      if (!serversResponse.ok) {
+        throw new Error('Failed to fetch servers');
+      }
+      if (!statsResponse.ok) {
+        throw new Error('Failed to fetch server statistics');
+      }
+
+      const serversData = await serversResponse.json();
+      const statsData = await statsResponse.json();
+      
+      setServers(serversData);
+      setStats(statsData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch server data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchServerData();
   }, []);
 
   const refreshData = async () => {
-    setIsLoading(true);
-    try {
-      // Simulate refresh
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setServers(mockDiscordServers);
-      setStats(calculateServerStats(mockDiscordServers));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to refresh server data');
-    } finally {
-      setIsLoading(false);
-    }
+    await fetchServerData();
   };
 
   return {

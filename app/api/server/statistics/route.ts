@@ -21,12 +21,12 @@ export async function GET() {
   try {
     // Fetch Discord server information
     const discordServersResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/discord/getserver`);
-    let discordServerMap = new Map<string, { name: string; icon: string | null; memberCount: number }>();
+    const discordServerMap = new Map<string, { name: string; icon: string | null; memberCount: number }>();
     
     if (discordServersResponse.ok) {
       const discordData = await discordServersResponse.json();
       if (discordData.success && discordData.guilds) {
-        discordData.guilds.forEach((guild: any) => {
+        discordData.guilds.forEach((guild: { serverId: string; name: string; icon: string | null; memberCount: number }) => {
           discordServerMap.set(guild.serverId, {
             name: guild.name,
             icon: guild.icon,
@@ -40,7 +40,7 @@ export async function GET() {
     const usersResponse = await grist.fetchTable('Users');
     const userAgentsResponse = await grist.fetchTable('User_agents');
     
-    const users = usersResponse.map((record: any) => ({
+    const users = usersResponse.map((record) => ({
       id: record.id,
       discord_id: record.discord_id,
       credit: record.credit,
@@ -48,7 +48,7 @@ export async function GET() {
       missions_completed: record.missions_completed
     })) as GristUser[];
     
-    const userAgents = userAgentsResponse.map((record: any) => ({
+    const userAgents = userAgentsResponse.map((record) => ({
       id: record.id,
       user_id: record.user_id,
       xp: record.xp,
@@ -102,6 +102,8 @@ export async function GET() {
         total_xp: data.totalXp,
         created_at: new Date().toISOString(),
         joined_at: new Date().toISOString(),
+        is_active: true,
+        categories: []
       };
     });
 

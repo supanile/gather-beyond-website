@@ -2,14 +2,14 @@ export interface DiscordServer {
   id: string;
   name: string;
   image_url?: string;
-  // owner_id: string;
-  // owner_name: string;
   member_count: number;
   sc_user_count: number; // Super Connector users
   total_credits: number;
   total_xp: number;
   created_at: string;
   joined_at: string;
+  is_active: boolean;
+  categories: string[];
 }
 
 export interface ServerStats {
