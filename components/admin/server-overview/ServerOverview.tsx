@@ -86,6 +86,9 @@ const ServerOverview: React.FC = () => {
           <p className="text-destructive mb-4">
             Error loading server data: {error}
           </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Please check your internet connection and try again.
+          </p>
           <Button onClick={refreshData} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Retry
