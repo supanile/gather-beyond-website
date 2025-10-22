@@ -18,7 +18,6 @@ import {
   UserCog,
   Server,
   ShieldUser,
-  Activity,
   ShoppingBasket,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -87,15 +86,6 @@ const DashboardPage = () => {
     isLoading: isLoadingData,
     error: dataError,
   } = useAdminData();
-
-  // Calculate active users within the last 7 days
-  const getActiveUsersLast7Days = () => {
-    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
-    return users.filter(user => {
-      const lastActive = user.agent?.last_active;
-      return lastActive && lastActive > sevenDaysAgo;
-    }).length;
-  };
 
   // Sort options - added last_active options
   const sortOptions: SortOption[] = [
@@ -489,11 +479,6 @@ const DashboardPage = () => {
                   activeUsers={stats?.activeUsers}
                   totalUsers={stats?.totaluser}
                   isLoading={isLoadingStats}
-                />
-                <AdminStatCard
-                  title="Active Users (7d)"
-                  value={getActiveUsersLast7Days().toLocaleString()}
-                  icon={Activity}
                 />
                 <AdminStatCard
                   title="Total Servers"
