@@ -19,26 +19,81 @@ interface GristUserAgent {
 
 export async function GET() {
   try {
-    // Fetch Discord server information
-    const discordServersResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/discord/getserver`);
+    // Fetch Discord server information directly
+    console.log('Fetching Discord servers directly...');
     const discordServerMap = new Map<string, { name: string; icon: string | null; memberCount: number }>();
     
-    if (discordServersResponse.ok) {
-      const discordData = await discordServersResponse.json();
-      if (discordData.success && discordData.guilds) {
-        discordData.guilds.forEach((guild: { serverId: string; name: string; icon: string | null; memberCount: number }) => {
-          discordServerMap.set(guild.serverId, {
+    try {
+      const guildsResponse = await fetch('https://discord.com/api/v10/users/@me/guilds', {
+        headers: {
+          'Authorization': `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (guildsResponse.ok) {
+        const guilds = await guildsResponse.json();
+        
+        // Fetch detailed info for each guild
+        const guildDetailsPromises = guilds.map(async (guild: { id: string; name: string; icon: string | null }) => {
+          try {
+            const guildDetailResponse = await fetch(
+              `https://discord.com/api/v10/guilds/${guild.id}?with_counts=true`,
+              {
+                headers: {
+                  'Authorization': `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+
+            if (guildDetailResponse.ok) {
+              const guildDetail = await guildDetailResponse.json();
+              return {
+                serverId: guild.id,
+                name: guildDetail.name,
+                icon: guildDetail.icon,
+                memberCount: guildDetail.approximate_member_count || 0,
+              };
+            }
+          } catch (error) {
+            console.error(`Error fetching guild ${guild.id} details:`, error);
+          }
+          
+          return {
+            serverId: guild.id,
             name: guild.name,
             icon: guild.icon,
-            memberCount: guild.memberCount
-          });
+            memberCount: 0,
+          };
         });
+
+        const guildDetails = await Promise.all(guildDetailsPromises);
+        
+        guildDetails.forEach((guild) => {
+          if (guild) {
+            discordServerMap.set(guild.serverId, {
+              name: guild.name,
+              icon: guild.icon,
+              memberCount: guild.memberCount,
+            });
+          }
+        });
+        
+        console.log('Discord servers fetched successfully:', discordServerMap.size);
+      } else {
+        console.error('Discord API response not ok:', guildsResponse.status, guildsResponse.statusText);
       }
+    } catch (discordError) {
+      console.error('Error fetching Discord servers:', discordError);
+      // Continue without Discord data
     }
 
     // Fetch users and user_agents from Grist
+    console.log('Fetching data from Grist...');
     const usersResponse = await grist.fetchTable('Users');
     const userAgentsResponse = await grist.fetchTable('User_agents');
+    console.log('Grist data fetched successfully:', { users: usersResponse.length, userAgents: userAgentsResponse.length });
     
     const users = usersResponse.map((record) => ({
       id: record.id,

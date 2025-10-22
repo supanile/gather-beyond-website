@@ -1,6 +1,8 @@
 import { GristDocAPI } from "grist-api";
 
-export const grist = new GristDocAPI(process.env.GRIST_DOC_URL!)
+export const grist = new GristDocAPI(process.env.GRIST_DOC_URL!, {
+  apiKey: process.env.GRIST_API_KEY!
+})
 
 // class GristClient {
 //   private baseUrl: string;
