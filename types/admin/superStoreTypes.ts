@@ -3,7 +3,7 @@ export interface Claimer {
   discord_id: string;
   username: string;
   email: string;
-  join_date: string;
+  join_date: string | number;
   level: number;
   total_xp: number;
   mood: "happy" | "neutral" | "sad";

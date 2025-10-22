@@ -427,13 +427,16 @@ const WinnersTable = () => {
                           <div className="flex items-center gap-3 flex-1">
                             <Avatar className="h-10 w-10">
                               <AvatarFallback>
-                                {winner.username.slice(0, 2).toUpperCase()}
+                                {winner.username !== "Unknown" 
+                                  ? winner.username.slice(0, 2).toUpperCase()
+                                  : winner.email.slice(0, 2).toUpperCase()
+                                }
                               </AvatarFallback>
                             </Avatar>
                             
                             <div className="flex-1 min-w-0">
                               <h6 className="font-medium text-foreground truncate">
-                                {winner.username}
+                                {winner.username !== "Unknown" ? winner.username : winner.email.split('@')[0]}
                               </h6>
                               <p className="text-sm text-muted-foreground truncate">
                                 {winner.email}

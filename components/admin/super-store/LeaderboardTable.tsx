@@ -422,7 +422,7 @@ const LeaderboardTable = () => {
                     <div className="text-center">
                       <div className="flex items-center gap-1 text-sm font-medium">
                         <Calendar className="h-4 w-4 text-gray-500" />
-                        {new Date(claimer.join_date).toLocaleDateString()}
+                        {new Date(typeof claimer.join_date === 'number' ? claimer.join_date * 1000 : claimer.join_date).toLocaleDateString()}
                       </div>
                     </div>
 
