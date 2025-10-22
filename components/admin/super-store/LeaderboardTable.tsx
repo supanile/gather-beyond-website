@@ -266,6 +266,16 @@ const LeaderboardTable = () => {
                   )}
               </DropdownMenuItem>
               <DropdownMenuItem
+                onClick={() => handleSortChange("rank", "desc")}
+                className="flex items-center justify-between"
+              >
+                <span>Rank (Worst to Best)</span>
+                {filters.sortBy === "rank" &&
+                  filters.sortDirection === "desc" && (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() => handleSortChange("level", "desc")}
                 className="flex items-center justify-between"
               >
@@ -276,12 +286,32 @@ const LeaderboardTable = () => {
                   )}
               </DropdownMenuItem>
               <DropdownMenuItem
+                onClick={() => handleSortChange("level", "asc")}
+                className="flex items-center justify-between"
+              >
+                <span>Level (Low to High)</span>
+                {filters.sortBy === "level" &&
+                  filters.sortDirection === "asc" && (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() => handleSortChange("total_xp", "desc")}
                 className="flex items-center justify-between"
               >
                 <span>Total XP (High to Low)</span>
                 {filters.sortBy === "total_xp" &&
                   filters.sortDirection === "desc" && (
+                    <CheckIcon className="h-4 w-4 text-green-500" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleSortChange("total_xp", "asc")}
+                className="flex items-center justify-between"
+              >
+                <span>Total XP (Low to High)</span>
+                {filters.sortBy === "total_xp" &&
+                  filters.sortDirection === "asc" && (
                     <CheckIcon className="h-4 w-4 text-green-500" />
                   )}
               </DropdownMenuItem>
@@ -422,7 +452,7 @@ const LeaderboardTable = () => {
                     <div className="text-center">
                       <div className="flex items-center gap-1 text-sm font-medium">
                         <Calendar className="h-4 w-4 text-gray-500" />
-                        {new Date(typeof claimer.join_date === 'number' ? claimer.join_date * 1000 : claimer.join_date).toLocaleDateString()}
+                        {new Date(typeof claimer.join_date === 'number' ? claimer.join_date * 1000 : parseInt(claimer.join_date) * 1000).toLocaleDateString()}
                       </div>
                     </div>
 

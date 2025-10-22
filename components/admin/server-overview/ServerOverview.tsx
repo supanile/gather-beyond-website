@@ -142,7 +142,7 @@ const ServerOverview: React.FC = () => {
         />
         <ServerStatCard
           title="Missions Completed"
-          value={stats?.totalMissionsCompleted.toLocaleString() ?? "0"}
+          value={stats?.totalMissionsCompleted?.toLocaleString() ?? "0"}
           subtitle="Total completed missions"
           icon={Target}
         />
