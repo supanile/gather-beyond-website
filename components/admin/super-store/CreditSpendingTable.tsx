@@ -386,7 +386,7 @@ const CreditSpendingTable = () => {
                     <div className="text-center">
                       <div className="flex items-center gap-1 text-sm font-medium">
                         <Calendar className="h-4 w-4 text-gray-500" />
-                        {new Date(spending.last_purchase_date).toLocaleDateString()}
+                        {spending.last_purchase_date ? new Date(spending.last_purchase_date).toLocaleDateString() : 'N/A'}
                       </div>
                       <p className="text-xs text-muted-foreground">Last Purchase</p>
                     </div>
