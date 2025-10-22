@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { grist } from "@/lib/grist";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Fetch User_agents data
     const userAgentsData = await grist.fetchTable("User_agents");
@@ -18,18 +18,18 @@ export async function GET(req: NextRequest) {
 
     // นับเครดิตที่ใช้ไปทั้งหมด
     const total_credits_spent = historyLogs.reduce(
-      (sum: number, record: any) => sum + (record.spend || 0),
+      (sum: number, record: Record<string, unknown>) => sum + (Number(record.spend) || 0),
       0
     );
 
     // นับผู้ชนะ (คนที่ is_win = 1)
     const total_winners = gachaResults.filter(
-      (record: any) => record.is_win === 1
+      (record: Record<string, unknown>) => record.is_win === 1
     ).length;
 
     // คำนวณเลเวลเฉลี่ย
     const totalLevel = userAgents.reduce(
-      (sum: number, record: any) => sum + (record.level || 0),
+      (sum: number, record: Record<string, unknown>) => sum + (Number(record.level) || 0),
       0
     );
     const average_level =
@@ -37,10 +37,10 @@ export async function GET(req: NextRequest) {
 
     // หาอารมณ์ที่พบบ่อยที่สุด
     const moodCount: { [key: string]: number } = {};
-    userAgents.forEach((record: any) => {
+    userAgents.forEach((record: Record<string, unknown>) => {
       const mood = record.mood;
       if (mood) {
-        moodCount[mood] = (moodCount[mood] || 0) + 1;
+        moodCount[String(mood)] = (moodCount[String(mood)] || 0) + 1;
       }
     });
 
@@ -56,9 +56,8 @@ export async function GET(req: NextRequest) {
       diamond: 0,
     };
 
-    userAgents.forEach((record: any) => {
-      const tier = record.tier;
-      const trustScore = record.trust_score || 0;
+    userAgents.forEach((record: Record<string, unknown>) => {
+      const trustScore = Number(record.trust_score) || 0;
 
       // Map tier based on trust_score
       if (trustScore < 1.0) {

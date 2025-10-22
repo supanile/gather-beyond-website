@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { grist } from "@/lib/grist";
 
 interface Winner {
@@ -31,7 +31,7 @@ interface Campaign {
   winners: Winner[];
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Fetch GachaResults data สำหรับข้อมูลผู้ชนะ
     const gachaResults = await grist.fetchTable("GachaResults");
@@ -47,19 +47,19 @@ export async function GET(req: NextRequest) {
 
     // สร้าง maps
     const userAgentMap = new Map<string, { xp: number; email: string }>(
-      userAgents.map((record: any) => [
-        record.user_id,
+      userAgents.map((record: Record<string, unknown>) => [
+        String(record.user_id || ""),
         {
-          xp: record.xp || 0,
-          email: record.email || "",
+          xp: Number(record.xp) || 0,
+          email: String(record.email || ""),
         },
       ])
     );
 
     const discordMap = new Map<string, string>(
-      discordUsers.map((record: any) => [
-        record.discord_id,
-        record.username,
+      discordUsers.map((record: Record<string, unknown>) => [
+        String(record.discord_id || ""),
+        String(record.username || ""),
       ])
     );
 
@@ -69,18 +69,18 @@ export async function GET(req: NextRequest) {
       {
         participants: Set<string>;
         credits_spent: number;
-        winners: any[];
+        winners: Winner[];
         start_date: Date;
         end_date: Date;
       }
     >();
 
     // ประมวลผล History_log
-    historyLogs.forEach((record: any) => {
+    historyLogs.forEach((record: Record<string, unknown>) => {
       const boughtAt = record.bought_at;
       if (!boughtAt) return;
 
-      const date = new Date(boughtAt);
+      const date = new Date(String(boughtAt));
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
       if (!campaignsMap.has(monthKey)) {
@@ -98,36 +98,36 @@ export async function GET(req: NextRequest) {
       }
 
       const campaign = campaignsMap.get(monthKey)!;
-      campaign.participants.add(record.discord_id);
-      campaign.credits_spent += record.spend || 0;
+      campaign.participants.add(String(record.discord_id || ""));
+      campaign.credits_spent += Number(record.spend) || 0;
     });
 
     // ประมวลผลผู้ชนะจาก GachaResults
     const winnersData = gachaResults
-      .filter((record: any) => record.is_win === 1)
-      .map((record: any) => {
+      .filter((record: Record<string, unknown>) => record.is_win === 1)
+      .map((record: Record<string, unknown>) => {
         const rollTime = record.roll_time;
-        const date = rollTime ? new Date(rollTime) : new Date();
+        const date = rollTime ? new Date(String(rollTime)) : new Date();
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
-        const userId = record.discord_id;
+        const userId = String(record.discord_id || "");
         const userAgent = userAgentMap.get(userId);
         const username = discordMap.get(userId) || "Unknown";
 
         return {
           monthKey,
           winner: {
-            _id: record.id.toString(),
+            _id: String(record.id || ""),
             user_id: userId,
             username,
             email: userAgent?.email || "",
             competition_name: `Monthly Gacha ${monthKey}`,
             competition_type: "monthly",
-            prize_title: record.won_prize || "Mystery Prize",
-            prize_value: record.price_paid || 0,
+            prize_title: String(record.won_prize || "Mystery Prize"),
+            prize_value: Number(record.price_paid) || 0,
             prize_description: `Won ${record.won_prize} from gacha`,
-            won_date: rollTime || "",
-            xp_earned: Math.floor((record.price_paid || 0) * 0.1),
+            won_date: String(rollTime || ""),
+            xp_earned: Math.floor((Number(record.price_paid) || 0) * 0.1),
             badge_earned: undefined,
             rank_achieved: 1,
             total_participants: 0, // จะคำนวณทีหลัง
@@ -137,7 +137,7 @@ export async function GET(req: NextRequest) {
 
     // เพิ่มผู้ชนะเข้า campaigns
     winnersData.forEach(
-      ({ monthKey, winner }: { monthKey: string; winner: Winner }) => {
+      ({ monthKey, winner }) => {
         if (campaignsMap.has(monthKey)) {
           campaignsMap.get(monthKey)!.winners.push(winner);
         }
@@ -146,7 +146,7 @@ export async function GET(req: NextRequest) {
 
     // สร้าง Campaign objects
     const campaigns: Campaign[] = Array.from(campaignsMap.entries()).map(
-      ([monthKey, data], index) => {
+      ([monthKey, data]) => {
         const now = new Date();
         let status: "active" | "completed" | "upcoming" = "completed";
 

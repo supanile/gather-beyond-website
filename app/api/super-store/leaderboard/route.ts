@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { grist } from "@/lib/grist";
 
 interface Claimer {
@@ -15,7 +15,7 @@ interface Claimer {
   status: "active" | "inactive" | "banned";
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Fetch User_agents data
     const userAgents = await grist.fetchTable("User_agents");
@@ -28,29 +28,29 @@ export async function GET(req: NextRequest) {
       string,
       { username: string; avatar_url?: string }
     >(
-      discordUsers.map((record: any) => [
-        record.discord_id,
+      discordUsers.map((record: Record<string, unknown>) => [
+        String(record.discord_id || ""),
         {
-          username: record.username,
-          avatar_url: record.avatarUrl,
+          username: String(record.username || ""),
+          avatar_url: record.avatarUrl ? String(record.avatarUrl) : undefined,
         },
       ])
     );
 
     // แปลงข้อมูลเป็น Claimer objects และเรียงตาม total_xp
     const claimers: Claimer[] = userAgents
-      .map((record: any) => {
-        const discordInfo = discordMap.get(record.user_id) || {
+      .map((record: Record<string, unknown>) => {
+        const discordInfo = discordMap.get(String(record.user_id || "")) || {
           username: "Unknown",
           avatar_url: undefined,
         };
 
         // กำหนด status ตาม health และ last_active
         let status: "active" | "inactive" | "banned" = "active";
-        if (record.health <= 0) {
+        if (Number(record.health || 0) <= 0) {
           status = "inactive";
         } else if (record.last_active) {
-          const lastActive = new Date(record.last_active);
+          const lastActive = new Date(String(record.last_active));
           const now = new Date();
           const daysSinceActive =
             (now.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24);
@@ -60,20 +60,20 @@ export async function GET(req: NextRequest) {
         }
 
         return {
-          _id: record.id.toString(),
-          discord_id: record.user_id || "",
+          _id: String(record.id || ""),
+          discord_id: String(record.user_id || ""),
           username: discordInfo.username,
-          email: record.email || "",
-          join_date: record.created_at || "",
-          level: record.level || 0,
-          total_xp: record.total_xp || 0,
-          mood: record.mood || "neutral",
+          email: String(record.email || ""),
+          join_date: String(record.created_at || ""),
+          level: Number(record.level) || 0,
+          total_xp: Number(record.total_xp) || 0,
+          mood: (record.mood as "happy" | "neutral" | "sad") || "neutral",
           rank: 0, // จะคำนวณหลังจากเรียง
           avatar_url: discordInfo.avatar_url,
           status,
         };
       })
-      .sort((a: Claimer, b: Claimer) => b.total_xp - a.total_xp); // เรียงจากมากไปน้อย
+      .sort((a, b) => b.total_xp - a.total_xp); // เรียงจากมากไปน้อย
 
     // กำหนดอันดับ
     claimers.forEach((claimer, index) => {

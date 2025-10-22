@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { grist } from "@/lib/grist";
 
 interface CreditSpending {
@@ -13,7 +13,7 @@ interface CreditSpending {
   avg_purchase_amount: number;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Fetch History_log data
     const historyLogs = await grist.fetchTable("History_log");
@@ -29,19 +29,19 @@ export async function GET(req: NextRequest) {
       string,
       { trust_score: number; email: string }
     >(
-      userAgents.map((record: any) => [
-        record.user_id,
+      userAgents.map((record: Record<string, unknown>) => [
+        String(record.user_id || ""),
         {
-          trust_score: record.trust_score || 0,
-          email: record.email || "",
+          trust_score: Number(record.trust_score) || 0,
+          email: String(record.email || ""),
         },
       ])
     );
 
     const discordMap = new Map<string, string>(
-      discordUsers.map((record: any) => [
-        record.discord_id,
-        record.username,
+      discordUsers.map((record: Record<string, unknown>) => [
+        String(record.discord_id || ""),
+        String(record.username || ""),
       ])
     );
 
@@ -54,10 +54,10 @@ export async function GET(req: NextRequest) {
       }
     >();
 
-    historyLogs.forEach((record: any) => {
-      const userId = record.discord_id;
-      const spend = record.spend || 0;
-      const boughtAt = record.bought_at || "";
+    historyLogs.forEach((record: Record<string, unknown>) => {
+      const userId = String(record.discord_id || "");
+      const spend = Number(record.spend) || 0;
+      const boughtAt = String(record.bought_at || "");
 
       if (!userSpending.has(userId)) {
         userSpending.set(userId, { total_spent: 0, purchases: [] });

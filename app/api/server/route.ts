@@ -100,6 +100,7 @@ export async function GET() {
         sc_user_count: data.users.length,
         total_credits: data.totalCredits,
         total_xp: data.totalXp,
+        missions_completed: data.missionsCompleted,
         created_at: new Date().toISOString(),
         joined_at: new Date().toISOString(),
         is_active: true,

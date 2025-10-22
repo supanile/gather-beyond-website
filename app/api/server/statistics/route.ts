@@ -100,6 +100,7 @@ export async function GET() {
         sc_user_count: data.users.length,
         total_credits: data.totalCredits,
         total_xp: data.totalXp,
+        missions_completed: data.missionsCompleted,
         created_at: new Date().toISOString(),
         joined_at: new Date().toISOString(),
         is_active: true,
@@ -113,6 +114,7 @@ export async function GET() {
     const totalSCUsers = servers.reduce((sum, s) => sum + s.sc_user_count, 0);
     const totalCredits = servers.reduce((sum, s) => sum + s.total_credits, 0);
     const totalXP = servers.reduce((sum, s) => sum + s.total_xp, 0);
+    const totalMissionsCompleted = servers.reduce((sum, s) => sum + s.missions_completed, 0);
     const averageMembersPerServer = totalServers > 0 ? totalMembers / totalServers : 0;
     
     // Find most active server (by sc_user_count)
@@ -128,6 +130,7 @@ export async function GET() {
       totalSCUsers,
       totalCredits,
       totalXP,
+      totalMissionsCompleted,
       averageMembersPerServer: Math.round(averageMembersPerServer * 100) / 100,
       mostActiveServer
     };
