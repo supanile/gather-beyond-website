@@ -9,10 +9,6 @@ import TrendTreemap from "./trends/TrendTreemap";
 import TrendsList from "./trends/TrendsList";
 import TimeRangeSelector from "./trends/TimeRangeSelector";
 import LocationFilter from "./trends/LocationFilter";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Globe } from "lucide-react";
 import XIcon from "../ui/icons/XIcon";
 
 interface TwitterTrendsArenaProps {
@@ -57,85 +53,6 @@ const TwitterTrendsArena: React.FC<TwitterTrendsArenaProps> = ({
         </div>
 
         <div className="space-y-4">
-          {/* Controls Card */}
-          <Card className="bg-background/60 backdrop-blur-xl border border-border/50 shadow-lg">
-            <CardHeader className="pb-1">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-                    <XIcon className="w-4 h-4 text-blue-500" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-sm font-semibold text-foreground">
-                      Live Dashboard
-                    </CardTitle>
-                  </div>
-                </div>{" "}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                  <TimeRangeSelector
-                    selectedRange={timeRange}
-                    onRangeChange={setTimeRange}
-                  />
-                  <LocationFilter
-                    selectedLocation={location}
-                    onLocationChange={setLocation}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={refetch}
-                    disabled={loading}
-                    className="border-border/50 bg-background/60 backdrop-blur-xl text-foreground hover:bg-accent/50 hover:border-border shadow-lg hover:shadow-xl transition-all duration-300 text-xs"
-                  >
-                    <RefreshCw
-                      className={`w-3 h-3 mr-1 ${
-                        loading ? "animate-spin" : ""
-                      }`}
-                    />
-                    Refresh
-                  </Button>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="flex flex-wrap gap-3 pt-3 border-t border-border/30">
-                <div className="flex items-center space-x-2">
-                  <Globe className="w-3 h-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
-                    Last updated:
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] bg-accent/50 text-foreground border-border/30"
-                  >
-                    {lastUpdated}
-                  </Badge>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-muted-foreground">
-                    Total trends:
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] border-border/30 text-foreground"
-                  >
-                    {totalTrends}
-                  </Badge>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-muted-foreground">
-                    Total volume:
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] border-border/30 text-foreground"
-                  >
-                    {formatVolume(totalVolume)} tweets
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
 
           {/* Trending Up Section - Horizontal Layout */}
           <TrendsList
@@ -176,6 +93,18 @@ const TwitterTrendsArena: React.FC<TwitterTrendsArenaProps> = ({
                 }
                 loading={loading}
                 error={error}
+                // Live Dashboard props
+                timeRange={timeRange}
+                location={location}
+                lastUpdated={lastUpdated}
+                totalTrends={totalTrends}
+                totalVolume={totalVolume}
+                onRefetch={refetch}
+                TimeRangeSelector={TimeRangeSelector}
+                LocationFilter={LocationFilter}
+                formatVolume={formatVolume}
+                onTimeRangeChange={setTimeRange}
+                onLocationChange={setLocation}
               />
             </div>
 

@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from "react";
-import { TrendWithStats } from "@/types/trends";
+import { TrendWithStats, TimeRange, LocationFilter as LocationFilterType } from "@/types/trends";
 import TrendCard from "./TrendCard";
 import TreemapLayoutComponent, { TreemapRect } from "./TreemapLayout";
 import TrendDetailsDialog from "./TrendDetailsDialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw, Globe } from "lucide-react";
 
 interface TrendTreemapProps {
   trends: TrendWithStats[];
@@ -14,6 +14,25 @@ interface TrendTreemapProps {
   error?: string | null;
   className?: string;
   onTrendClick?: (trend: TrendWithStats) => void;
+  // Live Dashboard controls
+  timeRange?: TimeRange;
+  location?: LocationFilterType;
+  lastUpdated?: string;
+  totalTrends?: number;
+  totalVolume?: number;
+  onRefetch?: () => void;
+  TimeRangeSelector?: React.ComponentType<{
+    selectedRange: TimeRange;
+    onRangeChange: (range: TimeRange) => void;
+  }>;
+  LocationFilter?: React.ComponentType<{
+    selectedLocation: LocationFilterType;
+    onLocationChange: (location: LocationFilterType) => void;
+  }>;
+  formatVolume?: (volume: number) => string;
+  // Callback functions for handling changes
+  onTimeRangeChange?: (range: TimeRange) => void;
+  onLocationChange?: (location: LocationFilterType) => void;
 }
 
 // Define trend ranges
@@ -33,10 +52,39 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
   error = null,
   className = "",
   onTrendClick,
+  // Live Dashboard props
+  timeRange,
+  location,
+  lastUpdated,
+  totalTrends,
+  totalVolume,
+  onRefetch,
+  TimeRangeSelector,
+  LocationFilter,
+  formatVolume,
+  onTimeRangeChange,
+  onLocationChange,
 }) => {
   const [currentRange, setCurrentRange] = useState<TrendRange>("top20");
   const [selectedTrend, setSelectedTrend] = useState<TrendWithStats | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Create callback functions for TimeRange and Location changes
+  const handleTimeRangeChange = (range: TimeRange) => {
+    if (onTimeRangeChange) {
+      onTimeRangeChange(range);
+    } else {
+      console.log("Time range changed to:", range);
+    }
+  };
+
+  const handleLocationChange = (location: LocationFilterType) => {
+    if (onLocationChange) {
+      onLocationChange(location);
+    } else {
+      console.log("Location changed to:", location);
+    }
+  };
 
   // Get next range for "Others" button
   const getNextRange = (): TrendRange | null => {
@@ -236,7 +284,43 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
         className={`bg-background/60 backdrop-blur-xl border border-border/50 shadow-2xl overflow-hidden ${className}`}
       >
         {/* Header Section with Controls */}
-        <div className="p-2 sm:p-3 space-y-2 border-b border-border/20">
+        <div className="p-2 sm:p-3 space-y-3 border-b border-border/20">
+          {/* Live Dashboard Controls */}
+          {(TimeRangeSelector || LocationFilter || onRefetch) && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+              {TimeRangeSelector && timeRange && (
+                <TimeRangeSelector
+                  selectedRange={timeRange}
+                  onRangeChange={handleTimeRangeChange}
+                />
+              )}
+              {LocationFilter && location && (
+                <LocationFilter
+                  selectedLocation={location}
+                  onLocationChange={handleLocationChange}
+                />
+              )}
+              {onRefetch && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onRefetch}
+                  disabled={loading}
+                  className="border-border/50 bg-background/60 backdrop-blur-xl text-foreground hover:bg-accent/50 hover:border-border shadow-lg hover:shadow-xl transition-all duration-300 text-xs"
+                >
+                  <RefreshCw
+                    className={`w-3 h-3 mr-1 ${
+                      loading ? "animate-spin" : ""
+                    }`}
+                  />
+                  Refresh
+                </Button>
+              )}
+            </div>
+          )}
+
+
+
           {/* Range Navigation Buttons */}
           <div className="flex flex-wrap gap-1 sm:gap-2">
             {Object.entries(trendRanges).map(([key, range]) => (
@@ -263,13 +347,53 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
 
           {/* Range Statistics */}
           <div className="p-2 rounded-lg bg-accent/5 border border-border/30">
-            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+              {lastUpdated && (
+                <div className="flex items-center space-x-2">
+                  <Globe className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    Last updated:
+                  </span>
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] bg-accent/50 text-foreground border-border/30"
+                  >
+                    {lastUpdated}
+                  </Badge>
+                </div>
+              )}
+              {totalTrends && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-muted-foreground">
+                    Total trends:
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] border-border/30 text-foreground"
+                  >
+                    {totalTrends}
+                  </Badge>
+                </div>
+              )}
+              {totalVolume && formatVolume && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-muted-foreground">
+                    Total volume:
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] border-border/30 text-foreground"
+                  >
+                    {formatVolume(totalVolume)} tweets
+                  </Badge>
+                </div>
+              )}
               {filteredTrends.length > 0 && (
                 <div className="flex items-center space-x-1">
                   <span className="font-medium hidden sm:inline">
-                    Total volume:
+                    Range volume:
                   </span>
-                  <span className="font-medium sm:hidden">Vol:</span>
+                  <span className="font-medium sm:hidden">Range:</span>
                   <Badge
                     variant="outline"
                     className="text-[10px] px-1"
