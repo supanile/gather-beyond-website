@@ -1,4 +1,5 @@
 import { TrendsData, TrendsMetrics, TimeRange, LocationFilter, LanguageFilter, TrendWithStats } from '@/types/trends';
+import { DEFAULT_LOCATION } from '@/config/locations';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -11,7 +12,7 @@ export class TrendsAPIClient {
 
   async getTrends(
     timeRange: TimeRange = '24H',
-    location: LocationFilter = 'worldwide',
+    location: LocationFilter = DEFAULT_LOCATION,
     language: LanguageFilter = 'all'
   ): Promise<TrendsData> {
     try {
@@ -42,7 +43,7 @@ export class TrendsAPIClient {
 
   async getTrendsMetrics(
     timeRange: TimeRange = '24H',
-    location: LocationFilter = 'worldwide'
+    location: LocationFilter = DEFAULT_LOCATION
   ): Promise<TrendsMetrics> {
     try {
       const params = new URLSearchParams({

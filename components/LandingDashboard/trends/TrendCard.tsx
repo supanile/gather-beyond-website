@@ -62,7 +62,7 @@ const TrendCard: React.FC<TrendCardProps> = ({
 
   const handleClick = () => {
     console.log("TrendCard clicked:", trend.name, trend.id);
-    
+
     if (trend.id === "others") {
       // ให้ onClick จัดการกับ "others" card
       if (onClick) {
@@ -147,7 +147,7 @@ const TrendCard: React.FC<TrendCardProps> = ({
           ? "Click to view more trends"
           : `${trend.name} - Rank #${trend.rank} - ${formatTweetVolume(
               trend.tweet_volume
-            )} tweets${
+            )} searches${
               trend.volume_change_24h !== undefined
                 ? ` (${
                     trend.volume_change_24h > 0 ? "+" : ""
@@ -201,7 +201,25 @@ const TrendCard: React.FC<TrendCardProps> = ({
                   fontSize: `${fontSize * 1}px`,
                 }}
               >
-                {trend.name}
+                {(() => {
+                  // คำนวณจำนวนตัวอักษรที่แสดงได้ตามขนาดพื้นที่
+                  let maxChars = 6; // ค่าเริ่มต้น
+                  
+                  if (!isXSmall && !isSmall) {
+                    // พื้นที่ใหญ่ - แสดงได้มากขึ้น
+                    maxChars = Math.min(9, Math.floor(size.width / (fontSize * 0.6)));
+                  } else if (!isXSmall) {
+                    // พื้นที่ปานกลาง
+                    maxChars = Math.min(6, Math.floor(size.width / (fontSize * 0.7)));
+                  } else {
+                    // พื้นที่เล็ก - ใช้ค่าเริ่มต้น
+                    maxChars = 6;
+                  }
+                  
+                  return trend.name.length > maxChars
+                    ? `${trend.name.substring(0, maxChars)}...`
+                    : trend.name;
+                })()}
               </h3>
             </div>
           )}
@@ -268,7 +286,7 @@ const TrendCard: React.FC<TrendCardProps> = ({
                       fontSize: `${fontSize * 0.65}px`,
                     }}
                   >
-                    tweets
+                    searches
                   </div>
                 )}
 

@@ -15,13 +15,14 @@ const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
   className = ''
 }) => {
   const timeRanges: { label: string; value: TimeRange }[] = [
+    { label: '4H', value: '4H' },
     { label: '24H', value: '24H' },
     { label: '48H', value: '48H' },
     { label: '7D', value: '7D' },
-    { label: '30D', value: '30D' },
-    { label: '3M', value: '3M' },
-    { label: '6M', value: '6M' },
-    { label: '12M', value: '12M' },
+    // { label: '30D', value: '30D' },
+    // { label: '3M', value: '3M' },
+    // { label: '6M', value: '6M' },
+    // { label: '12M', value: '12M' },
   ];
 
   return (

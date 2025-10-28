@@ -24,9 +24,10 @@ class TreemapLayout {
     this.height = height;
   }
 
-  // Squarified treemap algorithm
+  // Squarified treemap algorithm with improved spacing
   squarify(data: TreemapNode[], x = 0, y = 0, width = this.width, height = this.height): TreemapRect[] {
     if (data.length === 0) return [];
+    if (width <= 0 || height <= 0) return [];
 
     // Sort data by value descending, but put Others at the end with smallest value
     const sortedData = [...data].sort((a, b) => {
@@ -39,16 +40,24 @@ class TreemapLayout {
     const othersIndex = sortedData.findIndex(d => d.trend.id === 'others');
     if (othersIndex !== -1) {
       const minRegularValue = Math.min(...sortedData.filter(d => d.trend.id !== 'others').map(d => d.value));
-      sortedData[othersIndex].value = Math.max(1, minRegularValue * 0.1); // 10% of smallest regular value
+      sortedData[othersIndex].value = Math.max(1, minRegularValue * 0.05); // 5% of smallest regular value
     }
     
-    // Normalize values
+    // Normalize values with better distribution
     const totalValue = sortedData.reduce((sum, d) => sum + d.value, 0);
     if (totalValue === 0) return [];
 
-    const normalizedData = sortedData.map(d => ({
+    // Use square root scaling for better visual distribution
+    const sqrtData = sortedData.map(d => ({
       ...d,
-      value: (d.value / totalValue) * width * height
+      originalValue: d.value,
+      value: Math.sqrt(d.value)
+    }));
+
+    const totalSqrt = sqrtData.reduce((sum, d) => sum + d.value, 0);
+    const normalizedData = sqrtData.map(d => ({
+      ...d,
+      value: d.value / totalSqrt
     }));
 
     return this.squarifyRecursive(normalizedData, x, y, width, height);
@@ -113,21 +122,23 @@ class TreemapLayout {
     let rects: TreemapRect[] = [];
 
     if (width >= height) {
-      // Split vertically
-      const firstWidth = (firstGroupValue / totalValue) * width;
+      // Split vertically with gap
+      const gap = 2;
+      const firstWidth = Math.max(50, (firstGroupValue / totalValue) * width - gap);
       rects = this.layoutGroup(firstGroup, x, y, firstWidth, height);
       if (secondGroup.length > 0) {
         rects = rects.concat(
-          this.squarifyRecursive(secondGroup, x + firstWidth, y, width - firstWidth, height)
+          this.squarifyRecursive(secondGroup, x + firstWidth + gap, y, width - firstWidth - gap, height)
         );
       }
     } else {
-      // Split horizontally
-      const firstHeight = (firstGroupValue / totalValue) * height;
+      // Split horizontally with gap
+      const gap = 2;
+      const firstHeight = Math.max(40, (firstGroupValue / totalValue) * height - gap);
       rects = this.layoutGroup(firstGroup, x, y, width, firstHeight);
       if (secondGroup.length > 0) {
         rects = rects.concat(
-          this.squarifyRecursive(secondGroup, x, y + firstHeight, width, height - firstHeight)
+          this.squarifyRecursive(secondGroup, x, y + firstHeight + gap, width, height - firstHeight - gap)
         );
       }
     }
@@ -144,34 +155,43 @@ class TreemapLayout {
   ): TreemapRect[] {
     const totalValue = group.reduce((sum, d) => sum + d.value, 0);
     
+    // Minimum spacing between cards
+    const minGap = 3;
+    const minWidth = 45;
+    const minHeight = 35;
+    
     if (width >= height) {
       // Layout horizontally
       let currentX = x;
-      return group.map(node => {
-        const nodeWidth = Math.max(20, (node.value / totalValue) * width); // Minimum width
+      const availableWidth = width - (minGap * (group.length - 1));
+      
+      return group.map((node, idx) => {
+        const nodeWidth = Math.max(minWidth, (node.value / totalValue) * availableWidth);
         const rect = {
           x: currentX,
           y,
           width: nodeWidth,
-          height: Math.max(15, height), // Minimum height
+          height: Math.max(minHeight, height),
           data: node
         };
-        currentX += nodeWidth;
+        currentX += nodeWidth + (idx < group.length - 1 ? minGap : 0);
         return rect;
       });
     } else {
       // Layout vertically
       let currentY = y;
-      return group.map(node => {
-        const nodeHeight = Math.max(15, (node.value / totalValue) * height); // Minimum height
+      const availableHeight = height - (minGap * (group.length - 1));
+      
+      return group.map((node, idx) => {
+        const nodeHeight = Math.max(minHeight, (node.value / totalValue) * availableHeight);
         const rect = {
           x,
           y: currentY,
-          width: Math.max(20, width), // Minimum width
+          width: Math.max(minWidth, width),
           height: nodeHeight,
           data: node
         };
-        currentY += nodeHeight;
+        currentY += nodeHeight + (idx < group.length - 1 ? minGap : 0);
         return rect;
       });
     }

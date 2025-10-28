@@ -39,6 +39,6 @@ export interface TrendsMetrics {
   trending_down: TrendWithStats[];
 }
 
-export type TimeRange = '24H' | '48H' | '7D' | '30D' | '3M' | '6M' | '12M';
-export type LocationFilter = 'worldwide' | 'us' | 'uk' | 'brazil' | 'japan';
+export type TimeRange = '4H' | '24H' | '48H' | '7D' | '30D' | '3M' | '6M' | '12M';
+export type LocationFilter = 'thailand' | 'worldwide' | 'us' | 'uk' | 'brazil' | 'japan';
 export type LanguageFilter = 'all' | 'en' | 'es' | 'pt' | 'ja' | 'fr';

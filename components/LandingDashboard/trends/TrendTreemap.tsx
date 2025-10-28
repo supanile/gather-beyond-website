@@ -30,18 +30,16 @@ interface TrendTreemapProps {
     onLocationChange: (location: LocationFilterType) => void;
   }>;
   formatVolume?: (volume: number) => string;
-  // Callback functions for handling changes
   onTimeRangeChange?: (range: TimeRange) => void;
   onLocationChange?: (location: LocationFilterType) => void;
 }
 
-// Define trend ranges
 type TrendRange = "top20" | "top21-50" | "top51-100";
 
 const trendRanges: {
   [key in TrendRange]: { label: string; start: number; end: number };
 } = {
-  top20: { label: "Top 20", start: 0, end: 20 },
+  top20: { label: "Top 1-20", start: 0, end: 20 },
   "top21-50": { label: "Top 21-50", start: 20, end: 50 },
   "top51-100": { label: "Top 51-100", start: 50, end: 100 },
 };
@@ -52,7 +50,6 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
   error = null,
   className = "",
   onTrendClick,
-  // Live Dashboard props
   timeRange,
   location,
   lastUpdated,
@@ -69,7 +66,6 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
   const [selectedTrend, setSelectedTrend] = useState<TrendWithStats | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Create callback functions for TimeRange and Location changes
   const handleTimeRangeChange = (range: TimeRange) => {
     if (onTimeRangeChange) {
       onTimeRangeChange(range);
@@ -86,39 +82,30 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
     }
   };
 
-  // Get next range for "Others" button
-  const getNextRange = (): TrendRange | null => {
-    switch (currentRange) {
-      case "top20":
-        return "top21-50";
-      case "top21-50":
-        return "top51-100";
-      case "top51-100":
-        return null; // No more ranges
-      default:
-        return null;
-    }
-  };
-
-  const nextRange = getNextRange();
-
-  // Filter trends based on current range
+  // Filter trends based on current range (exclude "others")
   const filteredTrends = useMemo(() => {
     const range = trendRanges[currentRange];
-    const rangedTrends = trends.slice(range.start, range.end);
+    
+    const limitedTrends = trends.slice(0, 100);
+    const rangedTrends = limitedTrends.slice(range.start, range.end);
+    
+    // Filter out "others" and null/zero volume trends
     const validTrends = rangedTrends.filter(
-      (trend) => trend.tweet_volume !== null && trend.tweet_volume > 0
+      (trend) => 
+        trend.id !== 'others' && 
+        trend.tweet_volume !== null && 
+        trend.tweet_volume > 0
     );
 
-    // Update category based on volume change (stock-like colors)
+    // Update category based on volume change
     const updatedTrends = validTrends.map((trend) => {
       const change = trend.volume_change_24h || 0;
       let category: "high" | "medium" | "low" | "null";
 
-      if (change > 10) category = "high"; // Strong Up (Dark Green)
-      else if (change > 1) category = "medium"; // Up (Light Green)
-      else if (change >= -10) category = "low"; // Down (Light Red)
-      else category = "null"; // Strong Down (Dark Red) - will be handled in TrendCard
+      if (change > 10) category = "high";
+      else if (change > 1) category = "medium";
+      else if (change >= -10) category = "low";
+      else category = "null";
 
       return {
         ...trend,
@@ -126,116 +113,49 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
       };
     });
 
-    // Add "Others" card if there's a next range and we have valid trends and the next range has data
-    if (nextRange && updatedTrends.length > 0 && updatedTrends.length < 15) {
-      const nextRangeConfig = trendRanges[nextRange];
-      const nextRangeTrends = trends.slice(
-        nextRangeConfig.start,
-        nextRangeConfig.end
-      );
-      const hasNextRangeData = nextRangeTrends.some(
-        (trend) => trend.tweet_volume !== null && trend.tweet_volume > 0
-      );
-
-      if (hasNextRangeData) {
-        // Calculate a more balanced volume for "Others" card
-        const totalVolume = updatedTrends.reduce(
-          (sum, t) => sum + (t.tweet_volume || 0),
-          0
-        );
-        const averageVolume = totalVolume / updatedTrends.length;
-        const minVolume = Math.min(
-          ...updatedTrends.map((t) => t.tweet_volume || 0)
-        );
-
-        // Use a volume that's between 15-25% of the average, but not too small
-        const othersVolume = Math.max(
-          Math.floor(minVolume * 0.8), // At least 80% of smallest volume
-          Math.floor(averageVolume * 0.15), // Or 15% of average
-          1000 // Minimum baseline
-        );
-
-        const othersTrend: TrendWithStats = {
-          id: "others",
-          name: "Others",
-          rank: range.end + 1,
-          tweet_volume: othersVolume,
-          volume_change_24h: 0,
-          percentage: (othersVolume / (totalVolume + othersVolume)) * 100,
-          category: "low" as const, // Neutral color for Others
-          url: "#",
-          promoted_content: null,
-          query: "others",
-          momentum_score: 0,
-          historical_data: [],
-        };
-        updatedTrends.push(othersTrend);
-      }
-    }
-
     return updatedTrends;
-  }, [trends, currentRange, nextRange]);
+  }, [trends, currentRange]);
 
-  // Calculate Top 3 based on tweet volume - ONLY for Top 20 range
-  const top3VolumeThreshold = useMemo(() => {
-    // Only show Top 3 styling for "top20" range
-    if (currentRange !== "top20") return 0;
-    
-    const validTrendsOnly = filteredTrends.filter(
-      (trend) => trend.id !== "others" && trend.tweet_volume !== null
-    );
-    if (validTrendsOnly.length < 3) return 0;
-
-    const sortedByVolume = [...validTrendsOnly].sort(
-      (a, b) => (b.tweet_volume || 0) - (a.tweet_volume || 0)
-    );
-    return sortedByVolume[2]?.tweet_volume || 0; // Third highest volume
-  }, [filteredTrends, currentRange]);
-
-  // Calculate Top 3 rankings with their positions - ONLY for Top 20 range
+  // Calculate Top 3 rankings from ALL 100 trends
   const top3Rankings = useMemo(() => {
-    // Only show Top 3 styling for "top20" range
-    if (currentRange !== "top20") return new Map<string, number>();
+    const allValidTrends = trends
+      .slice(0, 100)
+      .filter((trend) => trend.id !== "others" && trend.tweet_volume !== null);
     
-    const validTrendsOnly = filteredTrends.filter(
-      (trend) => trend.id !== "others" && trend.tweet_volume !== null
-    );
-    const sortedByVolume = [...validTrendsOnly].sort(
+    const sortedByVolume = [...allValidTrends].sort(
       (a, b) => (b.tweet_volume || 0) - (a.tweet_volume || 0)
     );
 
     const rankings = new Map<string, number>();
     sortedByVolume.slice(0, 3).forEach((trend, index) => {
-      rankings.set(trend.id, index + 1); // 1, 2, 3
+      rankings.set(trend.id, index + 1);
     });
 
     return rankings;
-  }, [filteredTrends, currentRange]);
+  }, [trends]);
 
-  // Filter out trends with zero volume for better visualization
+  // Filter out trends with zero volume and "others"
   const validTrends = useMemo(() => {
-    return trends.filter(
-      (trend) => trend.tweet_volume !== null && trend.tweet_volume > 0
-    );
+    return trends
+      .slice(0, 100)
+      .filter(
+        (trend) => 
+          trend.id !== 'others' &&
+          trend.tweet_volume !== null && 
+          trend.tweet_volume > 0
+      );
   }, [trends]);
 
   // Handle trend click
   const handleTrendClick = (trend: TrendWithStats) => {
     console.log("handleTrendClick called:", trend.name, trend.id);
     
-    if (trend.id === "others") {
-      if (nextRange) {
-        setCurrentRange(nextRange);
-      }
-    } else {
-      console.log("Opening dialog for:", trend.name);
-      setSelectedTrend(trend);
-      setIsDialogOpen(true);
-      
-      // Call external onTrendClick if provided
-      if (onTrendClick) {
-        onTrendClick(trend);
-      }
+    console.log("Opening dialog for:", trend.name);
+    setSelectedTrend(trend);
+    setIsDialogOpen(true);
+    
+    if (onTrendClick) {
+      onTrendClick(trend);
     }
   };
 
@@ -319,30 +239,43 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
             </div>
           )}
 
-
-
           {/* Range Navigation Buttons */}
           <div className="flex flex-wrap gap-1 sm:gap-2">
-            {Object.entries(trendRanges).map(([key, range]) => (
-              <Button
-                key={key}
-                variant={currentRange === key ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentRange(key as TrendRange)}
-                className="transition-all duration-200 text-xs px-2 py-1"
-              >
-                <Badge
-                  variant={currentRange === key ? "secondary" : "outline"}
-                  className="mr-1 text-[10px] px-1"
+            {Object.entries(trendRanges).map(([key, range]) => {
+              const rangeData = trends
+                .slice(0, 100)
+                .slice(range.start, range.end)
+                .filter((t) => t.id !== 'others' && t.tweet_volume !== null && t.tweet_volume > 0);
+              
+              const trendCount = rangeData.length;
+              const isDisabled = trendCount === 0;
+
+              return (
+                <Button
+                  key={key}
+                  variant={currentRange === key ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentRange(key as TrendRange)}
+                  disabled={isDisabled}
+                  className="transition-all duration-200 text-xs px-2 py-1"
                 >
-                  {range.start + 1}-{range.end}
-                </Badge>
-                <span className="hidden sm:inline text-xs">{range.label}</span>
-                <span className="sm:hidden text-xs">
-                  {range.label.replace("Top ", "")}
-                </span>
-              </Button>
-            ))}
+                  <Badge
+                    variant={currentRange === key ? "secondary" : "outline"}
+                    className="mr-1 text-[10px] px-1"
+                  >
+                    {range.start + 1}-{range.end}
+                  </Badge>
+                  <span className="hidden sm:inline text-xs">
+                    {range.label}
+                    {trendCount > 0 && ` (${trendCount})`}
+                  </span>
+                  <span className="sm:hidden text-xs">
+                    #{range.start + 1}-{range.end}
+                    {trendCount > 0 && ` (${trendCount})`}
+                  </span>
+                </Button>
+              );
+            })}
           </div>
 
           {/* Range Statistics */}
@@ -371,7 +304,7 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
                     variant="outline"
                     className="text-[10px] border-border/30 text-foreground"
                   >
-                    {totalTrends}
+                    {Math.min(totalTrends, 100)} {totalTrends > 100 && "(limited)"}
                   </Badge>
                 </div>
               )}
@@ -384,16 +317,22 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
                     variant="outline"
                     className="text-[10px] border-border/30 text-foreground"
                   >
-                    {formatVolume(totalVolume)} tweets
+                    {formatVolume(totalVolume)} searches
                   </Badge>
                 </div>
               )}
               {filteredTrends.length > 0 && (
                 <div className="flex items-center space-x-1">
                   <span className="font-medium hidden sm:inline">
-                    Range volume:
+                    Showing:
                   </span>
-                  <span className="font-medium sm:hidden">Range:</span>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] px-1"
+                  >
+                    {filteredTrends.length} trends
+                  </Badge>
+                  <span className="text-xs">|</span>
                   <Badge
                     variant="outline"
                     className="text-[10px] px-1"
@@ -401,7 +340,7 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
                     {filteredTrends
                       .reduce((sum, trend) => sum + (trend.tweet_volume || 0), 0)
                       .toLocaleString()}{" "}
-                    tweets
+                    searches
                   </Badge>
                 </div>
               )}
@@ -426,20 +365,13 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
           ) : (
             <TreemapLayoutComponent
               data={filteredTrends}
-              width={0} // Will be calculated dynamically
-              height={0} // Will be calculated dynamically
+              width={0}
+              height={0}
             >
               {(rects: TreemapRect[]) =>
                 rects.map((rect: TreemapRect, index: number) => {
-                  // Check if this trend is in Top 3 by tweet volume
-                  const isTop3ByVolume =
-                    rect.data.trend.id !== "others" &&
-                    rect.data.trend.tweet_volume !== null &&
-                    rect.data.trend.tweet_volume >= top3VolumeThreshold &&
-                    top3VolumeThreshold > 0;
-
-                  // Get the ranking within Top 3 (1, 2, or 3)
                   const top3Rank = top3Rankings.get(rect.data.trend.id);
+                  const isTop3ByVolume = top3Rank !== undefined;
 
                   return (
                     <TrendCard
@@ -453,7 +385,6 @@ const TrendTreemap: React.FC<TrendTreemapProps> = ({
                       }}
                       isTop3={isTop3ByVolume}
                       top3Rank={top3Rank}
-                      onClick={() => handleTrendClick(rect.data.trend)}
                       onTrendClick={handleTrendClick}
                     />
                   );

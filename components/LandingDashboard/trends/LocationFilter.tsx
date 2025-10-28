@@ -2,6 +2,7 @@ import React from 'react';
 import { LocationFilter } from '@/types/trends';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
+import { getEnabledLocations, getLocationConfig } from '@/config/locations';
 
 interface LocationFilterProps {
   selectedLocation: LocationFilter;
@@ -14,13 +15,12 @@ const LocationFilterComponent: React.FC<LocationFilterProps> = ({
   onLocationChange,
   className = ''
 }) => {
-  const locations: { label: string; value: LocationFilter }[] = [
-    { label: 'Worldwide', value: 'worldwide' },
-    { label: 'United States', value: 'us' },
-    { label: 'United Kingdom', value: 'uk' },
-    { label: 'Brazil', value: 'brazil' },
-    { label: 'Japan', value: 'japan' },
-  ];
+  // Get enabled locations from configuration
+  const enabledLocations = getEnabledLocations();
+  const locations = enabledLocations.map(location => ({
+    label: `${location.flag} ${location.name}`,
+    value: location.code
+  }));
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { TrendsData, TrendsMetrics, TimeRange, LocationFilter, LanguageFilter } from '@/types/trends';
 import { trendsAPI } from '@/lib/api/trends';
 import { generateMockTrendsData, processTrendsData } from '@/lib/utils/mockData';
+import { DEFAULT_LOCATION } from '@/config/locations';
 
 interface UseTrendsOptions {
   timeRange?: TimeRange;
@@ -19,8 +20,8 @@ interface UseTrendsReturn {
 }
 
 export const useTrends = ({
-  timeRange = '24H',
-  location = 'worldwide',
+  timeRange = '4H',
+  location = DEFAULT_LOCATION,
   language = 'all',
   useMockData = true // Set to true for development
 }: UseTrendsOptions = {}): UseTrendsReturn => {
@@ -37,8 +38,8 @@ export const useTrends = ({
       let trendsData: TrendsData;
 
       if (useMockData) {
-        // Use mock data for development
-        trendsData = generateMockTrendsData();
+        // Use mock data for development - pass location for future extensibility
+        trendsData = generateMockTrendsData(timeRange, location);
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
       } else {
