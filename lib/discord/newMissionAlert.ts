@@ -1,6 +1,7 @@
 /**
- *
- * @returns
+ * Formats the mission's end date as a Discord timestamp string.
+ * @param duration - JSON string containing mission duration with start/end dates (e.g., '{"start":"2024-06-01T00:00:00Z","end":"2024-06-30T23:59:59Z"}').
+ * @returns Formatted Discord timestamp string (e.g., <t:1234567890:R>) or 'No deadline' if duration is invalid or missing.
  */
 function getDiscordTimestamp(duration?: string): string {
     if (!duration) return 'No deadline';
