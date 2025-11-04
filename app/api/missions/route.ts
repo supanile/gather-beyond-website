@@ -1,5 +1,6 @@
 import { grist } from "@/lib/grist";
 import { NextResponse } from "next/server";
+import { sendPublishedMissionAlert } from "@/lib/discord/newMissionAlert";
 
 // Partner mapping
 const PARTNER_ID_MAP: { [key: string]: number } = {
@@ -310,6 +311,25 @@ export async function POST(request: Request) {
       "✅ POST Mission created successfully with serverId:",
       missionData.serverId
     );
+
+    try {
+      await sendPublishedMissionAlert({
+        title: body.title,
+        description: body.description,
+        type: body.type,
+        platform: body.platform,
+        reward: body.reward,
+        partner: body.partner,
+        level_required: body.level_required,
+        duration: missionData.duration,
+        format: body.format,
+        action_request: body.action_request,
+        id2: nextMissionId2
+      });
+      console.log("✅ Discord notification sent successfully");
+    } catch (notificationError) {
+      console.error("⚠️ Failed to send Discord notification:", notificationError);
+    }
 
     return NextResponse.json(
       { message: "Mission added successfully", data: result },
