@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { XTrend } from '@/types/social-trends';
 import { TimeRange, LocationFilter as LocationFilterType, TrendWithStats } from '@/types/trends';
-import { Loader2, RefreshCw } from 'lucide-react';
-import TrendCard from './TrendCard';
+import { Loader2, RefreshCw, Globe } from 'lucide-react';
+import XTrendCard from './XTrendCard';
 import TreemapLayoutComponent from './TreemapLayout';
 import TrendDetailsDialog from './TrendDetailsDialog';
 
@@ -70,6 +71,23 @@ const XTreemap: React.FC<XTreemapProps> = ({
     if (volume >= 1000000) return `${(volume / 1000000).toFixed(1)}M`;
     if (volume >= 1000) return `${(volume / 1000).toFixed(1)}K`;
     return volume.toString();
+  };
+
+  const formatLastUpdated = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return dateString; // Return original if parsing fails
+    }
   };
 
   // Function to convert tweet_volume string to number for processing
@@ -211,7 +229,6 @@ const XTreemap: React.FC<XTreemapProps> = ({
       );
   }, [convertedTrends]);
 
-  // Handle trend click
   const handleTrendClick = (trend: TrendWithStats) => {
     console.log("handleTrendClick called:", trend.name, trend.id);
     
@@ -223,8 +240,6 @@ const XTreemap: React.FC<XTreemapProps> = ({
       onTrendClick(trend);
     }
   };
-
-  const volumeFormatter = formatVolume || defaultFormatVolume;
 
   if (loading) {
     return (
@@ -274,60 +289,143 @@ const XTreemap: React.FC<XTreemapProps> = ({
         <div className="p-2 sm:p-3 space-y-3 border-b border-border/20">
           {/* Live Dashboard Controls */}
           {(TimeRangeSelector || LocationFilter || onRefetch) && (
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                {TimeRangeSelector && timeRange && (
-                  <TimeRangeSelector
-                    selectedRange={timeRange}
-                    onRangeChange={handleTimeRangeChange}
-                  />
-                )}
-                {LocationFilter && location && (
-                  <LocationFilter
-                    selectedLocation={location}
-                    onLocationChange={handleLocationChange}
-                  />
-                )}
-              </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+              {TimeRangeSelector && timeRange && (
+                <TimeRangeSelector
+                  selectedRange={timeRange}
+                  onRangeChange={handleTimeRangeChange}
+                />
+              )}
+              {LocationFilter && location && (
+                <LocationFilter
+                  selectedLocation={location}
+                  onLocationChange={handleLocationChange}
+                />
+              )}
               {onRefetch && (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={onRefetch}
-                  className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  disabled={loading}
+                  className="border-border/50 bg-background/60 backdrop-blur-xl text-foreground hover:bg-accent/50 hover:border-border shadow-lg hover:shadow-xl transition-all duration-300 text-xs"
                 >
-                  <RefreshCw className="w-3 h-3" />
+                  <RefreshCw
+                    className={`w-3 h-3 mr-1 ${
+                      loading ? "animate-spin" : ""
+                    }`}
+                  />
+                  Refresh
                 </Button>
               )}
             </div>
           )}
 
-          {/* Range Selection */}
+          {/* Range Navigation Buttons */}
           <div className="flex flex-wrap gap-1 sm:gap-2">
-            {Object.entries(trendRanges).map(([key, range]) => (
-              <Button
-                key={key}
-                variant={currentRange === key ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentRange(key as TrendRange)}
-                className="text-xs sm:text-sm h-8 px-2 sm:px-3"
-              >
-                {range.label}
-              </Button>
-            ))}
+            {Object.entries(trendRanges).map(([key, range]) => {
+              const rangeData = convertedTrends
+                .slice(0, 100)
+                .slice(range.start, range.end)
+                .filter((t) => t.id !== 'others' && t.tweet_volume !== null && t.tweet_volume > 0);
+              
+              const trendCount = rangeData.length;
+              const isDisabled = trendCount === 0;
+
+              return (
+                <Button
+                  key={key}
+                  variant={currentRange === key ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentRange(key as TrendRange)}
+                  disabled={isDisabled}
+                  className="transition-all duration-200 text-xs px-2 py-1"
+                >
+                  <Badge
+                    variant={currentRange === key ? "secondary" : "outline"}
+                    className="mr-1 text-[10px] px-1"
+                  >
+                    {range.start + 1}-{range.end}
+                  </Badge>
+                  <span className="hidden sm:inline text-xs">
+                    {range.label}
+                    {trendCount > 0 && ` (${trendCount})`}
+                  </span>
+                  <span className="sm:hidden text-xs">
+                    #{range.start + 1}-{range.end}
+                    {trendCount > 0 && ` (${trendCount})`}
+                  </span>
+                </Button>
+              );
+            })}
           </div>
 
-          {/* Info Panel */}
+          {/* Range Statistics */}
           <div className="p-2 rounded-lg bg-accent/5 border border-border/30">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-muted-foreground">
-              <span>
-                X Trends • {filteredTrends.length} topics
-                {lastUpdated && ` • Last updated: ${lastUpdated}`}
-              </span>
-              <span>
-                Total volume: {volumeFormatter(totalVolume || 0)}
-                {totalTrends && ` • Showing ${totalTrends} trends`}
-              </span>
+            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+              {lastUpdated && (
+                <div className="flex items-center space-x-2">
+                  <Globe className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    Last updated:
+                  </span>
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] bg-accent/50 text-foreground border-border/30"
+                  >
+                    {formatLastUpdated(lastUpdated)}
+                  </Badge>
+                </div>
+              )}
+              {totalTrends && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-muted-foreground">
+                    Total trends:
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] border-border/30 text-foreground"
+                  >
+                    {Math.min(totalTrends, 100)} {totalTrends > 100 && "(limited)"}
+                  </Badge>
+                </div>
+              )}
+              {totalVolume && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-muted-foreground">
+                    Total volume:
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] border-border/30 text-foreground"
+                  >
+                    {(formatVolume || defaultFormatVolume)(totalVolume)} tweets
+                  </Badge>
+                </div>
+              )}
+              {filteredTrends.length > 0 && (
+                <div className="flex items-center space-x-1">
+                  <span className="font-medium hidden sm:inline">
+                    Showing:
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] px-1"
+                  >
+                    {filteredTrends.length} trends
+                  </Badge>
+                  <span className="text-xs">|</span>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] px-1"
+                  >
+                    {filteredTrends
+                      .reduce((sum, trend) => sum + (trend.tweet_volume || 0), 0)
+                      .toLocaleString()}{" "}
+                    tweets
+                  </Badge>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -335,8 +433,16 @@ const XTreemap: React.FC<XTreemapProps> = ({
         {/* Treemap Section - Full Width */}
         <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[600px] bg-gradient-to-br from-accent/10 to-accent/5 p-1">
           {filteredTrends.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <p>No trends available for the selected range</p>
+            <div className="flex items-center justify-center h-full p-4">
+              <div className="text-center text-muted-foreground">
+                <p className="text-sm font-semibold">
+                  No trends available
+                </p>
+                <p className="text-xs mt-2">
+                  No data found for {trendRanges[currentRange].label} range
+                </p>
+                <p className="text-xs mt-1">Try switching to a different range</p>
+              </div>
             </div>
           ) : (
             <TreemapLayoutComponent
@@ -350,7 +456,7 @@ const XTreemap: React.FC<XTreemapProps> = ({
                   const top3Rank = top3Rankings.get(rect.data.trend.id);
 
                   return (
-                    <TrendCard
+                    <XTrendCard
                       key={`${rect.data.trend.id}-${index}`}
                       trend={rect.data.trend}
                       size={{
@@ -372,26 +478,27 @@ const XTreemap: React.FC<XTreemapProps> = ({
 
         {/* Legend Section */}
         <div className="p-2 sm:p-3 border-t border-border/20">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-gradient-to-br from-green-600 to-green-700"></div>
-                <span>Rising (+10%)</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-gradient-to-br from-green-400 to-green-500"></div>
-                <span>Growing (+1%)</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-gradient-to-br from-red-400 to-red-500"></div>
-                <span>Declining (-1%)</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded bg-gradient-to-br from-red-600 to-red-700"></div>
-                <span>Falling (-10%)</span>
-              </div>
+          <div className="flex flex-wrap gap-2 text-[10px] text-muted-foreground">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-600/80 border border-green-600 rounded"></div>
+              <span className="whitespace-nowrap">Strong Up (&gt;+10%)</span>
             </div>
-            <span>Size represents tweet volume</span>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-400/80 border border-green-400 rounded"></div>
+              <span className="whitespace-nowrap">Up (+1% to +10%)</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-red-400/80 border border-red-400 rounded"></div>
+              <span className="whitespace-nowrap">Down (-1% to -10%)</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-red-600/80 border border-red-600 rounded"></div>
+              <span className="whitespace-nowrap">Strong Down (&lt;-10%)</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-muted/30 border border-border/50 rounded"></div>
+              <span className="whitespace-nowrap">No Data</span>
+            </div>
           </div>
         </div>
       </Card>

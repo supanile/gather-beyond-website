@@ -74,9 +74,6 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
             {/* <XIcon className="w-7 h-7 mr-2" /> */}
             Social Media Trends
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Real-time trending topics across major social platforms
-          </p>
         </div>
 
         {/* Tabs Navigation */}
@@ -216,7 +213,11 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
               {/* Treemap - Takes up 3 columns on xl screens */}
               <div className="xl:col-span-3">
                 <TikTokTreemap
-                  trends={tiktok?.trends?.filter(t => t.platform === 'tiktok') as TikTokTrend[] || []}
+                  trends={
+                    (tiktok?.trends?.filter(
+                      (t) => t.platform === "tiktok"
+                    ) as TikTokTrend[]) || []
+                  }
                   loading={socialLoading}
                   error={socialError}
                   timeRange={timeRange}
@@ -238,18 +239,22 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                 <TrendsList
                   title="Rising Trends"
                   trends={
-                    tiktok?.metrics?.top_gainers?.filter(t => t.platform === 'tiktok').map((trend, index) => {
-                      const tiktokTrend = trend as TikTokTrend;
-                      return {
-                        ...trend,
-                        id: `tiktok-gainer-${index}`,
-                        name: tiktokTrend.hashtag_name || trend.name,
-                        url: trend.url || `https://tiktok.com/tag/${tiktokTrend.hashtag_name}`,
-                        query: tiktokTrend.hashtag_name || trend.name,
-                        promoted_content: null,
-                        tweet_volume: trend.volume,
-                      };
-                    }) || []
+                    tiktok?.metrics?.top_gainers
+                      ?.filter((t) => t.platform === "tiktok")
+                      .map((trend, index) => {
+                        const tiktokTrend = trend as TikTokTrend;
+                        return {
+                          ...trend,
+                          id: `tiktok-gainer-${index}`,
+                          name: tiktokTrend.hashtag_name || trend.name,
+                          url:
+                            trend.url ||
+                            `https://tiktok.com/tag/${tiktokTrend.hashtag_name}`,
+                          query: tiktokTrend.hashtag_name || trend.name,
+                          promoted_content: null,
+                          tweet_volume: trend.volume,
+                        };
+                      }) || []
                   }
                   type="gainers"
                 />
@@ -258,18 +263,22 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                 <TrendsList
                   title="Falling Trends"
                   trends={
-                    tiktok?.metrics?.top_losers?.filter(t => t.platform === 'tiktok').map((trend, index) => {
-                      const tiktokTrend = trend as TikTokTrend;
-                      return {
-                        ...trend,
-                        id: `tiktok-loser-${index}`,
-                        name: tiktokTrend.hashtag_name || trend.name,
-                        url: trend.url || `https://tiktok.com/tag/${tiktokTrend.hashtag_name}`,
-                        query: tiktokTrend.hashtag_name || trend.name,
-                        promoted_content: null,
-                        tweet_volume: trend.volume,
-                      };
-                    }) || []
+                    tiktok?.metrics?.top_losers
+                      ?.filter((t) => t.platform === "tiktok")
+                      .map((trend, index) => {
+                        const tiktokTrend = trend as TikTokTrend;
+                        return {
+                          ...trend,
+                          id: `tiktok-loser-${index}`,
+                          name: tiktokTrend.hashtag_name || trend.name,
+                          url:
+                            trend.url ||
+                            `https://tiktok.com/tag/${tiktokTrend.hashtag_name}`,
+                          query: tiktokTrend.hashtag_name || trend.name,
+                          promoted_content: null,
+                          tweet_volume: trend.volume,
+                        };
+                      }) || []
                   }
                   type="losers"
                 />
@@ -283,7 +292,11 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
               {/* Treemap - Takes up 3 columns on xl screens */}
               <div className="xl:col-span-3">
                 <XTreemap
-                  trends={x?.trends?.filter(t => t.platform === 'x') as XTrend[] || []}
+                  trends={
+                    (x?.trends?.filter(
+                      (t) => t.platform === "x"
+                    ) as XTrend[]) || []
+                  }
                   loading={socialLoading}
                   error={socialError}
                   timeRange={timeRange}
@@ -305,18 +318,24 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                 <TrendsList
                   title="Rising Trends"
                   trends={
-                    x?.metrics?.top_gainers?.filter(t => t.platform === 'x').map((trend, index) => {
-                      const xTrend = trend as XTrend;
-                      return {
-                        ...trend,
-                        id: `x-gainer-${index}`,
-                        name: xTrend.topic || trend.name,
-                        url: trend.url || `https://x.com/search?q=${encodeURIComponent(xTrend.topic || trend.name)}`,
-                        query: xTrend.topic || trend.name,
-                        promoted_content: null,
-                        tweet_volume: trend.volume, // Use the numeric volume value
-                      };
-                    }) || []
+                    x?.metrics?.top_gainers
+                      ?.filter((t) => t.platform === "x")
+                      .map((trend, index) => {
+                        const xTrend = trend as XTrend;
+                        return {
+                          ...trend,
+                          id: `x-gainer-${index}`,
+                          name: xTrend.topic || trend.name,
+                          url:
+                            trend.url ||
+                            `https://x.com/search?q=${encodeURIComponent(
+                              xTrend.topic || trend.name
+                            )}`,
+                          query: xTrend.topic || trend.name,
+                          promoted_content: null,
+                          tweet_volume: trend.volume, // Use the numeric volume value
+                        };
+                      }) || []
                   }
                   type="gainers"
                 />
@@ -325,18 +344,24 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                 <TrendsList
                   title="Falling Trends"
                   trends={
-                    x?.metrics?.top_losers?.filter(t => t.platform === 'x').map((trend, index) => {
-                      const xTrend = trend as XTrend;
-                      return {
-                        ...trend,
-                        id: `x-loser-${index}`,
-                        name: xTrend.topic || trend.name,
-                        url: trend.url || `https://x.com/search?q=${encodeURIComponent(xTrend.topic || trend.name)}`,
-                        query: xTrend.topic || trend.name,
-                        promoted_content: null,
-                        tweet_volume: trend.volume, // Use the numeric volume value
-                      };
-                    }) || []
+                    x?.metrics?.top_losers
+                      ?.filter((t) => t.platform === "x")
+                      .map((trend, index) => {
+                        const xTrend = trend as XTrend;
+                        return {
+                          ...trend,
+                          id: `x-loser-${index}`,
+                          name: xTrend.topic || trend.name,
+                          url:
+                            trend.url ||
+                            `https://x.com/search?q=${encodeURIComponent(
+                              xTrend.topic || trend.name
+                            )}`,
+                          query: xTrend.topic || trend.name,
+                          promoted_content: null,
+                          tweet_volume: trend.volume, // Use the numeric volume value
+                        };
+                      }) || []
                   }
                   type="losers"
                 />
@@ -347,7 +372,9 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
           {/* Gather Trends Tab */}
           <TabsContent value="gather" className="mt-0">
             <GatherTrendsTab
-              trends={gather?.trends?.filter((t) => t.platform === "gather") || []}
+              trends={
+                gather?.trends?.filter((t) => t.platform === "gather") || []
+              }
               loading={socialLoading}
               error={socialError}
             />
