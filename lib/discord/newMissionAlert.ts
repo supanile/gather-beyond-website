@@ -38,6 +38,7 @@ export async function sendPublishedMissionAlert(missionData: {
 }): Promise<void> {
     try {
         const PUBLISHED_MISSION_CHANNEL_ID = '1432926699313434634';
+        const MISSIONS_ALERT_IMAGE_URL = 'https://i.ibb.co/kghVrjvc/super-connector.png';
         
         const timeRemaining = getDiscordTimestamp(missionData.duration);
         
@@ -60,15 +61,6 @@ export async function sendPublishedMissionAlert(missionData: {
         let fullDescription = `${missionTitle}\n${levelAndTime}\n\n${missionData.description}`;
         
         fullDescription += `\n\n💰 Reward: ${rewardText}`;
-        fullDescription += `\n🎯 Status: Available to accept`;
-        
-        if (missionData.format) {
-            fullDescription += `\n📝 Format: ${missionData.format}`;
-        }
-        
-        if (missionData.action_request) {
-            fullDescription += `\n❓ Action to submit: ${missionData.action_request}`;
-        }
         
         const response = await fetch(`https://discord.com/api/v10/channels/${PUBLISHED_MISSION_CHANNEL_ID}/messages`, {
             method: 'POST',
@@ -80,6 +72,9 @@ export async function sendPublishedMissionAlert(missionData: {
                 embeds: [{
                     title: "🚨 New Mission Published!",
                     description: fullDescription,
+                    image: {
+                        url: MISSIONS_ALERT_IMAGE_URL,
+                    },
                     color: 0x5865F2,
                     timestamp: new Date().toISOString(),
                 }]
