@@ -3,9 +3,7 @@ import { generateMockTrendsData as generateTwitterMockTrendsData } from "./twitt
 import { processTrendsData as processTwitterTrendsData } from "./twitterMockData";
 import { TimeRange, LocationFilter } from "@/types/trends";
 import { 
-  generateGoogleTrendsData, 
-  processGoogleTrendsMetrics,
-  generateGoogleTrendsInsights 
+  generateGoogleTrendsData
 } from "./googleTrendsMockData";
 import type { GoogleTrendsData } from "@/types/googleTrends";
 import type { TrendsData } from "@/types/trends";
@@ -13,8 +11,6 @@ import type { TrendsData } from "@/types/trends";
 // Export Google Trends mock data functions as main exports
 export {
   generateGoogleTrendsData,
-  processGoogleTrendsMetrics,
-  generateGoogleTrendsInsights,
   formatSearchVolume,
   formatTimeAgo,
   getTrendingIcon,

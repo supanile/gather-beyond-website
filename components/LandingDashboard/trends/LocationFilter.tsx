@@ -2,7 +2,7 @@ import React from 'react';
 import { LocationFilter } from '@/types/trends';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
-import { getEnabledLocations, getLocationConfig } from '@/config/locations';
+import { getEnabledLocations } from '@/config/locations';
 
 interface LocationFilterProps {
   selectedLocation: LocationFilter;

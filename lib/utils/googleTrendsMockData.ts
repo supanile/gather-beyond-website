@@ -8,22 +8,6 @@ import {
 import { LocationFilter } from "@/types/trends";
 import { getLocationConfig } from "@/config/locations";
 
-// Location-specific mock data structure
-interface LocationMockData {
-  [key: string]: GoogleTrendItem[];
-}
-
-// Currently only Thailand data is available, but structure is ready for expansion
-const LOCATION_MOCK_DATA: LocationMockData = {
-  thailand: [], // Will be populated with existing data
-  // Future locations:
-  // worldwide: [],
-  // us: [],
-  // uk: [],
-  // brazil: [],
-  // japan: [],
-};
-
 // Mock Google Trends data based on provided CSV files
 const mockGoogleTrends4H: GoogleTrendItem[] = [
   {

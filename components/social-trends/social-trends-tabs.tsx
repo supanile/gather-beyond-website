@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SocialPlatform } from '@/types/social-trends';
