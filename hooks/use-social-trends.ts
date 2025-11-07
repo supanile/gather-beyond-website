@@ -15,6 +15,7 @@ export const useSocialTrends = ({
     google: null,
     tiktok: null,
     x: null,
+    reddit: null,
     gather: null,
     loading: true,
     error: null,

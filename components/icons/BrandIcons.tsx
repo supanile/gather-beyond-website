@@ -96,6 +96,22 @@ export const XIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   </svg>
 );
 
+// Reddit Icon - ใช้รูปภาพแทน SVG
+export const RedditIcon = ({
+  className = "w-6 h-6",
+}: {
+  className?: string;
+}) => (
+  <div className={`relative ${className}`}>
+    <Image
+      src="/images/reddit-logo.png"
+      alt="Reddit"
+      fill
+      className="object-contain"
+    />
+  </div>
+);
+
 // Gather Icon - ใช้รูปภาพแทน SVG
 export const GatherIcon = ({
   className = "w-6 h-6",
@@ -147,6 +163,13 @@ const BrandIconsDemo = () => {
           <XIcon className="w-12 h-12" />
           <span className="text-sm font-medium text-gray-900 dark:text-white">
             X (Twitter)
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center gap-3 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-colors">
+          <RedditIcon className="w-12 h-12" />
+          <span className="text-sm font-medium text-gray-900 dark:text-white">
+            Reddit
           </span>
         </div>
 

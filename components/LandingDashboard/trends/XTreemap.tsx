@@ -7,7 +7,7 @@ import { TimeRange, LocationFilter as LocationFilterType, TrendWithStats } from 
 import { Loader2, RefreshCw, Globe } from 'lucide-react';
 import XTrendCard from './XTrendCard';
 import TreemapLayoutComponent from './TreemapLayout';
-import TrendDetailsDialog from './TrendDetailsDialog';
+import XDetailsDialog from './XDetailsDialog';
 
 interface XTreemapProps {
   trends: XTrend[];
@@ -504,7 +504,7 @@ const XTreemap: React.FC<XTreemapProps> = ({
       </Card>
 
       {/* Dialog Component */}
-      <TrendDetailsDialog
+      <XDetailsDialog
         trend={selectedTrend}
         isOpen={isDialogOpen}
         onClose={() => {

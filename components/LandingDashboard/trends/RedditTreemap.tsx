@@ -1,16 +1,17 @@
-import React, { useState, useMemo } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { TikTokTrend } from '@/types/social-trends';
-import { TimeRange, LocationFilter as LocationFilterType, TrendWithStats } from '@/types/trends';
-import { Loader2, RefreshCw, Globe } from 'lucide-react';
-import TikTokTrendCard from './TikTokTrendCard';
-import TreemapLayoutComponent from './TreemapLayout';
-import TikTokDetailsDialog from './TikTokDetailsDialog';
+import React, { useMemo, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, RefreshCw, Globe } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { RedditTrend } from "@/types/social-trends";
+import { TrendWithStats, TimeRange } from "@/types/trends";
+import { LocationFilter as LocationFilterType } from "@/types/trends";
+import TreemapLayoutComponent, { TreemapRect } from "./TreemapLayout";
+import RedditDetailsDialog from "./RedditDetailsDialog";
+import RedditTrendCard from "./RedditTrendCard";
 
-interface TikTokTreemapProps {
-  trends: TikTokTrend[];
+interface RedditTreemapProps {
+  trends: RedditTrend[];
   loading?: boolean;
   error?: string | null;
   className?: string;
@@ -45,7 +46,7 @@ const trendRanges: {
   "top51-100": { label: "Top 51-100", start: 50, end: 100 },
 };
 
-const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
+const RedditTreemap: React.FC<RedditTreemapProps> = ({
   trends,
   loading = false,
   error = null,
@@ -67,12 +68,6 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
   const [selectedTrend, setSelectedTrend] = useState<TrendWithStats | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const defaultFormatVolume = (volume: number) => {
-    if (volume >= 1000000) return `${(volume / 1000000).toFixed(1)}M`;
-    if (volume >= 1000) return `${(volume / 1000).toFixed(1)}K`;
-    return volume.toString();
-  };
-
   const formatLastUpdated = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -86,7 +81,7 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
         hour12: true
       });
     } catch {
-      return dateString; // Return original if parsing fails
+      return dateString;
     }
   };
 
@@ -106,30 +101,34 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
     }
   };
 
-  // Convert TikTokTrend to TrendWithStats format for compatibility
+  // Convert RedditTrend to TrendWithStats format for compatibility
   const convertedTrends = useMemo(() => {
     return trends.map((trend, index) => ({
       // TrendWithStats required fields
-      id: trend.id || `tiktok-trend-${index}`,
-      name: trend.hashtag_name,
-      url: trend.url || `https://www.tiktok.com/tag/${encodeURIComponent(trend.hashtag_name)}`,
-      promoted_content: trend.is_promoted ? "TikTok Promoted" : null,
-      query: trend.hashtag_name,
-      tweet_volume: trend.video_views,
+      id: trend.id || `reddit-trend-${index}`,
+      name: trend.title,
+      url: trend.postUrl,
+      promoted_content: null,
+      query: trend.title,
+      tweet_volume: trend.upvotes,
       volume_change_24h: trend.volume_change_24h,
       momentum_score: trend.momentum_score || 0,
       rank: index + 1,
       percentage: trend.percentage || 0,
       category: "medium" as const,
       historical_data: trend.historical_data || [],
-      // Additional TikTok-specific fields
+      // Additional Reddit-specific fields
       platform: trend.platform,
-      hashtag_id: trend.hashtag_id,
-      hashtag_name: trend.hashtag_name,
-      industry_info: trend.industry_info,
-      is_promoted: trend.is_promoted,
-      publish_cnt: trend.publish_cnt,
-      video_views: trend.video_views,
+      title: trend.title,
+      postUrl: trend.postUrl,
+      upvotes: trend.upvotes,
+      comments: trend.comments,
+      subreddit: trend.subreddit,
+      subredditUrl: trend.subredditUrl,
+      subredditType: trend.subredditType,
+      author: trend.author,
+      authorProfile: trend.authorProfile,
+      postTime: trend.postTime,
       volume: trend.volume,
     }));
   }, [trends]);
@@ -217,7 +216,7 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
       >
         <div className="flex items-center space-x-2 text-muted-foreground">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          <span>Loading TikTok trends...</span>
+          <span>Loading trends...</span>
         </div>
       </Card>
     );
@@ -229,7 +228,7 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
         className={`flex items-center justify-center h-96 bg-background/60 backdrop-blur-xl border border-border/50 shadow-2xl ${className}`}
       >
         <div className="text-center text-red-500">
-          <p className="text-lg font-semibold">Error loading TikTok trends</p>
+          <p className="text-lg font-semibold">Error loading trends</p>
           <p className="text-sm text-muted-foreground mt-2">{error}</p>
         </div>
       </Card>
@@ -242,8 +241,8 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
         className={`flex items-center justify-center h-96 bg-background/60 backdrop-blur-xl border border-border/50 shadow-2xl ${className}`}
       >
         <div className="text-center text-muted-foreground">
-          <p className="text-lg font-semibold">No TikTok trends available</p>
-          <p className="text-sm mt-2">Check back later for trending hashtags</p>
+          <p className="text-lg font-semibold">No trends available</p>
+          <p className="text-sm mt-2">Check back later for trending posts</p>
         </div>
       </Card>
     );
@@ -368,7 +367,7 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
                     variant="outline"
                     className="text-[10px] border-border/30 text-foreground"
                   >
-                    {(formatVolume || defaultFormatVolume)(totalVolume)} views
+                    {formatVolume ? formatVolume(totalVolume) : totalVolume.toLocaleString()} upvotes
                   </Badge>
                 </div>
               )}
@@ -391,7 +390,7 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
                     {filteredTrends
                       .reduce((sum, trend) => sum + (trend.tweet_volume || 0), 0)
                       .toLocaleString()}{" "}
-                    views
+                    upvotes
                   </Badge>
                 </div>
               )}
@@ -419,21 +418,17 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
               width={0}
               height={0}
             >
-              {(rects) =>
-                rects.map((rect, index) => {
-                  const isTop3 = top3Rankings.has(rect.data.trend.id);
-                  const top3Rank = top3Rankings.get(rect.data.trend.id);
+              {(rects: TreemapRect[]) =>
+                rects.map((rect: TreemapRect, index: number) => {
+                  const trendData = filteredTrends[index];
+                  const top3Rank = top3Rankings.get(trendData.id);
+                  const isTop3 = top3Rank !== undefined;
 
                   return (
-                    <TikTokTrendCard
-                      key={`${rect.data.trend.id}-${index}`}
-                      trend={rect.data.trend}
-                      size={{
-                        width: rect.width,
-                        height: rect.height,
-                        x: rect.x,
-                        y: rect.y,
-                      }}
+                    <RedditTrendCard
+                      key={trendData.id}
+                      trend={trendData}
+                      size={rect}
                       isTop3={isTop3}
                       top3Rank={top3Rank}
                       onTrendClick={handleTrendClick}
@@ -473,7 +468,7 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
       </Card>
 
       {/* Dialog Component */}
-      <TikTokDetailsDialog
+      <RedditDetailsDialog
         trend={selectedTrend}
         isOpen={isDialogOpen}
         onClose={() => {
@@ -485,4 +480,4 @@ const TikTokTreemap: React.FC<TikTokTreemapProps> = ({
   );
 };
 
-export default TikTokTreemap;
+export default RedditTreemap;

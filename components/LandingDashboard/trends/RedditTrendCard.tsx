@@ -1,10 +1,9 @@
 import React from "react";
-import { TrendWithStats } from "@/types/trends";
-import { formatTweetVolume } from "@/lib/utils/mockData";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, BarChart3, MessageSquare } from "lucide-react";
+import { TrendWithStats } from "@/types/trends";
 
-interface XTrendCardProps {
+interface RedditTrendCardProps {
   trend: TrendWithStats;
   size: {
     width: number;
@@ -18,7 +17,14 @@ interface XTrendCardProps {
   onTrendClick?: (trend: TrendWithStats) => void;
 }
 
-const XTrendCard: React.FC<XTrendCardProps> = ({
+const formatTweetVolume = (volume: number | null): string => {
+  if (volume === null) return "N/A";
+  if (volume >= 1000000) return `${(volume / 1000000).toFixed(1)}M`;
+  if (volume >= 1000) return `${(volume / 1000).toFixed(1)}K`;
+  return volume.toString();
+};
+
+const RedditTrendCard: React.FC<RedditTrendCardProps> = ({
   trend,
   size,
   onClick,
@@ -61,7 +67,7 @@ const XTrendCard: React.FC<XTrendCardProps> = ({
   };
 
   const handleClick = () => {
-    console.log("XTrendCard clicked:", trend.name, trend.id);
+    console.log("RedditTrendCard clicked:", trend.name, trend.id);
 
     if (trend.id === "others") {
       if (onClick) {
@@ -94,7 +100,10 @@ const XTrendCard: React.FC<XTrendCardProps> = ({
   const fontSize = baseFontSize * rankScale;
   const padding = Math.max(3, Math.min(12, avgDimension / 20));
   const isXSmall = size.width < 60 || size.height < 40;
-  const isSmall = size.width < 100 || size.height < 60;
+
+  // Extract Reddit-specific data
+  const subreddit = (trend as TrendWithStats & { subreddit?: string }).subreddit || '';
+  const comments = (trend as TrendWithStats & { comments?: number }).comments || 0;
 
   return (
     <div
@@ -142,9 +151,9 @@ const XTrendCard: React.FC<XTrendCardProps> = ({
       title={
         trend.id === "others"
           ? "Click to view more trends"
-          : `${trend.name} - Rank #${trend.rank} - ${formatTweetVolume(
+          : `${trend.name} - ${subreddit} - Rank #${trend.rank} - ${formatTweetVolume(
               trend.tweet_volume
-            )} tweets${
+            )} upvotes${
               trend.volume_change_24h !== undefined
                 ? ` (${
                     trend.volume_change_24h > 0 ? "+" : ""
@@ -186,15 +195,17 @@ const XTrendCard: React.FC<XTrendCardProps> = ({
         <div className="flex items-start justify-between relative z-10 min-h-0">
           {trend.id !== "others" && (
             <div className="flex-1 min-w-0 overflow-hidden">
-              <h3
-                className="font-bold text-white leading-tight group-hover:text-yellow-200 transition-colors line-clamp-2 group-hover:line-clamp-none"
-                style={{
-                  textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                  fontSize: `${fontSize * 1}px`,
-                }}
-              >
-                {trend.name}
-              </h3>
+              <div className="flex items-center gap-1 mb-0.5">
+                {getTrendIcon()}
+                {!isXSmall && subreddit && (
+                  <span
+                    className="text-white/80 font-medium truncate"
+                    style={{ fontSize: `${fontSize * 0.5}px` }}
+                  >
+                    {subreddit}
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -230,48 +241,47 @@ const XTrendCard: React.FC<XTrendCardProps> = ({
         <div className="flex-1 flex flex-col justify-center relative z-10 min-h-0">
           <div className={`${isXSmall ? "space-y-0" : "space-y-0.5"}`}>
             {trend.id === "others" ? (
-              <div className="text-center flex items-center justify-center h-full">
-                <div
-                  className="font-bold text-white leading-tight"
-                  style={{
-                    textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                    fontSize: `${fontSize}px`,
-                  }}
+              <div className="text-center">
+                <p
+                  className="text-white/90 font-bold leading-tight"
+                  style={{ fontSize: `${fontSize * 1.2}px` }}
                 >
-                  Others
-                </div>
+                  +{trend.tweet_volume || 0}
+                </p>
+                <p
+                  className="text-white/70 leading-tight mt-1"
+                  style={{ fontSize: `${fontSize * 0.8}px` }}
+                >
+                  More Trends
+                </p>
               </div>
             ) : (
               <>
-                <div
-                  className="font-bold text-white leading-tight"
-                  style={{
-                    textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                    fontSize: `${fontSize * 0.9}px`,
-                  }}
+                <h3
+                  className="text-white font-bold leading-tight line-clamp-2 group-hover:line-clamp-none transition-all"
+                  style={{ fontSize: `${fontSize}px` }}
                 >
-                  {formatTweetVolume(trend.tweet_volume)}
-                </div>
-
+                  {trend.name}
+                </h3>
                 {!isXSmall && (
-                  <div
-                    className="text-white/70 leading-tight"
-                    style={{
-                      fontSize: `${fontSize * 0.65}px`,
-                    }}
-                  >
-                    tweets
-                  </div>
-                )}
-
-                {!isSmall && trend.percentage > 0 && (
-                  <div
-                    className="text-white/60 font-medium leading-tight"
-                    style={{
-                      fontSize: `${fontSize * 0.6}px`,
-                    }}
-                  >
-                    {trend.percentage.toFixed(1)}%
+                  <div className="flex items-center gap-2 mt-1">
+                    <p
+                      className="text-white/90 font-semibold"
+                      style={{ fontSize: `${fontSize * 0.7}px` }}
+                    >
+                      ↑ {formatTweetVolume(trend.tweet_volume)}
+                    </p>
+                    {comments > 0 && (
+                      <div className="flex items-center gap-0.5 text-white/70">
+                        <MessageSquare
+                          className="w-2.5 h-2.5"
+                          style={{ fontSize: `${fontSize * 0.6}px` }}
+                        />
+                        <span style={{ fontSize: `${fontSize * 0.6}px` }}>
+                          {formatTweetVolume(comments)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </>
@@ -284,20 +294,23 @@ const XTrendCard: React.FC<XTrendCardProps> = ({
           trend.id !== "others" && (
             <div className="relative z-10">
               <div
-                className={`font-bold flex items-center leading-tight ${
+                className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded ${
                   trend.volume_change_24h > 0
-                    ? "text-green-300"
+                    ? "bg-green-500/30 text-green-100"
                     : trend.volume_change_24h < 0
-                    ? "text-red-300"
-                    : "text-white/70"
-                }`}
-                style={{
-                  textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                  fontSize: `${fontSize * 0.7}px`,
-                }}
+                    ? "bg-red-500/30 text-red-100"
+                    : "bg-gray-500/30 text-gray-100"
+                } backdrop-blur-sm`}
+                style={{ fontSize: `${fontSize * 0.65}px` }}
               >
-                {!isSmall && <span className="mr-0.5">{getTrendIcon()}</span>}
-                <span>
+                {trend.volume_change_24h > 0 ? (
+                  <TrendingUp className="w-2 h-2" />
+                ) : trend.volume_change_24h < 0 ? (
+                  <TrendingDown className="w-2 h-2" />
+                ) : (
+                  <BarChart3 className="w-2 h-2" />
+                )}
+                <span className="font-bold">
                   {trend.volume_change_24h > 0 ? "+" : ""}
                   {trend.volume_change_24h.toFixed(1)}%
                 </span>
@@ -309,4 +322,4 @@ const XTrendCard: React.FC<XTrendCardProps> = ({
   );
 };
 
-export default XTrendCard;
+export default RedditTrendCard;

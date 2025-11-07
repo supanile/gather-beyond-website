@@ -1,4 +1,4 @@
-export type SocialPlatform = 'google' | 'tiktok' | 'x' | 'gather';
+export type SocialPlatform = 'google' | 'tiktok' | 'x' | 'reddit' | 'gather';
 
 export interface BaseTrend {
   id: string;
@@ -63,7 +63,21 @@ export interface GatherTrend extends BaseTrend {
   events_count: number;
 }
 
-export type SocialTrend = GoogleTrend | TikTokTrend | XTrend | GatherTrend;
+export interface RedditTrend extends BaseTrend {
+  platform: 'reddit';
+  title: string;
+  postUrl: string;
+  upvotes: number;
+  comments: number;
+  subreddit: string;
+  subredditUrl: string;
+  subredditType: string;
+  author: string;
+  authorProfile: string;
+  postTime: string;
+}
+
+export type SocialTrend = GoogleTrend | TikTokTrend | XTrend | GatherTrend | RedditTrend;
 
 export interface SocialTrendsData {
   platform: SocialPlatform;
@@ -83,6 +97,7 @@ export interface SocialTrendsState {
   tiktok: SocialTrendsData | null;
   x: SocialTrendsData | null;
   gather: SocialTrendsData | null;
+  reddit: SocialTrendsData | null;
   loading: boolean;
   error: string | null;
 }

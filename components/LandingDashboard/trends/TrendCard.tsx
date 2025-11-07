@@ -97,7 +97,6 @@ const TrendCard: React.FC<TrendCardProps> = ({
   const padding = Math.max(3, Math.min(12, avgDimension / 20));
   const isXSmall = size.width < 60 || size.height < 40;
   const isSmall = size.width < 100 || size.height < 60;
-  const isMedium = size.width < 140 || size.height < 80;
 
   return (
     <div
@@ -190,36 +189,13 @@ const TrendCard: React.FC<TrendCardProps> = ({
           {trend.id !== "others" && (
             <div className="flex-1 min-w-0 overflow-hidden">
               <h3
-                className={`font-bold text-white leading-tight group-hover:text-yellow-200 transition-colors flex-1`}
+                className="font-bold text-white leading-tight group-hover:text-yellow-200 transition-colors line-clamp-2 group-hover:line-clamp-none"
                 style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: isXSmall ? 1 : isMedium ? 2 : 3,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
                   textShadow: "0 1px 2px rgba(0,0,0,0.5)",
                   fontSize: `${fontSize * 1}px`,
                 }}
               >
-                {(() => {
-                  // คำนวณจำนวนตัวอักษรที่แสดงได้ตามขนาดพื้นที่
-                  let maxChars = 6; // ค่าเริ่มต้น
-                  
-                  if (!isXSmall && !isSmall) {
-                    // พื้นที่ใหญ่ - แสดงได้มากขึ้น
-                    maxChars = Math.min(9, Math.floor(size.width / (fontSize * 0.6)));
-                  } else if (!isXSmall) {
-                    // พื้นที่ปานกลาง
-                    maxChars = Math.min(6, Math.floor(size.width / (fontSize * 0.7)));
-                  } else {
-                    // พื้นที่เล็ก - ใช้ค่าเริ่มต้น
-                    maxChars = 6;
-                  }
-                  
-                  return trend.name.length > maxChars
-                    ? `${trend.name.substring(0, maxChars)}...`
-                    : trend.name;
-                })()}
+                {trend.name}
               </h3>
             </div>
           )}
