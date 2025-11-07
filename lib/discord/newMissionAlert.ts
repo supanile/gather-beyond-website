@@ -38,6 +38,7 @@ export async function sendPublishedMissionAlert(missionData: {
 }): Promise<void> {
     try {
         const PUBLISHED_MISSION_CHANNEL_ID = '1432926699313434634';
+        const MISSIONS_ALERT_IMAGE_URL = 'https://i.ibb.co/kghVrjvc/super-connector.png';
         
         const timeRemaining = getDiscordTimestamp(missionData.duration);
         
@@ -72,7 +73,7 @@ export async function sendPublishedMissionAlert(missionData: {
                     title: "🚨 New Mission Published!",
                     description: fullDescription,
                     image: {
-                        url: 'https://i.ibb.co/kghVrjvc/super-connector.png',
+                        url: MISSIONS_ALERT_IMAGE_URL,
                     },
                     color: 0x5865F2,
                     timestamp: new Date().toISOString(),
