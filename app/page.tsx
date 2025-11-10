@@ -7,6 +7,7 @@ import { FeaturedProjects } from "@/components/LandingDashboard/FeaturedProjects
 import LiveInsightsPanel from "@/components/LandingDashboard/LiveInsightsPanel";
 import MediaFeed from "@/components/LandingDashboard/MediaFeed";
 import ProjectsTable from "@/components/LandingDashboard/ProjectsTable";
+import SocialMediaTrends from "@/components/LandingDashboard/SocialMediaTrends";
 import { allProjects as projects, featuredProjects, Project } from "@/data/admin/projectMockData";
 
 const Dashboard: React.FC = () => {
@@ -49,6 +50,7 @@ const Dashboard: React.FC = () => {
         onFilterSelect={handleFilterSelect}
         selectedFilter={selectedFilter}
       />
+      <SocialMediaTrends />
       <FeaturedProjects 
         projects={searchTerm || selectedFilter ? filteredProjects.slice(0, 6) : featuredProjects}
       />
