@@ -69,12 +69,11 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
   };
 
   return (
-    <section className={`py-8 sm:py-12 lg:py-16 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className={`py-6 sm:py-8 lg:py-12 xl:py-16 ${className}`}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
         {/* Section Title */}
-        <div className="mb-6 sm:mb-8">
-          <h2 className="flex items-center text-2xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text">
-            {/* <XIcon className="w-7 h-7 mr-2" /> */}
+        <div className="mb-4 sm:mb-6 lg:mb-8">
+          <h2 className="flex items-center text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text">
             Social Media Trends
           </h2>
         </div>
@@ -85,90 +84,89 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
           onValueChange={(value) => setActiveTab(value as SocialPlatform)}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-5 mb-8 h-auto sm:h-auto bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 gap-2">
+          <TabsList className="flex flex-wrap sm:grid sm:grid-cols-3 md:grid-cols-5 w-full mb-6 sm:mb-8 h-auto bg-white dark:bg-gray-800 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 gap-1 sm:gap-2">
             <TabsTrigger
               value="google"
-              className="flex flex-row items-center justify-center gap-2.5 cursor-pointer px-4 py-3.5 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-50 data-[state=active]:to-indigo-50 dark:data-[state=active]:from-blue-900/30 dark:data-[state=active]:to-indigo-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-blue-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
+              className="flex flex-row items-center justify-center gap-1.5 sm:gap-2.5 cursor-pointer px-2 sm:px-4 py-2 sm:py-3.5 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-50 data-[state=active]:to-indigo-50 dark:data-[state=active]:from-blue-900/30 dark:data-[state=active]:to-indigo-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-blue-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
             >
-              <GoogleTrendsIcon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
+              <GoogleTrendsIcon className="w-4 h-4 sm:w-4 sm:h-4 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
               <div className="flex flex-col items-start min-w-0">
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-blue-700 dark:group-data-[state=active]:text-blue-300 truncate">
+                <span className="text-[11px] sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-blue-700 dark:group-data-[state=active]:text-blue-300 truncate">
                   Google
                 </span>
-                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-blue-600 dark:group-data-[state=active]:text-blue-400 truncate">
+                <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-blue-600 dark:group-data-[state=active]:text-blue-400 truncate">
                   Trends
                 </span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="tiktok"
-              className="flex flex-row items-center justify-center gap-2.5 cursor-pointer px-4 py-3.5 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-50 data-[state=active]:to-cyan-50 dark:data-[state=active]:from-pink-900/30 dark:data-[state=active]:to-cyan-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-pink-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
+              className="flex flex-row items-center justify-center gap-1.5 sm:gap-2.5 cursor-pointer px-2 sm:px-4 py-2 sm:py-3.5 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-50 data-[state=active]:to-cyan-50 dark:data-[state=active]:from-pink-900/30 dark:data-[state=active]:to-cyan-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-pink-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
             >
-              <TikTokIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
+              <TikTokIcon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
               <div className="flex flex-col items-start min-w-0">
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-pink-700 dark:group-data-[state=active]:text-pink-300 truncate">
+                <span className="text-[11px] sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-pink-700 dark:group-data-[state=active]:text-pink-300 truncate">
                   TikTok
                 </span>
-                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-pink-600 dark:group-data-[state=active]:text-pink-400 truncate">
+                <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-pink-600 dark:group-data-[state=active]:text-pink-400 truncate">
                   Trends
                 </span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="x"
-              className="flex flex-row items-center justify-center gap-2.5 cursor-pointer px-4 py-3.5 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-gray-50 data-[state=active]:to-slate-50 dark:data-[state=active]:from-gray-700/50 dark:data-[state=active]:to-slate-700/50 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-gray-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
+              className="flex flex-row items-center justify-center gap-1.5 sm:gap-2.5 cursor-pointer px-2 sm:px-4 py-2 sm:py-3.5 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-gray-50 data-[state=active]:to-slate-50 dark:data-[state=active]:from-gray-700/50 dark:data-[state=active]:to-slate-700/50 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-gray-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
             >
-              <XIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
+              <XIcon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
               <div className="flex flex-col items-start min-w-0">
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-gray-900 dark:group-data-[state=active]:text-white truncate">
+                <span className="text-[11px] sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-gray-900 dark:group-data-[state=active]:text-white truncate">
                   X
                 </span>
-                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-gray-700 dark:group-data-[state=active]:text-gray-300 truncate">
+                <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-gray-700 dark:group-data-[state=active]:text-gray-300 truncate">
                   Trends
                 </span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="reddit"
-              className="flex flex-row items-center justify-center gap-2.5 cursor-pointer px-4 py-3.5 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-50 data-[state=active]:to-red-50 dark:data-[state=active]:from-orange-900/30 dark:data-[state=active]:to-red-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-orange-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
+              className="flex flex-row items-center justify-center gap-1.5 sm:gap-2.5 cursor-pointer px-2 sm:px-4 py-2 sm:py-3.5 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-50 data-[state=active]:to-red-50 dark:data-[state=active]:from-orange-900/30 dark:data-[state=active]:to-red-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-orange-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
             >
-              <RedditIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
+              <RedditIcon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
               <div className="flex flex-col items-start min-w-0">
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-orange-700 dark:group-data-[state=active]:text-orange-300 truncate">
+                <span className="text-[11px] sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-orange-700 dark:group-data-[state=active]:text-orange-300 truncate">
                   Reddit
                 </span>
-                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-orange-600 dark:group-data-[state=active]:text-orange-400 truncate">
+                <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-orange-600 dark:group-data-[state=active]:text-orange-400 truncate">
                   Trends
                 </span>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="gather"
-              className="flex flex-row items-center justify-center gap-2.5 cursor-pointer px-4 py-3.5 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-50 data-[state=active]:to-violet-50 dark:data-[state=active]:from-purple-900/30 dark:data-[state=active]:to-violet-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-purple-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
+              className="flex flex-row items-center justify-center gap-1.5 sm:gap-2.5 cursor-pointer px-2 sm:px-4 py-2 sm:py-3.5 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-50 data-[state=active]:to-violet-50 dark:data-[state=active]:from-purple-900/30 dark:data-[state=active]:to-violet-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-purple-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
             >
-              <GatherIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
+              <GatherIcon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
               <div className="flex flex-col items-start min-w-0">
-                <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-purple-700 dark:group-data-[state=active]:text-purple-300 truncate">
+                <span className="text-[11px] sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-purple-700 dark:group-data-[state=active]:text-purple-300 truncate">
                   Gather
                 </span>
-                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-purple-600 dark:group-data-[state=active]:text-purple-400 truncate">
+                <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-purple-600 dark:group-data-[state=active]:text-purple-400 truncate">
                   Trends
                 </span>
               </div>
             </TabsTrigger>
           </TabsList>
 
-          {/* Google Trends Tab Content - Keep the existing treemap for Google */}
+          {/* Google Trends Tab Content */}
           <TabsContent value="google" className="mt-0">
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Treemap - Takes up 3 columns on xl screens */}
-              <div className="xl:col-span-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="lg:col-span-2 xl:col-span-3">
                 <TrendTreemap
                   trends={
                     data?.trends.map((trend, index) => ({
                       ...trend,
                       id: `trend-${index}`,
-                      volume_change_24h: Math.random() * 100 - 50, // Mock data
+                      volume_change_24h: Math.random() * 100 - 50,
                       volume_change_7d: Math.random() * 200 - 100,
                       volume_change_30d: Math.random() * 300 - 150,
                       momentum_score: Math.random() * 100 - 50,
@@ -185,12 +183,11 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                           : (trend.tweet_volume || 0) > 0
                           ? ("low" as const)
                           : ("null" as const),
-                      historical_data: [], // Will be populated by mock data
+                      historical_data: [],
                     })) || []
                   }
                   loading={loading}
                   error={error}
-                  // Live Dashboard props
                   timeRange={timeRange}
                   location={location}
                   lastUpdated={lastUpdated}
@@ -205,16 +202,12 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                 />
               </div>
 
-              {/* Sidebar - Takes up 1 column on xl screens */}
-              <div className="xl:col-span-1 space-y-4">
-                {/* Rising Trends */}
+              <div className="lg:col-span-1 xl:col-span-1 space-y-4">
                 <TrendsList
                   title="Rising Trends"
                   trends={metrics?.top_gainers || []}
                   type="gainers"
                 />
-
-                {/* Falling Trends */}
                 <TrendsList
                   title="Falling Trends"
                   trends={metrics?.top_losers || []}
@@ -226,9 +219,8 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
 
           {/* TikTok Trends Tab */}
           <TabsContent value="tiktok" className="mt-0">
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Treemap - Takes up 3 columns on xl screens */}
-              <div className="xl:col-span-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="lg:col-span-2 xl:col-span-3">
                 <TikTokTreemap
                   trends={
                     (tiktok?.trends?.filter(
@@ -250,9 +242,7 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                 />
               </div>
 
-              {/* Sidebar - Takes up 1 column on xl screens */}
-              <div className="xl:col-span-1 space-y-4">
-                {/* Rising Trends */}
+              <div className="lg:col-span-1 xl:col-span-1 space-y-4">
                 <TrendsList
                   title="Rising Trends"
                   trends={
@@ -275,8 +265,6 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                   }
                   type="gainers"
                 />
-
-                {/* Falling Trends */}
                 <TrendsList
                   title="Falling Trends"
                   trends={
@@ -305,9 +293,8 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
 
           {/* X Trends Tab */}
           <TabsContent value="x" className="mt-0">
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Treemap - Takes up 3 columns on xl screens */}
-              <div className="xl:col-span-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="lg:col-span-2 xl:col-span-3">
                 <XTreemap
                   trends={
                     (x?.trends?.filter(
@@ -329,9 +316,7 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                 />
               </div>
 
-              {/* Sidebar - Takes up 1 column on xl screens */}
-              <div className="xl:col-span-1 space-y-4">
-                {/* Rising Trends */}
+              <div className="lg:col-span-1 xl:col-span-1 space-y-4">
                 <TrendsList
                   title="Rising Trends"
                   trends={
@@ -350,14 +335,12 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                             )}`,
                           query: xTrend.topic || trend.name,
                           promoted_content: null,
-                          tweet_volume: trend.volume, // Use the numeric volume value
+                          tweet_volume: trend.volume,
                         };
                       }) || []
                   }
                   type="gainers"
                 />
-
-                {/* Falling Trends */}
                 <TrendsList
                   title="Falling Trends"
                   trends={
@@ -376,7 +359,7 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                             )}`,
                           query: xTrend.topic || trend.name,
                           promoted_content: null,
-                          tweet_volume: trend.volume, // Use the numeric volume value
+                          tweet_volume: trend.volume,
                         };
                       }) || []
                   }
@@ -388,8 +371,8 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
 
           {/* Reddit Trends Tab */}
           <TabsContent value="reddit" className="mt-0">
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              <div className="xl:col-span-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="lg:col-span-2 xl:col-span-3">
                 <RedditTreemap
                   trends={
                     reddit?.trends?.filter((t) => t.platform === "reddit") || []
@@ -409,7 +392,7 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                 />
               </div>
 
-              <div className="xl:col-span-1 space-y-4">
+              <div className="lg:col-span-1 xl:col-span-1 space-y-4">
                 <TrendsList
                   title="Rising Trends"
                   trends={
@@ -427,7 +410,6 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                   }
                   type="gainers"
                 />
-
                 <TrendsList
                   title="Falling Trends"
                   trends={
