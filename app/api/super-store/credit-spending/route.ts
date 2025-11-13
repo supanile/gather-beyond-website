@@ -4,6 +4,7 @@ import { grist } from "@/lib/grist";
 interface CreditSpending {
   user_id: string;
   username: string;
+  avatar_url?: string;
   email: string;
   total_credits_spent: number;
   tier: "bronze" | "silver" | "gold" | "platinum" | "diamond";
@@ -35,14 +36,20 @@ export async function GET() {
           trust_score: Number(record.trust_score) || 0,
           email: String(record.email || ""),
         },
-      ])
+      ]),
     );
 
-    const discordMap = new Map<string, string>(
+    const discordMap = new Map<
+      string,
+      { username: string; avatar_url?: string }
+    >(
       discordUsers.map((record: Record<string, unknown>) => [
         String(record.discord_id || ""),
-        String(record.username || ""),
-      ])
+        {
+          username: String(record.username || ""),
+          avatar_url: record.avatarUrl ? String(record.avatarUrl) : undefined,
+        },
+      ]),
     );
 
     // จัดกลุ่มข้อมูลการซื้อตาม user_id
@@ -70,8 +77,11 @@ export async function GET() {
 
     // แปลง trust_score เป็น tier
     const getTierFromTrustScore = (
-      trustScore: number
-    ): { tier: "bronze" | "silver" | "gold" | "platinum" | "diamond"; tier_level: number } => {
+      trustScore: number,
+    ): {
+      tier: "bronze" | "silver" | "gold" | "platinum" | "diamond";
+      tier_level: number;
+    } => {
       if (trustScore < 1.0) {
         return { tier: "bronze", tier_level: 1 };
       } else if (trustScore < 2.5) {
@@ -94,21 +104,24 @@ export async function GET() {
 
     // สร้าง CreditSpending objects
     const creditSpendingList: CreditSpending[] = Array.from(
-      userSpending.entries()
+      userSpending.entries(),
     ).map(([userId, data]) => {
       const userAgent = userAgentMap.get(userId);
-      const username = discordMap.get(userId) || "Unknown";
+      const discordUser = discordMap.get(userId);
+      const username = discordUser?.username || "Unknown";
+      const avatar_url = discordUser?.avatar_url;
       const trustScore = userAgent?.trust_score || 0;
       const { tier, tier_level } = getTierFromTrustScore(trustScore);
 
       // เรียงวันที่และหาวันซื้อล่าสุด
       const sortedPurchases = data.purchases.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
 
       return {
         user_id: userId,
         username,
+        avatar_url,
         email: userAgent?.email || "",
         total_credits_spent: Math.round(data.total_spent),
         tier,
@@ -124,7 +137,7 @@ export async function GET() {
 
     // เรียงตาม total_credits_spent จากมากไปน้อย
     creditSpendingList.sort(
-      (a, b) => b.total_credits_spent - a.total_credits_spent
+      (a, b) => b.total_credits_spent - a.total_credits_spent,
     );
 
     return NextResponse.json(creditSpendingList);
@@ -132,7 +145,7 @@ export async function GET() {
     console.error("Error fetching credit spending:", error);
     return NextResponse.json(
       { error: "Failed to fetch credit spending data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
