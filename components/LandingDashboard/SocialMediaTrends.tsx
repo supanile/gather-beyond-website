@@ -36,7 +36,7 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
   const [location, setLocation] =
     useState<LocationFilterType>(DEFAULT_LOCATION);
   const [language] = useState<LanguageFilter>("all");
-  const [activeTab, setActiveTab] = useState<SocialPlatform>("google");
+  const [activeTab, setActiveTab] = useState<SocialPlatform>("gather");
 
   // Keep existing Google Trends hook for treemap
   const { data, metrics, loading, error, refetch } = useTrends({
@@ -74,7 +74,7 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
         {/* Section Title */}
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <h2 className="flex items-center text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text">
-            Social Media Trends
+            Gather Trends
           </h2>
         </div>
 
@@ -85,6 +85,20 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
           className="w-full"
         >
           <TabsList className="flex flex-wrap sm:grid sm:grid-cols-3 md:grid-cols-5 w-full mb-6 sm:mb-8 h-auto bg-white dark:bg-gray-800 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 gap-1 sm:gap-2">
+            <TabsTrigger
+              value="gather"
+              className="flex flex-row items-center justify-center gap-1.5 sm:gap-2.5 cursor-pointer px-2 sm:px-4 py-2 sm:py-3.5 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-50 data-[state=active]:to-violet-50 dark:data-[state=active]:from-purple-900/30 dark:data-[state=active]:to-violet-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-purple-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
+            >
+              <GatherIcon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
+              <div className="flex flex-col items-start min-w-0">
+                <span className="text-[11px] sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-purple-700 dark:group-data-[state=active]:text-purple-300 truncate">
+                  Gather
+                </span>
+                <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-purple-600 dark:group-data-[state=active]:text-purple-400 truncate">
+                  Trends
+                </span>
+              </div>
+            </TabsTrigger>
             <TabsTrigger
               value="google"
               className="flex flex-row items-center justify-center gap-1.5 sm:gap-2.5 cursor-pointer px-2 sm:px-4 py-2 sm:py-3.5 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-50 data-[state=active]:to-indigo-50 dark:data-[state=active]:from-blue-900/30 dark:data-[state=active]:to-indigo-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-blue-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
@@ -137,20 +151,6 @@ const SocialMediaTrends: React.FC<SocialMediaTrendsProps> = ({
                   Reddit
                 </span>
                 <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-orange-600 dark:group-data-[state=active]:text-orange-400 truncate">
-                  Trends
-                </span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger
-              value="gather"
-              className="flex flex-row items-center justify-center gap-1.5 sm:gap-2.5 cursor-pointer px-2 sm:px-4 py-2 sm:py-3.5 rounded-lg sm:rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-50 data-[state=active]:to-violet-50 dark:data-[state=active]:from-purple-900/30 dark:data-[state=active]:to-violet-900/30 data-[state=active]:shadow-md data-[state=active]:ring-2 data-[state=active]:ring-purple-500/20 hover:bg-gray-50 dark:hover:bg-gray-700/50 group"
-            >
-              <GatherIcon className="w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0 transition-transform group-data-[state=active]:scale-110" />
-              <div className="flex flex-col items-start min-w-0">
-                <span className="text-[11px] sm:text-sm font-semibold text-gray-700 dark:text-gray-300 group-data-[state=active]:text-purple-700 dark:group-data-[state=active]:text-purple-300 truncate">
-                  Gather
-                </span>
-                <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 group-data-[state=active]:text-purple-600 dark:group-data-[state=active]:text-purple-400 truncate">
                   Trends
                 </span>
               </div>
