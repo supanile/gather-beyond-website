@@ -121,7 +121,7 @@ export async function GET() {
             user_id: userId,
             username,
             email: userAgent?.email || "",
-            competition_name: `Monthly Gacha ${monthKey}`,
+            competition_name: `Super Store Summary ${monthKey}`,
             competition_type: "monthly",
             prize_title: String(record.won_prize || "Mystery Prize"),
             prize_value: Number(record.price_paid) || 0,
@@ -130,7 +130,7 @@ export async function GET() {
             xp_earned: Math.floor((Number(record.price_paid) || 0) * 0.1),
             badge_earned: undefined,
             rank_achieved: 1,
-            total_participants: 0, // จะคำนวณทีหลัง
+            total_participants: 0,
           },
         };
       });
@@ -178,7 +178,7 @@ export async function GET() {
 
         return {
           _id: `campaign-${monthKey}`,
-          campaign_name: `Monthly Gacha Campaign ${monthKey}`,
+          campaign_name: `Super Store Summary ${monthKey}`,
           campaign_type: campaignType,
           start_date: data.start_date.toISOString(),
           end_date: data.end_date.toISOString(),
