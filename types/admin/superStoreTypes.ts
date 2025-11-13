@@ -15,6 +15,7 @@ export interface Claimer {
 export interface CreditSpending {
   user_id: string;
   username: string;
+  avatar_url?: string;
   email: string;
   total_credits_spent: number;
   tier: "bronze" | "silver" | "gold" | "platinum" | "diamond";
@@ -27,6 +28,7 @@ export interface CreditSpending {
 export interface Winner {
   _id: string;
   user_id: string;
+  avatar_url?: string;
   username: string;
   email: string;
   competition_name: string;

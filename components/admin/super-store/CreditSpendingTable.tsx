@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -334,6 +334,10 @@ const CreditSpendingTable = () => {
                   {/* User Info */}
                   <div className="flex items-center gap-3 flex-1">
                     <Avatar className="h-12 w-12">
+                      <AvatarImage 
+                        src={spending.avatar_url} 
+                        alt={spending.username}
+                      />
                       <AvatarFallback>
                         {spending.username.slice(0, 2).toUpperCase()}
                       </AvatarFallback>

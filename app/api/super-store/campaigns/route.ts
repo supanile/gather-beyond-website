@@ -4,6 +4,7 @@ import { grist } from "@/lib/grist";
 interface Winner {
   _id: string;
   user_id: string;
+  avatar_url?: string;
   username: string;
   email: string;
   competition_name: string;
@@ -53,14 +54,22 @@ export async function GET() {
           xp: Number(record.xp) || 0,
           email: String(record.email || ""),
         },
-      ])
+      ]),
     );
 
-    const discordMap = new Map<string, string>(
+    const discordMap = new Map<
+      string,
+      { username: string; avatar_url?: string }
+    >(
       discordUsers.map((record: Record<string, unknown>) => [
         String(record.discord_id || ""),
-        String(record.username || ""),
-      ])
+        {
+          username: String(record.username || ""),
+          avatar_url: record.avatarUrl
+            ? String(record.avatarUrl || "")
+            : undefined,
+        },
+      ]),
     );
 
     // จัดกลุ่มข้อมูลตามเดือน (ใช้เป็น campaign)
@@ -86,7 +95,14 @@ export async function GET() {
       if (!campaignsMap.has(monthKey)) {
         // สร้าง start และ end date ของเดือน
         const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-        const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59);
+        const endDate = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0,
+          23,
+          59,
+          59,
+        );
 
         campaignsMap.set(monthKey, {
           participants: new Set(),
@@ -112,14 +128,15 @@ export async function GET() {
 
         const userId = String(record.discord_id || "");
         const userAgent = userAgentMap.get(userId);
-        const username = discordMap.get(userId) || "Unknown";
+        const discordUser = discordMap.get(userId);
 
         return {
           monthKey,
           winner: {
             _id: String(record.id || ""),
             user_id: userId,
-            username,
+            avatar_url: discordUser?.avatar_url,
+            username: discordUser?.username || "Unknown",
             email: userAgent?.email || "",
             competition_name: `Super Store Summary ${monthKey}`,
             competition_type: "monthly",
@@ -136,13 +153,11 @@ export async function GET() {
       });
 
     // เพิ่มผู้ชนะเข้า campaigns
-    winnersData.forEach(
-      ({ monthKey, winner }) => {
-        if (campaignsMap.has(monthKey)) {
-          campaignsMap.get(monthKey)!.winners.push(winner);
-        }
+    winnersData.forEach(({ monthKey, winner }) => {
+      if (campaignsMap.has(monthKey)) {
+        campaignsMap.get(monthKey)!.winners.push(winner);
       }
-    );
+    });
 
     // สร้าง Campaign objects
     const campaigns: Campaign[] = Array.from(campaignsMap.entries()).map(
@@ -165,12 +180,13 @@ export async function GET() {
         // คำนวณมูลค่ารางวัลรวม
         const totalPrizeValue = data.winners.reduce(
           (sum, winner) => sum + winner.prize_value,
-          0
+          0,
         );
 
         // กำหนดประเภท campaign
         const month = parseInt(monthKey.split("-")[1]);
-        let campaignType: "weekly" | "monthly" | "seasonal" | "special" = "monthly";
+        let campaignType: "weekly" | "monthly" | "seasonal" | "special" =
+          "monthly";
 
         if ([3, 6, 9, 12].includes(month)) {
           campaignType = "seasonal";
@@ -188,13 +204,13 @@ export async function GET() {
           status,
           winners: data.winners,
         };
-      }
+      },
     );
 
     // เรียงตามวันที่ล่าสุดก่อน
     campaigns.sort(
       (a, b) =>
-        new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
+        new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
     );
 
     return NextResponse.json(campaigns);
@@ -202,7 +218,7 @@ export async function GET() {
     console.error("Error fetching campaigns:", error);
     return NextResponse.json(
       { error: "Failed to fetch campaigns data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
