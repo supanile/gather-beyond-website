@@ -6,32 +6,32 @@ import { useState } from "react";
 import { useTheme } from "next-themes";
 import { ModeToggle } from "./Darkmode";
 import SignOutLinks from "./SignOutLinks";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+// import {
+//   NavigationMenu,
+//   NavigationMenuContent,
+//   NavigationMenuItem,
+//   NavigationMenuLink,
+//   NavigationMenuList,
+//   NavigationMenuTrigger,
+// } from "@/components/ui/navigation-menu";
 
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 
-// Define types for props
-interface ListItemProps {
-  className?: string;
-  title: string;
-  children: React.ReactNode;
-  href: string;
-}
+// Define types for props - Commented out (not used with new navigation)
+// interface ListItemProps {
+//   className?: string;
+//   title: string;
+//   children: React.ReactNode;
+//   href: string;
+// }
 
-interface FeatureItem {
-  title: string;
-  href: string;
-  description: string;
-}
+// interface FeatureItem {
+//   title: string;
+//   href: string;
+//   description: string;
+// }
 
 
 
@@ -43,51 +43,51 @@ const Header: React.FC = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const features: FeatureItem[] = [
-    {
-      title: "Event Management",
-      href: "/features/events",
-      description: "Create and manage events with ease",
-    },
-    {
-      title: "Community Building",
-      href: "/features/community",
-      description: "Build and grow your community",
-    },
-    {
-      title: "Analytics",
-      href: "/features/analytics",
-      description: "Track engagement and growth",
-    },
-    {
-      title: "Integrations",
-      href: "/features/integrations",
-      description: "Connect with your favorite tools",
-    },
-  ];
+  // const features: FeatureItem[] = [
+  //   {
+  //     title: "Event Management",
+  //     href: "/features/events",
+  //     description: "Create and manage events with ease",
+  //   },
+  //   {
+  //     title: "Community Building",
+  //     href: "/features/community",
+  //     description: "Build and grow your community",
+  //   },
+  //   {
+  //     title: "Analytics",
+  //     href: "/features/analytics",
+  //     description: "Track engagement and growth",
+  //   },
+  //   {
+  //     title: "Integrations",
+  //     href: "/features/integrations",
+  //     description: "Connect with your favorite tools",
+  //   },
+  // ];
 
-  const resources: FeatureItem[] = [
-    {
-      title: "Documentation",
-      href: "/resources/docs",
-      description: "Learn how to use our platform",
-    },
-    {
-      title: "API Reference",
-      href: "/resources/api",
-      description: "Integrate with our API",
-    },
-    {
-      title: "Help Center",
-      href: "/resources/help",
-      description: "Get support and find answers",
-    },
-    {
-      title: "Blog",
-      href: "/resources/blog",
-      description: "Latest news and updates",
-    },
-  ];
+  // const resources: FeatureItem[] = [
+  //   {
+  //     title: "Documentation",
+  //     href: "/resources/docs",
+  //     description: "Learn how to use our platform",
+  //   },
+  //   {
+  //     title: "API Reference",
+  //     href: "/resources/api",
+  //     description: "Integrate with our API",
+  //   },
+  //   {
+  //     title: "Help Center",
+  //     href: "/resources/help",
+  //     description: "Get support and find answers",
+  //   },
+  //   {
+  //     title: "Blog",
+  //     href: "/resources/blog",
+  //     description: "Latest news and updates",
+  //   },
+  // ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -119,7 +119,29 @@ const Header: React.FC = () => {
               </div>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center">
+              <nav className="hidden md:flex items-center space-x-2">
+                <Link
+                  href="/faq"
+                  className="cursor-pointer text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 font-medium bg-transparent hover:bg-accent/50 rounded-lg px-4 py-2 relative group after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-gray-600 after:to-slate-600 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  FAQ
+                </Link>
+                <Link
+                  href="/partners"
+                  className="cursor-pointer text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 font-medium bg-transparent hover:bg-accent/50 rounded-lg px-4 py-2 relative group after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-gray-600 after:to-slate-600 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  Partners
+                </Link>
+                <Link
+                  href="/contact"
+                  className="cursor-pointer text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 font-medium bg-transparent hover:bg-accent/50 rounded-lg px-4 py-2 relative group after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-gray-600 after:to-slate-600 after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  Contact Us
+                </Link>
+              </nav>
+
+              {/* Old Desktop Navigation - Commented Out */}
+              {/* <nav className="hidden md:flex items-center">
                 <NavigationMenu>
                   <NavigationMenuList>
                     <NavigationMenuItem>
@@ -170,7 +192,7 @@ const Header: React.FC = () => {
                     </NavigationMenuItem>
                   </NavigationMenuList>
                 </NavigationMenu>
-              </nav>
+              </nav> */}
 
               {/* Desktop Search & CTA */}
               <div className="hidden md:flex items-center space-x-4">
@@ -238,8 +260,30 @@ const Header: React.FC = () => {
             >
               <div className="relative bg-background/90 backdrop-blur-xl border border-border/50 rounded-2xl m-4 p-6 shadow-2xl before:absolute before:inset-0 before:bg-gradient-to-br before:from-gray-50/30 before:to-slate-50/30 dark:before:from-gray-950/30 dark:before:to-slate-950/30 before:rounded-2xl">
                 <nav className="relative space-y-6 z-10">
-                  {/* Mobile Features */}
+                  {/* Mobile Navigation Links */}
                   <div className="space-y-3">
+                    <Link
+                      href="/faq"
+                      className="cursor-pointer block p-4 text-base font-medium text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 rounded-lg hover:bg-accent/50 transform hover:scale-105"
+                    >
+                      FAQ
+                    </Link>
+                    <Link
+                      href="/partners"
+                      className="cursor-pointer block p-4 text-base font-medium text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 rounded-lg hover:bg-accent/50 transform hover:scale-105"
+                    >
+                      Partners
+                    </Link>
+                    <Link
+                      href="/contact"
+                      className="cursor-pointer block p-4 text-base font-medium text-muted-foreground hover:text-gray-800 dark:hover:text-slate-200 transition-all duration-300 rounded-lg hover:bg-accent/50 transform hover:scale-105"
+                    >
+                      Contact Us
+                    </Link>
+                  </div>
+
+                  {/* Old Mobile Navigation - Commented Out */}
+                  {/* <div className="space-y-3">
                     <h3 className="font-semibold text-lg bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text text-transparent">
                       Features
                     </h3>
@@ -255,10 +299,9 @@ const Header: React.FC = () => {
                         </Link>
                       ))}
                     </div>
-                  </div>
+                  </div> */}
 
-                  {/* Mobile Resources */}
-                  <div className="space-y-3">
+                  {/* <div className="space-y-3">
                     <h3 className="font-semibold text-lg bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text text-transparent">
                       Resources
                     </h3>
@@ -274,7 +317,7 @@ const Header: React.FC = () => {
                         </Link>
                       ))}
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="pt-6 border-t border-border/50 space-y-4">
                     {/* Mobile Authentication - Show when NOT signed in */}
@@ -318,35 +361,36 @@ const Header: React.FC = () => {
   );
 };
 
-const ListItem: React.FC<ListItemProps & { style?: React.CSSProperties }> = ({
-  className,
-  title,
-  children,
-  href,
-  style,
-  ...props
-}) => {
-  return (
-    <li style={style}>
-      <NavigationMenuLink asChild>
-        <Link
-          href={href}
-          className={cn(
-            "group block select-none space-y-2 rounded-xl p-4 leading-none no-underline outline-none transition-all duration-300 hover:bg-accent/50 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground border border-transparent hover:border-border/50 hover:shadow-lg transform hover:scale-105 relative after:absolute after:bottom-2 after:left-4 after:w-0 after:h-0.5",
-            className
-          )}
-          {...props}
-        >
-          <div className="text-sm font-semibold leading-none group-hover:text-primary transition-colors duration-300">
-            {title}
-          </div>
-          <p className="line-clamp-2 text-xs leading-snug text-muted-foreground group-hover:text-muted-foreground/80">
-            {children}
-          </p>
-        </Link>
-      </NavigationMenuLink>
-    </li>
-  );
-};
+// ListItem component - Commented out (not used with new navigation)
+// const ListItem: React.FC<ListItemProps & { style?: React.CSSProperties }> = ({
+//   className,
+//   title,
+//   children,
+//   href,
+//   style,
+//   ...props
+// }) => {
+//   return (
+//     <li style={style}>
+//       <NavigationMenuLink asChild>
+//         <Link
+//           href={href}
+//           className={cn(
+//             "group block select-none space-y-2 rounded-xl p-4 leading-none no-underline outline-none transition-all duration-300 hover:bg-accent/50 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground border border-transparent hover:border-border/50 hover:shadow-lg transform hover:scale-105 relative after:absolute after:bottom-2 after:left-4 after:w-0 after:h-0.5",
+//             className
+//           )}
+//           {...props}
+//         >
+//           <div className="text-sm font-semibold leading-none group-hover:text-primary transition-colors duration-300">
+//             {title}
+//           </div>
+//           <p className="line-clamp-2 text-xs leading-snug text-muted-foreground group-hover:text-muted-foreground/80">
+//             {children}
+//           </p>
+//         </Link>
+//       </NavigationMenuLink>
+//     </li>
+//   );
+// };
 
 export default Header;
