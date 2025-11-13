@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -538,6 +538,10 @@ const WinnersTable = () => {
                             <div className="flex items-center gap-3 flex-1">
                               {/* Avatar */}
                               <Avatar className="h-10 w-10 bg-orange-500">
+                                <AvatarImage 
+                                  src={winner.avatar_url} 
+                                  alt={winner.username !== "Unknown" ? winner.username : winner.email}
+                                />
                                 <AvatarFallback className="bg-orange-500 text-white">
                                   {winner.username !== "Unknown"
                                     ? winner.username.slice(0, 2).toUpperCase()
