@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Search } from "lucide-react";
+import React from "react";
+// import { Search } from "lucide-react";
 
 interface HeroSectionProps {
   onSearch?: (searchTerm: string) => void;
@@ -8,38 +8,38 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({
-  onSearch,
-  onFilterSelect,
-  selectedFilter = "", // Default value
+  // onSearch,
+  // onFilterSelect,
+  // selectedFilter = "", // Default value
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+  // const [searchTerm, setSearchTerm] = useState("");
 
-  const filters = [
-    "Trending Now",
-    "Highest Trust",
-    "Most Active Communities",
-    "New Projects",
-  ];
+  // const filters = [
+  //   "Trending Now",
+  //   "Highest Trust",
+  //   "Most Active Communities",
+  //   "New Projects",
+  // ];
 
-  const handleSearch = () => {
-    if (onSearch) {
-      onSearch(searchTerm);
-    }
-  };
+  // const handleSearch = () => {
+  //   if (onSearch) {
+  //     onSearch(searchTerm);
+  //   }
+  // };
 
-  const handleFilterClick = (filter: string) => {
-    if (onFilterSelect) {
-      // Toggle filter: if clicking the same filter, clear it
-      const newFilter = selectedFilter === filter ? "" : filter;
-      onFilterSelect(newFilter);
-    }
-  };
+  // const handleFilterClick = (filter: string) => {
+  //   if (onFilterSelect) {
+  //     // Toggle filter: if clicking the same filter, clear it
+  //     const newFilter = selectedFilter === filter ? "" : filter;
+  //     onFilterSelect(newFilter);
+  //   }
+  // };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
+  // const handleKeyPress = (e: React.KeyboardEvent) => {
+  //   if (e.key === 'Enter') {
+  //     handleSearch();
+  //   }
+  // };
 
   return (
     <section className="relative pt-28 md:pt-36 pb-12 sm:pb-16 overflow-hidden">
@@ -56,7 +56,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           </h1>
 
           {/* Search Bar */}
-          <div className="max-w-xl sm:max-w-2xl mx-auto relative px-2 sm:px-0">
+          {/* <div className="max-w-xl sm:max-w-2xl mx-auto relative px-2 sm:px-0">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-gray-500/20 via-slate-500/20 to-zinc-500/20 rounded-xl sm:rounded-2xl blur-sm"></div>
               <div className="relative bg-background/80 backdrop-blur-xl border border-border/50 rounded-xl sm:rounded-2xl p-2 shadow-2xl">
@@ -79,10 +79,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Filter Chips */}
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 max-w-4xl mx-auto px-2 sm:px-0">
+          {/* <div className="flex flex-wrap justify-center gap-2 sm:gap-3 max-w-4xl mx-auto px-2 sm:px-0">
             {filters.map((filter, index) => {
               const isSelected = selectedFilter === filter;
               return (
@@ -100,7 +100,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 </button>
               );
             })}
-          </div>
+          </div> */}
         </div>
       </div>
     </section>
