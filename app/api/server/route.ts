@@ -20,7 +20,6 @@ interface GristUserAgent {
 export async function GET() {
   try {
     // Fetch Discord server information directly
-    console.log('Fetching Discord servers directly...');
     const discordServerMap = new Map<string, { name: string; icon: string | null; memberCount: number }>();
     
     try {
@@ -89,11 +88,8 @@ export async function GET() {
       // Continue without Discord data
     }
 
-    // Fetch users and user_agents from Grist
-    console.log('Fetching data from Grist...');
     const usersResponse = await grist.fetchTable('Users');
     const userAgentsResponse = await grist.fetchTable('User_agents');
-    console.log('Grist data fetched successfully:', { users: usersResponse.length, userAgents: userAgentsResponse.length });
     
     const users = usersResponse.map((record) => ({
       id: record.id,
@@ -150,7 +146,7 @@ export async function GET() {
       return {
         id: serverId,
         name: discordInfo?.name || `Server ${serverId}`,
-        image_url: discordInfo?.icon || undefined,
+        image_url: discordInfo?.icon ? `https://cdn.discordapp.com/icons/${serverId}/${discordInfo.icon}.png` : undefined,
         member_count: discordInfo?.memberCount || data.users.length,
         sc_user_count: data.users.length,
         total_credits: data.totalCredits,
