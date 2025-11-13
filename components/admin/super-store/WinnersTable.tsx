@@ -16,6 +16,7 @@ import {
   Zap,
   Users,
   Trophy,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useCampaigns } from "@/hooks/useSuperStoreData";
 import { CampaignFilters } from "@/types/admin/superStoreTypes";
 
@@ -146,21 +153,6 @@ const WinnersTable = () => {
     setCurrentPage(1);
   };
 
-  const getCampaignTypeBadgeColor = (type: string) => {
-    switch (type) {
-      case "monthly":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "weekly":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "seasonal":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "special":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "active":
@@ -172,13 +164,6 @@ const WinnersTable = () => {
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  };
-
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return `${rank}`;
   };
 
   const getSortIcon = () => {
@@ -388,176 +373,234 @@ const WinnersTable = () => {
         />
       </div>
 
-      {/* Campaigns List */}
-      <div className="space-y-6 mb-6">
+      {/* Campaigns List - Accordion Design */}
+      <div className="mb-6">
         {currentCampaigns.length > 0 ? (
-          currentCampaigns.map((campaign) => (
-            <div
-              key={campaign._id}
-              className="bg-background rounded-lg border border-border p-6 hover:shadow-lg transition-all duration-300"
-            >
-              {/* Campaign Header */}
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h4 className="text-xl font-bold text-foreground">
-                      {campaign.campaign_name}
-                    </h4>
-                    <Badge
-                      className={getCampaignTypeBadgeColor(
-                        campaign.campaign_type
-                      )}
-                    >
-                      {campaign.campaign_type.toUpperCase()}
-                    </Badge>
-                    <Badge className={getStatusBadgeColor(campaign.status)}>
-                      {campaign.status.toUpperCase()}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      {new Date(campaign.start_date).toLocaleDateString()} -{" "}
-                      {new Date(campaign.end_date).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Campaign Stats */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-muted/30 rounded-lg p-4 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Users className="h-5 w-5 text-blue-500" />
-                    <span className="text-lg font-semibold">
-                      {campaign.total_participants.toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Participants</p>
-                </div>
-
-                <div className="bg-muted/30 rounded-lg p-4 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Zap className="h-5 w-5 text-purple-500" />
-                    <span className="text-lg font-semibold">
-                      {campaign.total_credits_spent.toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Credits Spent</p>
-                </div>
-
-                <div className="bg-muted/30 rounded-lg p-4 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Gift className="h-5 w-5 text-green-500" />
-                    <span className="text-lg font-semibold">
-                      {campaign.total_prize_value.toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Prize Value</p>
-                </div>
-
-                <div className="bg-muted/30 rounded-lg p-4 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Trophy className="h-5 w-5 text-yellow-500" />
-                    <span className="text-lg font-semibold">
-                      {campaign.winners.length}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Winners</p>
-                </div>
-              </div>
-
-              {/* Winners List */}
-              {campaign.winners.length > 0 ? (
-                <div>
-                  <h5 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-yellow-500" />
-                    List of Winners:
-                  </h5>
-                  <div className="space-y-3">
-                    {campaign.winners.map((winner) => (
-                      <div
-                        key={winner._id}
-                        className="bg-muted/20 rounded-lg p-4 flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-4 flex-1">
-                          {/* Rank */}
-                          <div className="flex items-center gap-2 min-w-[40px]">
-                            <span className="text-xl">
-                              {getRankIcon(winner.rank_achieved)}
-                            </span>
-                          </div>
-
-                          {/* Winner Info */}
-                          <div className="flex items-center gap-3 flex-1">
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback>
-                                {winner.username !== "Unknown"
-                                  ? winner.username.slice(0, 2).toUpperCase()
-                                  : winner.email.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-
-                            <div className="flex-1 min-w-0">
-                              <h6 className="font-medium text-foreground truncate">
-                                {winner.username !== "Unknown"
-                                  ? winner.username
-                                  : winner.email.split("@")[0]}
-                              </h6>
-                              <p className="text-sm text-muted-foreground truncate">
-                                {winner.email}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Prize Info */}
-                          <div className="hidden md:flex flex-col items-end">
-                            <div className="flex items-center gap-1 text-sm font-medium">
-                              <Gift className="h-4 w-4 text-green-500" />
-                              {winner.prize_title}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              Value: {winner.prize_value.toLocaleString()}
-                            </p>
-                          </div>
-
-                          {/* Date Won */}
-                          <div className="text-right">
-                            <div className="flex items-center gap-1 text-sm font-medium">
-                              <Calendar className="h-4 w-4 text-gray-500" />
-                              {new Date(winner.won_date).toLocaleDateString()}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {winner.xp_earned} XP earned
-                            </p>
-                          </div>
+          <Accordion type="single" collapsible className="space-y-4">
+            {currentCampaigns.map((campaign) => (
+              <AccordionItem
+                key={campaign._id}
+                value={campaign._id}
+                className="bg-background rounded-lg border border-border overflow-hidden"
+              >
+                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted/50">
+                  <div className="flex items-center justify-between w-full pr-4">
+                    {/* Left side - Campaign name and date */}
+                    <div className="flex items-center gap-4">
+                      <Trophy className="h-6 w-6 text-yellow-500 flex-shrink-0" />
+                      <div className="text-left">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="text-base font-semibold text-foreground">
+                            {campaign.campaign_name}
+                          </h4>
+                          <Badge className={getStatusBadgeColor(campaign.status)}>
+                            {campaign.status.toUpperCase()}
+                          </Badge>
                         </div>
-
-                        {/* Mobile Prize Info */}
-                        <div className="md:hidden flex flex-col items-end gap-1">
-                          <div className="flex items-center gap-1 text-sm font-medium">
-                            <Gift className="h-4 w-4 text-green-500" />
-                            {winner.prize_value.toLocaleString()}
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {winner.xp_earned} XP
-                          </p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          <span>
+                            {new Date(campaign.start_date).toLocaleDateString("en-US", {
+                              month: "numeric",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
                         </div>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Right side - Stats */}
+                    <div className="hidden md:flex items-center gap-6">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Users className="h-4 w-4 text-blue-500" />
+                        <div className="text-left">
+                          <div className="font-semibold text-foreground">
+                            {campaign.total_participants}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Participants
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm">
+                        <CreditCard className="h-4 w-4 text-purple-500" />
+                        <div className="text-left">
+                          <div className="font-semibold text-foreground">
+                            {campaign.total_credits_spent.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Credits Spent
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm">
+                        <Trophy className="h-4 w-4 text-yellow-500" />
+                        <div className="text-left">
+                          <div className="font-semibold text-foreground">
+                            {campaign.winners.length}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Winners
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 bg-muted/20 rounded-lg">
-                  <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-muted-foreground">
-                    No winners yet for this campaign
-                  </p>
-                </div>
-              )}
-            </div>
-          ))
+                </AccordionTrigger>
+
+                <AccordionContent className="px-6 pb-6">
+                  {/* Items Distribution Section */}
+                  <div className="mb-6 bg-muted/30 rounded-lg p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <h5 className="text-sm font-semibold flex items-center gap-2">
+                        <Gift className="h-5 w-5 text-green-500" />
+                        Items Distribution
+                      </h5>
+                      <span className="text-xs text-muted-foreground">
+                        {Object.keys(
+                          campaign.winners.reduce((acc, winner) => {
+                            if (!acc[winner.prize_title]) {
+                              acc[winner.prize_title] = 0;
+                            }
+                            acc[winner.prize_title]++;
+                            return acc;
+                          }, {} as Record<string, number>)
+                        ).length}{" "}
+                        item types
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {/* Group prizes by title and count quantities */}
+                      {Object.entries(
+                        campaign.winners.reduce((acc, winner) => {
+                          if (!acc[winner.prize_title]) {
+                            acc[winner.prize_title] = 0;
+                          }
+                          acc[winner.prize_title]++;
+                          return acc;
+                        }, {} as Record<string, number>)
+                      )
+                        .sort(([, a], [, b]) => b - a) // Sort by quantity descending
+                        .map(([prizeTitle, quantity]) => (
+                          <div
+                            key={prizeTitle}
+                            className="bg-background/50 rounded-lg p-3 border border-border/50 hover:border-green-500/50 transition-all duration-200 hover:shadow-sm"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                                <span className="text-sm font-medium text-foreground truncate">
+                                  {prizeTitle}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <span className="text-lg font-bold text-green-500">
+                                  {quantity}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {quantity === 1 ? "item" : "items"}
+                                </span>
+                              </div>
+                            </div>
+                            {/* Progress bar showing relative quantity */}
+                            <div className="mt-2 w-full bg-muted/50 rounded-full h-1.5 overflow-hidden">
+                              <div
+                                className="bg-gradient-to-r from-green-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+                                style={{
+                                  width: `${(quantity / campaign.winners.length) * 100}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* Winners List Section */}
+                  {campaign.winners.length > 0 ? (
+                    <div>
+                      <h5 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-yellow-500" />
+                        List of Winners
+                        <span className="text-xs font-normal text-muted-foreground">
+                          ({campaign.winners.length} Winners)
+                        </span>
+                      </h5>
+                      <div className="space-y-2">
+                        {campaign.winners.map((winner) => (
+                          <div
+                            key={winner._id}
+                            className="bg-muted/20 rounded-lg p-4 flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-3 flex-1">
+                              {/* Avatar */}
+                              <Avatar className="h-10 w-10 bg-orange-500">
+                                <AvatarFallback className="bg-orange-500 text-white">
+                                  {winner.username !== "Unknown"
+                                    ? winner.username.slice(0, 2).toUpperCase()
+                                    : winner.email.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+
+                              {/* Winner Info */}
+                              <div className="flex-1 min-w-0">
+                                <h6 className="font-medium text-foreground truncate text-sm">
+                                  {winner.username !== "Unknown"
+                                    ? winner.username
+                                    : winner.email.split("@")[0]}
+                                </h6>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {winner.email}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Prize Info */}
+                            <div className="flex items-center gap-2 text-right">
+                              <Gift className="h-4 w-4 text-green-500" />
+                              <span className="text-sm font-medium text-green-500">
+                                {winner.prize_title}
+                              </span>
+                            </div>
+
+                            {/* XP Earned */}
+                            <div className="hidden md:flex items-center gap-2 ml-4">
+                              <Zap className="h-4 w-4 text-blue-500" />
+                              <span className="text-xs text-purple-500">
+                                {winner.xp_earned} XP earned
+                              </span>
+                            </div>
+
+                            {/* Date Won */}
+                            <div className="hidden md:flex items-center gap-2 ml-4">
+                              <Calendar className="h-4 w-4 text-gray-500" />
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(winner.won_date).toLocaleDateString("en-US", {
+                                  month: "numeric",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 bg-muted/20 rounded-lg">
+                      <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground text-sm">
+                        No winners yet for this campaign
+                      </p>
+                    </div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         ) : (
           <div className="text-center py-8">
             <p className="text-muted-foreground">
