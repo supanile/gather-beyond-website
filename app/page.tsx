@@ -3,18 +3,20 @@
 import React, { useState } from "react";
 import Header from "@/components/LandingDashboard/Header/Header";
 import HeroSection from "@/components/LandingDashboard/HeroSection";
-import { FeaturedProjects } from "@/components/LandingDashboard/FeaturedProjects";
-import LiveInsightsPanel from "@/components/LandingDashboard/LiveInsightsPanel";
+// ✅ Hidden components imports (uncomment to restore)
+// import { FeaturedProjects } from "@/components/LandingDashboard/FeaturedProjects";
+// import LiveInsightsPanel from "@/components/LandingDashboard/LiveInsightsPanel";
 import MediaFeed from "@/components/LandingDashboard/MediaFeed";
-import ProjectsTable from "@/components/LandingDashboard/ProjectsTable";
+// import ProjectsTable from "@/components/LandingDashboard/ProjectsTable";
 import SocialMediaTrends from "@/components/LandingDashboard/SocialMediaTrends";
-import { allProjects as projects, featuredProjects, Project } from "@/data/admin/projectMockData";
+import { allProjects as projects, /* featuredProjects, */ Project } from "@/data/admin/projectMockData";
 
 const Dashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedFilter, setSelectedFilter] = useState<string>("");
 
-  // Filter projects based on search and filter
+  // Filter projects based on search and filter (currently hidden)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const filteredProjects: Project[] = projects.filter((project: Project) => {
     const matchesSearch = searchTerm === "" || 
       project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -51,14 +53,17 @@ const Dashboard: React.FC = () => {
         selectedFilter={selectedFilter}
       />
       <SocialMediaTrends />
-      <FeaturedProjects 
+      {/* ✅ Hide "Featured Project" Section */}
+      {/* <FeaturedProjects 
         projects={searchTerm || selectedFilter ? filteredProjects.slice(0, 6) : featuredProjects}
-      />
-      <LiveInsightsPanel />
+      /> */}
+      {/* ✅ Hide "Insights Panel" Section */}
+      {/* <LiveInsightsPanel /> */}
       <MediaFeed />
-      <ProjectsTable 
+      {/* ✅ Hide "All Projects" Section */}
+      {/* <ProjectsTable 
         projects={searchTerm || selectedFilter ? filteredProjects : projects}
-      />
+      /> */}
     </div>
   );
 };
