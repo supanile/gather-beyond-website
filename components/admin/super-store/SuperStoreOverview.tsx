@@ -5,7 +5,7 @@ import { Trophy, CreditCard, Crown, TrendingUp } from "lucide-react";
 import { useSuperStoreData } from "@/hooks/useSuperStoreData";
 import AdminStatCard from "@/components/admin/AdminStatCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import LeaderboardTable from "@/components/admin/super-store/LeaderboardTable";
+// import LeaderboardTable from "@/components/admin/super-store/LeaderboardTable"; // HIDDEN: Claimers Tab
 import CreditSpendingTable from "@/components/admin/super-store/CreditSpendingTable";
 import WinnersTable from "@/components/admin/super-store/WinnersTable";
 
@@ -89,15 +89,16 @@ const SuperStoreOverview = () => {
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="leaderboard" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 h-12 sm:h-14 md:h-16">
-          <TabsTrigger
+      <Tabs defaultValue="credit-spending" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 h-12 sm:h-14 md:h-16">
+          {/* HIDDEN: Claimers Tab */}
+          {/* <TabsTrigger
             value="leaderboard"
             className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
           >
             <Trophy className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
             <span className="truncate">Claimers</span>
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger
             value="credit-spending"
             className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base md:text-lg py-2 sm:py-3 cursor-pointer"
@@ -114,12 +115,12 @@ const SuperStoreOverview = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Leaderboard Tab */}
-        <TabsContent value="leaderboard">
+        {/* HIDDEN: Leaderboard/Claimers Tab Content */}
+        {/* <TabsContent value="leaderboard">
           <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
             <LeaderboardTable />
           </div>
-        </TabsContent>
+        </TabsContent> */}
 
         {/* Credit Spending Tab */}
         <TabsContent value="credit-spending">
