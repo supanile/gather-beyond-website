@@ -77,7 +77,23 @@ export async function sendPublishedMissionAlert(missionData: {
                     },
                     color: 0x5865F2,
                     timestamp: new Date().toISOString(),
-                }]
+                }],
+                components: [
+                    {
+                      type: 1,
+                      components: [
+                        {
+                          style: 1,
+                          type: 2,
+                          custom_id: `accept_mission_${missionData.id2}`,
+                          label: "Accept",
+                          emoji: {
+                            name: "🎯",
+                          }
+                        }
+                      ]
+                    }
+                  ]
             })
         });
 
