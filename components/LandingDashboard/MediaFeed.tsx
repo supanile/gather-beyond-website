@@ -1,320 +1,497 @@
-import React from "react";
-import { ChevronRight, Calendar, Badge } from "lucide-react";
-import { allProjects as projects, Project } from "@/data/admin/projectMockData";
+"use client";
 
-interface Article {
-  id?: number;
-  title: string;
-  subtitle: string;
-  category: string;
-  readTime: string;
-  author?: string;
-  publishedAt?: string;
-  imageUrl?: string;
-  type: "editorial" | "badge" | "audit" | "protocol";
-  featured?: boolean;
-  relatedProject?: Project;
-}
+import { useEffect, useState, useRef } from "react";
 
-interface MediaFeedProps {
-  articles?: Article[];
-}
-
-// Generate articles based on project data
-const generateArticlesFromProjects = (): Article[] => {
-  const articleTemplates = [
-    {
-      type: "editorial" as const,
-      templates: [
-        "The Rise of {category} in Web3 Communities",
-        "How {name} is Transforming {category}",
-        "Understanding {category}: A Deep Dive into {name}",
-        "The Future of {category}: Lessons from {name}",
-      ]
-    },
-    {
-      type: "badge" as const,
-      templates: [
-        "Badge Announcement: {name} Achieves Gold Trust Rating",
-        "Verification Complete: {name} Joins Elite {category} Projects",
-        "Trust Milestone: {name} Reaches {trustScore} Trust Score",
-      ]
-    },
-    {
-      type: "audit" as const,
-      templates: [
-        "Security Audit: {name} Protocol Review Complete",
-        "Community Audit Results: {name} Security Assessment",
-        "Trust Audit: {name} Governance Review",
-      ]
-    },
-    {
-      type: "protocol" as const,
-      templates: [
-        "Protocol News: {name} Integration Update",
-        "Technical Update: {name} Protocol Enhancement",
-        "Development News: {name} Latest Features",
-      ]
-    }
-  ];
-
-  const authors: string[] = [
-    "Sarah Chen", "Michael Rodriguez", "Emma Thompson", "David Kim", 
-    "Lisa Wang", "Alex Johnson", "Security Team", "Research Team"
-  ];
-
-  const timeframes: string[] = [
-    "2 hours ago", "6 hours ago", "8 hours ago", "1 day ago", 
-    "2 days ago", "3 days ago", "4 days ago", "1 week ago"
-  ];
-
-  const readTimes: string[] = ["3 min read", "5 min read", "8 min read", "6 min read", "4 min read", "7 min read"];
-
-  const articles: Article[] = [];
-  
-  // Create articles for each project
-  projects.forEach((project: Project, index: number) => {
-    const templateGroup = articleTemplates[index % articleTemplates.length];
-    const template = templateGroup.templates[Math.floor(Math.random() * templateGroup.templates.length)];
-    
-    const title = template
-      .replace(/{name}/g, project.name)
-      .replace(/{category}/g, project.category)
-      .replace(/{trustScore}/g, project.trustScore.toString());
-    
-    const subtitle = generateSubtitle(project, templateGroup.type);
-    
-    articles.push({
-      id: project.id,
-      title,
-      subtitle,
-      category: project.category,
-      readTime: readTimes[Math.floor(Math.random() * readTimes.length)],
-      author: templateGroup.type !== "badge" ? authors[Math.floor(Math.random() * authors.length)] : undefined,
-      publishedAt: timeframes[index % timeframes.length],
-      type: templateGroup.type,
-      featured: index === 0, // First article is featured
-      relatedProject: project,
-    });
-  });
-
-  return articles.slice(0, 6); // Return first 6 articles
-};
-
-const generateSubtitle = (project: Project, type: string): string => {
-  const subtitleTemplates: { [key: string]: string[] } = {
-    editorial: [
-      `How ${project.name} is revolutionizing the ${project.category.toLowerCase()} space with innovative trust-building strategies`,
-      `Exploring the impact of ${project.name} on decentralized ${project.category.toLowerCase()} communities`,
-      `Understanding the technology and community behind ${project.name}'s success`,
-    ],
-    badge: [
-      `${project.name} reaches milestone verification level with ${project.trustScore} trust score`,
-      `Community-driven ${project.category.toLowerCase()} platform achieves verification standards`,
-      `Latest verification milestone demonstrates strong community governance and security`,
-    ],
-    audit: [
-      `Comprehensive audit reveals strong security practices and community governance for ${project.name}`,
-      `Security assessment shows ${project.name} meets industry standards for ${project.category.toLowerCase()} projects`,
-      `Independent review confirms ${project.name}'s commitment to transparency and security`,
-    ],
-    protocol: [
-      `Latest updates on ${project.name}'s cross-chain community verification and reputation scoring`,
-      `Technical improvements and new features enhance ${project.name}'s ${project.category.toLowerCase()} capabilities`,
-      `Protocol updates strengthen ${project.name}'s position in the ${project.category.toLowerCase()} ecosystem`,
-    ],
-  };
-
-  const templates = subtitleTemplates[type] || subtitleTemplates.editorial;
-  return templates[Math.floor(Math.random() * templates.length)];
-};
-
-const MediaFeed: React.FC<MediaFeedProps> = ({
-  articles = generateArticlesFromProjects(),
-}) => {
-  const handleArticleClick = (article: Article): void => {
-    if (article.relatedProject) {
-      // Navigate to project profile if it's related to a project
-      window.location.href = `/project-profile?id=${article.relatedProject.id}`;
-    } else if (article.id) {
-      // Navigate to article page
-      window.location.href = `/article/${article.id}`;
-    }
-  };
-
-  const getCategoryColor = (category: string): string => {
-    const colors: { [key: string]: string } = {
-      DAO: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-      DeFi: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-      AI: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-      Gaming: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-      NFT: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400",
-      Infrastructure: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
-      Social: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400",
-      Technology: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-      Research: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-      "Case Study": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-      Audit: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-      Protocol: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
-      News: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-      Analysis: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400",
-      Badge: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-      Metaverse: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-      Wallet: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400",
+// Extend Window interface to include Twitter's twttr object
+declare global {
+  interface Window {
+    twttr?: {
+      widgets: {
+        load: () => void;
+      };
     };
-    return (
-      colors[category] ||
-      "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
-    );
-  };
+  }
+}
 
-  const getTypeIcon = (type: Article["type"]): React.ReactNode => {
-    switch (type) {
-      case "badge":
-        return <Badge className="w-4 h-4" />;
-      case "audit":
-        return <Badge className="w-4 h-4" />;
-      case "protocol":
-        return <Badge className="w-4 h-4" />;
-      default:
-        return <Calendar className="w-4 h-4" />;
+interface Tweet {
+  url: string;
+  html: string;
+  author_name: string;
+  author_url: string;
+}
+
+const XFeed = () => {
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scriptLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (scriptLoadedRef.current) {
+      console.log("✅ Twitter script already loaded");
+      return;
     }
-  };
 
-  // Separate featured and regular articles
-  const featuredArticles = articles.filter((article: Article) => article.featured);
-  const regularArticles = articles.filter((article: Article) => !article.featured);
+    console.log("🔄 Loading Twitter widgets script...");
+    const script = document.createElement("script");
+    script.src = "https://platform.twitter.com/widgets.js";
+    script.async = true;
+    script.charset = "utf-8";
+
+    script.onload = () => {
+      console.log("✅ Twitter widgets script loaded successfully");
+      scriptLoadedRef.current = true;
+      if (window.twttr && window.twttr.widgets) {
+        window.twttr.widgets.load();
+      }
+    };
+
+    script.onerror = () => {
+      console.error("❌ Failed to load Twitter widgets script");
+    };
+
+    if (
+      !document.querySelector(
+        'script[src="https://platform.twitter.com/widgets.js"]'
+      )
+    ) {
+      document.body.appendChild(script);
+      console.log("📝 Twitter script added to document");
+    } else {
+      scriptLoadedRef.current = true;
+      console.log("✅ Twitter script already in document");
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchTweets = async () => {
+      // 🎯 FALLBACK URLs - รับประกันว่าจะมี tweets แสดงเสมอ
+      const fallbackUrls = [
+        'https://x.com/gatherbeyond/status/1858055776051359790',
+        'https://x.com/gatherbeyond/status/1858054646477660267'
+      ];
+
+      const loadFallbackTweets = async () => {
+        console.log("🔄 XFeed: Loading fallback tweets...");
+        try {
+          const fallbackTweets = await Promise.all(
+            fallbackUrls.map(async (url) => {
+              try {
+                const twitterUrl = url.replace('x.com', 'twitter.com');
+                const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(twitterUrl)}&theme=light&dnt=true&omit_script=true`;
+                const response = await fetch(oembedUrl);
+                if (response.ok) {
+                  const data = await response.json();
+                  return {
+                    url,
+                    html: data.html,
+                    author_name: data.author_name || '@gatherbeyond',
+                    author_url: 'https://twitter.com/gatherbeyond'
+                  };
+                }
+              } catch (error) {
+                console.error("Failed to fetch fallback tweet:", url, error);
+              }
+              return null;
+            })
+          );
+          
+          const validFallbackTweets = fallbackTweets.filter(t => t !== null) as Tweet[];
+          if (validFallbackTweets.length > 0) {
+            console.log("✅ XFeed: Loaded", validFallbackTweets.length, "fallback tweets");
+            setTweets(validFallbackTweets);
+            
+            setTimeout(() => {
+              if (window.twttr && window.twttr.widgets) {
+                window.twttr.widgets.load();
+              }
+            }, 100);
+          }
+        } catch (error) {
+          console.error("❌ XFeed: Fallback loading failed:", error);
+        }
+      };
+
+      try {
+        console.log("🔄 XFeed: Fetching tweets from API...");
+        const cacheBuster = Date.now();
+        const response = await fetch(`/api/tweets?t=${cacheBuster}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          }
+        });
+        
+        console.log("📡 XFeed: Response status:", response.status, response.statusText);
+        
+        if (!response.ok) {
+          console.error("❌ XFeed: API returned error status:", response.status);
+          await loadFallbackTweets();
+          setIsLoading(false);
+          return;
+        }
+        
+        const data = await response.json();
+
+        console.log("📦 XFeed: API Response:", data);
+        console.log("📊 XFeed: Tweets count:", data.tweets?.length || 0);
+
+        // ✅ ถ้า API ส่ง tweets มา ใช้เลย
+        if (data.tweets && Array.isArray(data.tweets) && data.tweets.length > 0) {
+          console.log("✨ XFeed: Setting tweets from API:", data.tweets.length);
+          setTweets(data.tweets);
+
+          setTimeout(() => {
+            console.log("🔄 XFeed: Reloading Twitter widgets...");
+            if (window.twttr && window.twttr.widgets) {
+              window.twttr.widgets.load();
+              console.log("✅ XFeed: Twitter widgets loaded");
+            }
+          }, 100);
+        } else {
+          // ⚠️ ถ้า API ไม่ส่ง tweets มา ใช้ fallback
+          console.warn("⚠️ XFeed: API returned no tweets, loading fallback...");
+          await loadFallbackTweets();
+        }
+      } catch (error) {
+        console.error("❌ XFeed: Error fetching tweets:", error);
+        // 🔥 ถ้าเกิด error ใช้ fallback
+        await loadFallbackTweets();
+      } finally {
+        setIsLoading(false);
+        console.log("✅ XFeed: Loading complete");
+      }
+    };
+
+    fetchTweets();
+  }, []);
 
   return (
-    <section className="py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-slate-800 dark:from-gray-100 dark:to-slate-200 bg-clip-text text-transparent">
-            Media Feed
-          </h2>
-          <button className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-300 flex items-center gap-1">
-            View all
-            <ChevronRight className="w-4 h-4" />
-          </button>
+    <section className="scroll-fade scroll-fade-delay-6 py-8 sm:py-12 md:py-16 lg:py-20 xl:py-24 px-3 sm:px-4 md:px-6 lg:px-8 bg-gradient-to-b from-background/50 via-background/30 to-background/50 relative overflow-hidden">
+      <div className="container mx-auto relative z-10 max-w-7xl">
+        {/* Header */}
+        <div className="text-center mb-8 sm:mb-10 md:mb-12 lg:mb-16">
+          <div className="inline-flex items-center justify-center mb-4 sm:mb-5 md:mb-6 px-4 sm:px-5 md:px-6 py-1.5 sm:py-2 bg-foreground/5 rounded-full border border-border/50 backdrop-blur-sm">
+            <svg
+              className="w-4 h-4 sm:w-5 sm:h-5 text-foreground mr-1.5 sm:mr-2"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            <span className="font-semibold text-foreground text-xs sm:text-sm tracking-wide">
+              LIVE FROM X
+            </span>
+          </div>
         </div>
 
-        {/* Featured Article (Full Width) */}
-        {featuredArticles.length > 0 && (
-          <div className="mb-8">
-            <article
-              onClick={() => handleArticleClick(featuredArticles[0])}
-              className="group bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-foreground/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] cursor-pointer"
-            >
-              <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-                <div className="flex-1 space-y-4">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-medium ${getCategoryColor(
-                        featuredArticles[0].category
-                      )}`}
+        {/* Main Card */}
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-gradient-to-br from-background/80 via-background/60 to-background/80 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 xl:p-10 border border-border/50 hover:border-border transition-all duration-500 shadow-xl sm:shadow-2xl backdrop-blur-xl">
+            {/* Profile Header */}
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-7 md:mb-8 gap-3 sm:gap-4">
+              <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto justify-center sm:justify-start">
+                <div className="relative flex-shrink-0">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-foreground/10 to-foreground/5 rounded-full flex items-center justify-center ring-2 ring-border hover:ring-border/40 transition-all duration-300">
+                    <svg
+                      className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-foreground"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      {featuredArticles[0].category}
-                    </span>
-                    <span className="px-3 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400">
-                      Featured
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {featuredArticles[0].readTime}
-                    </span>
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
                   </div>
-
-                  <h3 className="text-xl font-semibold text-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 line-clamp-2">
-                    {featuredArticles[0].title}
+                  <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 border-background"></div>
+                </div>
+                <div className="text-center sm:text-left">
+                  <h3 className="font-bold text-foreground text-base sm:text-lg md:text-xl leading-tight">
+                    @gatherbeyond
                   </h3>
-
-                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
-                    {featuredArticles[0].subtitle}
+                  <p className="text-muted-foreground text-xs sm:text-sm flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 mt-0.5">
+                    <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Live Updates
                   </p>
-
-                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
-                    <div className="flex items-center gap-2">
-                      {getTypeIcon(featuredArticles[0].type)}
-                      {featuredArticles[0].author ? (
-                        <span>By {featuredArticles[0].author}</span>
-                      ) : (
-                        <span>{featuredArticles[0].publishedAt}</span>
-                      )}
-                    </div>
-                    {featuredArticles[0].author && featuredArticles[0].publishedAt && (
-                      <span>{featuredArticles[0].publishedAt}</span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                    <span className="text-sm text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
-                      Read more
-                    </span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 group-hover:translate-x-1 transition-all duration-300" />
-                  </div>
                 </div>
               </div>
-            </article>
-          </div>
-        )}
 
-        {/* Regular Articles (2-Column Grid) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {regularArticles.map((article: Article, index: number) => (
-            <article
-              key={article.id || index}
-              onClick={() => handleArticleClick(article)}
-              className="group bg-background/60 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:border-foreground/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer animate-fade-up"
-              style={{ animationDelay: `${index * 150}ms` }}
+              <a
+                href="https://x.com/intent/follow?screen_name=gatherbeyond"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center justify-center space-x-1.5 sm:space-x-2 bg-foreground hover:bg-foreground/90 text-background px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-bold text-xs sm:text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 w-full sm:w-auto"
+              >
+                <span className="whitespace-nowrap">Follow @gatherbeyond</span>
+                <svg
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </a>
+            </div>
+
+            {/* Tweets Container */}
+            <div
+              ref={containerRef}
+              className="rounded-lg sm:rounded-xl overflow-hidden bg-muted/30 backdrop-blur-sm border border-border/30"
             >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`px-3 py-1 rounded-lg text-xs font-medium ${getCategoryColor(
-                      article.category
-                    )}`}
-                  >
-                    {article.category}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {article.readTime}
-                  </span>
-                </div>
-
-                <h3 className="text-xl font-semibold text-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 line-clamp-2">
-                  {article.title}
-                </h3>
-
-                <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
-                  {article.subtitle}
-                </p>
-
-                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
-                  <div className="flex items-center gap-2">
-                    {getTypeIcon(article.type)}
-                    {article.author ? (
-                      <span>By {article.author}</span>
-                    ) : (
-                      <span>{article.publishedAt}</span>
-                    )}
+              {/* Loading */}
+              {isLoading && (
+                <div className="flex items-center justify-center py-16 sm:py-20 md:py-24 min-h-[400px] sm:min-h-[450px] md:min-h-[500px]">
+                  <div className="text-center px-4">
+                    <div className="relative mb-4 sm:mb-5 md:mb-6">
+                      <div className="animate-spin rounded-full h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 border-3 sm:border-4 border-border border-t-foreground mx-auto"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-muted-foreground"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground text-sm sm:text-base md:text-lg font-medium">
+                      Loading latest posts...
+                    </p>
                   </div>
-                  {article.author && article.publishedAt && (
-                    <span>{article.publishedAt}</span>
-                  )}
                 </div>
+              )}
 
-                <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                  <span className="text-sm text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
-                    Read more
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-gray-700 dark:group-hover:text-gray-300 group-hover:translate-x-1 transition-all duration-300" />
+              {/* Tweets Grid - 2 columns on desktop */}
+              {!isLoading && tweets.length > 0 && (
+                <div className="p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-8">
+                    {tweets.slice(0, 2).map((tweet, index) => (
+                      <div
+                        key={index}
+                        className="w-full"
+                        style={{
+                          animationDelay: `${index * 200}ms`,
+                          animation: "fadeInUp 0.6s ease-out forwards",
+                          opacity: 0,
+                        }}
+                      >
+                        <div
+                          className="tweet-embed-container w-full min-h-[400px] sm:min-h-[450px] flex items-start justify-center"
+                          dangerouslySetInnerHTML={{ __html: tweet.html }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-5 sm:mt-6 md:mt-7 lg:mt-8 text-center">
+                    <a
+                      href="https://x.com/gatherbeyond"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-1.5 sm:space-x-2 text-muted-foreground hover:text-foreground transition-all duration-300 text-xs sm:text-sm group"
+                    >
+                      <span>View all posts</span>
+                      <svg
+                        className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {!isLoading && tweets.length === 0 && (
+                <div className="flex items-center justify-center py-16 sm:py-20 md:py-24 min-h-[400px] sm:min-h-[450px] md:min-h-[500px]">
+                  <div className="text-center max-w-md px-4 sm:px-6">
+                    <div className="mb-6 sm:mb-7 md:mb-8 inline-flex items-center justify-center relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-foreground/20 to-foreground/5 rounded-full blur-xl sm:blur-2xl animate-pulse"></div>
+                      <div className="relative w-20 h-20 sm:w-22 sm:h-22 md:w-24 md:h-24 bg-gradient-to-br from-foreground/10 to-foreground/5 rounded-full flex items-center justify-center ring-2 ring-border">
+                        <svg
+                          className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 text-muted-foreground"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <h3 className="text-foreground text-xl sm:text-2xl font-bold mb-2 sm:mb-3">
+                      Coming Soon
+                    </h3>
+                    <p className="text-muted-foreground text-sm sm:text-base mb-1.5 sm:mb-2 leading-relaxed">
+                      We&apos;re preparing amazing content for you.
+                    </p>
+                    <p className="text-muted-foreground/80 text-xs sm:text-sm mb-8 sm:mb-9 md:mb-10 leading-relaxed">
+                      Follow us to get notified when we share new updates!
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center">
+                      <a
+                        href="https://x.com/intent/follow?screen_name=gatherbeyond"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group inline-flex items-center justify-center space-x-1.5 sm:space-x-2 bg-foreground text-background px-6 sm:px-7 md:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-full font-bold text-sm sm:text-base transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl active:scale-95"
+                      >
+                        <span>Follow Now</span>
+                        <svg
+                          className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform duration-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"
+                          />
+                        </svg>
+                      </a>
+                      <a
+                        href="https://x.com/gatherbeyond"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center space-x-1.5 sm:space-x-2 bg-foreground/10 hover:bg-foreground/20 text-foreground px-6 sm:px-7 md:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 border border-border hover:border-border/40"
+                      >
+                        <span>View Profile</span>
+                        <svg
+                          className="w-3.5 h-3.5 sm:w-4 sm:h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          />
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 sm:mt-7 md:mt-8 pt-4 sm:pt-5 md:pt-6 border-t border-border/50">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center space-x-2 text-center sm:text-left">
+                  <p className="text-muted-foreground text-xs sm:text-sm">
+                    Follow us for updates and announcements
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <a
+                    href="https://x.com/gatherbeyond"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110"
+                    aria-label="Follow us on X"
+                  >
+                    <svg
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                  </a>
                 </div>
               </div>
-            </article>
-          ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Background Effects */}
+        <div className="absolute top-1/4 left-4 sm:left-6 md:left-10 transform -translate-y-1/2 opacity-10 pointer-events-none">
+          <div className="w-48 h-48 sm:w-60 sm:h-60 md:w-72 md:h-72 bg-gradient-to-br from-foreground/20 to-foreground/10 rounded-full blur-2xl sm:blur-3xl animate-pulse"></div>
+        </div>
+        <div className="absolute bottom-1/4 right-4 sm:right-6 md:right-10 transform translate-y-1/2 opacity-10 pointer-events-none">
+          <div
+            className="w-40 h-40 sm:w-52 sm:h-52 md:w-64 md:h-64 bg-gradient-to-br from-foreground/10 to-foreground/20 rounded-full blur-2xl sm:blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          ></div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* Twitter Embed Styling */
+        :global(.tweet-embed-container) {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        :global(.tweet-embed-container .twitter-tweet) {
+          margin: 0 auto !important;
+          border: none !important;
+          background: transparent !important;
+          box-shadow: none !important;
+          width: 100% !important;
+          max-width: 550px !important;
+        }
+
+        :global(.tweet-embed-container blockquote.twitter-tweet) {
+          display: block !important;
+          width: 100% !important;
+          max-width: 550px !important;
+          margin: 0 auto !important;
+          padding: 0 !important;
+          border: none !important;
+          background: transparent !important;
+        }
+
+        :global(.tweet-embed-container .twitter-tweet-rendered) {
+          margin: 0 auto !important;
+          max-width: 550px !important;
+          width: 100% !important;
+        }
+
+        :global(.tweet-embed-container iframe) {
+          max-width: 550px !important;
+          width: 100% !important;
+          margin: 0 auto !important;
+        }
+
+        /* Ensure tweets are visible on mobile */
+        @media (max-width: 640px) {
+          :global(.tweet-embed-container .twitter-tweet),
+          :global(.tweet-embed-container blockquote.twitter-tweet),
+          :global(.tweet-embed-container iframe) {
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+        }
+      `}</style>
     </section>
   );
 };
 
-export default MediaFeed;
+export default XFeed;
